@@ -1,16 +1,70 @@
 package zwave
 
-const CommandClassNetworkManagementProxy uint8 = 0x52
-const NodeInfoCachedGet uint8 = 0x03
+const (
+	ZwNodeList              = 0x02
+	ZwAddNodeToNetwork      = 0x4a
+	ZwRemoveNodeFromNetwork = 0x4b
+)
 
-func MakeNodeInfoCachedGetPacket() []byte {
-	bytes := make([]byte, 0)
+const (
+	AddNodeAny                  = 1
+	AddNodeController           = 2
+	AddNodeSlave                = 3
+	AddNodeExisting             = 4
+	AddNodeStop                 = 5
+	AddNodeStopFailed           = 6
+	AddNodeStatusSecurityFailed = 9
+)
 
-	bytes = append(bytes, CommandClassNetworkManagementProxy)
-	bytes = append(bytes, NodeInfoCachedGet)
-	bytes = append(bytes, uint8(0x20))
-	bytes = append(bytes, uint8(0x02))
-	bytes = append(bytes, uint8(0x00))
+const (
+	AddNodeOptionNormalPower = 0x80
+	AddNodeOptionNetworkWide = 0x40
+)
 
-	return bytes
+const (
+	RemoveNodeAny        = AddNodeAny
+	RemoveNodeController = AddNodeController
+	RemoveNodeSlave      = AddNodeSlave
+	RemoveNodeStop       = AddNodeStop
+)
+
+const (
+	RemoveNodeOptionNormalPower = AddNodeOptionNormalPower
+	RemoveNodeOptionNetworkWide = AddNodeOptionNetworkWide
+)
+
+func GetNodeList() []byte {
+	return []byte{ZwNodeList}
+}
+
+func EnterInclusionMode() []byte {
+	return []byte{
+		ZwAddNodeToNetwork,
+		AddNodeAny | AddNodeOptionNormalPower | AddNodeOptionNetworkWide,
+		0x01,
+	}
+}
+
+func ExitInclusionMode() []byte {
+	return []byte{
+		ZwRemoveNodeFromNetwork,
+		AddNodeStop,
+		0x01,
+	}
+}
+
+func EnterExclusionMode() []byte {
+	return []byte{
+		ZwRemoveNodeFromNetwork,
+		RemoveNodeAny | RemoveNodeOptionNormalPower | RemoveNodeOptionNetworkWide,
+		0x01,
+	}
+}
+
+func ExitExclusionMode() []byte {
+	return []byte{
+		ZwRemoveNodeFromNetwork,
+		RemoveNodeAny | RemoveNodeOptionNormalPower | RemoveNodeOptionNetworkWide,
+		0x01,
+	}
 }
