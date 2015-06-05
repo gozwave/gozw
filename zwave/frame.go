@@ -82,6 +82,18 @@ func (z *ZFrame) IsAck() bool {
 	return z.Header == FrameHeaderAck
 }
 
+func (z *ZFrame) IsNak() bool {
+	return z.Header == FrameHeaderNak
+}
+
+func (z *ZFrame) IsCan() bool {
+	return z.Header == FrameHeaderCan
+}
+
+func (z *ZFrame) IsData() bool {
+	return z.Header == FrameHeaderData
+}
+
 // CalcChecksum calculates the checksum for this frame, given the current data.
 // The Z-Wave checksum is calculated by taking 0xFF XOR Length XOR Type XOR Payload[0:n]
 func (z *ZFrame) CalcChecksum() uint8 {
