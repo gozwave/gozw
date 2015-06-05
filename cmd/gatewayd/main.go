@@ -3,11 +3,12 @@ package main
 import (
 	"fmt"
 
+	"github.com/bjyoungblood/gozw/gateway"
 	"github.com/bjyoungblood/gozw/zwave"
 	"github.com/olebedev/config"
 )
 
-func loadConfigFromYaml(path string) (*zwave.SerialConfig, error) {
+func loadConfigFromYaml(path string) (*gateway.SerialConfig, error) {
 	config, err := config.ParseYamlFile(path)
 	if err != nil {
 		return nil, err
@@ -23,7 +24,7 @@ func loadConfigFromYaml(path string) (*zwave.SerialConfig, error) {
 		return nil, err
 	}
 
-	zwaveConfig := zwave.SerialConfig{
+	zwaveConfig := gateway.SerialConfig{
 		Device: device,
 		Baud:   baud,
 	}
@@ -38,7 +39,7 @@ func main() {
 		panic(err)
 	}
 
-	serialPort, err := zwave.NewSerialPort(config)
+	serialPort, err := gateway.NewSerialPort(config)
 	if err != nil {
 		panic(err)
 	}

@@ -1,13 +1,8 @@
 package main
 
-import
-// "bufio"
-
-// "io"
-// "io/ioutil"
-// "os"
-
-"github.com/bjyoungblood/gozw/portal"
+import (
+	"github.com/bjyoungblood/gozw/portal"
+)
 
 func main() {
 
