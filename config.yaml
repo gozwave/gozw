@@ -1,0 +1,19 @@
+portal:
+  bindAddress: 0.0.0.0
+  bindPort: 44123
+  cert: ./ssl/portal.cert.pem
+  key: ./ssl/portal.key.pem
+  ca:
+    - ./ssl/ca.cert.pem
+  clientCA:
+    - ./ssl/ca.cert.pem
+
+gateway:
+  device: /tmp/usbmodem
+  baud: 115200
+  cert: ./ssl/zip.cert.pem
+  key: ./ssl/zip.key.pem
+  ca:
+    - ./ssl/ca.cert.pem
+  clientCA:
+    - ./ssl/ca.cert.pem
