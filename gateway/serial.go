@@ -100,6 +100,7 @@ func (s *SerialPort) Run() {
 	for {
 		select {
 		case incoming := <-s.incomingPrivate:
+			// @todo verify checksum and send appropriate response frame
 			s.Incoming <- incoming
 		case request := <-s.requestQueue:
 			s.transmitFrame(request.frame)
