@@ -11,12 +11,6 @@ import (
 	"github.com/tarm/serial"
 )
 
-const (
-	StateUninitialized = iota
-	StateReady
-	StateAwaitingAck
-)
-
 type ZCallback func(response *zwave.ZFrame)
 
 type Request struct {
@@ -26,7 +20,6 @@ type Request struct {
 
 type SerialPort struct {
 	port            *serial.Port
-	state           int
 	incomingPrivate chan *zwave.ZFrame
 	requestQueue    chan Request
 	Incoming        chan *zwave.ZFrame
@@ -48,7 +41,6 @@ func NewSerialPort(config *common.GozwConfig) (*SerialPort, error) {
 
 	serialPort := SerialPort{
 		port:            port,
-		state:           StateUninitialized,
 		incomingPrivate: incomingPrivate,
 		requestQueue:    requestQueue,
 		Incoming:        incomingPublic,
