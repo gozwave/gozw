@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bjyoungblood/gozw/common"
 	"github.com/bjyoungblood/gozw/zwave"
 	"github.com/tarm/serial"
 )
@@ -23,11 +24,6 @@ type Request struct {
 	callback ZCallback
 }
 
-type SerialConfig struct {
-	Device string
-	Baud   int
-}
-
 type SerialPort struct {
 	port            *serial.Port
 	state           int
@@ -36,7 +32,7 @@ type SerialPort struct {
 	Incoming        chan *zwave.ZFrame
 }
 
-func NewSerialPort(config *SerialConfig) (*SerialPort, error) {
+func NewSerialPort(config *common.GozwConfig) (*SerialPort, error) {
 	port, err := serial.OpenPort(&serial.Config{
 		Name: config.Device,
 		Baud: config.Baud,

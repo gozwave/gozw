@@ -3,38 +3,14 @@ package main
 import (
 	"fmt"
 
+	"github.com/bjyoungblood/gozw/common"
 	"github.com/bjyoungblood/gozw/gateway"
 	"github.com/bjyoungblood/gozw/zwave"
-	"github.com/olebedev/config"
 )
-
-func loadConfigFromYaml(path string) (*gateway.SerialConfig, error) {
-	config, err := config.ParseYamlFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	device, err := config.String("controller.device")
-	if err != nil {
-		return nil, err
-	}
-
-	baud, err := config.Int("controller.baud")
-	if err != nil {
-		return nil, err
-	}
-
-	zwaveConfig := gateway.SerialConfig{
-		Device: device,
-		Baud:   baud,
-	}
-
-	return &zwaveConfig, nil
-}
 
 func main() {
 
-	config, err := loadConfigFromYaml("./zwconfig.yaml")
+	config, err := common.LoadGatewayConfig("./config.yaml")
 	if err != nil {
 		panic(err)
 	}
@@ -53,6 +29,8 @@ func main() {
 	}()
 
 	for {
+		// frame := <-serialPort.Incoming
+		// packet := common.WirePacket{frame.Marshal()}
 		fmt.Println("MAIN:", <-serialPort.Incoming)
 	}
 

@@ -4,6 +4,8 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+
+	"github.com/bjyoungblood/gozw/common"
 )
 
 // PortalServer is the server that Z/IP gateways connect to
@@ -12,15 +14,23 @@ type PortalServer struct {
 	clients  map[net.Conn]Client
 }
 
-func NewPortalServer(config *portalConfig) (*PortalServer, error) {
+func NewPortalServer(config *common.GozwConfig) (*PortalServer, error) {
 	server := new(PortalServer)
 
-	listener, err := tls.Listen("tcp4", config.GetListenAddress(), config.GetTLSConfig())
+	tlsConfig := tls.Config{
+		Certificates: config.Certificate,
+		// @todo change to RequireAndVerifyClientCert when I understand SSL certs
+		// ClientAuth: tls.RequireAndVerifyClientCert,
+		RootCAs: config.RootCAs,
+		// ClientCAs: config.clientCAs,
+	}
+
+	listener, err := tls.Listen("tcp4", config.PortalAddress, &tlsConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println("Listening on " + config.GetListenAddress())
+	fmt.Println("Listening on " + config.PortalAddress)
 
 	server.listener = listener
 	return server, nil
