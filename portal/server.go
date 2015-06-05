@@ -13,7 +13,6 @@ type PortalServer struct {
 }
 
 func NewPortalServer(config *portalConfig) (*PortalServer, error) {
-
 	server := new(PortalServer)
 
 	listener, err := tls.Listen("tcp4", config.GetListenAddress(), config.GetTLSConfig())
