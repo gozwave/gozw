@@ -5,6 +5,7 @@ const (
 	ZwSendData              = 0x13
 	ZwAddNodeToNetwork      = 0x4a
 	ZwRemoveNodeFromNetwork = 0x4b
+	ZwSerialAPIReady        = 0xEF
 )
 
 const (
@@ -46,6 +47,10 @@ func SendData(nodeId uint8, data []byte) []byte {
 	buf = append(buf, 0x1, 0x1)
 
 	return buf
+}
+
+func ReadyCommand() []byte {
+	return []byte{ZwSerialAPIReady, 0x01}
 }
 
 func GetNodeList() []byte {
