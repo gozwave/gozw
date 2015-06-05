@@ -1,4 +1,4 @@
-package zwave
+package gateway
 
 import (
 	"bufio"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bjyoungblood/gozw/zwave"
 	"github.com/tarm/serial"
 )
 
@@ -15,10 +16,10 @@ const (
 	StateAwaitingAck
 )
 
-type ZCallback func(response *ZFrame)
+type ZCallback func(response *zwave.ZFrame)
 
 type Request struct {
-	frame    *ZFrame
+	frame    *zwave.ZFrame
 	callback ZCallback
 }
 
@@ -30,9 +31,9 @@ type SerialConfig struct {
 type SerialPort struct {
 	port            *serial.Port
 	state           int
-	incomingPrivate chan *ZFrame
+	incomingPrivate chan *zwave.ZFrame
 	requestQueue    chan Request
-	Incoming        chan *ZFrame
+	Incoming        chan *zwave.ZFrame
 }
 
 func NewSerialPort(config *SerialConfig) (*SerialPort, error) {
@@ -46,8 +47,8 @@ func NewSerialPort(config *SerialConfig) (*SerialPort, error) {
 	}
 
 	requestQueue := make(chan Request, 1)
-	incomingPrivate := make(chan *ZFrame, 1)
-	incomingPublic := make(chan *ZFrame, 1)
+	incomingPrivate := make(chan *zwave.ZFrame, 1)
+	incomingPublic := make(chan *zwave.ZFrame, 1)
 
 	serialPort := SerialPort{
 		port:            port,
@@ -71,7 +72,7 @@ func (s *SerialPort) Initialize() {
 	for {
 		select {
 		case frame := <-s.incomingPrivate:
-			go func(frame *ZFrame) {
+			go func(frame *zwave.ZFrame) {
 				s.Incoming <- frame
 			}(frame)
 		case <-time.After(time.Second * 2):
@@ -93,9 +94,9 @@ func (s *SerialPort) Run() {
 	}
 }
 
-func (s *SerialPort) SendFrameSync(frame *ZFrame) *ZFrame {
-	await := make(chan *ZFrame, 1)
-	callback := func(response *ZFrame) {
+func (s *SerialPort) SendFrameSync(frame *zwave.ZFrame) *zwave.ZFrame {
+	await := make(chan *zwave.ZFrame, 1)
+	callback := func(response *zwave.ZFrame) {
 		await <- response
 	}
 
@@ -104,8 +105,8 @@ func (s *SerialPort) SendFrameSync(frame *ZFrame) *ZFrame {
 	return <-await
 }
 
-func (s *SerialPort) SendFrame(frame *ZFrame, callback ZCallback) {
-	go func(frame *ZFrame, callback ZCallback) {
+func (s *SerialPort) SendFrame(frame *zwave.ZFrame, callback ZCallback) {
+	go func(frame *zwave.ZFrame, callback ZCallback) {
 		s.requestQueue <- Request{
 			frame:    frame,
 			callback: callback,
@@ -118,11 +119,16 @@ func (s *SerialPort) Close() error {
 }
 
 func (s *SerialPort) sendAck() error {
-	_, err := s.port.Write(NewAckFrame().Marshal())
+	_, err := s.port.Write(zwave.NewAckFrame().Marshal())
 	return err
 }
 
-func (s *SerialPort) transmitFrame(frame *ZFrame) *ZFrame {
+func (s *SerialPort) sendNak() error {
+	_, err := s.port.Write(zwave.NewNakFrame().Marshal())
+	return err
+}
+
+func (s *SerialPort) transmitFrame(frame *zwave.ZFrame) *zwave.ZFrame {
 
 	// Write the frame to the serial port
 	numBytes, err := s.port.Write(frame.Marshal())
@@ -144,9 +150,4 @@ func (s *SerialPort) transmitFrame(frame *ZFrame) *ZFrame {
 
 	fmt.Println("BAD FRAME!!!", receipt)
 	panic("hi")
-}
-
-func (s *SerialPort) sendNak() error {
-	_, err := s.port.Write(NewNakFrame().Marshal())
-	return err
 }

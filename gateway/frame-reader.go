@@ -1,8 +1,12 @@
-package zwave
+package gateway
 
-import "bufio"
+import (
+	"bufio"
 
-func readFrames(reader *bufio.Reader, frames chan<- *ZFrame) {
+	"github.com/bjyoungblood/gozw/zwave"
+)
+
+func readFrames(reader *bufio.Reader, frames chan<- *zwave.ZFrame) {
 	for {
 		header, err := reader.ReadByte()
 		if err != nil {
@@ -11,7 +15,7 @@ func readFrames(reader *bufio.Reader, frames chan<- *ZFrame) {
 		}
 
 		if header != 0x01 {
-			frame := UnmarshalFrame([]byte{header})
+			frame := zwave.UnmarshalFrame([]byte{header})
 			frames <- frame
 			continue
 		}
@@ -44,7 +48,7 @@ func readFrames(reader *bufio.Reader, frames chan<- *ZFrame) {
 
 		buf[len(buf)-1] = checksum
 
-		frame := UnmarshalFrame(buf)
+		frame := zwave.UnmarshalFrame(buf)
 		frames <- frame
 	}
 }
