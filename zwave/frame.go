@@ -10,10 +10,10 @@ type FrameHeader uint8
 type FrameType uint8
 
 const (
-	FrameHeaderData   uint8 = 0x01
-	FrameHeaderAck    uint8 = 0x06
-	FrameHeaderNak    uint8 = 0x15
-	FrameHeaderCancel uint8 = 0x18
+	FrameHeaderData uint8 = 0x01
+	FrameHeaderAck  uint8 = 0x06
+	FrameHeaderNak  uint8 = 0x15
+	FrameHeaderCan  uint8 = 0x18
 )
 
 const (
@@ -66,7 +66,7 @@ func NewAckFrame() *ZFrame {
 
 func NewCanFrame() *ZFrame {
 	return &ZFrame{
-		Header: FrameHeaderCancel,
+		Header: FrameHeaderCan,
 	}
 }
 
