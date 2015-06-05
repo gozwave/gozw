@@ -2,6 +2,7 @@ package zwave
 
 const (
 	ZwNodeList              = 0x02
+	ZwSendData              = 0x13
 	ZwAddNodeToNetwork      = 0x4a
 	ZwRemoveNodeFromNetwork = 0x4b
 )
@@ -32,6 +33,20 @@ const (
 	RemoveNodeOptionNormalPower = AddNodeOptionNormalPower
 	RemoveNodeOptionNetworkWide = AddNodeOptionNetworkWide
 )
+
+func SendData(nodeId uint8, data []byte) []byte {
+	buf := []byte{
+		ZwSendData,
+		byte(nodeId),
+		byte(len(data)),
+	}
+
+	// @todo transport options
+	buf = append(buf, data...)
+	buf = append(buf, 0x1, 0x1)
+
+	return buf
+}
 
 func GetNodeList() []byte {
 	return []byte{ZwNodeList}
