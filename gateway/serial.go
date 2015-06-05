@@ -110,18 +110,16 @@ func (s *SerialPort) Run() {
 			if err != nil {
 				s.sendNak()
 				continue
-			} else if incoming.IsData() {
-				s.sendAck()
-				continue
-			}
-
-			// If the next frame is an ACK or a NAK, respond with it
-			if incoming.IsAck() || incoming.IsNak() {
+			} else if incoming.IsAck() || incoming.IsNak() {
 				if &s.requestInFlight != nil && s.requestInFlight.callback != nil {
 					s.requestInFlight.callback(int(incoming.Header))
 					s.requestInFlight = Request{}
 					continue
 				}
+			} else if incoming.IsData() {
+				// If everything else has been processed, then release it into the wild
+				s.sendAck()
+				s.Incoming <- incoming
 			}
 
 		case request := <-s.requestQueue:
