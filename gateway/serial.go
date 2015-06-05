@@ -165,6 +165,10 @@ func (s *SerialPort) transmitFrame(frame *zwave.ZFrame) *zwave.ZFrame {
 	// fmt.Println(hex.Dump(frame.Marshal()))
 
 	// Block for the next incoming frame
+	// @todo possible race condition here, since we block on s.incomingPrivate in Run()
+	// 	     should refactor SerialPort into a state machine that stores the request
+	//       in flight. We can handle the ACK/NAK/CAN response there, as well as any
+	//       response frames
 	receipt := <-s.incomingPrivate
 
 	// If the next frame is an ACK, we can wait for the next frame, which should
