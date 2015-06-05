@@ -2,7 +2,6 @@ package gateway
 
 import (
 	"bufio"
-	"fmt"
 	"time"
 
 	"github.com/bjyoungblood/gozw/common"
@@ -10,17 +9,24 @@ import (
 	"github.com/tarm/serial"
 )
 
-type ZCallback func(response *zwave.ZFrame)
+// AckCallback is a function callback to be executed when a frame is transmitted.
+// status will be one of zwave.FrameHeader*
+type AckCallback func(status int)
 
+// Request represents a ZFrame queued for transmission to the controller
 type Request struct {
 	frame    *zwave.ZFrame
-	callback ZCallback
+	callback AckCallback
+	attempts int
 }
 
+// SerialPort is a container/wrapper for the actual serial port, with some
+// extra protection to ensure proper connection state with the controller
 type SerialPort struct {
 	port            *serial.Port
 	incomingPrivate chan *zwave.ZFrame
 	requestQueue    chan Request
+	requestInFlight Request
 	Incoming        chan *zwave.ZFrame
 }
 
@@ -100,24 +106,42 @@ func (s *SerialPort) Run() {
 	for {
 		select {
 		case incoming := <-s.incomingPrivate:
-			// @todo verify checksum and send appropriate response frame
-			s.Incoming <- incoming
+			err := incoming.VerifyChecksum()
+			if err != nil {
+				s.sendNak()
+				continue
+			} else if incoming.IsData() {
+				s.sendAck()
+				continue
+			}
+
+			// If the next frame is an ACK or a NAK, respond with it
+			if incoming.IsAck() || incoming.IsNak() {
+				if &s.requestInFlight != nil && s.requestInFlight.callback != nil {
+					s.requestInFlight.callback(int(incoming.Header))
+					s.requestInFlight = Request{}
+					continue
+				}
+			}
+
 		case request := <-s.requestQueue:
-			s.transmitFrame(request.frame)
-			s.sendAck()
-			fmt.Println(<-s.incomingPrivate)
+			s.requestInFlight = request
+			_, err := s.port.Write(request.frame.Marshal())
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 }
 
 // SendFrameSync wraps SendFrame with some magic that blocks until the result
 // arrives
-func (s *SerialPort) SendFrameSync(frame *zwave.ZFrame) *zwave.ZFrame {
+func (s *SerialPort) SendFrameSync(frame *zwave.ZFrame) int {
 	// Make a channel we can block on
-	await := make(chan *zwave.ZFrame, 1)
+	await := make(chan int, 1)
 
 	// All our callback needs to do is publish the response frame back to the channel
-	callback := func(response *zwave.ZFrame) {
+	callback := func(response int) {
 		await <- response
 	}
 
@@ -129,8 +153,8 @@ func (s *SerialPort) SendFrameSync(frame *zwave.ZFrame) *zwave.ZFrame {
 }
 
 // SendFrame queues a frame to be sent to the controller
-func (s *SerialPort) SendFrame(frame *zwave.ZFrame, callback ZCallback) {
-	go func(frame *zwave.ZFrame, callback ZCallback) {
+func (s *SerialPort) SendFrame(frame *zwave.ZFrame, callback AckCallback) {
+	go func(frame *zwave.ZFrame, callback AckCallback) {
 		s.requestQueue <- Request{
 			frame:    frame,
 			callback: callback,
@@ -151,38 +175,4 @@ func (s *SerialPort) sendAck() error {
 func (s *SerialPort) sendNak() error {
 	_, err := s.port.Write(zwave.NewNakFrame().Marshal())
 	return err
-}
-
-func (s *SerialPort) transmitFrame(frame *zwave.ZFrame) *zwave.ZFrame {
-
-	// Write the frame to the serial port
-	_, err := s.port.Write(frame.Marshal())
-	if err != nil {
-		panic(err)
-	}
-
-	// fmt.Printf("---> %d bytes written:\n", numBytes)
-	// fmt.Println(hex.Dump(frame.Marshal()))
-
-	// Block for the next incoming frame
-	// @todo possible race condition here, since we block on s.incomingPrivate in Run()
-	// 	     should refactor SerialPort into a state machine that stores the request
-	//       in flight. We can handle the ACK/NAK/CAN response there, as well as any
-	//       response frames
-	receipt := <-s.incomingPrivate
-
-	// If the next frame is an ACK, we can wait for the next frame, which should
-	// be a response frame
-	if receipt.IsAck() {
-		receipt = <-s.incomingPrivate
-		return receipt
-	}
-
-	// @todo Handle non-ACK frames here
-	// @todo Not all frames receive a response frame, so it isn't appropriate to
-	// always grab the next incoming frame.
-
-	// @todo Need to reinitialize our connection and do a reset of the controller
-	fmt.Println("BAD FRAME!!!", receipt)
-	panic("hi")
 }
