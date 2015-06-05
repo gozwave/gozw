@@ -32,6 +32,7 @@ type ZFrame struct {
 	// Type is one of FrameType*
 	Type uint8
 
+	// Payload is the command id and command payload
 	Payload []byte
 
 	// Checksum = 0xff XOR Type XOR Length XOR payload[0] XOR [...payload[n]]
@@ -81,6 +82,8 @@ func (z *ZFrame) IsAck() bool {
 	return z.Header == FrameHeaderAck
 }
 
+// CalcChecksum calculates the checksum for this frame, given the current data.
+// The Z-Wave checksum is calculated by taking 0xFF XOR Length XOR Type XOR Payload[0:n]
 func (z *ZFrame) CalcChecksum() uint8 {
 	var csum uint8 = 0xff
 	csum ^= z.Length
@@ -93,10 +96,13 @@ func (z *ZFrame) CalcChecksum() uint8 {
 	return csum
 }
 
+// SetChecksum calculates the frame checksum and saves it into the frame
 func (z *ZFrame) SetChecksum() {
 	z.Checksum = z.CalcChecksum()
 }
 
+// VerifyChecksum calculates a checksum for the frame and compares it to the
+// frame's checksum, returning an error if they do not agree
 func (z *ZFrame) VerifyChecksum() error {
 	if z.Checksum != z.CalcChecksum() {
 		return errors.New("Invalid checksum")
@@ -105,23 +111,27 @@ func (z *ZFrame) VerifyChecksum() error {
 	return nil
 }
 
+// Marshal this frame into a byte slice
 func (z *ZFrame) Marshal() []byte {
 	buf := new(bytes.Buffer)
 
 	switch z.Header {
 	case FrameHeaderData:
+		// Data frames have the whole kit and caboodle
 		binary.Write(buf, binary.BigEndian, uint8(z.Header))
 		binary.Write(buf, binary.BigEndian, uint8(z.Length))
 		binary.Write(buf, binary.BigEndian, uint8(z.Type))
 		buf.Write(z.Payload)
 		binary.Write(buf, binary.BigEndian, uint8(z.Checksum))
 	default:
+		// Non-data frames are just a single byte
 		binary.Write(buf, binary.BigEndian, uint8(z.Header))
 	}
 
 	return buf.Bytes()
 }
 
+// UnmarshalFrame turns a byte slice into a ZFrame
 func UnmarshalFrame(frame []byte) *ZFrame {
 	if frame[0] != FrameHeaderData {
 		return &ZFrame{
