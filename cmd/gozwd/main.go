@@ -11,7 +11,7 @@ import
 
 func main() {
 
-	config, err := portal.LoadConfigFromYaml("./config.yaml")
+	config, err := portal.LoadConfigFromYaml("./portal-config.yaml")
 	if err != nil {
 		panic(err)
 	}
