@@ -104,6 +104,10 @@ func (z *ZFrame) SetChecksum() {
 // VerifyChecksum calculates a checksum for the frame and compares it to the
 // frame's checksum, returning an error if they do not agree
 func (z *ZFrame) VerifyChecksum() error {
+	if z.Header != FrameHeaderData {
+		return nil
+	}
+
 	if z.Checksum != z.CalcChecksum() {
 		return errors.New("Invalid checksum")
 	}
