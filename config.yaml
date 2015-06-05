@@ -1,0 +1,10 @@
+gozwd:
+  bindAddress: 192.168.7.1
+  bindPort: 44123
+  cert: ./portal.cert.pem
+  key: ./portal.key.pem
+  ca:
+    - ca.cert.pem
+  clientCA:
+    - zip.cert.pem
+    - ca.cert.pem

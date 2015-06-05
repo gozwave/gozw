@@ -1,0 +1,3 @@
+controller:
+  device: /tmp/usbmodem
+  baud: 115200
