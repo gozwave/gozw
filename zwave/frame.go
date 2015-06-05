@@ -159,7 +159,7 @@ func UnmarshalFrame(frame []byte) *ZFrame {
 		Header:   frame[0],
 		Length:   frame[1],
 		Type:     frame[2],
-		Payload:  frame[3 : len(frame)-2],
+		Payload:  frame[3 : len(frame)-1],
 		Checksum: frame[len(frame)-1],
 	}
 }
