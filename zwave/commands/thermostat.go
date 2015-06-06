@@ -1,14 +1,6 @@
-package zwave
+package commands
 
 import "fmt"
-
-const (
-	CommandClassThermostatSetpointV3 = 0x43
-)
-
-const (
-	ThermostatSetpointSet = 0x01
-)
 
 func NewThermostatSetpointCommand() []byte {
 
@@ -25,7 +17,7 @@ func NewThermostatSetpointCommand() []byte {
 		ThermostatSetpointSet,
 		0x01, // heating
 		precision | scale | size, // intentional bitwise OR
-		0x48,
+		64,
 	}
 
 	fmt.Println(buf)

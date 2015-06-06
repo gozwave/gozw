@@ -6,6 +6,7 @@ import (
 	"github.com/bjyoungblood/gozw/common"
 	"github.com/bjyoungblood/gozw/gateway"
 	"github.com/bjyoungblood/gozw/zwave"
+	"github.com/bjyoungblood/gozw/zwave/functions"
 )
 
 func main() {
@@ -28,16 +29,29 @@ func main() {
 	// status = 3
 	// source = 0
 	// blen = 19
-	//
+
+	// serialPort.SendFrame(zwave.NewRequestFrame(zwave.RequestNodeInfo(30)), func(status int) {
+	// 	fmt.Println("STATUS:", status)
+	// })
+
+	// serialPort.SendFrame(zwave.NewRequestFrame(zwave.NodeProtocolInfo(30)), func(status int) {
+	// 	fmt.Println("STATUS:", status)
+	// })
 
 	// serialPort.SendFrame(zwave.NewRequestFrame(zwave.GetNodeList()), func(status int) {
 	// 	fmt.Println("STATUS:", status)
 	// })
 
-	f := zwave.NewRequestFrame(zwave.SendData(uint8(29), zwave.NewThermostatSetpointCommand()))
-	go serialPort.SendFrame(f, func(status int) {
-		fmt.Println("STATUS:", status)
-	})
+	// f := zwave.NewRequestFrame(zwave.SendData(uint8(30), zwave.NewDoorLockCommand()))
+	// fmt.Println(f)
+	// go serialPort.SendFrame(f, func(status int) {
+	// 	fmt.Println("STATUS:", status)
+	// })
+
+	// f := zwave.NewRequestFrame(zwave.SendData(uint8(29), zwave.NewThermostatSetpointCommand()))
+	// go serialPort.SendFrame(f, func(status int) {
+	// 	fmt.Println("STATUS:", status)
+	// })
 
 	// go serialPort.SendFrame(zwave.NewRequestFrame(zwave.EnterInclusionMode()), func(status int) {
 	// 	if status == int(zwave.FrameHeaderAck) {
@@ -85,7 +99,9 @@ func main() {
 
 		if frame.Payload[0] == 0x4a && frame.Payload[2] == 5 {
 			fmt.Println("NODE ADDED")
-			go serialPort.SendFrame(zwave.NewRequestFrame(zwave.ExitInclusionMode()), func(status int) {
+			addNodeEnd := functions.NewAddNode()
+			frame := addNodeEnd.Marshal()
+			go serialPort.SendFrame(zwave.NewRequestFrame(frame), func(status int) {
 				if status == int(zwave.FrameHeaderAck) {
 					fmt.Println("Exited inclusion mode")
 				} else {
@@ -96,7 +112,9 @@ func main() {
 
 		if frame.Payload[0] == 0x4b && frame.Payload[2] == 5 {
 			fmt.Println("NODE REMOVED")
-			go serialPort.SendFrame(zwave.NewRequestFrame(zwave.ExitExclusionMode()), func(status int) {
+			removeNodeEnd := functions.NewAddNode()
+			frame := removeNodeEnd.Marshal()
+			go serialPort.SendFrame(zwave.NewRequestFrame(frame), func(status int) {
 				if status == int(zwave.FrameHeaderAck) {
 					fmt.Println("Exited exclusion mode")
 				} else {

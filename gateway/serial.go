@@ -80,6 +80,10 @@ func (s *SerialPort) Initialize() {
 	// incomingPrivate channel
 	go readFrames(bufio.NewReader(s.port), s.incomingPrivate)
 
+	// s.SendFrame(zwave.NewRequestFrame(zwave.ReadyCommand()), func(status int) {
+	// 	fmt.Println(status)
+	// })
+
 	// This block will block to receive incoming frames and continue to do so until
 	// 2 seconds after it has received the last frame. We do this because if we
 	// previously crashed, a quick startup could bring us up while the controller is
@@ -128,6 +132,8 @@ func (s *SerialPort) Run() {
 			if err != nil {
 				panic(err)
 			}
+
+			// time.Sleep(10 * time.Millisecond)
 		}
 	}
 }
