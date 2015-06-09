@@ -1,7 +1,5 @@
 package zwave
 
-import "fmt"
-
 type NodeList struct {
 	Version      uint8
 	Capabilities byte
@@ -13,7 +11,7 @@ type NodeList struct {
 // @todo functions to parse capabilities flags
 
 func isBitSet(mask byte, pos uint) bool {
-	return mask&(1<<pos) == 1
+	return mask&(1<<(7-pos)) > 0
 }
 
 func (n *NodeList) Unmarshal(frame *ZFrame) {
@@ -27,7 +25,7 @@ func (n *NodeList) Unmarshal(frame *ZFrame) {
 func (n *NodeList) GetNodeIds() []int {
 	nodes := []int{}
 	nodeNum := 1
-	fmt.Println(len(n.Nodes))
+
 	for i := 0; i < 29; i++ {
 		for j := uint(0); j < 8; j++ {
 			if isBitSet(n.Nodes[i], j) {
