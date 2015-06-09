@@ -7,7 +7,10 @@ const (
 	ZwGetNodeProtocolInfo   = 0x41
 	ZwAddNodeToNetwork      = 0x4a
 	ZwRemoveNodeFromNetwork = 0x4b
+	ZwRequestNetworkUpdate  = 0x53
 	ZwRequestNodeInfo       = 0x60
+	ZwRemoveFailingNode     = 0x61
+	ZwIsNodeFailed          = 0x62
 	ZwSerialAPIReady        = 0xEF
 )
 

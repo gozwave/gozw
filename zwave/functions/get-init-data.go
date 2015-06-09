@@ -4,7 +4,7 @@ type GetInitData struct {
 	FunctionId uint8
 }
 
-func NewGetInitData(nodeId uint8) GetInitData {
+func NewGetInitData() GetInitData {
 	return GetInitData{
 		FunctionId: ZwGetInitData,
 	}
