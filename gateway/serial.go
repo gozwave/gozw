@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"bufio"
+	"fmt"
 	"time"
 
 	"github.com/bjyoungblood/gozw/common"
@@ -11,7 +12,7 @@ import (
 
 // AckCallback is a function callback to be executed when a frame is transmitted.
 // status will be one of zwave.FrameHeader*
-type AckCallback func(status int)
+type AckCallback func(responseType uint8, response *zwave.ZFrame)
 
 // Request represents a ZFrame queued for transmission to the controller
 type Request struct {
@@ -114,16 +115,12 @@ func (s *SerialPort) Run() {
 			if err != nil {
 				s.sendNak()
 				continue
-			} else if incoming.IsAck() || incoming.IsNak() {
-				if &s.requestInFlight != nil && s.requestInFlight.callback != nil {
-					s.requestInFlight.callback(int(incoming.Header))
-					s.requestInFlight = Request{}
-					continue
-				}
 			} else if incoming.IsData() {
 				// If everything else has been processed, then release it into the wild
 				s.sendAck()
 				s.Incoming <- incoming
+			} else {
+				fmt.Println("Unexpected frame: ", incoming)
 			}
 
 		case request := <-s.requestQueue:
@@ -133,6 +130,21 @@ func (s *SerialPort) Run() {
 				panic(err)
 			}
 
+			confirmation := <-s.incomingPrivate
+
+			if confirmation.IsNak() || confirmation.IsCan() {
+				s.requestInFlight.callback(confirmation.Header, nil)
+			} else if confirmation.IsAck() {
+
+				response := <-s.incomingPrivate
+
+				if response.IsData() {
+					s.sendAck()
+				}
+
+				go s.requestInFlight.callback(confirmation.Header, response)
+			}
+
 			// time.Sleep(10 * time.Millisecond)
 		}
 	}
@@ -140,13 +152,13 @@ func (s *SerialPort) Run() {
 
 // SendFrameSync wraps SendFrame with some magic that blocks until the result
 // arrives
-func (s *SerialPort) SendFrameSync(frame *zwave.ZFrame) int {
+func (s *SerialPort) SendFrameSync(frame *zwave.ZFrame) *zwave.ZFrame {
 	// Make a channel we can block on
-	await := make(chan int, 1)
+	await := make(chan *zwave.ZFrame, 1)
 
 	// All our callback needs to do is publish the response frame back to the channel
-	callback := func(response int) {
-		await <- response
+	callback := func(response uint8, responseFrame *zwave.ZFrame) {
+		await <- responseFrame
 	}
 
 	// Send the frame in a goroutine, since we don't want to block on this
