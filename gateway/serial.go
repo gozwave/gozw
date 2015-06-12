@@ -7,6 +7,8 @@ import (
 
 	"github.com/bjyoungblood/gozw/common"
 	"github.com/bjyoungblood/gozw/zwave"
+	"github.com/bjyoungblood/gozw/zwave/layers"
+	"github.com/google/gopacket"
 	"github.com/tarm/serial"
 )
 
@@ -24,11 +26,19 @@ type Request struct {
 // SerialPort is a container/wrapper for the actual serial port, with some
 // extra protection to ensure proper connection state with the controller
 type SerialPort struct {
-	port            *serial.Port
-	incomingPrivate chan *zwave.ZFrame
-	requestQueue    chan Request
+	port *serial.Port
+
+	// Channel for parsed frames (packets)
+	incomingPackets chan gopacket.Packet
+
+	// Channel for Z-Wave commands we need to queue up
+	requestQueue chan Request
+
+	// Storage for the currently-running request
 	requestInFlight Request
-	Incoming        chan *zwave.ZFrame
+
+	// Channel for frames we want to release into the wild
+	Incoming chan *zwave.ZFrame
 }
 
 // NewSerialPort Open a(n actual) serial port and create some supporting channels
@@ -45,24 +55,28 @@ func NewSerialPort(config *common.GozwConfig) (*SerialPort, error) {
 		return nil, err
 	}
 
-	// Channel for Z-Wave commands we need to queue up
-	requestQueue := make(chan Request, 1)
-
-	// Channel for frames we receive from the Z-Wave controller, but don't necessarily
-	// want to make public (yet), since this can include ACKs, NAKs, and CANs
-	incomingPrivate := make(chan *zwave.ZFrame, 1)
-
-	// Channel for frames we want to release into the wild
-	incomingPublic := make(chan *zwave.ZFrame, 1)
-
 	serialPort := SerialPort{
-		port:            port,
-		incomingPrivate: incomingPrivate,
-		requestQueue:    requestQueue,
-		Incoming:        incomingPublic,
+		port: port,
+
+		incomingPackets: make(chan gopacket.Packet, 1),
+		requestQueue:    make(chan Request, 1),
+		Incoming:        make(chan *zwave.ZFrame, 1),
 	}
 
 	return &serialPort, nil
+}
+
+func (s *SerialPort) ReadPacketData() ([]byte, gopacket.CaptureInfo, error) {
+	buf := make([]byte, 128)
+	readLen, err := s.port.Read(buf)
+
+	ci := gopacket.CaptureInfo{
+		Timestamp:     time.Now(),
+		CaptureLength: readLen,
+		Length:        readLen,
+	}
+
+	return buf, ci, err
 }
 
 // Initialize We need to do some initial setup on the device before we are able
@@ -78,8 +92,8 @@ func (s *SerialPort) Initialize() {
 	}
 
 	// Read frames from the serial port in a goroutine, and make them available on the
-	// incomingPrivate channel
-	go readFrames(bufio.NewReader(s.port), s.incomingPrivate)
+	// incomingPackets channel
+	go readFrames(s.port, s.incomingPackets)
 
 	// s.SendFrame(zwave.NewRequestFrame(zwave.ReadyCommand()), func(status int) {
 	// 	fmt.Println(status)
@@ -92,15 +106,15 @@ func (s *SerialPort) Initialize() {
 	// with them
 	for {
 		select {
-		case frame := <-s.incomingPrivate:
-			// this runs in a goroutine in case nothing is listening to s.Incoming yet
-			// the goroutine basically just blocks until something listens.
-			go func(frame *zwave.ZFrame) {
-				s.Incoming <- frame
-			}(frame)
+		// case <-s.incomingPackets:
+		// 	// this runs in a goroutine in case nothing is listening to s.Incoming yet
+		// 	// the goroutine basically just blocks until something listens.
+		// 	// go func(packet gopacket.Packet) {
+		// 	// 	s.Incoming <- packet
+		// 	// }(packet)
 		case <-time.After(time.Second * 2):
 			// after 2 seconds of not receiving any frames, return
-			return
+			continue
 		}
 	}
 }
@@ -110,42 +124,42 @@ func (s *SerialPort) Initialize() {
 func (s *SerialPort) Run() {
 	for {
 		select {
-		case incoming := <-s.incomingPrivate:
-			err := incoming.VerifyChecksum()
-			if err != nil {
-				s.sendNak()
-				continue
-			} else if incoming.IsData() {
-				// If everything else has been processed, then release it into the wild
-				s.sendAck()
-				s.Incoming <- incoming
-			} else {
-				fmt.Println("Unexpected frame: ", incoming)
-			}
+		// case incoming := <-s.incomingPackets:
+		// 	err := incoming.VerifyChecksum()
+		// 	if err != nil {
+		// 		s.sendNak()
+		// 		continue
+		// 	} else if incoming.IsData() {
+		// 		// If everything else has been processed, then release it into the wild
+		// 		s.sendAck()
+		// 		s.Incoming <- incoming
+		// 	} else {
+		// 		fmt.Println("Unexpected frame: ", incoming)
+		// 	}
+		//
+		// case request := <-s.requestQueue:
+		// 	s.requestInFlight = request
+		// 	_, err := s.port.Write(request.frame.Marshal())
+		// 	if err != nil {
+		// 		panic(err)
+		// 	}
+		//
+		// 	confirmation := <-s.incomingPackets
+		//
+		// 	if confirmation.IsNak() || confirmation.IsCan() {
+		// 		s.requestInFlight.callback(confirmation.Header, nil)
+		// 	} else if confirmation.IsAck() {
+		//
+		// 		response := <-s.incomingPackets
+		//
+		// 		if response.IsData() {
+		// 			s.sendAck()
+		// 		}
+		//
+		// 		go s.requestInFlight.callback(confirmation.Header, response)
+		// 	}
 
-		case request := <-s.requestQueue:
-			s.requestInFlight = request
-			_, err := s.port.Write(request.frame.Marshal())
-			if err != nil {
-				panic(err)
-			}
-
-			confirmation := <-s.incomingPrivate
-
-			if confirmation.IsNak() || confirmation.IsCan() {
-				s.requestInFlight.callback(confirmation.Header, nil)
-			} else if confirmation.IsAck() {
-
-				response := <-s.incomingPrivate
-
-				if response.IsData() {
-					s.sendAck()
-				}
-
-				go s.requestInFlight.callback(confirmation.Header, response)
-			}
-
-			// time.Sleep(10 * time.Millisecond)
+		// time.Sleep(10 * time.Millisecond)
 		}
 	}
 }
@@ -183,6 +197,11 @@ func (s *SerialPort) Close() error {
 	return s.port.Close()
 }
 
+func (s *SerialPort) Write(buf []byte) (int, error) {
+	written, err := s.port.Write(buf)
+	return written, err
+}
+
 func (s *SerialPort) sendAck() error {
 	_, err := s.port.Write(zwave.NewAckFrame().Marshal())
 	return err
@@ -191,4 +210,64 @@ func (s *SerialPort) sendAck() error {
 func (s *SerialPort) sendNak() error {
 	_, err := s.port.Write(zwave.NewNakFrame().Marshal())
 	return err
+}
+
+// @todo handle EOF, other errors instead of panic
+func readFrames(port *serial.Port, incomingPackets chan<- gopacket.Packet) {
+	reader := bufio.NewReader(port)
+
+	for {
+		// Read the SOF byte
+		sof, err := reader.ReadByte()
+		if err != nil {
+			panic(err)
+		}
+
+		// Handle ACK, CAN, and NAK frames first
+		if sof == layers.FrameSOFAck || sof == layers.FrameSOFCan || sof == layers.FrameSOFNak {
+			packet := gopacket.NewPacket([]byte{sof}, layers.LayerTypeFrame, gopacket.DecodeOptions{})
+			incomingPackets <- packet
+			continue
+		}
+
+		// If we're seeing something other than a data SOF here, we need to ignore it
+		// to flush garbage out of the read buffer, per specification
+		if sof != layers.FrameSOFData {
+			continue
+		}
+
+		// Read the length from the frame
+		length, err := reader.ReadByte()
+		if err != nil {
+			panic(err)
+		}
+
+		buf := make([]byte, length+2)
+		buf[0] = sof
+		buf[1] = length
+
+		// read the frame payload
+		for i := 0; i < int(length)-1; i++ {
+			data, err := reader.ReadByte()
+			if err != nil {
+				// @todo handle panic
+				panic(err)
+			}
+
+			buf[i+2] = data
+		}
+
+		// read the checksum
+		checksum, err := reader.ReadByte()
+		if err != nil {
+			// @todo handle panic
+			panic(err)
+		}
+
+		buf[len(buf)-1] = checksum
+
+		packet := gopacket.NewPacket(buf, layers.LayerTypeFrame, gopacket.DecodeOptions{})
+		fmt.Println(packet.Dump())
+		incomingPackets <- packet
+	}
 }
