@@ -13,9 +13,9 @@ var (
 		Decoder: gopacket.DecodeFunc(decodeAddNode),
 	})
 
-	LayerTypeInitData = gopacket.RegisterLayerType(4002, gopacket.LayerTypeMetadata{
-		Name:    "FnInitData",
-		Decoder: gopacket.DecodeFunc(decodeInitData),
+	LayerTypeGetInitData = gopacket.RegisterLayerType(4002, gopacket.LayerTypeMetadata{
+		Name:    "FnGetInitData",
+		Decoder: gopacket.DecodeFunc(decodeGetInitData),
 	})
 )
 
@@ -25,4 +25,5 @@ var LayerClassFrame = gopacket.NewLayerClass([]gopacket.LayerType{
 
 var LayerClassFunction = gopacket.NewLayerClass([]gopacket.LayerType{
 	LayerTypeAddNode,
+	LayerTypeGetInitData,
 })

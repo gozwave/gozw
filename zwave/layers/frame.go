@@ -107,7 +107,7 @@ func (f *Frame) CanDecode() gopacket.LayerClass {
 func (f *Frame) NextLayerType() gopacket.LayerType {
 	switch f.FunctionId {
 	case ZwGetInitData:
-		return LayerTypeInitData
+		return LayerTypeGetInitData
 	case ZwAddNodeToNetwork:
 		return LayerTypeAddNode
 	default:
