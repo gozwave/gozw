@@ -135,6 +135,7 @@ func (f *FrameLayer) readFromTransport(frames chan<- *Frame) {
 				}
 
 				payload.Reset()
+				timeout.Stop()
 
 				if frame.VerifyChecksum() == nil {
 					fmt.Println("yo")
