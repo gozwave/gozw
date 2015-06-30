@@ -6,6 +6,7 @@ import (
 )
 
 type frameParseState int
+type mediaAccessControlState int
 
 const (
 	minFrameSize uint8 = 3
@@ -28,9 +29,16 @@ const (
 	FRS_CHECKSUM
 )
 
+const (
+	MAC_IDLE mediaAccessControlState = iota
+	MAC_AWAIT_ACK
+	MAC_RX
+)
+
 type FrameLayer struct {
 	transport  *TransportLayer
 	parseState frameParseState
+	macState   mediaAccessControlState
 }
 
 func NewFrameLayer(transport *TransportLayer) *FrameLayer {
@@ -143,7 +151,6 @@ func (f *FrameLayer) readFromTransport(frames chan<- *Frame) {
 					// @todo logging?
 					f.sendNak()
 				}
-
 			}
 		}
 	}
