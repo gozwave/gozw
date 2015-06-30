@@ -14,11 +14,11 @@ import (
 
 // AckCallback is a function callback to be executed when a frame is transmitted.
 // status will be one of zwave.FrameHeader*
-type AckCallback func(responseType uint8, response *zwave.ZFrame)
+type AckCallback func(responseType uint8, response *zwave.Frame)
 
 // Request represents a ZFrame queued for transmission to the controller
 type Request struct {
-	frame    *zwave.ZFrame
+	frame    *zwave.Frame
 	callback AckCallback
 	attempts int
 }
@@ -38,7 +38,7 @@ type SerialPort struct {
 	requestInFlight Request
 
 	// Channel for frames we want to release into the wild
-	Incoming chan *zwave.ZFrame
+	Incoming chan *zwave.Frame
 }
 
 // NewSerialPort Open a(n actual) serial port and create some supporting channels
@@ -60,7 +60,7 @@ func NewSerialPort(config *common.GozwConfig) (*SerialPort, error) {
 
 		incomingPackets: make(chan gopacket.Packet, 1),
 		requestQueue:    make(chan Request, 1),
-		Incoming:        make(chan *zwave.ZFrame, 1),
+		Incoming:        make(chan *zwave.Frame, 1),
 	}
 
 	return &serialPort, nil
@@ -166,12 +166,12 @@ func (s *SerialPort) Run() {
 
 // SendFrameSync wraps SendFrame with some magic that blocks until the result
 // arrives
-func (s *SerialPort) SendFrameSync(frame *zwave.ZFrame) *zwave.ZFrame {
+func (s *SerialPort) SendFrameSync(frame *zwave.Frame) *zwave.Frame {
 	// Make a channel we can block on
-	await := make(chan *zwave.ZFrame, 1)
+	await := make(chan *zwave.Frame, 1)
 
 	// All our callback needs to do is publish the response frame back to the channel
-	callback := func(response uint8, responseFrame *zwave.ZFrame) {
+	callback := func(response uint8, responseFrame *zwave.Frame) {
 		await <- responseFrame
 	}
 
@@ -183,8 +183,8 @@ func (s *SerialPort) SendFrameSync(frame *zwave.ZFrame) *zwave.ZFrame {
 }
 
 // SendFrame queues a frame to be sent to the controller
-func (s *SerialPort) SendFrame(frame *zwave.ZFrame, callback AckCallback) {
-	go func(frame *zwave.ZFrame, callback AckCallback) {
+func (s *SerialPort) SendFrame(frame *zwave.Frame, callback AckCallback) {
+	go func(frame *zwave.Frame, callback AckCallback) {
 		s.requestQueue <- Request{
 			frame:    frame,
 			callback: callback,
