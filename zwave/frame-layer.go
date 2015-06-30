@@ -3,10 +3,9 @@ package zwave
 import (
 	"bytes"
 	"time"
-)
 
-type frameParseState int
-type mediaAccessControlState int
+	"github.com/looplab/fsm"
+)
 
 const (
 	minFrameSize uint8 = 3
@@ -21,24 +20,12 @@ const (
 	ackTime2    time.Duration = 2000 * time.Millisecond
 )
 
-const (
-	FRS_SOF_HUNT frameParseState = iota
-	FRS_LENGTH
-	FRS_TYPE
-	FRS_DATA
-	FRS_CHECKSUM
-)
-
-const (
-	MAC_IDLE mediaAccessControlState = iota
-	MAC_AWAIT_ACK
-	MAC_RX
-)
-
 type FrameLayer struct {
-	transport  *TransportLayer
-	parseState frameParseState
-	macState   mediaAccessControlState
+	transport                          *TransportLayer
+	parseState                         *fsm.FSM
+	sof, length, checksum, readCounter uint8
+	payloadReadBuffer                  *bytes.Buffer
+	parseTimeout                       *time.Timer
 }
 
 func NewFrameLayer(transport *TransportLayer) *FrameLayer {
@@ -54,9 +41,64 @@ func (f *FrameLayer) Write(bytes []byte) {
 }
 
 func (f *FrameLayer) Read() <-chan *Frame {
-	frames := make(chan *Frame)
-	go f.readFromTransport(frames)
-	return frames
+
+	parsedFrameQueue := make(chan *Frame)
+
+	f.payloadReadBuffer = bytes.NewBuffer([]byte{})
+
+	f.parseTimeout = time.NewTimer(readTimeout)
+	f.parseTimeout.Stop()
+
+	f.parseState = fsm.NewFSM(
+		"idle",
+		fsm.Events{
+			{Name: "PARSE_TIMEOUT", Src: []string{"idle", "length", "data", "checksum"}, Dst: "idle"},
+			{Name: "RX_SOF", Src: []string{"idle"}, Dst: "length"},
+			{Name: "RX_ACK", Src: []string{"idle"}, Dst: "idle"},
+			{Name: "RX_LENGTH", Src: []string{"length"}, Dst: "data"},
+			{Name: "INVALID_LENGTH", Src: []string{"length"}, Dst: "idle"},
+			{Name: "RX_DATA", Src: []string{"length", "data"}, Dst: "data"},
+			{Name: "RX_DATA_COMPLETE", Src: []string{"data"}, Dst: "data_complete"},
+			{Name: "RX_CHECKSUM", Src: []string{"data_complete"}, Dst: "checksum"},
+			{Name: "CRC_OK", Src: []string{"checksum"}, Dst: "idle"},
+			{Name: "CRC_NOTOK", Src: []string{"checksum"}, Dst: "idle"},
+		},
+		fsm.Callbacks{
+			"enter_idle": func(e *fsm.Event) {
+				f.parseTimeout.Stop()
+				f.payloadReadBuffer.Reset()
+				// stop timeout, clear payload buffer
+			},
+			"RX_SOF": func(e *fsm.Event) {
+				f.parseTimeout.Reset(readTimeout)
+			},
+			"RX_LENGTH": func(e *fsm.Event) {
+				f.length = e.Args[0].(uint8)
+				f.readCounter = f.length - 2
+			},
+			"RX_DATA": func(e *fsm.Event) {
+				f.payloadReadBuffer.WriteByte(e.Args[0].(uint8))
+				f.readCounter--
+			},
+			"checksum": func(e *fsm.Event) {
+				e.Async()
+			},
+			"CRC_OK": func(e *fsm.Event) {
+				f.sendAck()
+				parsedFrameQueue <- e.Args[0].(*Frame)
+			},
+			"CRC_NOTOK": func(e *fsm.Event) {
+				// @todo logging?
+				f.sendNak()
+			},
+			// "before_event": func(e *fsm.Event) {
+			// 	fmt.Printf("%s: %s -> %s\n", e.Event, e.Src, e.Dst)
+			// },
+		},
+	)
+
+	go f.readLoop()
+	return parsedFrameQueue
 }
 
 func (f *FrameLayer) sendAck() error {
@@ -69,88 +111,67 @@ func (f *FrameLayer) sendNak() error {
 	return err
 }
 
-func (f *FrameLayer) readFromTransport(frames chan<- *Frame) {
-
-	f.parseState = FRS_SOF_HUNT
+func (f *FrameLayer) readLoop() {
 
 	timeout := time.NewTimer(readTimeout)
 	timeout.Stop()
 
-	var sof, length, frameType, counter uint8
-	payload := bytes.NewBuffer([]byte{})
-
-	inputBytes := f.transport.Read()
+	readQueue := f.transport.Read()
 
 	for {
 		select {
 		case <-timeout.C:
-			f.parseState = FRS_SOF_HUNT
-			payload.Reset()
+			f.parseState.Event("PARSE_TIMEOUT")
 
-		case currentByte := <-inputBytes:
-			switch f.parseState {
+		case currentByte := <-readQueue:
+			switch {
 
-			case FRS_SOF_HUNT:
+			case f.parseState.Is("idle"):
 				switch currentByte {
 				case FrameSOFData:
-					sof = currentByte
-					f.parseState = FRS_LENGTH
-					timeout.Reset(readTimeout)
+					f.parseState.Event("RX_SOF", currentByte)
 
 				case FrameSOFAck:
-					f.parseState = FRS_SOF_HUNT
 					// @todo make ACK channel
 				case FrameSOFCan:
-					f.parseState = FRS_SOF_HUNT
 					// @todo make CAN channel
 				case FrameSOFNak:
-					f.parseState = FRS_SOF_HUNT
 					// @todo make NAK channel
 				}
 
-			case FRS_LENGTH:
-				length = currentByte
-				if length < minFrameSize || length > maxFrameSize {
-					f.parseState = FRS_SOF_HUNT
+			case f.parseState.Is("length"):
+				if currentByte < minFrameSize || currentByte > maxFrameSize {
+					f.parseState.Event("INVALID_LENGTH")
 				} else {
-					counter = length - 2
-					f.parseState = FRS_TYPE
+					f.parseState.Event("RX_LENGTH", currentByte)
 				}
 
-			case FRS_TYPE:
-				frameType = currentByte
-				counter--
-				f.parseState = FRS_DATA
-
-			case FRS_DATA:
-				if counter > 0 {
-					payload.WriteByte(currentByte)
-					counter--
+			case f.parseState.Is("data"):
+				if f.readCounter > 0 {
+					f.parseState.Event("RX_DATA", currentByte)
 				} else {
-					f.parseState = FRS_CHECKSUM
+					f.parseState.Event("RX_DATA_COMPLETE")
 				}
 
-			case FRS_CHECKSUM:
-				f.parseState = FRS_SOF_HUNT
+			case f.parseState.Is("data_complete"):
+				f.parseState.Event("RX_CHECKSUM", currentByte)
+				f.parseState.Transition()
 
+				payload := f.payloadReadBuffer.Bytes()
 				frame := &Frame{
-					Header:   sof,
-					Length:   length,
-					Type:     frameType,
-					Payload:  payload.Bytes(),
+					Header:   f.sof,
+					Length:   f.length,
+					Type:     payload[0],
+					Payload:  payload[1:],
 					Checksum: currentByte,
 				}
 
-				payload.Reset()
-				timeout.Stop()
-
 				if frame.VerifyChecksum() == nil {
-					frames <- frame
-					f.sendAck()
+					f.parseState.Event("CRC_OK", frame)
 				} else {
-					// @todo logging?
-					f.sendNak()
+					f.parseState.Event("CRC_NOTOK")
 				}
+
 			}
 		}
 	}
