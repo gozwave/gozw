@@ -14,7 +14,7 @@ func isBitSet(mask byte, pos uint) bool {
 	return mask&(1<<(7-pos)) > 0
 }
 
-func (n *NodeList) Unmarshal(frame *ZFrame) {
+func (n *NodeList) Unmarshal(frame *Frame) {
 	n.Version = frame.Payload[1]
 	n.Capabilities = frame.Payload[2]
 	n.Nodes = frame.Payload[4:33]

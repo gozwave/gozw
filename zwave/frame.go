@@ -16,12 +16,7 @@ const (
 	FrameHeaderCan  uint8 = 0x18
 )
 
-const (
-	FrameTypeReq uint8 = 0x00
-	FrameTypeRes uint8 = 0x01
-)
-
-type ZFrame struct {
+type Frame struct {
 
 	// Header is one of FrameHeader*
 	Header uint8
@@ -39,8 +34,8 @@ type ZFrame struct {
 	Checksum uint8
 }
 
-func NewRequestFrame(payload []byte) *ZFrame {
-	frame := ZFrame{
+func NewRequestFrame(payload []byte) *Frame {
+	frame := Frame{
 		Header:  FrameHeaderData,
 		Type:    FrameTypeReq,
 		Length:  uint8(len(payload) + 2), // payload length plus Type and Length
@@ -52,51 +47,51 @@ func NewRequestFrame(payload []byte) *ZFrame {
 	return &frame
 }
 
-func NewNakFrame() *ZFrame {
-	return &ZFrame{
+func NewNakFrame() *Frame {
+	return &Frame{
 		Header: FrameHeaderNak,
 	}
 }
 
-func NewAckFrame() *ZFrame {
-	return &ZFrame{
+func NewAckFrame() *Frame {
+	return &Frame{
 		Header: FrameHeaderAck,
 	}
 }
 
-func NewCanFrame() *ZFrame {
-	return &ZFrame{
+func NewCanFrame() *Frame {
+	return &Frame{
 		Header: FrameHeaderCan,
 	}
 }
 
-func (z *ZFrame) IsRequest() bool {
+func (z *Frame) IsRequest() bool {
 	return z.Type == FrameTypeReq
 }
 
-func (z *ZFrame) IsResponse() bool {
+func (z *Frame) IsResponse() bool {
 	return z.Type == FrameTypeRes
 }
 
-func (z *ZFrame) IsAck() bool {
+func (z *Frame) IsAck() bool {
 	return z.Header == FrameHeaderAck
 }
 
-func (z *ZFrame) IsNak() bool {
+func (z *Frame) IsNak() bool {
 	return z.Header == FrameHeaderNak
 }
 
-func (z *ZFrame) IsCan() bool {
+func (z *Frame) IsCan() bool {
 	return z.Header == FrameHeaderCan
 }
 
-func (z *ZFrame) IsData() bool {
+func (z *Frame) IsData() bool {
 	return z.Header == FrameHeaderData
 }
 
 // CalcChecksum calculates the checksum for this frame, given the current data.
 // The Z-Wave checksum is calculated by taking 0xFF XOR Length XOR Type XOR Payload[0:n]
-func (z *ZFrame) CalcChecksum() uint8 {
+func (z *Frame) CalcChecksum() uint8 {
 	var csum uint8 = 0xff
 	csum ^= z.Length
 	csum ^= z.Type
@@ -109,13 +104,13 @@ func (z *ZFrame) CalcChecksum() uint8 {
 }
 
 // SetChecksum calculates the frame checksum and saves it into the frame
-func (z *ZFrame) SetChecksum() {
+func (z *Frame) SetChecksum() {
 	z.Checksum = z.CalcChecksum()
 }
 
 // VerifyChecksum calculates a checksum for the frame and compares it to the
 // frame's checksum, returning an error if they do not agree
-func (z *ZFrame) VerifyChecksum() error {
+func (z *Frame) VerifyChecksum() error {
 	if z.Header != FrameHeaderData {
 		return nil
 	}
@@ -128,7 +123,7 @@ func (z *ZFrame) VerifyChecksum() error {
 }
 
 // Marshal this frame into a byte slice
-func (z *ZFrame) Marshal() []byte {
+func (z *Frame) Marshal() []byte {
 	buf := new(bytes.Buffer)
 
 	switch z.Header {
@@ -148,14 +143,14 @@ func (z *ZFrame) Marshal() []byte {
 }
 
 // UnmarshalFrame turns a byte slice into a ZFrame
-func UnmarshalFrame(frame []byte) *ZFrame {
+func UnmarshalFrame(frame []byte) *Frame {
 	if frame[0] != FrameHeaderData {
-		return &ZFrame{
+		return &Frame{
 			Header: frame[0],
 		}
 	}
 
-	return &ZFrame{
+	return &Frame{
 		Header:   frame[0],
 		Length:   frame[1],
 		Type:     frame[2],
