@@ -31,30 +31,30 @@ func NewTransportLayer(device string, baud int) (*TransportLayer, error) {
 }
 
 func (t *TransportLayer) Read() <-chan byte {
-	byteChannel := make(chan byte)
+	readQueue := make(chan byte)
 
-	go t.readAsync(byteChannel)
+	go t.readAsync(readQueue)
 
-	return byteChannel
+	return readQueue
 }
 
-func (t *TransportLayer) Write(byteChannel []byte) (int, error) {
-	return t.port.Write(byteChannel)
+func (t *TransportLayer) Write(buf []byte) (int, error) {
+	return t.port.Write(buf)
 }
 
-func (t *TransportLayer) readAsync(byteChannel chan<- byte) {
+func (t *TransportLayer) readAsync(readQueue chan<- byte) {
 	reader := bufio.NewReader(t.port)
 
 	for {
 		byt, err := reader.ReadByte()
 
 		if err == io.EOF {
-			close(byteChannel)
+			close(readQueue)
 			break
 		} else if err != nil {
 			panic(err)
 		}
 
-		byteChannel <- byt
+		readQueue <- byt
 	}
 }
