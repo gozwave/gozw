@@ -2,7 +2,6 @@ package zwave
 
 import (
 	"bytes"
-	"fmt"
 	"time"
 )
 
@@ -138,11 +137,11 @@ func (f *FrameLayer) readFromTransport(frames chan<- *Frame) {
 				timeout.Stop()
 
 				if frame.VerifyChecksum() == nil {
-					fmt.Println("yo")
 					frames <- frame
+					f.sendAck()
 				} else {
-					fmt.Println("invalid frame:", frame)
-					// @todo send NAK
+					// @todo logging?
+					f.sendNak()
 				}
 
 			}
