@@ -1,6 +1,7 @@
 package zwave
 
 type NodeProtocolInfoResponse struct {
+	CommandId           byte
 	Capability          byte
 	Security            byte
 	BasicDeviceClass    byte
@@ -10,8 +11,9 @@ type NodeProtocolInfoResponse struct {
 
 func ParseNodeProtocolInfoResponse(payload []byte) *NodeProtocolInfoResponse {
 	val := &NodeProtocolInfoResponse{
-		Capability:          payload[0],
-		Security:            payload[1],
+		CommandId:           payload[0],
+		Capability:          payload[1],
+		Security:            payload[2],
 		BasicDeviceClass:    payload[3],
 		GenericDeviceClass:  payload[4],
 		SpecificDeviceClass: payload[5],
@@ -30,4 +32,8 @@ func (n *NodeProtocolInfoResponse) GetBasicDeviceClassName() string {
 
 func (n *NodeProtocolInfoResponse) GetGenericDeviceClassName() string {
 	return GetGenericTypeName(n.BasicDeviceClass)
+}
+
+func (n *NodeProtocolInfoResponse) GetSpecificDeviceClassName() string {
+	return GetSpecificTypeName(n.BasicDeviceClass, n.SpecificDeviceClass)
 }
