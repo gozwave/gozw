@@ -22,6 +22,8 @@ func ParseFunctionPayload(payload []byte) FunctionPayload {
 	switch payload[0] {
 	case 0x02:
 		return ParseNodeListResponse(payload)
+	case 0x07:
+		return ParseSerialApiCapabilitiesResponse(payload)
 	default:
 		val := &GenericPayload{
 			CommandId: payload[0],

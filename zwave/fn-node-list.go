@@ -30,7 +30,7 @@ func (n NodeListResponse) Marshal() []byte {
 	panic("not implemented")
 }
 
-func (n *NodeListResponse) GetAPIType() string {
+func (n *NodeListResponse) GetApiType() string {
 	if n.CommandId&0x80 == 0x80 {
 		return "Slave"
 	} else {
