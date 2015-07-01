@@ -14,9 +14,9 @@ func ParseNodeProtocolInfoResponse(payload []byte) *NodeProtocolInfoResponse {
 		CommandId:           payload[0],
 		Capability:          payload[1],
 		Security:            payload[2],
-		BasicDeviceClass:    payload[3],
-		GenericDeviceClass:  payload[4],
-		SpecificDeviceClass: payload[5],
+		BasicDeviceClass:    payload[4],
+		GenericDeviceClass:  payload[5],
+		SpecificDeviceClass: payload[6],
 	}
 
 	return val
