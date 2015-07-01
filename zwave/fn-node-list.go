@@ -9,8 +9,12 @@ type NodeListResponse struct {
 	ChipVersion  byte
 }
 
-func isBitSet(mask byte, pos uint8) bool {
-	return mask&(1<<(7-pos)) > 0
+func isBitSet(mask []byte, nodeId uint8) bool {
+	if (nodeId > 0) && (nodeId <= 232) {
+		return ((mask[(nodeId-1)>>3] & (1 << ((nodeId - 1) & 0x07))) != 0)
+	}
+
+	return false
 }
 
 func ParseNodeListResponse(payload []byte) *NodeListResponse {
@@ -52,16 +56,11 @@ func (n *NodeListResponse) IsPrimaryController() bool {
 
 func (n *NodeListResponse) GetNodeIds() []uint8 {
 	nodes := []uint8{}
-	var nodeNum uint8 = 1
 
-	var i, j uint8
-	for i = 0; i < 29; i++ {
-		for j = 0; j < 8; j++ {
-			if isBitSet(n.Nodes[i], j) {
-				nodes = append(nodes, nodeNum)
-			}
-
-			nodeNum++
+	var i uint8
+	for i = 1; i <= 232; i++ {
+		if isBitSet(n.Nodes, i) {
+			nodes = append(nodes, i)
 		}
 	}
 
