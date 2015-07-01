@@ -52,6 +52,8 @@ func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent) *FramePar
 			{Name: "PARSE_TIMEOUT", Src: []string{"idle", "length", "data", "checksum"}, Dst: "idle"},
 			{Name: "RX_SOF", Src: []string{"idle"}, Dst: "length"},
 			{Name: "RX_ACK", Src: []string{"idle"}, Dst: "idle"},
+			{Name: "RX_CAN", Src: []string{"idle"}, Dst: "idle"},
+			{Name: "RX_NAK", Src: []string{"idle"}, Dst: "idle"},
 			{Name: "RX_LENGTH", Src: []string{"length"}, Dst: "data"},
 			{Name: "INVALID_LENGTH", Src: []string{"length"}, Dst: "idle"},
 			{Name: "RX_DATA", Src: []string{"length", "data"}, Dst: "data"},
@@ -64,7 +66,6 @@ func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent) *FramePar
 			"enter_idle": func(e *fsm.Event) {
 				frameParser.parseTimeout.Stop()
 				frameParser.payloadReadBuffer.Reset()
-				// frameLayer.macState.Event("RX_COMPLETE")
 			},
 			"PARSE_TIMEOUT": func(e *fsm.Event) {
 				event := &FrameParseEvent{
@@ -76,7 +77,6 @@ func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent) *FramePar
 			"RX_SOF": func(e *fsm.Event) {
 				frameParser.sof = e.Args[0].(uint8)
 				frameParser.parseTimeout.Reset(readTimeout)
-				// frameLayer.macState.Event("RX_SOF")
 			},
 			"RX_LENGTH": func(e *fsm.Event) {
 				frameParser.length = e.Args[0].(uint8)
@@ -94,7 +94,7 @@ func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent) *FramePar
 					status: FrameParseOk,
 					frame:  e.Args[0].(*Frame),
 				}
-				// frameParser.sendAck()
+
 				frameParser.output <- event
 			},
 			"CRC_NOTOK": func(e *fsm.Event) {
@@ -102,7 +102,7 @@ func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent) *FramePar
 					status: FrameParseNotOk,
 					frame:  e.Args[0].(*Frame),
 				}
-				// frameParser.sendNak()
+
 				frameParser.output <- event
 			},
 			// "before_event": func(e *fsm.Event) {
@@ -135,13 +135,12 @@ func (parser *FrameParser) processByte(currentByte byte) {
 		switch currentByte {
 		case FrameSOFData:
 			parser.state.Event("RX_SOF", currentByte)
-
 		case FrameSOFAck:
-			// @todo make ACK channel
+			parser.state.Event("RX_ACK", currentByte)
 		case FrameSOFCan:
-			// @todo make CAN channel
+			parser.state.Event("RX_CAN", currentByte)
 		case FrameSOFNak:
-			// @todo make NAK channel
+			parser.state.Event("RX_NAK", currentByte)
 		}
 
 	case parser.state.Is("length"):

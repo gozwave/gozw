@@ -64,9 +64,44 @@ func NewFrameLayer(transport *TransportLayer, debug bool) *FrameLayer {
 		},
 	)
 
-	go frameLayer.handle()
+	go frameLayer.loop()
 
 	return frameLayer
+}
+
+func (layer *FrameLayer) loop() {
+	transportBytesIn := layer.transport.Read()
+
+start:
+	for {
+
+		switch layer.state.Current() {
+		case "idle":
+
+			for {
+				select {
+				case firstByte := <-transportBytesIn:
+					layer.handleReceive(transportBytesIn, firstByte)
+					goto start
+
+				case writeFrame := <-layer.pendingWrites:
+					layer.state.Event("TX_DATA")
+					layer.writeToTransport(writeFrame.Marshal())
+					goto start
+				}
+			}
+
+		case "awaiting_ack":
+			select {
+			case firstByte := <-transportBytesIn:
+				layer.handleReceive(transportBytesIn, firstByte)
+				goto start
+			}
+
+		} // end switch
+
+	} // end for
+
 }
 
 func (f *FrameLayer) Write(frame *Frame) {
@@ -77,16 +112,28 @@ func (f *FrameLayer) Read() <-chan *Frame {
 	return f.frameOutput
 }
 
+func check(err error) {
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
 func (layer *FrameLayer) handleReceive(transportBytesIn <-chan byte, firstByte byte) {
+	var err error
+
 	if firstByte == FrameSOFData {
-		layer.state.Event("RX_SOF")
+		err = layer.state.Event("RX_SOF")
+		check(err)
 	} else {
 		if firstByte == FrameSOFAck {
-			layer.state.Event("RX_ACK")
+			err = layer.state.Event("RX_ACK")
+			check(err)
 		} else if firstByte == FrameSOFNak {
-			layer.state.Event("RX_NAK")
+			err = layer.state.Event("RX_NAK")
+			check(err)
 		} else if firstByte == FrameSOFCan {
-			layer.state.Event("RX_CAN")
+			err = layer.state.Event("RX_CAN")
+			check(err)
 		}
 
 		return
@@ -97,27 +144,12 @@ func (layer *FrameLayer) handleReceive(transportBytesIn <-chan byte, firstByte b
 	for {
 		select {
 		case event := <-layer.parserOutput:
-			layer.state.Event("RX_COMPLETE", event)
+			err = layer.state.Event("RX_COMPLETE", event)
+			check(err)
 			break
 
 		case nextByte := <-transportBytesIn:
 			layer.parserInput <- nextByte
-		}
-	}
-}
-
-func (layer *FrameLayer) handle() {
-
-	transportBytesIn := layer.transport.Read()
-
-	for {
-		select {
-		case firstByte := <-transportBytesIn:
-			layer.handleReceive(transportBytesIn, firstByte)
-
-		case writeFrame := <-layer.pendingWrites:
-			layer.state.Event("TX_DATA")
-			layer.writeToTransport(writeFrame.Marshal())
 		}
 	}
 }
