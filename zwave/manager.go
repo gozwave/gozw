@@ -36,14 +36,14 @@ func (m *Manager) Init() {
 }
 
 func (m *Manager) GetAppInfo() *NodeListResponse {
-	resp := m.session.ExecuteCommand(0x02, []byte{})
+	resp := m.session.ExecuteCommand(FnGetInitAppData, []byte{})
 	respPayload := ParseFunctionPayload(resp.Payload).(*NodeListResponse)
 
 	return respPayload
 }
 
 func (m *Manager) GetSerialApiCapabilities() *SerialApiCapabilitiesResponse {
-	resp := m.session.ExecuteCommand(0x07, []byte{})
+	resp := m.session.ExecuteCommand(FnSerialApiCapabilities, []byte{})
 	respPayload := ParseFunctionPayload(resp.Payload).(*SerialApiCapabilitiesResponse)
 
 	return respPayload

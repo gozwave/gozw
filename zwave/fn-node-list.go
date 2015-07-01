@@ -26,10 +26,6 @@ func ParseNodeListResponse(payload []byte) *NodeListResponse {
 	return val
 }
 
-func (n NodeListResponse) Marshal() []byte {
-	panic("not implemented")
-}
-
 func (n *NodeListResponse) GetApiType() string {
 	if n.CommandId&0x80 == 0x80 {
 		return "Slave"

@@ -30,10 +30,6 @@ func ParseSerialApiCapabilitiesResponse(payload []byte) *SerialApiCapabilitiesRe
 	return val
 }
 
-func (n SerialApiCapabilitiesResponse) Marshal() []byte {
-	panic("not implemented")
-}
-
 func (n *SerialApiCapabilitiesResponse) GetSupportedFunctions() []int {
 	supportedFunctions := []int{}
 	funcId := 1

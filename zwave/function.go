@@ -1,9 +1,5 @@
 package zwave
 
-type FunctionPayload interface {
-	Marshal() []byte
-}
-
 type GenericPayload struct {
 	CommandId byte
 	Payload   []byte
@@ -13,16 +9,12 @@ func (p GenericPayload) Marshal() []byte {
 	return append([]byte{p.CommandId}, p.Payload...)
 }
 
-func MarshalPayload(payload FunctionPayload) []byte {
-	return payload.Marshal()
-}
-
-func ParseFunctionPayload(payload []byte) FunctionPayload {
+func ParseFunctionPayload(payload []byte) interface{} {
 
 	switch payload[0] {
-	case 0x02:
+	case FnGetInitAppData:
 		return ParseNodeListResponse(payload)
-	case 0x07:
+	case FnSerialApiCapabilities:
 		return ParseSerialApiCapabilitiesResponse(payload)
 	default:
 		val := &GenericPayload{
