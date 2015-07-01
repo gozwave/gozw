@@ -31,7 +31,7 @@ func NewFrameLayer(transportLayer *TransportLayer) *FrameLayer {
 		parserOutput: parserOutput,
 
 		pendingWrites: make(chan *Frame),
-		frameOutput:   make(chan *Frame),
+		frameOutput:   make(chan Frame),
 	}
 
 	frameLayer.state = fsm.NewFSM(
@@ -100,7 +100,7 @@ func (f *FrameLayer) Write(frame *Frame) {
 	f.pendingWrites <- frame
 }
 
-func (f *FrameLayer) GetOutput() <-chan *Frame {
+func (f *FrameLayer) GetOutputChannel() <-chan Frame {
 	return f.frameOutput
 }
 

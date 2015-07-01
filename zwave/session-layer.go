@@ -21,7 +21,7 @@ func NewSessionLayer(frameLayer *FrameLayer) *SessionLayer {
 	}
 }
 
-func (session *SessionLayer) ExecuteCommand(commandId uint8, payload []byte) *Frame {
+func (session *SessionLayer) ExecuteCommand(commandId uint8, payload []byte) Frame {
 	frame := NewRequestFrame()
 	framePayload := &GenericPayload{
 		CommandId: commandId,

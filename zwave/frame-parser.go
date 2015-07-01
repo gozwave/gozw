@@ -24,7 +24,7 @@ const readTimeout time.Duration = 1500 * time.Millisecond
 
 type FrameParseEvent struct {
 	status FrameParseStatus
-	frame  *Frame
+	frame  Frame
 }
 
 type FrameParser struct {
@@ -70,7 +70,7 @@ func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent) *FramePar
 			"PARSE_TIMEOUT": func(e *fsm.Event) {
 				event := &FrameParseEvent{
 					status: FrameParseTimeout,
-					frame:  nil,
+					frame:  Frame{},
 				}
 				frameParser.output <- event
 			},
@@ -92,7 +92,7 @@ func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent) *FramePar
 			"CRC_OK": func(e *fsm.Event) {
 				event := &FrameParseEvent{
 					status: FrameParseOk,
-					frame:  e.Args[0].(*Frame),
+					frame:  e.Args[0].(Frame),
 				}
 
 				go func() {
@@ -102,7 +102,7 @@ func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent) *FramePar
 			"CRC_NOTOK": func(e *fsm.Event) {
 				event := &FrameParseEvent{
 					status: FrameParseNotOk,
-					frame:  e.Args[0].(*Frame),
+					frame:  e.Args[0].(Frame),
 				}
 
 				go func() {
@@ -167,7 +167,7 @@ func (parser *FrameParser) processByte(currentByte byte) {
 		parser.state.Transition()
 
 		payload := parser.payloadReadBuffer.Bytes()
-		frame := &Frame{
+		frame := Frame{
 			Header:   parser.sof,
 			Length:   parser.length,
 			Type:     payload[0],
