@@ -24,7 +24,7 @@ func ParseSerialApiCapabilitiesResponse(payload []byte) *SerialApiCapabilitiesRe
 		ProductType2:        payload[6],
 		ProductId1:          payload[7],
 		ProductId2:          payload[8],
-		SupportedFunctions:  payload[8:],
+		SupportedFunctions:  payload[9:],
 	}
 
 	return val
@@ -38,7 +38,7 @@ func (n *SerialApiCapabilitiesResponse) GetSupportedFunctions() []int {
 	supportedFunctions := []int{}
 	funcId := 1
 
-	for i := 0; i < 29; i++ {
+	for i := 0; i < len(n.SupportedFunctions); i++ {
 		for j := uint(0); j < 8; j++ {
 			if isBitSet(n.SupportedFunctions[i], j) {
 				supportedFunctions = append(supportedFunctions, funcId)

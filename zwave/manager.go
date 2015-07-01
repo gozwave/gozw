@@ -31,7 +31,8 @@ func (m *Manager) Init() {
 	m.NodeList = appInfo.GetNodeIds()
 
 	serialApi := m.GetSerialApiCapabilities()
-	fmt.Println(serialApi)
+	fmt.Println("><><><><><>", serialApi)
+	fmt.Println(serialApi.GetSupportedFunctions())
 }
 
 func (m *Manager) GetAppInfo() *NodeListResponse {
