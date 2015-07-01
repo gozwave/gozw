@@ -1,5 +1,7 @@
 package zwave
 
+import "fmt"
+
 const (
 	BasicTypeController       = 0x01
 	BasicTypeStaticController = 0x02
@@ -347,24 +349,24 @@ var SpecificTypeNames map[byte]map[byte]string = map[byte]map[byte]string{
 
 func GetBasicTypeName(basicType byte) string {
 	if val, ok := BasicTypeNames[basicType]; ok {
-		return val
+		return val + fmt.Sprintf(" (0x%X)", basicType)
 	} else {
-		return "Unknown"
+		return "Unknown" + fmt.Sprintf(" (0x%X)", basicType)
 	}
 }
 
 func GetGenericTypeName(genericType byte) string {
 	if val, ok := GenericTypeNames[genericType]; ok {
-		return val
+		return val + fmt.Sprintf(" (0x%X)", genericType)
 	} else {
-		return "Unknown"
+		return "Unknown" + fmt.Sprintf(" (0x%X)", genericType)
 	}
 }
 
 func GetSpecificTypeName(genericType byte, specificType byte) string {
 	if val, ok := SpecificTypeNames[genericType][specificType]; ok {
-		return val
+		return val + fmt.Sprintf(" (0x%X)", specificType)
 	} else {
-		return "Unknown"
+		return "Unknown" + fmt.Sprintf(" (0x%X)", specificType)
 	}
 }
