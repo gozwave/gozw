@@ -34,17 +34,11 @@ type Frame struct {
 	Checksum uint8
 }
 
-func NewRequestFrame(payload []byte) *Frame {
-	frame := Frame{
-		Header:  FrameHeaderData,
-		Type:    FrameTypeReq,
-		Length:  uint8(len(payload) + 2), // payload length plus Type and Length
-		Payload: payload,
+func NewRequestFrame() *Frame {
+	return &Frame{
+		Header: FrameHeaderData,
+		Type:   FrameTypeReq,
 	}
-
-	frame.SetChecksum()
-
-	return &frame
 }
 
 func NewNakFrame() *Frame {
@@ -126,6 +120,9 @@ func (z *Frame) VerifyChecksum() error {
 func (z *Frame) Marshal() []byte {
 	buf := new(bytes.Buffer)
 
+	z.Length = uint8(len(z.Payload) + 2)
+	z.SetChecksum()
+
 	switch z.Header {
 	case FrameHeaderData:
 		// Data frames have the whole kit and caboodle
@@ -142,7 +139,7 @@ func (z *Frame) Marshal() []byte {
 	return buf.Bytes()
 }
 
-// UnmarshalFrame turns a byte slice into a ZFrame
+// UnmarshalFrame turns a byte slice into a Frame
 func UnmarshalFrame(frame []byte) *Frame {
 	if frame[0] != FrameHeaderData {
 		return &Frame{

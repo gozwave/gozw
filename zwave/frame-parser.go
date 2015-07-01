@@ -95,7 +95,9 @@ func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent) *FramePar
 					frame:  e.Args[0].(*Frame),
 				}
 
-				frameParser.output <- event
+				go func() {
+					frameParser.output <- event
+				}()
 			},
 			"CRC_NOTOK": func(e *fsm.Event) {
 				event := &FrameParseEvent{
@@ -103,7 +105,9 @@ func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent) *FramePar
 					frame:  e.Args[0].(*Frame),
 				}
 
-				frameParser.output <- event
+				go func() {
+					frameParser.output <- event
+				}()
 			},
 			// "before_event": func(e *fsm.Event) {
 			// 	fmt.Printf("%s: %s -> %s\n", e.Event, e.Src, e.Dst)
@@ -167,7 +171,7 @@ func (parser *FrameParser) processByte(currentByte byte) {
 			Header:   parser.sof,
 			Length:   parser.length,
 			Type:     payload[0],
-			Payload:  ParseFunctionPayload(payload[1:]),
+			Payload:  payload[1:],
 			Checksum: currentByte,
 		}
 

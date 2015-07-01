@@ -1,6 +1,6 @@
 package zwave
 
-import "fmt"
+// @todo: ack timeouts, retransmission, backoff, etc.
 
 type SessionLayer struct {
 	frameLayer *FrameLayer
@@ -12,12 +12,17 @@ func NewSessionLayer(frameLayer *FrameLayer) *SessionLayer {
 	}
 }
 
-func (session *SessionLayer) ExecuteCommand(commandId uint8, payload []byte) {
-	frame := NewRequestFrame(append([]byte{commandId}, payload...))
+func (session *SessionLayer) ExecuteCommand(commandId uint8, payload []byte) *Frame {
+	frame := NewRequestFrame()
+	framePayload := &GenericPayload{
+		CommandId: commandId,
+		Payload:   payload,
+	}
+	frame.Payload = framePayload.Marshal()
 
 	session.frameLayer.Write(frame)
 
 	response := <-session.frameLayer.GetOutput()
 
-	fmt.Println(response)
+	return response
 }
