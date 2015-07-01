@@ -9,7 +9,7 @@ type Manager struct {
 	ApiType                 string
 	TimerFunctionsSupported bool
 	IsPrimaryController     bool
-	NodeList                []int
+	NodeList                []uint8
 }
 
 func NewManager(session *SessionLayer) *Manager {
@@ -49,9 +49,9 @@ func (m *Manager) GetSerialApiCapabilities() *SerialApiCapabilitiesResponse {
 	return respPayload
 }
 
-func (m *Manager) GetNodeProtocolInfo(nodeId uint8) *GetNodeProtocolInfoResponse {
-	resp := m.session.ExecuteCommand(FnRequestNodeInfo, []byte{nodeId})
-	respPayload := ParseFunctionPayload(resp.Payload).(*GetNodeProtocolInfoResponse)
+func (m *Manager) GetNodeProtocolInfo(nodeId uint8) *NodeProtocolInfoResponse {
+	resp := m.session.ExecuteCommand(FnGetNodeProtocolInfo, []byte{nodeId})
+	respPayload := ParseFunctionPayload(resp.Payload).(*NodeProtocolInfoResponse)
 
 	return respPayload
 }
