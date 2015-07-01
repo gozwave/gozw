@@ -97,9 +97,7 @@ start:
 }
 
 func (f *FrameLayer) Write(frame *Frame) {
-	go func() {
-		f.pendingWrites <- frame
-	}()
+	f.pendingWrites <- frame
 }
 
 func (f *FrameLayer) GetOutput() <-chan *Frame {

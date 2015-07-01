@@ -48,3 +48,10 @@ func (m *Manager) GetSerialApiCapabilities() *SerialApiCapabilitiesResponse {
 
 	return respPayload
 }
+
+func (m *Manager) GetNodeProtocolInfo(nodeId uint8) *GetNodeProtocolInfoResponse {
+	resp := m.session.ExecuteCommand(FnRequestNodeInfo, []byte{nodeId})
+	respPayload := ParseFunctionPayload(resp.Payload).(*GetNodeProtocolInfoResponse)
+
+	return respPayload
+}

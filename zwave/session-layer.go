@@ -1,6 +1,7 @@
 package zwave
 
 import (
+	"fmt"
 	"runtime"
 	"sync"
 )
@@ -29,10 +30,12 @@ func (session *SessionLayer) ExecuteCommand(commandId uint8, payload []byte) *Fr
 
 	frame.Payload = framePayload.Marshal()
 
+	fmt.Println("lock", commandId)
 	session.writeLock.Lock()
 	session.frameLayer.Write(frame)
-	response := <-session.frameLayer.GetOutput()
+	response := <-session.frameLayer.frameOutput
 	session.writeLock.Unlock()
+	fmt.Println("unlock", commandId)
 	runtime.Gosched()
 
 	return response
