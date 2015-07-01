@@ -154,6 +154,7 @@ func (parser *FrameParser) processByte(currentByte byte) {
 		if parser.readCounter > 0 {
 			parser.state.Event("RX_DATA", currentByte)
 		} else {
+			parser.state.Event("RX_DATA", currentByte)
 			parser.state.Event("RX_DATA_COMPLETE")
 		}
 
@@ -166,14 +167,14 @@ func (parser *FrameParser) processByte(currentByte byte) {
 			Header:   parser.sof,
 			Length:   parser.length,
 			Type:     payload[0],
-			Payload:  payload[1:],
+			Payload:  ParseFunctionPayload(payload[1:]),
 			Checksum: currentByte,
 		}
 
 		if frame.VerifyChecksum() == nil {
 			parser.state.Event("CRC_OK", frame)
 		} else {
-			parser.state.Event("CRC_NOTOK")
+			parser.state.Event("CRC_NOTOK", frame)
 		}
 
 	}
