@@ -7,8 +7,8 @@ import (
 )
 
 type FrameLayer struct {
-	transport   *TransportLayer
-	frameParser *FrameParser
+	transportLayer *TransportLayer
+	frameParser    *FrameParser
 
 	parserInput  chan<- byte
 	parserOutput <-chan *FrameParseEvent
@@ -19,13 +19,13 @@ type FrameLayer struct {
 	state *fsm.FSM
 }
 
-func NewFrameLayer(transport *TransportLayer, debug bool) *FrameLayer {
+func NewFrameLayer(transportLayer *TransportLayer) *FrameLayer {
 	parserInput := make(chan byte)
 	parserOutput := make(chan *FrameParseEvent)
 
 	frameLayer := &FrameLayer{
-		transport:   transport,
-		frameParser: NewFrameParser(parserInput, parserOutput),
+		transportLayer: transportLayer,
+		frameParser:    NewFrameParser(parserInput, parserOutput),
 
 		parserInput:  parserInput,
 		parserOutput: parserOutput,
@@ -48,19 +48,6 @@ func NewFrameLayer(transport *TransportLayer, debug bool) *FrameLayer {
 			"before_event": func(e *fsm.Event) {
 				fmt.Printf("%s: %s -> %s\n", e.Event, e.Src, e.Dst)
 			},
-			"RX_COMPLETE": func(e *fsm.Event) {
-				event := e.Args[0].(*FrameParseEvent)
-
-				if event.status == FrameParseOk {
-					frameLayer.sendAck()
-					frameLayer.frameOutput <- event.frame
-				} else if event.status == FrameParseNotOk {
-					fmt.Println("sent a nak for some reason")
-					frameLayer.sendNak()
-				} else {
-					fmt.Println("frame parse timeout or something")
-				}
-			},
 		},
 	)
 
@@ -70,100 +57,67 @@ func NewFrameLayer(transport *TransportLayer, debug bool) *FrameLayer {
 }
 
 func (layer *FrameLayer) loop() {
-	transportBytesIn := layer.transport.Read()
+	transportBytesIn := layer.transportLayer.Read()
 
 start:
 	for {
+		select {
 
-		switch layer.state.Current() {
-		case "idle":
+		// Read
+		case firstByte := <-transportBytesIn:
+			layer.parserInput <- firstByte
 
 			for {
 				select {
-				case firstByte := <-transportBytesIn:
-					layer.handleReceive(transportBytesIn, firstByte)
+				case event := <-layer.parserOutput:
+
+					if event.status == FrameParseOk {
+						layer.sendAck()
+						fmt.Println("hey")
+						layer.frameOutput <- event.frame
+						fmt.Println("yo")
+					} else if event.status == FrameParseNotOk {
+						layer.sendNak()
+						layer.frameOutput <- event.frame
+					} else {
+						fmt.Println("frame parse timeout or something")
+					}
+
 					goto start
 
-				case writeFrame := <-layer.pendingWrites:
-					layer.state.Event("TX_DATA")
-					layer.writeToTransport(writeFrame.Marshal())
-					goto start
+				case nextByte := <-transportBytesIn:
+					layer.parserInput <- nextByte
 				}
 			}
 
-		case "awaiting_ack":
-			select {
-			case firstByte := <-transportBytesIn:
-				layer.handleReceive(transportBytesIn, firstByte)
-				goto start
-			}
+		// Write
+		case writeFrame := <-layer.pendingWrites:
+			layer.writeToTransport(writeFrame.Marshal())
 
-		} // end switch
-
-	} // end for
-
+		}
+	}
 }
 
 func (f *FrameLayer) Write(frame *Frame) {
-	f.pendingWrites <- frame
+	go func() {
+		f.pendingWrites <- frame
+	}()
 }
 
-func (f *FrameLayer) Read() <-chan *Frame {
+func (f *FrameLayer) GetOutput() <-chan *Frame {
 	return f.frameOutput
 }
 
-func check(err error) {
-	if err != nil {
-		fmt.Println(err)
-	}
-}
-
-func (layer *FrameLayer) handleReceive(transportBytesIn <-chan byte, firstByte byte) {
-	var err error
-
-	if firstByte == FrameSOFData {
-		err = layer.state.Event("RX_SOF")
-		check(err)
-	} else {
-		if firstByte == FrameSOFAck {
-			err = layer.state.Event("RX_ACK")
-			check(err)
-		} else if firstByte == FrameSOFNak {
-			err = layer.state.Event("RX_NAK")
-			check(err)
-		} else if firstByte == FrameSOFCan {
-			err = layer.state.Event("RX_CAN")
-			check(err)
-		}
-
-		return
-	}
-
-	layer.parserInput <- firstByte
-
-	for {
-		select {
-		case event := <-layer.parserOutput:
-			err = layer.state.Event("RX_COMPLETE", event)
-			check(err)
-			break
-
-		case nextByte := <-transportBytesIn:
-			layer.parserInput <- nextByte
-		}
-	}
-}
-
 func (f *FrameLayer) writeToTransport(buf []byte) (int, error) {
-	return f.transport.Write(buf)
+	return f.transportLayer.Write(buf)
 }
 
 func (f *FrameLayer) sendAck() error {
-	_, err := f.transport.Write([]byte{FrameSOFAck})
+	_, err := f.transportLayer.Write([]byte{FrameSOFAck})
 	return err
 }
 
 func (f *FrameLayer) sendNak() error {
-	_, err := f.transport.Write([]byte{FrameSOFNak})
+	_, err := f.transportLayer.Write([]byte{FrameSOFNak})
 	return err
 }
