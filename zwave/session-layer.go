@@ -18,6 +18,7 @@ func (session *SessionLayer) ExecuteCommand(commandId uint8, payload []byte) *Fr
 		CommandId: commandId,
 		Payload:   payload,
 	}
+
 	frame.Payload = framePayload.Marshal()
 
 	session.frameLayer.Write(frame)

@@ -26,8 +26,32 @@ func ParseNodeListResponse(payload []byte) *NodeListResponse {
 	return val
 }
 
-func (p NodeListResponse) Marshal() []byte {
+func (n NodeListResponse) Marshal() []byte {
 	panic("not implemented")
+}
+
+func (n *NodeListResponse) GetAPIType() string {
+	if n.CommandId&0x80 == 0x80 {
+		return "Slave"
+	} else {
+		return "Controller"
+	}
+}
+
+func (n *NodeListResponse) TimerFunctionsSupported() bool {
+	if n.CommandId&0x40 == 0x40 {
+		return true
+	} else {
+		return false
+	}
+}
+
+func (n *NodeListResponse) IsPrimaryController() bool {
+	if n.CommandId&0x20 == 0x20 {
+		return false
+	} else {
+		return true
+	}
 }
 
 func (n *NodeListResponse) GetNodeIds() []int {
