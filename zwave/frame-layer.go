@@ -1,107 +1,89 @@
 package zwave
 
-import (
-	"fmt"
-
-	"github.com/looplab/fsm"
-)
+import "fmt"
 
 type FrameLayer struct {
 	transportLayer *TransportLayer
-	frameParser    *FrameParser
 
-	parserInput  chan<- byte
-	parserOutput <-chan *FrameParseEvent
+	frameParser      *FrameParser
+	parserInput      chan<- byte
+	parserOutput     <-chan *FrameParseEvent
+	acks, naks, cans <-chan bool
 
 	pendingWrites chan *Frame
-	frameOutput   chan *Frame
-
-	state *fsm.FSM
+	frameOutput   chan Frame
 }
 
 func NewFrameLayer(transportLayer *TransportLayer) *FrameLayer {
 	parserInput := make(chan byte)
-	parserOutput := make(chan *FrameParseEvent)
+	parserOutput := make(chan *FrameParseEvent, 1)
+	acks := make(chan bool, 1)
+	naks := make(chan bool, 1)
+	cans := make(chan bool, 1)
 
 	frameLayer := &FrameLayer{
 		transportLayer: transportLayer,
-		frameParser:    NewFrameParser(parserInput, parserOutput),
 
+		frameParser:  NewFrameParser(parserInput, parserOutput, acks, naks, cans),
 		parserInput:  parserInput,
 		parserOutput: parserOutput,
+		acks:         acks,
+		naks:         naks,
+		cans:         cans,
 
 		pendingWrites: make(chan *Frame),
 		frameOutput:   make(chan Frame),
 	}
 
-	frameLayer.state = fsm.NewFSM(
-		"idle",
-		fsm.Events{
-			{Name: "TX_DATA", Src: []string{"idle"}, Dst: "awaiting_ack"},
-			{Name: "RX_ACK", Src: []string{"awaiting_ack"}, Dst: "idle"},
-			{Name: "RX_NAK", Src: []string{"awaiting_ack"}, Dst: "idle"},
-			{Name: "RX_CAN", Src: []string{"idle", "awaiting_ack"}, Dst: "idle"},
-			{Name: "RX_SOF", Src: []string{"idle"}, Dst: "parse_frame"},
-			{Name: "RX_COMPLETE", Src: []string{"parse_frame"}, Dst: "idle"},
-		},
-		fsm.Callbacks{
-			"before_event": func(e *fsm.Event) {
-				fmt.Printf("%s: %s -> %s\n", e.Event, e.Src, e.Dst)
-			},
-		},
-	)
-
-	go frameLayer.loop()
+	go frameLayer.bgWork()
+	go frameLayer.bgRead()
 
 	return frameLayer
 }
 
-func (layer *FrameLayer) loop() {
-	transportBytesIn := layer.transportLayer.Read()
+func (layer *FrameLayer) bgWork() {
 
-start:
 	for {
 		select {
-
-		// Read
-		case firstByte := <-transportBytesIn:
-			layer.parserInput <- firstByte
-
-			for {
-				select {
-				case event := <-layer.parserOutput:
-
-					if event.status == FrameParseOk {
-						layer.sendAck()
-						layer.frameOutput <- event.frame
-					} else if event.status == FrameParseNotOk {
-						layer.sendNak()
-						layer.frameOutput <- event.frame
-					} else {
-						fmt.Println("frame parse timeout or something")
-					}
-
-					goto start
-
-				case nextByte := <-transportBytesIn:
-					layer.parserInput <- nextByte
-				}
+		case frameIn := <-layer.parserOutput:
+			if frameIn.status == FrameParseOk {
+				layer.sendAck()
+				layer.frameOutput <- frameIn.frame
+			} else if frameIn.status == FrameParseNotOk {
+				layer.sendNak()
+			} else {
+				// @todo handle timeout(?)
 			}
 
-		// Write
-		case writeFrame := <-layer.pendingWrites:
-			layer.writeToTransport(writeFrame.Marshal())
+		case <-layer.acks:
+			fmt.Println("frame layer: rx ack")
+		case <-layer.naks:
+			fmt.Println("frame layer: rx nak")
+		case <-layer.cans:
+			fmt.Println("frame layer: rx can")
+
+		case frameToWrite := <-layer.pendingWrites:
+			layer.writeToTransport(frameToWrite.Marshal())
+			_ = <-layer.acks
 
 		}
 	}
 }
 
 func (f *FrameLayer) Write(frame *Frame) {
-	f.pendingWrites <- frame
+	go func() {
+		f.pendingWrites <- frame
+	}()
 }
 
 func (f *FrameLayer) GetOutputChannel() <-chan Frame {
 	return f.frameOutput
+}
+
+func (f *FrameLayer) bgRead() {
+	for eachByte := range f.transportLayer.Read() {
+		f.parserInput <- eachByte
+	}
 }
 
 func (f *FrameLayer) writeToTransport(buf []byte) (int, error) {

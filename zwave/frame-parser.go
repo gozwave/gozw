@@ -30,16 +30,20 @@ type FrameParseEvent struct {
 type FrameParser struct {
 	state                              *fsm.FSM
 	input                              <-chan byte
-	output                             chan<- *FrameParseEvent
+	framesReceived                     chan<- *FrameParseEvent
+	acks, naks, cans                   chan<- bool
 	sof, length, checksum, readCounter uint8
 	payloadReadBuffer                  *bytes.Buffer
 	parseTimeout                       *time.Timer
 }
 
-func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent) *FrameParser {
+func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent, acks, naks, cans chan bool) *FrameParser {
 	frameParser := &FrameParser{
 		input:             input,
-		output:            output,
+		framesReceived:    output,
+		acks:              acks,
+		naks:              naks,
+		cans:              cans,
 		payloadReadBuffer: bytes.NewBuffer([]byte{}),
 		parseTimeout:      time.NewTimer(readTimeout),
 	}
@@ -72,7 +76,19 @@ func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent) *FramePar
 					status: FrameParseTimeout,
 					frame:  Frame{},
 				}
-				frameParser.output <- event
+
+				go func() {
+					frameParser.framesReceived <- event
+				}()
+			},
+			"RX_ACK": func(e *fsm.Event) {
+				frameParser.acks <- true
+			},
+			"RX_NAK": func(e *fsm.Event) {
+				frameParser.naks <- true
+			},
+			"RX_CAN": func(e *fsm.Event) {
+				frameParser.cans <- true
 			},
 			"RX_SOF": func(e *fsm.Event) {
 				frameParser.sof = e.Args[0].(uint8)
@@ -96,7 +112,7 @@ func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent) *FramePar
 				}
 
 				go func() {
-					frameParser.output <- event
+					frameParser.framesReceived <- event
 				}()
 			},
 			"CRC_NOTOK": func(e *fsm.Event) {
@@ -106,10 +122,13 @@ func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent) *FramePar
 				}
 
 				go func() {
-					frameParser.output <- event
+					frameParser.framesReceived <- event
 				}()
 			},
 			// "before_event": func(e *fsm.Event) {
+			// 	if e.Src == "data" && e.Dst == "data" {
+			// 		return
+			// 	}
 			// 	fmt.Printf("%s: %s -> %s\n", e.Event, e.Src, e.Dst)
 			// },
 		},
