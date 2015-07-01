@@ -30,12 +30,13 @@ func ParseSerialApiCapabilitiesResponse(payload []byte) *SerialApiCapabilitiesRe
 	return val
 }
 
-func (n *SerialApiCapabilitiesResponse) GetSupportedFunctions() []int {
-	supportedFunctions := []int{}
-	funcId := 1
+func (n *SerialApiCapabilitiesResponse) GetSupportedFunctions() []uint8 {
+	supportedFunctions := []uint8{}
+	var funcId uint8 = 1
 
-	for i := 0; i < len(n.SupportedFunctions); i++ {
-		for j := uint(0); j < 8; j++ {
+	var i, j uint8
+	for i = 0; i < uint8(len(n.SupportedFunctions)); i++ {
+		for j = 0; j < 8; j++ {
 			if isBitSet(n.SupportedFunctions[i], j) {
 				supportedFunctions = append(supportedFunctions, funcId)
 			}
