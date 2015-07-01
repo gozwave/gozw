@@ -1,5 +1,6 @@
 package zwave
 
+
 type GenericPayload struct {
 	CommandId byte
 	Payload   []byte
@@ -16,6 +17,8 @@ func ParseFunctionPayload(payload []byte) interface{} {
 		return ParseNodeListResponse(payload)
 	case FnSerialApiCapabilities:
 		return ParseSerialApiCapabilitiesResponse(payload)
+	case FnGetNodeProtocolInfo:
+		return ParseNodeProtocolInfoResponse(payload)
 	default:
 		val := &GenericPayload{
 			CommandId: payload[0],
