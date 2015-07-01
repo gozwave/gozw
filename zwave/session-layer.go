@@ -38,3 +38,18 @@ func (session *SessionLayer) ExecuteCommand(commandId uint8, payload []byte) Fra
 
 	return response
 }
+
+func (session *SessionLayer) ExecuteCommandNoWait(commandId uint8, payload []byte) {
+	frame := NewRequestFrame()
+	framePayload := &GenericPayload{
+		CommandId: commandId,
+		Payload:   payload,
+	}
+
+	frame.Payload = framePayload.Marshal()
+
+	session.writeLock.Lock()
+	session.frameLayer.Write(frame)
+	session.writeLock.Unlock()
+	runtime.Gosched()
+}

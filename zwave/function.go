@@ -1,5 +1,6 @@
 package zwave
 
+import "fmt"
 
 type GenericPayload struct {
 	CommandId byte
@@ -19,7 +20,12 @@ func ParseFunctionPayload(payload []byte) interface{} {
 		return ParseSerialApiCapabilitiesResponse(payload)
 	case FnGetNodeProtocolInfo:
 		return ParseNodeProtocolInfoResponse(payload)
+	case FnGetVersion:
+		return ParseVersionResponse(payload)
+	case FnMemoryGetId:
+		return ParseMemoryGetIdResponse(payload)
 	default:
+		fmt.Println("UNKNOWN:", payload[0])
 		val := &GenericPayload{
 			CommandId: payload[0],
 		}
