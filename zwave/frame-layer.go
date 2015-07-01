@@ -73,9 +73,7 @@ start:
 
 					if event.status == FrameParseOk {
 						layer.sendAck()
-						fmt.Println("hey")
 						layer.frameOutput <- event.frame
-						fmt.Println("yo")
 					} else if event.status == FrameParseNotOk {
 						layer.sendNak()
 						layer.frameOutput <- event.frame
