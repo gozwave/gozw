@@ -16,15 +16,18 @@ type Manager struct {
 	ApiType                 string
 	TimerFunctionsSupported bool
 	IsPrimaryController     bool
-	NodeList                []uint8
 	ApplicationVersion      byte
 	ApplicationRevision     byte
 	SupportedFunctions      []byte
+
+	nodeList []uint8
+	Nodes    map[uint8]*Node
 }
 
 func NewManager(session *SessionLayer) *Manager {
 	manager := &Manager{
 		session: session,
+		Nodes:   map[uint8]*Node{},
 	}
 
 	manager.init()
@@ -46,7 +49,7 @@ func (m *Manager) init() {
 	m.ApiType = appInfo.GetApiType()
 	m.TimerFunctionsSupported = appInfo.TimerFunctionsSupported()
 	m.IsPrimaryController = appInfo.IsPrimaryController()
-	m.NodeList = appInfo.GetNodeIds()
+	m.nodeList = appInfo.GetNodeIds()
 
 	serialApi := m.GetSerialApiCapabilities()
 	m.ApplicationVersion = serialApi.ApplicationVersion
