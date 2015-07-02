@@ -31,9 +31,9 @@ func (n *NodeProtocolInfoResponse) GetBasicDeviceClassName() string {
 }
 
 func (n *NodeProtocolInfoResponse) GetGenericDeviceClassName() string {
-	return GetGenericTypeName(n.BasicDeviceClass)
+	return GetGenericTypeName(n.GenericDeviceClass)
 }
 
 func (n *NodeProtocolInfoResponse) GetSpecificDeviceClassName() string {
-	return GetSpecificTypeName(n.BasicDeviceClass, n.SpecificDeviceClass)
+	return GetSpecificTypeName(n.GenericDeviceClass, n.SpecificDeviceClass)
 }
