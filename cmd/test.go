@@ -29,20 +29,13 @@ func main() {
 	fmt.Println("API Type:", manager.ApiType)
 	fmt.Println("Timer Functions Supported:", manager.TimerFunctionsSupported)
 	fmt.Println("Is Primary Controller:", manager.IsPrimaryController)
-	fmt.Println("Nodes:", manager.NodeList)
+	fmt.Println("Node count:", len(manager.Nodes))
 
 	// manager.SetApplicationNodeInformation()
 	// manager.FactoryReset()
 
-	for _, i := range manager.NodeList {
-		nodeInfo := manager.GetNodeProtocolInfo(i)
-
-		fmt.Printf("Node %d: \n", i)
-		fmt.Printf("  Is listening? %t\n", nodeInfo.IsListening())
-		fmt.Printf("  Basic device class: %s\n", nodeInfo.GetBasicDeviceClassName())
-		fmt.Printf("  Generic device class: %s\n", nodeInfo.GetGenericDeviceClassName())
-		fmt.Printf("  Specific device class: %s\n", nodeInfo.GetSpecificDeviceClassName())
-		fmt.Printf("  Raw: %v\n\n", nodeInfo)
+	for _, node := range manager.Nodes {
+		fmt.Println(node.String())
 	}
 
 	// manager.SendData(3, cc.NewSwitchMultilevelCommand(0))
