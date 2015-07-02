@@ -52,6 +52,8 @@ func (m *Manager) Init() {
 	m.ApplicationVersion = serialApi.ApplicationVersion
 	m.ApplicationRevision = serialApi.ApplicationRevision
 	m.SupportedFunctions = serialApi.GetSupportedFunctions()
+
+	m.SetSerialApiReady(true)
 }
 
 func (m *Manager) SetApplicationNodeInformation() {
@@ -177,6 +179,17 @@ func (m *Manager) GetVersion() *VersionResponse {
 func (m *Manager) GetNodeProtocolInfo(nodeId uint8) *NodeProtocolInfoResponse {
 	resp := m.session.ExecuteCommand(FnGetNodeProtocolInfo, []byte{nodeId})
 	return ParseFunctionPayload(resp.Payload).(*NodeProtocolInfoResponse)
+}
+
+func (m *Manager) SetSerialApiReady(ready bool) {
+	var rdy byte
+	if ready {
+		rdy = 1
+	} else {
+		rdy = 0
+	}
+
+	m.session.ExecuteCommandNoWait(FnSerialAPIReady, []byte{rdy})
 }
 
 func (m *Manager) SendData(nodeId uint8, data []byte) {
