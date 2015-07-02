@@ -27,12 +27,12 @@ func NewManager(session *SessionLayer) *Manager {
 		session: session,
 	}
 
-	manager.Init()
+	manager.init()
 
 	return manager
 }
 
-func (m *Manager) Init() {
+func (m *Manager) init() {
 	version := m.GetVersion()
 	m.ApiVersion = version.ApiVersion
 	m.ApiLibraryType = version.GetLibraryTypeString()
