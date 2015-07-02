@@ -1,31 +1,26 @@
 package main
 
-import (
-	"github.com/bjyoungblood/gozw/common"
-	"github.com/bjyoungblood/gozw/gateway"
-)
-
 func main() {
 
-	config, err := common.LoadGatewayConfig("./config.yaml")
-	if err != nil {
-		panic(err)
-	}
+	// config, err := common.LoadGatewayConfig("./config.yaml")
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	serialPort, err := gateway.NewSerialPort(config)
-	if err != nil {
-		panic(err)
-	}
+	// serialPort, err := gateway.NewSerialPort(config)
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	serialPort.Write([]byte{
-		0x01,
-		0x03,
-		0x00,
-		0x02,
-		0xfe,
-	})
-
-	serialPort.Initialize()
+	// serialPort.Write([]byte{
+	// 	0x01,
+	// 	0x03,
+	// 	0x00,
+	// 	0x02,
+	// 	0xfe,
+	// })
+	//
+	// serialPort.Initialize()
 	// go serialPort.Run()
 
 	// MAIN: &{1 26 0 [74 1 3 0 19 4 8 6 64 66 67 68 69 128 112 49 143 134 114 133 44 43 115 129] 62}
