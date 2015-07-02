@@ -156,13 +156,13 @@ func (parser *FrameParser) processByte(currentByte byte) {
 
 	case parser.state.Is("idle"):
 		switch currentByte {
-		case FrameSOFData:
+		case FrameHeaderData:
 			parser.state.Event("RX_SOF", currentByte)
-		case FrameSOFAck:
+		case FrameHeaderAck:
 			parser.state.Event("RX_ACK", currentByte)
-		case FrameSOFCan:
+		case FrameHeaderCan:
 			parser.state.Event("RX_CAN", currentByte)
-		case FrameSOFNak:
+		case FrameHeaderNak:
 			parser.state.Event("RX_NAK", currentByte)
 		}
 

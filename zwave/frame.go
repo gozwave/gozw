@@ -16,6 +16,11 @@ const (
 	FrameHeaderCan  uint8 = 0x18
 )
 
+const (
+	FrameTypeReq uint8 = 0x00
+	FrameTypeRes uint8 = 0x01
+)
+
 type Frame struct {
 
 	// Header is one of FrameHeader*

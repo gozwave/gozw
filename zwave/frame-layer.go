@@ -91,11 +91,11 @@ func (f *FrameLayer) writeToTransport(buf []byte) (int, error) {
 }
 
 func (f *FrameLayer) sendAck() error {
-	_, err := f.transportLayer.Write([]byte{FrameSOFAck})
+	_, err := f.transportLayer.Write([]byte{FrameHeaderAck})
 	return err
 }
 
 func (f *FrameLayer) sendNak() error {
-	_, err := f.transportLayer.Write([]byte{FrameSOFNak})
+	_, err := f.transportLayer.Write([]byte{FrameHeaderNak})
 	return err
 }
