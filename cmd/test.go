@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/bjyoungblood/gozw/zwave"
 )
@@ -39,6 +42,11 @@ func main() {
 		fmt.Printf("  Specific device class: %s\n", nodeInfo.GetSpecificDeviceClassName())
 		fmt.Printf("  Raw: %v\n\n", nodeInfo)
 	}
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+	<-sigs
 
 	// manager.RemoveNode()
 	// manager.AddNode()
