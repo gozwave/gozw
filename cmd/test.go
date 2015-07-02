@@ -20,6 +20,8 @@ func main() {
 	sessionLayer := zwave.NewSessionLayer(frameLayer)
 	manager := zwave.NewManager(sessionLayer)
 
+	defer manager.Close()
+
 	fmt.Printf("Home ID: 0x%x; Node ID: %d\n", manager.HomeId, manager.NodeId)
 	fmt.Println("API Version:", manager.ApiVersion)
 	fmt.Println("Library:", manager.ApiLibraryType)

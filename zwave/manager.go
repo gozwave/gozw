@@ -56,6 +56,10 @@ func (m *Manager) init() {
 	m.SetSerialApiReady(true)
 }
 
+func (m *Manager) Close() {
+	m.SetSerialApiReady(false)
+}
+
 func (m *Manager) SetApplicationNodeInformation() {
 	m.session.ExecuteCommandNoWait(FnApplicationNodeInformation, []byte{
 		ApplicationNodeInfoListening | ApplicationFreqListeningMode250ms | ApplicationNodeInfoOptionalFunctionality,
