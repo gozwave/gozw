@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/bjyoungblood/gozw/zwave"
+	cc "github.com/bjyoungblood/gozw/zwave/commandclass"
 )
 
 func main() {
@@ -42,6 +43,8 @@ func main() {
 		fmt.Printf("  Specific device class: %s\n", nodeInfo.GetSpecificDeviceClassName())
 		fmt.Printf("  Raw: %v\n\n", nodeInfo)
 	}
+
+	manager.SendData(3, cc.NewSwitchMultilevelCommand(0))
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
