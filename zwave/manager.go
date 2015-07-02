@@ -180,11 +180,6 @@ func (m *Manager) GetVersion() *VersionResponse {
 	return ParseFunctionPayload(resp.Payload).(*VersionResponse)
 }
 
-func (m *Manager) GetNodeProtocolInfo(nodeId uint8) *NodeProtocolInfoResponse {
-	resp := m.session.ExecuteCommand(FnGetNodeProtocolInfo, []byte{nodeId})
-	return ParseFunctionPayload(resp.Payload).(*NodeProtocolInfoResponse)
-}
-
 func (m *Manager) SendData(nodeId uint8, data []byte) {
 	payload := []byte{
 		nodeId,
@@ -208,4 +203,13 @@ func (m *Manager) setSerialApiReady(ready bool) {
 	}
 
 	m.session.ExecuteCommandNoWait(FnSerialAPIReady, []byte{rdy})
+}
+
+func (m *Manager) getNodeProtocolInfo(nodeId uint8) *NodeProtocolInfoResponse {
+	resp := m.session.ExecuteCommand(FnGetNodeProtocolInfo, []byte{nodeId})
+	return ParseFunctionPayload(resp.Payload).(*NodeProtocolInfoResponse)
+}
+
+func (m *Manager) loadNodes() {
+
 }
