@@ -26,6 +26,8 @@ func ParseFunctionPayload(payload []byte) interface{} {
 		return ParseMemoryGetIdResponse(payload)
 	case FnAddNodeToNetwork, FnRemoveNodeFromNetwork:
 		return ParseAddNodeCallback(payload)
+	case FnApplicationControllerUpdate:
+		return ParseApplicationControllerUpdate(payload)
 	default:
 		fmt.Println("UNKNOWN:", payload[0])
 		val := &GenericPayload{

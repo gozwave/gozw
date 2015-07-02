@@ -92,7 +92,7 @@ func (session *SessionLayer) read() {
 			}
 
 		case frame := <-session.frameLayer.frameOutput:
-			fmt.Println("Application frame:", frame)
+			fmt.Println("Application frame:", ParseFunctionPayload(frame.Payload))
 			session.ApplicationFrames <- frame
 		}
 	}
