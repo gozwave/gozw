@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"os/signal"
-	"syscall"
+	"strconv"
 
 	"github.com/bjyoungblood/gozw/zwave"
-	cc "github.com/bjyoungblood/gozw/zwave/commandclass"
+	"github.com/bjyoungblood/gozw/zwave/commandclass"
+	"github.com/peterh/liner"
 )
 
 func main() {
@@ -44,14 +43,31 @@ func main() {
 		fmt.Printf("  Raw: %v\n\n", nodeInfo)
 	}
 
-	manager.SendData(3, cc.NewSwitchMultilevelCommand(0))
+	// manager.SendData(3, cc.NewSwitchMultilevelCommand(0))
 
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	line := liner.NewLiner()
+	defer line.Close()
 
-	<-sigs
-
-	// manager.RemoveNode()
-	// manager.AddNode()
+	for {
+		cmd, _ := line.Prompt("(a)dd node\n(r)emove node\n(g)et nonce\n(q)uit\n> ")
+		switch cmd {
+		case "a":
+			manager.AddNode()
+		case "r":
+			manager.RemoveNode()
+		case "s":
+			input, _ := line.Prompt("node id: ")
+			nodeId, _ := strconv.Atoi(input)
+			manager.SendData(uint8(nodeId), commandclass.NewSecuritySchemeGet())
+		case "g":
+			input, _ := line.Prompt("node id: ")
+			nodeId, _ := strconv.Atoi(input)
+			manager.SendData(uint8(nodeId), commandclass.NewSecurityNonceGet())
+		case "q":
+			return
+		default:
+			fmt.Println("invalid selection")
+		}
+	}
 
 }
