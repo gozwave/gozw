@@ -1,6 +1,7 @@
 package zwave
 
 import "fmt"
+import cc "github.com/bjyoungblood/gozw/zwave/commandclass"
 
 type Manager struct {
 	session *SessionLayer
@@ -59,7 +60,7 @@ func (m *Manager) SetApplicationNodeInformation() {
 		GenericTypeGenericController,
 		SpecificTypePortableSceneController,
 		0x01,
-		CommandClassBasic,
+		cc.CommandClassBasic,
 	})
 }
 
@@ -142,6 +143,7 @@ func (m *Manager) RemoveNode() {
 
 	}
 }
+
 func (m *Manager) GetHomeId() *MemoryGetIdResponse {
 	resp := m.session.ExecuteCommand(FnMemoryGetId, []byte{})
 	return ParseFunctionPayload(resp.Payload).(*MemoryGetIdResponse)
@@ -165,4 +167,18 @@ func (m *Manager) GetVersion() *VersionResponse {
 func (m *Manager) GetNodeProtocolInfo(nodeId uint8) *NodeProtocolInfoResponse {
 	resp := m.session.ExecuteCommand(FnGetNodeProtocolInfo, []byte{nodeId})
 	return ParseFunctionPayload(resp.Payload).(*NodeProtocolInfoResponse)
+}
+
+func (m *Manager) SendData(nodeId uint8, data []byte) {
+	payload := []byte{
+		nodeId,
+		uint8(len(data)),
+	}
+
+	payload = append(payload, data...)
+	payload = append(payload, TransmitOptionAck|TransmitOptionAutoRoute)
+	payload = append(payload, 0x01)
+
+	resp := m.session.ExecuteCommand(FnSendData, payload)
+	fmt.Println("senddata reply", resp.Payload)
 }

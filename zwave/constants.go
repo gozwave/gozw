@@ -28,6 +28,14 @@ const (
 )
 
 const (
+	TransmitOptionAck       = 0x01
+	TransmitOptionLowPower  = 0x02
+	TransmitOptionAutoRoute = 0x04
+	TransmitOptionNoRoute   = 0x10
+	TransmitOptionExplore   = 0x20
+)
+
+const (
 	AddNodeOptionNormalPower = 0x80
 	AddNodeOptionNetworkWide = 0x40
 )
