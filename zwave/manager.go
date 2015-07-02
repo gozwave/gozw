@@ -80,18 +80,28 @@ func (m *Manager) AddNode() {
 
 		switch {
 		case callback.Status == AddNodeStatusLearnReady:
+			// timeout after waiting for this for 10 seconds
+			// then perform ADD_NODE_STOP
 			fmt.Print("Add node ready... ")
 		case callback.Status == AddNodeStatusNodeFound:
+			// recommended timeout interval for receiving this is 60 seconds
+			// can either timeout or manually stop inclusion process
 			fmt.Print("found node... ")
 		case callback.Status == AddNodeStatusAddingSlave:
+			// recommended timeout interval after NodeFound is 60 seconds
+			// if timeout, must call ADD_NODE_STOP with callback and wait for ADD_NODE_STATUS_DONE
 			fmt.Print("slave... ")
 		case callback.Status == AddNodeStatusProtocolDone:
+			// must call ADD_NODE_STOP and wait for AddNodeStatusDone
+			// must timeout after period depending on network size and composition (see 4.4.1.3.3)
+			// when timing out, must call ADD_NODE_STOP with callback
 			fmt.Println("protocol done")
 			m.session.ExecuteCommandNoWait(FnAddNodeToNetwork, []byte{
 				AddNodeStop,
 				0x02,
 			})
 		case callback.Status == AddNodeStatusDone:
+			// Must call ADD_NODE_STOP with null callback (Serial API: is this 0x0 or omit the field?)
 			fmt.Println("done")
 			m.session.ExecuteCommandNoWait(FnAddNodeToNetwork, []byte{
 				AddNodeStop,
