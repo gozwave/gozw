@@ -56,6 +56,8 @@ func (m *Manager) init() {
 	m.ApplicationRevision = serialApi.ApplicationRevision
 	m.SupportedFunctions = serialApi.GetSupportedFunctions()
 
+	m.loadNodes()
+
 	m.setSerialApiReady(true)
 }
 
@@ -214,5 +216,12 @@ func (m *Manager) getNodeProtocolInfo(nodeId uint8) *NodeProtocolInfoResponse {
 }
 
 func (m *Manager) loadNodes() {
+	for _, nodeId := range m.nodeList {
+		nodeInfo := m.getNodeProtocolInfo(nodeId)
+		node := NewNode(m, nodeId)
 
+		node.setFromNodeProtocolInfo(nodeInfo)
+
+		m.Nodes[nodeId] = node
+	}
 }
