@@ -10,7 +10,7 @@ const (
 
 func NewSwitchMultilevelCommand(level uint8) []byte {
 	return []byte{
-		CommandClassSwitchMultiLevel,
+		CommandClassSensorMultilevel,
 		SwitchMultilevelSet,
 		level,
 	}
