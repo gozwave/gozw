@@ -20,6 +20,10 @@ func NewSessionLayer(frameLayer *FrameLayer) *SessionLayer {
 	}
 }
 
+func (session *SessionLayer) WaitForFrame() Frame {
+	return <-session.frameLayer.frameOutput
+}
+
 func (session *SessionLayer) ExecuteCommand(commandId uint8, payload []byte) Frame {
 	frame := NewRequestFrame()
 	framePayload := &GenericPayload{
