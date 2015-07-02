@@ -39,18 +39,28 @@ const (
 )
 
 const (
-	AddNodeAny                  = 1
-	AddNodeController           = 2
-	AddNodeSlave                = 3
-	AddNodeExisting             = 4
-	AddNodeStop                 = 5
-	AddNodeStopFailed           = 6
-	AddNodeStatusSecurityFailed = 9
+	AddNodeAny        = 1
+	AddNodeController = 2
+	AddNodeSlave      = 3
+	AddNodeExisting   = 4
+	AddNodeStop       = 5
+	AddNodeStopFailed = 6
 )
 
 const (
 	AddNodeOptionNormalPower = 0x80
 	AddNodeOptionNetworkWide = 0x40
+)
+
+const (
+	AddNodeStatusLearnReady       = 1
+	AddNodeStatusNodeFound        = 2
+	AddNodeStatusAddingSlave      = 3
+	AddNodeStatusAddingController = 4
+	AddNodeStatusProtocolDone     = 5
+	AddNodeStatusDone             = 6
+	AddNodeStatusFailed           = 7
+	AddNodeStatusSecurityFailed   = 9
 )
 
 const (
@@ -63,6 +73,16 @@ const (
 const (
 	RemoveNodeOptionNormalPower = AddNodeOptionNormalPower
 	RemoveNodeOptionNetworkWide = AddNodeOptionNetworkWide
+)
+
+const (
+	RemoveNodeStatusLearnReady         = AddNodeStatusLearnReady
+	RemoveNodeStatusNodeFound          = AddNodeStatusNodeFound
+	RemoveNodeStatusRemovingSlave      = AddNodeStatusAddingSlave
+	RemoveNodeStatusRemovingController = AddNodeStatusAddingController
+	RemoveNodeStatusProtocolDone       = AddNodeStatusProtocolDone
+	RemoveNodeStatusDone               = AddNodeStatusDone
+	RemoveNodeStatusFailed             = AddNodeStatusFailed
 )
 
 const (

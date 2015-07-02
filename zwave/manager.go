@@ -1,5 +1,7 @@
 package zwave
 
+import "fmt"
+
 type Manager struct {
 	session *SessionLayer
 
@@ -65,6 +67,81 @@ func (m *Manager) FactoryReset() {
 	m.session.ExecuteCommand(FnSetDefault, []byte{0x01})
 }
 
+func (m *Manager) AddNode() {
+	m.session.ExecuteCommandNoWait(FnAddNodeToNetwork, []byte{
+		AddNodeAny | AddNodeOptionNetworkWide | AddNodeOptionNormalPower,
+		0x01,
+	})
+
+	for {
+		frame := m.session.WaitForFrame()
+		callback := ParseFunctionPayload(frame.Payload).(*AddRemoveNodeCallback)
+
+		switch {
+		case callback.Status == AddNodeStatusLearnReady:
+			fmt.Print("Add node ready... ")
+		case callback.Status == AddNodeStatusNodeFound:
+			fmt.Print("found node... ")
+		case callback.Status == AddNodeStatusAddingSlave:
+			fmt.Print("slave... ")
+		case callback.Status == AddNodeStatusProtocolDone:
+			fmt.Println("protocol done")
+			m.session.ExecuteCommandNoWait(FnAddNodeToNetwork, []byte{
+				AddNodeStop,
+				0x02,
+			})
+		case callback.Status == AddNodeStatusDone:
+			fmt.Println("done")
+			m.session.ExecuteCommandNoWait(FnAddNodeToNetwork, []byte{
+				AddNodeStop,
+				0x0,
+			})
+
+			return
+		default:
+			fmt.Println("unknown frame", callback)
+		}
+
+	}
+}
+
+func (m *Manager) RemoveNode() {
+	m.session.ExecuteCommandNoWait(FnRemoveNodeFromNetwork, []byte{
+		RemoveNodeAny | RemoveNodeOptionNetworkWide | RemoveNodeOptionNormalPower,
+		0x01,
+	})
+
+	for {
+		frame := m.session.WaitForFrame()
+		callback := ParseFunctionPayload(frame.Payload).(*AddRemoveNodeCallback)
+
+		switch {
+		case callback.Status == RemoveNodeStatusLearnReady:
+			fmt.Print("Remove node ready... ")
+		case callback.Status == RemoveNodeStatusNodeFound:
+			fmt.Print("found node... ")
+		case callback.Status == RemoveNodeStatusRemovingSlave:
+			fmt.Print("slave... ")
+		case callback.Status == RemoveNodeStatusProtocolDone:
+			fmt.Println("protocol done")
+			m.session.ExecuteCommandNoWait(FnRemoveNodeFromNetwork, []byte{
+				RemoveNodeStop,
+				0x02,
+			})
+		case callback.Status == RemoveNodeStatusDone:
+			fmt.Println("done")
+			m.session.ExecuteCommandNoWait(FnRemoveNodeFromNetwork, []byte{
+				RemoveNodeStop,
+				0x0,
+			})
+
+			return
+		default:
+			fmt.Println("unknown frame", callback)
+		}
+
+	}
+}
 func (m *Manager) GetHomeId() *MemoryGetIdResponse {
 	resp := m.session.ExecuteCommand(FnMemoryGetId, []byte{})
 	return ParseFunctionPayload(resp.Payload).(*MemoryGetIdResponse)
