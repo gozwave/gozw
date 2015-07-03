@@ -39,10 +39,11 @@ type Frame struct {
 	Checksum uint8
 }
 
-func NewRequestFrame() *Frame {
+func NewRequestFrame(payload []byte) *Frame {
 	return &Frame{
-		Header: FrameHeaderData,
-		Type:   FrameTypeReq,
+		Header:  FrameHeaderData,
+		Type:    FrameTypeReq,
+		Payload: payload,
 	}
 }
 

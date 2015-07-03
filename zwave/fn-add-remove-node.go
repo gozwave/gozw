@@ -1,7 +1,5 @@
 package zwave
 
-import "fmt"
-
 type AddRemoveNodeCallback struct {
 	CommandId      byte
 	CallbackId     byte
@@ -22,8 +20,6 @@ func ParseAddNodeCallback(payload []byte) *AddRemoveNodeCallback {
 		Source:     payload[3],
 		Length:     payload[4],
 	}
-
-	fmt.Println(payload)
 
 	if val.Length == 0 {
 		return val

@@ -30,6 +30,12 @@ func NewNode(manager *Manager, nodeId byte) *Node {
 	}
 }
 
+func NewNodeFromAddNodeCallback(manager *Manager, callback *AddRemoveNodeCallback) *Node {
+	newNode := NewNode(manager, callback.Source)
+	newNode.setFromAddNodeCallback(callback)
+	return newNode
+}
+
 func (n *Node) IsSecure() bool {
 	for _, cc := range n.SupportedCommandClasses {
 		if cc == commandclass.CommandClassSecurity {
@@ -79,6 +85,7 @@ func (n *Node) setFromNodeProtocolInfo(nodeInfo *NodeProtocolInfoResponse) {
 func (n *Node) String() string {
 	str := fmt.Sprintf("Node %d: \n", n.NodeId)
 	str += fmt.Sprintf("  Is listening? %t\n", n.IsListening())
+	str += fmt.Sprintf("  Is secure? %t\n", n.IsSecure())
 	str += fmt.Sprintf("  Basic device class: %s\n", n.GetBasicDeviceClassName())
 	str += fmt.Sprintf("  Generic device class: %s\n", n.GetGenericDeviceClassName())
 	str += fmt.Sprintf("  Specific device class: %s\n", n.GetSpecificDeviceClassName())

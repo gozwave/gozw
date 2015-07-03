@@ -1,99 +1,509 @@
 package zwave
 
 import (
+	"errors"
 	"fmt"
 	"runtime"
 	"sync"
+	"time"
 )
+
+const (
+	MinSequenceNumber = 1
+	MaxSequenceNumber = 127
+)
+
+const (
+	AddRemoveNodeReadyTimeout = time.Second * 10
+	AddRemoveNodeFoundTimeout = time.Second * 30 // @todo recommended is 60, but 30 is nicer for testing
+)
+
+type Callback func(Frame)
+type CallbackResult struct {
+	frame *Frame
+	err   error
+}
+
+type AddRemoveNodeResult struct {
+	node *Node
+	err  error
+}
 
 // @todo: ack timeouts, retransmission, backoff, etc.
 
 type SessionLayer struct {
+	manager    *Manager
 	frameLayer *FrameLayer
 
-	writeLock *sync.Mutex
-	readState chan bool
+	UnsolicitedFrames chan Frame
 
-	ApplicationFrames chan Frame
+	lastRequestedFn uint8
+	responses       chan Frame
+
+	// maps sequence number to callback
+	callbacks map[uint8]Callback
+
+	currentSequenceNumber uint8
+
+	execLock *sync.Mutex
 }
 
 func NewSessionLayer(frameLayer *FrameLayer) *SessionLayer {
 	session := &SessionLayer{
-		frameLayer:        frameLayer,
-		writeLock:         &sync.Mutex{},
-		readState:         make(chan bool),
-		ApplicationFrames: make(chan Frame),
+		frameLayer: frameLayer,
+
+		UnsolicitedFrames: make(chan Frame),
+
+		lastRequestedFn: 0,
+		responses:       make(chan Frame),
+
+		callbacks: map[uint8]Callback{},
+
+		execLock: &sync.Mutex{},
 	}
 
-	go session.read()
+	go session.readFrames()
 
 	return session
 }
 
-func (session *SessionLayer) WaitForFrame() Frame {
-	return <-session.frameLayer.frameOutput
-}
+func (s *SessionLayer) ApplicationNodeInformation(
+	deviceOptions uint8,
+	genericType uint8,
+	specificType uint8,
+	supportedCommandClasses []uint8,
+) {
 
-func (session *SessionLayer) ExecuteCommand(commandId uint8, payload []byte) Frame {
-	frame := NewRequestFrame()
-	framePayload := &GenericPayload{
-		CommandId: commandId,
-		Payload:   payload,
+	s.execLock.Lock()
+	defer s.execLock.Unlock()
+	defer runtime.Gosched()
+
+	payload := []byte{
+		FnApplicationNodeInformation,
+		deviceOptions,
+		genericType,
+		specificType,
+		uint8(len(supportedCommandClasses)),
 	}
 
-	frame.Payload = framePayload.Marshal()
+	payload = append(payload, supportedCommandClasses...)
 
-	session.writeLock.Lock()
-	session.pauseReads()
-	session.frameLayer.Write(frame)
-	// @todo handle timeouts, transmission, incorrect responses, etc.
-	response := <-session.frameLayer.frameOutput
-	session.resumeReads()
-	session.writeLock.Unlock()
-	runtime.Gosched()
+	s.write(NewRequestFrame(payload))
 
-	return response
 }
 
-func (session *SessionLayer) ExecuteCommandNoWait(commandId uint8, payload []byte) {
-	frame := NewRequestFrame()
-	framePayload := &GenericPayload{
-		CommandId: commandId,
-		Payload:   payload,
+func (s *SessionLayer) SetDefault() {
+	done := make(chan bool)
+
+	s.execLock.Lock()
+	defer s.execLock.Unlock()
+	defer runtime.Gosched()
+
+	callback := func(frame Frame) {
+		done <- true
 	}
 
-	frame.Payload = framePayload.Marshal()
+	seqNo := s.registerCallback(callback)
+	defer s.unregisterCallback(seqNo)
 
-	session.writeLock.Lock()
-	session.frameLayer.Write(frame)
-	session.writeLock.Unlock()
-	runtime.Gosched()
+	payload := []byte{
+		FnSetDefault,
+		seqNo,
+	}
+
+	s.write(NewRequestFrame(payload))
+
+	// @todo timeout
+	<-done
 }
 
-func (session *SessionLayer) pauseReads() {
-	session.readState <- false
-}
+func (s *SessionLayer) AddNodeToNetwork() (*Node, error) {
+	done := make(chan *AddRemoveNodeResult)
 
-func (session *SessionLayer) resumeReads() {
-	session.readState <- true
-}
+	// Just keep in mind that this will lock all other z-wave traffic until the
+	// process completes (it's supposed to, but you should be aware anyway)
+	s.execLock.Lock()
+	defer s.execLock.Unlock()
+	defer runtime.Gosched()
 
-func (session *SessionLayer) read() {
-	for {
-	read:
-		select {
-		case continueReading := <-session.readState:
-			if !continueReading {
-				for continueReading = range session.readState {
-					if continueReading {
-						goto read
-					}
+	var newNode *Node = nil
+	timeout := time.NewTimer(0)
+
+	callback := func(cb Frame) {
+		payload := ParseAddNodeCallback(cb.Payload)
+		fmt.Println("ADD NODE: FRAME", payload)
+		// at each step, don't forget to kick the timer to the correct value
+		switch {
+		case payload.Status == AddNodeStatusLearnReady:
+			timeout.Reset(AddRemoveNodeFoundTimeout)
+			fmt.Println("ADD NODE: learn ready")
+		case payload.Status == AddNodeStatusNodeFound:
+			timeout.Reset(AddRemoveNodeFoundTimeout)
+			fmt.Println("ADD NODE: node found")
+		case payload.Status == AddNodeStatusAddingSlave:
+			timeout.Reset(AddRemoveNodeFoundTimeout)
+			newNode = NewNodeFromAddNodeCallback(s.manager, payload)
+			fmt.Println("ADD NODE: adding slave node")
+		case payload.Status == AddNodeStatusAddingController:
+			// hey, i just met you, and this is crazy
+			// but it could happen, so implement me maybe
+			timeout.Reset(AddRemoveNodeFoundTimeout)
+			fmt.Println("ADD NODE: adding controller node")
+		case payload.Status == AddNodeStatusProtocolDone:
+			fmt.Println("ADD NODE: protocol done")
+			s.AddRemoveNodeStop(FnAddNodeToNetwork)
+			if newNode != nil {
+				done <- &AddRemoveNodeResult{
+					node: newNode,
+					err:  nil,
+				}
+			} else {
+				done <- &AddRemoveNodeResult{
+					node: nil,
+					err:  errors.New("Unknown error adding node (this should not happen)"),
 				}
 			}
-
-		case frame := <-session.frameLayer.frameOutput:
-			fmt.Println("Application frame:", ParseFunctionPayload(frame.Payload))
-			session.ApplicationFrames <- frame
+		case payload.Status == AddNodeStatusFailed:
+			fmt.Println("ADD NODE: failed")
+			s.AddRemoveNodeStop(FnAddNodeToNetwork)
+			done <- &AddRemoveNodeResult{
+				node: nil,
+				err:  errors.New("Failed to add node correctly"),
+			}
 		}
 	}
+
+	seqNo := s.registerCallback(callback)
+	defer s.unregisterCallback(seqNo)
+
+	frame := NewRequestFrame([]byte{
+		FnAddNodeToNetwork,
+		AddNodeAny | AddNodeOptionNetworkWide | AddNodeOptionNormalPower,
+		seqNo,
+	})
+
+	s.write(frame)
+	timeout.Reset(AddRemoveNodeReadyTimeout)
+
+	select {
+	case result := <-done:
+		return result.node, result.err
+	case <-timeout.C:
+		return nil, errors.New("Timed out adding node")
+	}
+}
+
+// Believe it or not, this function is exempt from execLock
+func (s *SessionLayer) AddRemoveNodeStop(funcId uint8) {
+	done := make(chan bool)
+
+	callback := func(cb Frame) {
+		payload := ParseAddNodeCallback(cb.Payload)
+		fmt.Println("ADD NODE2: FRAME", payload)
+		switch {
+		case payload.Status == AddNodeStatusDone:
+			fmt.Println("ADD NODE: done")
+		default:
+			fmt.Printf("ADD NODE: unexpected status 0x%x\n", payload.Status)
+		}
+
+		// this should happen regardless of what the previous status was
+		s.write(NewRequestFrame([]byte{
+			FnAddNodeToNetwork,
+			AddNodeStop,
+			0x00, // @todo should this be 0x0 or omitted entirely?
+		}))
+
+		done <- true
+	}
+
+	seqNo := s.registerCallback(callback)
+	defer s.unregisterCallback(seqNo)
+
+	frame := NewRequestFrame([]byte{
+		FnAddNodeToNetwork,
+		AddNodeStop,
+		seqNo,
+	})
+
+	s.write(frame)
+	timeout := time.NewTimer(AddRemoveNodeReadyTimeout)
+
+	// both cases are noops
+	select {
+	case <-done:
+	case <-timeout.C:
+	}
+}
+
+func (s *SessionLayer) RemoveNodeFromNetwork() (*Node, error) {
+	done := make(chan *AddRemoveNodeResult)
+
+	// Just keep in mind that this will lock all other z-wave traffic until the
+	// process completes (it's supposed to, but you should be aware anyway)
+	s.execLock.Lock()
+	defer s.execLock.Unlock()
+	defer runtime.Gosched()
+
+	var newNode *Node = nil
+	timeout := time.NewTimer(0)
+
+	callback := func(cb Frame) {
+		payload := ParseAddNodeCallback(cb.Payload)
+		fmt.Println("REMOVE NODE: FRAME", payload)
+		// at each step, don't forget to kick the timer to the correct value
+		switch {
+		case payload.Status == RemoveNodeStatusLearnReady:
+			timeout.Reset(AddRemoveNodeFoundTimeout)
+			fmt.Println("REMOVE NODE: learn ready")
+		case payload.Status == RemoveNodeStatusNodeFound:
+			timeout.Reset(AddRemoveNodeFoundTimeout)
+			fmt.Println("REMOVE NODE: node found")
+		case payload.Status == RemoveNodeStatusRemovingSlave:
+			timeout.Reset(AddRemoveNodeFoundTimeout)
+			newNode = NewNodeFromAddNodeCallback(s.manager, payload)
+			fmt.Println("REMOVE NODE: remove slave node")
+		case payload.Status == RemoveNodeStatusRemovingController:
+			// hey, i just met you, and this is crazy
+			// but it could happen, so implement me maybe
+			timeout.Reset(AddRemoveNodeFoundTimeout)
+			fmt.Println("REMOVE NODE: removing controller node")
+		case payload.Status == RemoveNodeStatusProtocolDone:
+			fmt.Println("REMOVE NODE: protocol done")
+			s.AddRemoveNodeStop(FnRemoveNodeFromNetwork)
+			if newNode != nil {
+				done <- &AddRemoveNodeResult{
+					node: newNode,
+					err:  nil,
+				}
+			} else {
+				done <- &AddRemoveNodeResult{
+					node: nil,
+					err:  errors.New("Unknown error removing node (this should not happen)"),
+				}
+			}
+		case payload.Status == RemoveNodeStatusFailed:
+			fmt.Println("REMOVE NODE: failed")
+			s.AddRemoveNodeStop(FnRemoveNodeFromNetwork)
+			done <- &AddRemoveNodeResult{
+				node: nil,
+				err:  errors.New("Failed to remove node correctly"),
+			}
+		}
+	}
+
+	seqNo := s.registerCallback(callback)
+	defer s.unregisterCallback(seqNo)
+
+	frame := NewRequestFrame([]byte{
+		FnRemoveNodeFromNetwork,
+		RemoveNodeAny | RemoveNodeOptionNetworkWide | RemoveNodeOptionNormalPower,
+		seqNo,
+	})
+
+	s.write(frame)
+	timeout.Reset(AddRemoveNodeReadyTimeout)
+
+	select {
+	case result := <-done:
+		return result.node, result.err
+	case <-timeout.C:
+		return nil, errors.New("Timed out removing node")
+	}
+}
+
+func (s *SessionLayer) GetVersion() (*VersionResponse, error) {
+	response, err := s.writeSimple(FnGetVersion, []byte{})
+	if err != nil {
+		return nil, err
+	}
+
+	return ParseVersionResponse(response.Payload), nil
+}
+
+func (s *SessionLayer) MemoryGetId() (*MemoryGetIdResponse, error) {
+	response, err := s.writeSimple(FnMemoryGetId, []byte{})
+	if err != nil {
+		return nil, err
+	}
+
+	return ParseMemoryGetIdResponse(response.Payload), nil
+}
+
+func (s *SessionLayer) GetInitAppData() (*NodeListResponse, error) {
+	response, err := s.writeSimple(FnGetInitAppData, []byte{})
+	if err != nil {
+		return nil, err
+	}
+
+	return ParseNodeListResponse(response.Payload), nil
+}
+
+func (s *SessionLayer) GetSerialApiCapabilities() (*SerialApiCapabilitiesResponse, error) {
+	response, err := s.writeSimple(FnSerialApiCapabilities, []byte{})
+	if err != nil {
+		return nil, err
+	}
+
+	return ParseSerialApiCapabilitiesResponse(response.Payload), nil
+}
+
+func (s *SessionLayer) GetNodeProtocolInfo(nodeId uint8) (*NodeProtocolInfoResponse, error) {
+	response, err := s.writeSimple(FnGetNodeProtocolInfo, []byte{})
+	if err != nil {
+		return nil, err
+	}
+
+	return ParseNodeProtocolInfoResponse(response.Payload), nil
+}
+
+func (s *SessionLayer) SetSerialAPIReady(ready bool) {
+	var rdy byte
+	if ready {
+		rdy = 1
+	} else {
+		rdy = 0
+	}
+
+	s.execLock.Lock()
+	defer s.execLock.Unlock()
+	defer runtime.Gosched()
+
+	payload := []byte{FnSerialAPIReady, rdy}
+	s.write(NewRequestFrame(payload))
+}
+
+func (s *SessionLayer) SendData(nodeId uint8, data []byte) (*Frame, error) {
+	done := make(chan CallbackResult)
+
+	s.execLock.Lock()
+	defer s.execLock.Unlock()
+	defer runtime.Gosched()
+
+	callback := func(callbackFrame Frame) {
+		// @todo implement me better maybe
+		done <- CallbackResult{
+			frame: &callbackFrame,
+			err:   nil,
+		}
+	}
+
+	seqNo := s.registerCallback(callback)
+	defer s.unregisterCallback(seqNo)
+
+	payload := []byte{
+		FnSendData,
+		nodeId,
+		uint8(len(data)),
+	}
+
+	payload = append(payload, data...)
+	payload = append(payload, TransmitOptionAck|TransmitOptionAutoRoute)
+	payload = append(payload, seqNo)
+
+	frame := NewRequestFrame(payload)
+
+	s.write(frame)
+
+	result := <-done
+	return result.frame, result.err
+}
+
+// Writes a single byte function call and awaits the response frame
+func (s *SessionLayer) writeSimple(funcId uint8, payload []byte) (*Frame, error) {
+	s.execLock.Lock()
+	defer s.execLock.Unlock()
+	defer runtime.Gosched()
+
+	payload = append([]byte{funcId}, payload...)
+
+	s.write(NewRequestFrame(payload))
+
+	// @todo correct timeout implementation?
+	select {
+	case response := <-s.responses:
+		return &response, nil
+	case <-time.After(10 * time.Second):
+		return nil, errors.New("Request timeout")
+	}
+}
+
+// DO NOT CALL THIS WITHOUT ALREADY HAVING OBTAINED THE LOCK
+func (s *SessionLayer) write(frame *Frame) {
+	s.lastRequestedFn = frame.Payload[0]
+	s.frameLayer.Write(frame)
+}
+
+func (s *SessionLayer) readFrames() {
+	for frame := range s.frameLayer.frameOutput {
+		s.processFrame(frame)
+	}
+}
+
+// for each incoming frame, determine how to handle it based on whether it is a
+// return value (response), a callback (request), or an unsolicited frame (request)
+func (s *SessionLayer) processFrame(frame Frame) {
+	if frame.IsResponse() {
+		// handle frame as a response
+		if frame.Payload[0] == s.lastRequestedFn {
+
+			// performs a non-blocking send
+			select {
+			case s.responses <- frame:
+				// noop
+			default:
+				// noop
+			}
+
+			// Clear last requested function
+			s.lastRequestedFn = 0
+
+		} else {
+			fmt.Println("Received an unexpected response frame: ", frame)
+		}
+	} else {
+		// handle frame as a callback
+
+		var callbackId uint8
+
+		// find the callback id in the payload
+		switch frame.Payload[0] {
+		case FnAddNodeToNetwork, FnRemoveNodeFromNetwork:
+			callbackId = frame.Payload[1]
+		default:
+			fmt.Println("session-layer: Potentially missed callback!")
+			callbackId = 0
+		}
+
+		// if we have a registered callback, remove it from the list of registered
+		// callbacks, and call it (asynchronously, in case it makes further calls)
+		if callback, ok := s.callbacks[callbackId]; ok {
+			go callback(frame)
+		} else {
+			fmt.Println("Received unsolicited frame:", frame)
+			s.UnsolicitedFrames <- frame
+		}
+	}
+}
+
+func (s *SessionLayer) registerCallback(callback Callback) uint8 {
+	seqNo := s.getSequenceNumber()
+
+	s.callbacks[seqNo] = callback
+
+	return seqNo
+}
+
+func (s *SessionLayer) unregisterCallback(seqNo uint8) {
+	delete(s.callbacks, seqNo)
+}
+
+func (s *SessionLayer) getSequenceNumber() uint8 {
+	if s.currentSequenceNumber == MaxSequenceNumber {
+		s.currentSequenceNumber = MinSequenceNumber
+	} else {
+		s.currentSequenceNumber++
+	}
+
+	return s.currentSequenceNumber
 }
