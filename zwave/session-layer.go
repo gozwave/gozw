@@ -272,6 +272,11 @@ func (s *SessionLayer) RemoveNodeFromNetwork() (*Node, error) {
 			fmt.Println("REMOVE NODE: protocol done")
 			s.AddRemoveNodeStop(FnRemoveNodeFromNetwork)
 			if newNode != nil {
+
+				// if newNode.IsSecure() {
+				// 	s.includeSecureNode(node *Node)
+				// }
+
 				done <- &AddRemoveNodeResult{
 					node: newNode,
 					err:  nil,
@@ -398,7 +403,7 @@ func (s *SessionLayer) SendData(nodeId uint8, data []byte) (*Frame, error) {
 	}
 
 	payload = append(payload, data...)
-	payload = append(payload, TransmitOptionAck|TransmitOptionAutoRoute)
+	payload = append(payload, TransmitOptionAck|TransmitOptionAutoRoute|TransmitOptionExplore)
 	payload = append(payload, seqNo)
 
 	frame := NewRequestFrame(payload)
@@ -468,8 +473,13 @@ func (s *SessionLayer) processFrame(frame Frame) {
 
 		// find the callback id in the payload
 		switch frame.Payload[0] {
-		case FnAddNodeToNetwork, FnRemoveNodeFromNetwork:
+		case FnAddNodeToNetwork, FnRemoveNodeFromNetwork, FnSendData:
 			callbackId = frame.Payload[1]
+
+		case FnApplicationCommandHandlerBridge:
+			// never a callback
+			callbackId = 0
+
 		default:
 			fmt.Println("session-layer: Potentially missed callback!")
 			callbackId = 0
@@ -480,7 +490,6 @@ func (s *SessionLayer) processFrame(frame Frame) {
 		if callback, ok := s.callbacks[callbackId]; ok {
 			go callback(frame)
 		} else {
-			fmt.Println("Received unsolicited frame:", frame)
 			s.UnsolicitedFrames <- frame
 		}
 	}

@@ -77,6 +77,8 @@ func (m *Manager) init() {
 
 	m.loadNodes()
 
+	go m.handleUnsolicitedFrames()
+
 	m.session.SetSerialAPIReady(true)
 }
 
@@ -146,10 +148,11 @@ func (m *Manager) GetVersion() (*VersionResponse, error) {
 
 func (m *Manager) SendData(nodeId uint8, data []byte) {
 	resp, err := m.session.SendData(nodeId, data)
+	fmt.Println(resp, err)
 	if err != nil {
-		fmt.Println("senddata reply", resp.Payload)
-	} else {
 		fmt.Println("senddata error", resp)
+	} else {
+		fmt.Println("senddata reply", resp.Payload)
 	}
 }
 
@@ -161,5 +164,21 @@ func (m *Manager) loadNodes() {
 		node.setFromNodeProtocolInfo(nodeInfo)
 
 		m.Nodes[nodeId] = node
+	}
+}
+
+func (m *Manager) handleUnsolicitedFrames() {
+	for frame := range m.session.UnsolicitedFrames {
+		switch frame.Payload[0] {
+		case FnApplicationCommandHandlerBridge:
+			cmd := ParseApplicationCommandHandlerBridge(frame.Payload)
+			if cmd.CmdLength > 0 {
+				fmt.Printf("Got %s: %v", commandclass.GetCommandClassString(cmd.CommandData[0]), cmd.CommandData)
+			} else {
+				fmt.Println("wat", cmd)
+			}
+		default:
+			fmt.Println("Received unsolicited frame:", frame)
+		}
 	}
 }
