@@ -120,7 +120,7 @@ func (m *Manager) includeSecureNode(node *Node) {
 }
 
 func (m *Manager) RemoveNode() {
-	node, err := m.session.AddNodeToNetwork()
+	node, err := m.session.RemoveNodeFromNetwork()
 	if err != nil {
 		fmt.Println(err)
 		return
