@@ -58,6 +58,10 @@ func main() {
 			input, _ := line.Prompt("node id: ")
 			nodeId, _ := strconv.Atoi(input)
 			manager.SendData(uint8(nodeId), commandclass.NewSecurityNonceGet())
+		case "v":
+			input, _ := line.Prompt("node id: ")
+			nodeId, _ := strconv.Atoi(input)
+			manager.SendData(uint8(nodeId), commandclass.NewVersionGet())
 		case "q":
 			return
 		default:
