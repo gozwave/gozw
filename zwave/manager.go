@@ -97,6 +97,11 @@ func (m *Manager) SetApplicationNodeInformation() {
 	)
 }
 
+// @todo temporary, remove me
+func (m *Manager) SendDataSecure(nodeId uint8, data []byte) error {
+	return m.session.SendDataSecure(nodeId, data)
+}
+
 func (m *Manager) FactoryReset() {
 	m.session.SetDefault()
 }
@@ -147,7 +152,7 @@ func (m *Manager) GetVersion() (*VersionResponse, error) {
 }
 
 func (m *Manager) SendData(nodeId uint8, data []byte) {
-	resp, err := m.session.SendData(nodeId, data)
+	resp, err := m.session.SendData(nodeId, data, false)
 	fmt.Println(resp, err)
 	if err != nil {
 		fmt.Println("senddata error", resp)
@@ -173,7 +178,7 @@ func (m *Manager) handleUnsolicitedFrames() {
 		case FnApplicationCommandHandlerBridge:
 			cmd := ParseApplicationCommandHandlerBridge(frame.Payload)
 			if cmd.CmdLength > 0 {
-				fmt.Printf("Got %s: %v", commandclass.GetCommandClassString(cmd.CommandData[0]), cmd.CommandData)
+				fmt.Printf("Got %s: %v\n", commandclass.GetCommandClassString(cmd.CommandData[0]), cmd.CommandData)
 			} else {
 				fmt.Println("wat", cmd)
 			}
