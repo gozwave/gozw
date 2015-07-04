@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"sync"
 	"time"
+
+	"github.com/bjyoungblood/gozw/zwave/commandclass"
 )
 
 const (
@@ -14,9 +16,16 @@ const (
 )
 
 const (
+	SendDataInsecure = false
+	SendDataSecure   = true
+)
+
+const (
 	AddRemoveNodeReadyTimeout = time.Second * 10
 	AddRemoveNodeFoundTimeout = time.Second * 30 // @todo recommended is 60, but 30 is nicer for testing
 )
+
+type CommandClassHandlerCallback func(*ApplicationCommandHandlerBridge, *Frame)
 
 type Callback func(Frame)
 type CallbackResult struct {
@@ -32,8 +41,9 @@ type AddRemoveNodeResult struct {
 // @todo: ack timeouts, retransmission, backoff, etc.
 
 type SessionLayer struct {
-	manager    *Manager
-	frameLayer *FrameLayer
+	manager       *Manager
+	frameLayer    *FrameLayer
+	securityLayer *SecurityLayer
 
 	UnsolicitedFrames chan Frame
 
@@ -42,6 +52,9 @@ type SessionLayer struct {
 
 	// maps sequence number to callback
 	callbacks map[uint8]Callback
+
+	// maps command class to callback
+	applicationCommandHandlers map[uint8]CommandClassHandlerCallback
 
 	currentSequenceNumber uint8
 
@@ -59,8 +72,17 @@ func NewSessionLayer(frameLayer *FrameLayer) *SessionLayer {
 
 		callbacks: map[uint8]Callback{},
 
+		applicationCommandHandlers: map[uint8]CommandClassHandlerCallback{},
+
 		execLock: &sync.Mutex{},
 	}
+
+	session.securityLayer = NewSecurityLayer(session)
+
+	session.registerApplicationCommandHandler(
+		commandclass.CommandClassSecurity,
+		session.securityLayer.SecurityFrameHandler,
+	)
 
 	go session.readFrames()
 
@@ -151,7 +173,13 @@ func (s *SessionLayer) AddNodeToNetwork() (*Node, error) {
 			fmt.Println("ADD NODE: adding controller node")
 		case payload.Status == AddNodeStatusProtocolDone:
 			fmt.Println("ADD NODE: protocol done")
+
 			s.AddRemoveNodeStop(FnAddNodeToNetwork)
+
+			if newNode.IsSecure() {
+				s.securityLayer.includeSecureNode(newNode)
+			}
+
 			if newNode != nil {
 				done <- &AddRemoveNodeResult{
 					node: newNode,
@@ -187,6 +215,7 @@ func (s *SessionLayer) AddNodeToNetwork() (*Node, error) {
 
 	select {
 	case result := <-done:
+
 		return result.node, result.err
 	case <-timeout.C:
 		return nil, errors.New("Timed out adding node")
@@ -209,7 +238,7 @@ func (s *SessionLayer) AddRemoveNodeStop(funcId uint8) {
 
 		// this should happen regardless of what the previous status was
 		s.write(NewRequestFrame([]byte{
-			FnAddNodeToNetwork,
+			funcId,
 			AddNodeStop,
 			0x00, // @todo should this be 0x0 or omitted entirely?
 		}))
@@ -219,9 +248,10 @@ func (s *SessionLayer) AddRemoveNodeStop(funcId uint8) {
 
 	seqNo := s.registerCallback(callback)
 	defer s.unregisterCallback(seqNo)
+	fmt.Println("remove node stop seq", seqNo)
 
 	frame := NewRequestFrame([]byte{
-		FnAddNodeToNetwork,
+		funcId,
 		AddNodeStop,
 		seqNo,
 	})
@@ -236,6 +266,7 @@ func (s *SessionLayer) AddRemoveNodeStop(funcId uint8) {
 	}
 }
 
+// @todo remove node is currently breaking things after it runs
 func (s *SessionLayer) RemoveNodeFromNetwork() (*Node, error) {
 	done := make(chan *AddRemoveNodeResult)
 
@@ -256,27 +287,18 @@ func (s *SessionLayer) RemoveNodeFromNetwork() (*Node, error) {
 		case payload.Status == RemoveNodeStatusLearnReady:
 			timeout.Reset(AddRemoveNodeFoundTimeout)
 			fmt.Println("REMOVE NODE: learn ready")
+
 		case payload.Status == RemoveNodeStatusNodeFound:
 			timeout.Reset(AddRemoveNodeFoundTimeout)
 			fmt.Println("REMOVE NODE: node found")
-		case payload.Status == RemoveNodeStatusRemovingSlave:
+
+		case payload.Status == RemoveNodeStatusRemovingSlave || payload.Status == RemoveNodeStatusRemovingController:
 			timeout.Reset(AddRemoveNodeFoundTimeout)
 			newNode = NewNodeFromAddNodeCallback(s.manager, payload)
-			fmt.Println("REMOVE NODE: remove slave node")
-		case payload.Status == RemoveNodeStatusRemovingController:
-			// hey, i just met you, and this is crazy
-			// but it could happen, so implement me maybe
-			timeout.Reset(AddRemoveNodeFoundTimeout)
-			fmt.Println("REMOVE NODE: removing controller node")
-		case payload.Status == RemoveNodeStatusProtocolDone:
-			fmt.Println("REMOVE NODE: protocol done")
+			fmt.Println("REMOVE NODE: remove node")
+
 			s.AddRemoveNodeStop(FnRemoveNodeFromNetwork)
 			if newNode != nil {
-
-				// if newNode.IsSecure() {
-				// 	s.includeSecureNode(node *Node)
-				// }
-
 				done <- &AddRemoveNodeResult{
 					node: newNode,
 					err:  nil,
@@ -287,6 +309,7 @@ func (s *SessionLayer) RemoveNodeFromNetwork() (*Node, error) {
 					err:  errors.New("Unknown error removing node (this should not happen)"),
 				}
 			}
+
 		case payload.Status == RemoveNodeStatusFailed:
 			fmt.Println("REMOVE NODE: failed")
 			s.AddRemoveNodeStop(FnRemoveNodeFromNetwork)
@@ -298,11 +321,12 @@ func (s *SessionLayer) RemoveNodeFromNetwork() (*Node, error) {
 	}
 
 	seqNo := s.registerCallback(callback)
+	fmt.Println("remove node seq", seqNo)
 	defer s.unregisterCallback(seqNo)
 
 	frame := NewRequestFrame([]byte{
 		FnRemoveNodeFromNetwork,
-		RemoveNodeAny | RemoveNodeOptionNetworkWide | RemoveNodeOptionNormalPower,
+		RemoveNodeAny,
 		seqNo,
 	})
 
@@ -378,12 +402,24 @@ func (s *SessionLayer) SetSerialAPIReady(ready bool) {
 	s.write(NewRequestFrame(payload))
 }
 
-func (s *SessionLayer) SendData(nodeId uint8, data []byte) (*Frame, error) {
-	done := make(chan CallbackResult)
-
+func (s *SessionLayer) SendData(nodeId uint8, data []byte, secure bool) (*Frame, error) {
 	s.execLock.Lock()
 	defer s.execLock.Unlock()
 	defer runtime.Gosched()
+
+	return s.sendDataUnsafe(nodeId, data)
+}
+
+func (s *SessionLayer) SendDataSecure(nodeId uint8, data []byte) error {
+	s.execLock.Lock()
+	defer s.execLock.Unlock()
+	defer runtime.Gosched()
+
+	return s.securityLayer.sendDataSecure(nodeId, data, false)
+}
+
+func (s *SessionLayer) sendDataUnsafe(nodeId uint8, data []byte) (*Frame, error) {
+	done := make(chan CallbackResult)
 
 	callback := func(callbackFrame Frame) {
 		// @todo implement me better maybe
@@ -403,7 +439,7 @@ func (s *SessionLayer) SendData(nodeId uint8, data []byte) (*Frame, error) {
 	}
 
 	payload = append(payload, data...)
-	payload = append(payload, TransmitOptionAck|TransmitOptionAutoRoute|TransmitOptionExplore)
+	payload = append(payload, TransmitOptionAck) // @todo implement ability to choose options
 	payload = append(payload, seqNo)
 
 	frame := NewRequestFrame(payload)
@@ -477,6 +513,12 @@ func (s *SessionLayer) processFrame(frame Frame) {
 			callbackId = frame.Payload[1]
 
 		case FnApplicationCommandHandlerBridge:
+			cmd := ParseApplicationCommandHandlerBridge(frame.Payload)
+			cc := cmd.CommandData[0]
+			if callback, ok := s.applicationCommandHandlers[cc]; ok {
+				go callback(cmd, &frame)
+				return
+			}
 			// never a callback
 			callbackId = 0
 
@@ -495,6 +537,16 @@ func (s *SessionLayer) processFrame(frame Frame) {
 	}
 }
 
+// This will prevent these command classes from reaching the application layer
+// until they are unregistered
+func (s *SessionLayer) registerApplicationCommandHandler(commandClass uint8, callback CommandClassHandlerCallback) {
+	s.applicationCommandHandlers[commandClass] = callback
+}
+
+func (s *SessionLayer) unregisterApplicationCommandHandler(commandClass uint8) {
+	delete(s.applicationCommandHandlers, commandClass)
+}
+
 func (s *SessionLayer) registerCallback(callback Callback) uint8 {
 	seqNo := s.getSequenceNumber()
 
@@ -511,7 +563,7 @@ func (s *SessionLayer) getSequenceNumber() uint8 {
 	if s.currentSequenceNumber == MaxSequenceNumber {
 		s.currentSequenceNumber = MinSequenceNumber
 	} else {
-		s.currentSequenceNumber++
+		s.currentSequenceNumber = s.currentSequenceNumber + 1
 	}
 
 	return s.currentSequenceNumber
