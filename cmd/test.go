@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-
 	transport, err := zwave.NewTransportLayer("/tmp/usbmodem", 115200)
 	if err != nil {
 		panic(err)
@@ -30,6 +29,12 @@ func main() {
 	fmt.Println("Timer Functions Supported:", manager.TimerFunctionsSupported)
 	fmt.Println("Is Primary Controller:", manager.IsPrimaryController)
 	fmt.Println("Node count:", len(manager.Nodes))
+
+	manager.SendDataSecure(15, []byte{
+		commandclass.CommandClassDoorLock,
+		0x01, // door lock operation set
+		0x00, // unsecured
+	})
 
 	// manager.SetApplicationNodeInformation()
 	// manager.FactoryReset()
