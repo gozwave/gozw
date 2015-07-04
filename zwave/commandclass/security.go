@@ -49,10 +49,43 @@ func NewSecurityNonceGet() []byte {
 	}
 }
 
-func NewSecurityNonceReport() []byte {
-	return []byte{
+func NewSecurityNonceReport(nonce []byte) []byte {
+	buf := []byte{
 		CommandClassSecurity,
 		CommandSecurityNonceReport,
+	}
+
+	return append(buf, nonce...)
+}
+
+func NewSecurityNetworkKeySet(key []byte) []byte {
+	buf := []byte{
+		CommandClassSecurity,
+		CommandNetworkKeySet,
+	}
+
+	return append(buf, key...)
+}
+
+func NewSecurityMessageEncapsulation(iv, payload, hmac []byte, receiverNonceId byte) []byte {
+	buf := []byte{
+		CommandClassSecurity,
+		CommandSecurityMessageEncapsulation,
+	}
+
+	buf = append(buf, iv...)
+	buf = append(buf, payload...)
+	buf = append(buf, receiverNonceId)
+	buf = append(buf, hmac...)
+
+	return buf
+}
+
+func ParseSecurityNonceReport(command []byte) *SecurityNonceReport {
+	return &SecurityNonceReport{
+		CommandClass: command[0],
+		Command:      command[1],
+		Nonce:        command[2:],
 	}
 }
 
@@ -63,11 +96,7 @@ func ParseCommandClassSecurity(command []byte) (interface{}, error) {
 
 	switch command[1] {
 	case CommandSecurityNonceReport:
-		return &SecurityNonceReport{
-			CommandClass: command[0],
-			Command:      command[1],
-			Nonce:        command[2:],
-		}, nil
+		return ParseSecurityNonceReport(command), nil
 	default:
 		return nil, errors.New("Unhandled command")
 	}
