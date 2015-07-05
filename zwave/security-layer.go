@@ -82,7 +82,7 @@ func NewSecurityLayer(session *SessionLayer) *SecurityLayer {
 	return securityLayer
 }
 
-func (s *SecurityLayer) SecurityFrameHandler(cmd *ApplicationCommandHandlerBridge, frame *Frame) {
+func (s *SecurityLayer) SecurityFrameHandler(cmd *ApplicationCommandHandler, frame *Frame) {
 
 	switch cmd.CommandData[1] {
 	case commandclass.CommandSecurityVersion:
@@ -396,7 +396,7 @@ func (s *SecurityLayer) cleanupSecureInclusionMode() {
 // NOTE: The Z-Wave docs are not very clear on this, but the "receiver nonce id"
 // is simply the first byte of the nonce (which must be unique among all of the
 // active internal nonces)
-func (s *SecurityLayer) handleNonceGet(cmd *ApplicationCommandHandlerBridge) {
+func (s *SecurityLayer) handleNonceGet(cmd *ApplicationCommandHandler) {
 	nonce, err := s.internalNonceTable.Generate(InternalNonceTTL)
 
 	if err != nil {
@@ -411,7 +411,7 @@ func (s *SecurityLayer) handleNonceGet(cmd *ApplicationCommandHandlerBridge) {
 // nonce table. Additionally, it sets a timeout on the nonce (after which the
 // nonce will be deleted from the nonce table) and notifies any goroutines that
 // may be waiting for a nonce from the given node
-func (s *SecurityLayer) handleNonceReport(cmd *ApplicationCommandHandlerBridge) {
+func (s *SecurityLayer) handleNonceReport(cmd *ApplicationCommandHandler) {
 	cc := commandclass.ParseSecurityNonceReport(cmd.CommandData)
 	fmt.Printf("handleNonceReport: received nonce from %d, %v\n", cmd.SrcNodeId, cc.Nonce)
 	s.externalNonceTable.Set(cmd.SrcNodeId, cc.Nonce, ExternalNonceTTL)

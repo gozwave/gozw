@@ -3,6 +3,7 @@ package zwave
 const (
 	FnGetInitAppData                  = 0x02
 	FnApplicationNodeInformation      = 0x03
+	FnApplicationCommandHandler       = 0x04
 	FnSerialApiCapabilities           = 0x07
 	FnSendData                        = 0x13
 	FnGetVersion                      = 0x15

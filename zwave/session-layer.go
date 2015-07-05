@@ -25,7 +25,7 @@ const (
 	AddRemoveNodeFoundTimeout = time.Second * 30 // @todo recommended is 60, but 30 is nicer for testing
 )
 
-type CommandClassHandlerCallback func(*ApplicationCommandHandlerBridge, *Frame)
+type CommandClassHandlerCallback func(*ApplicationCommandHandler, *Frame)
 
 type Callback func(Frame)
 type CallbackResult struct {
@@ -512,8 +512,8 @@ func (s *SessionLayer) processFrame(frame Frame) {
 		case FnAddNodeToNetwork, FnRemoveNodeFromNetwork, FnSendData:
 			callbackId = frame.Payload[1]
 
-		case FnApplicationCommandHandlerBridge:
-			cmd := ParseApplicationCommandHandlerBridge(frame.Payload)
+		case FnApplicationCommandHandler, FnApplicationCommandHandlerBridge:
+			cmd := ParseApplicationCommandHandler(frame.Payload)
 			cc := cmd.CommandData[0]
 			if callback, ok := s.applicationCommandHandlers[cc]; ok {
 				go callback(cmd, &frame)

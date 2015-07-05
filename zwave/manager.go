@@ -176,7 +176,7 @@ func (m *Manager) handleUnsolicitedFrames() {
 	for frame := range m.session.UnsolicitedFrames {
 		switch frame.Payload[0] {
 		case FnApplicationCommandHandlerBridge:
-			cmd := ParseApplicationCommandHandlerBridge(frame.Payload)
+			cmd := ParseApplicationCommandHandler(frame.Payload)
 			if cmd.CmdLength > 0 {
 				fmt.Printf("Got %s: %v\n", commandclass.GetCommandClassString(cmd.CommandData[0]), cmd.CommandData)
 			} else {
