@@ -42,7 +42,7 @@ func NewManager(session *SessionLayer) *Manager {
 }
 
 func (m *Manager) init() {
-	version, err := m.GetVersion()
+	version, err := m.session.GetVersion()
 	if err != nil {
 		panic(err)
 	}
@@ -50,7 +50,7 @@ func (m *Manager) init() {
 	m.ApiVersion = version.ApiVersion
 	m.ApiLibraryType = version.GetLibraryTypeString()
 
-	ids, err := m.GetHomeId()
+	ids, err := m.session.MemoryGetId()
 	if err != nil {
 		panic(err)
 	}
@@ -58,7 +58,7 @@ func (m *Manager) init() {
 	m.HomeId = ids.HomeId
 	m.NodeId = ids.NodeId
 
-	appInfo, err := m.GetAppInfo()
+	appInfo, err := m.session.GetInitAppData()
 	if err != nil {
 		panic(err)
 	}
@@ -69,7 +69,7 @@ func (m *Manager) init() {
 	m.IsPrimaryController = appInfo.IsPrimaryController()
 	m.nodeList = appInfo.GetNodeIds()
 
-	serialApi, err := m.GetSerialApiCapabilities()
+	serialApi, err := m.session.GetSerialApiCapabilities()
 	if err != nil {
 		panic(err)
 	}
@@ -136,22 +136,6 @@ func (m *Manager) RemoveNode() {
 	fmt.Println(node.String())
 }
 
-func (m *Manager) GetHomeId() (*MemoryGetIdResponse, error) {
-	return m.session.MemoryGetId()
-}
-
-func (m *Manager) GetAppInfo() (*NodeListResponse, error) {
-	return m.session.GetInitAppData()
-}
-
-func (m *Manager) GetSerialApiCapabilities() (*SerialApiCapabilitiesResponse, error) {
-	return m.session.GetSerialApiCapabilities()
-}
-
-func (m *Manager) GetVersion() (*VersionResponse, error) {
-	return m.session.GetVersion()
-}
-
 func (m *Manager) SendData(nodeId uint8, data []byte) {
 	resp, err := m.session.SendData(nodeId, data, false)
 	fmt.Println(resp, err)
@@ -210,7 +194,7 @@ func (m *Manager) handleUnsolicitedFrames() {
 	for frame := range m.session.UnsolicitedFrames {
 		switch frame.Payload[0] {
 
-		case FnApplicationCommandHandlerBridge:
+		case FnApplicationCommandHandlerBridge, FnApplicationCommandHandler:
 			cmd := ParseApplicationCommandHandler(frame.Payload)
 			if cmd.CmdLength > 0 {
 				fmt.Printf("Got %s: %v\n", commandclass.GetCommandClassString(cmd.CommandData[0]), cmd.CommandData)
