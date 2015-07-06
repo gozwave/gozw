@@ -17,6 +17,8 @@ const (
 	CommandSecuritySchemeReport                       = 0x05
 )
 
+const SecurityCommandsSupportedReportCommandClassMark = 0xEF
+
 type SecuritySchemeGet struct {
 	CommandClass             uint8
 	Command                  uint8
@@ -32,6 +34,23 @@ type SecurityNonceReport struct {
 	CommandClass uint8
 	Command      uint8
 	Nonce        []byte
+}
+
+type SecurityCommandsSupportedReport struct {
+	CommandClass             uint8
+	Command                  uint8
+	RemainingFrames          uint8
+	SupportedCommandClasses  []byte
+	ControlledCommandClasses []byte
+}
+
+type SecurityMessageEncapsulation struct {
+	CommandClass     uint8
+	Command          uint8
+	SenderNonce      []byte
+	EncryptedPayload []byte
+	ReceiverNonceId  byte
+	Hmac             []byte
 }
 
 func NewSecuritySchemeGet() []byte {
@@ -79,6 +98,52 @@ func NewSecurityMessageEncapsulation(iv, payload, hmac []byte, receiverNonceId b
 	buf = append(buf, hmac...)
 
 	return buf
+}
+
+func ParseSecurityCommandsSupportedReport(data []byte) *SecurityCommandsSupportedReport {
+	cc := &SecurityCommandsSupportedReport{
+		CommandClass:    data[0],
+		Command:         data[1],
+		RemainingFrames: data[2],
+	}
+
+	supportedCommandClasses := []byte{}
+	controlledCommandClasses := []byte{}
+
+	var i int
+	for i = 3; i < len(data); i++ {
+		if data[i] == SecurityCommandsSupportedReportCommandClassMark {
+			break
+		}
+
+		supportedCommandClasses = append(supportedCommandClasses, data[i])
+	}
+
+	i += 1 // skip command class mark
+
+	for i < len(data) {
+		controlledCommandClasses = append(controlledCommandClasses, data[i])
+	}
+
+	cc.SupportedCommandClasses = supportedCommandClasses
+	cc.ControlledCommandClasses = controlledCommandClasses
+
+	return cc
+}
+
+func ParseSecurityMessageEncapsulation(data []byte) *SecurityMessageEncapsulation {
+	payloadLen := len(data) - 19
+
+	cmd := &SecurityMessageEncapsulation{
+		CommandClass:     data[0],
+		Command:          data[1],
+		SenderNonce:      data[2:10],
+		EncryptedPayload: data[10 : 10+payloadLen],
+		ReceiverNonceId:  data[10+payloadLen],
+		Hmac:             data[11+payloadLen:],
+	}
+
+	return cmd
 }
 
 func ParseSecurityNonceReport(command []byte) *SecurityNonceReport {
