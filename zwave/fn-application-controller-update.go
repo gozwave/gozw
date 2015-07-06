@@ -1,7 +1,5 @@
 package zwave
 
-import "fmt"
-
 type ApplicationControllerUpdate struct {
 	CommandId      byte
 	Status         byte
@@ -13,15 +11,13 @@ type ApplicationControllerUpdate struct {
 	CommandClasses []byte
 }
 
-func ParseApplicationControllerUpdate(payload []byte) *AddRemoveNodeCallback {
-	val := &AddRemoveNodeCallback{
+func ParseApplicationControllerUpdate(payload []byte) *ApplicationControllerUpdate {
+	val := &ApplicationControllerUpdate{
 		CommandId: payload[0],
 		Status:    payload[1],
-		Source:    payload[2],
+		NodeId:    payload[2],
 		Length:    payload[3],
 	}
-
-	fmt.Println(payload)
 
 	if val.Length == 0 {
 		return val
