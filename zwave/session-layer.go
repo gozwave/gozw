@@ -564,9 +564,8 @@ func (s *SessionLayer) processFrame(frame Frame) {
 			callbackId = 0
 
 		case FnApplicationControllerUpdate:
-			cmd := ParseApplicationControllerUpdate(frame.Payload)
-			fmt.Println(cmd.GetStatusString())
-			fmt.Println("Application controller update")
+			// never a callback
+			callbackId = 0
 
 		default:
 			fmt.Println("session-layer: Potentially missed callback!")

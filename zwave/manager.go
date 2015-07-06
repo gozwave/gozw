@@ -1,6 +1,9 @@
 package zwave
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 import "github.com/bjyoungblood/gozw/zwave/commandclass"
 
@@ -75,14 +78,14 @@ func (m *Manager) init() {
 	m.ApplicationRevision = serialApi.ApplicationRevision
 	m.SupportedFunctions = serialApi.GetSupportedFunctions()
 
-	m.loadNodes()
+	go m.handleUnsolicitedFrames()
 
 	m.session.registerApplicationCommandHandler(
 		commandclass.CommandClassSecurity,
 		m.handleSecurityCommands,
 	)
 
-	go m.handleUnsolicitedFrames()
+	m.loadNodes()
 
 	m.session.SetSerialAPIReady(true)
 }
@@ -169,28 +172,33 @@ func (m *Manager) removeFailedNode(nodeId uint8) {
 }
 
 func (m *Manager) loadNodes() {
+	var wg sync.WaitGroup
+
 	for _, nodeId := range m.nodeList {
-		fmt.Println(nodeId)
-		nodeInfo, _ := m.session.GetNodeProtocolInfo(nodeId)
 		node := NewNode(m, nodeId)
-
-		if node.NodeId != 1 && node.isFailing() {
-			fmt.Printf("node %d is failing\n", node.NodeId)
-		}
-
-		node.setFromNodeProtocolInfo(nodeInfo)
-		node.requestNodeInformationFrame()
-
-		fmt.Println(nodeId)
-
 		m.Nodes[nodeId] = node
+
+		wait := node.Initialize()
+
+		wg.Add(1)
+
+		go func() {
+			<-wait
+			fmt.Println("init", node.NodeId)
+			wg.Done()
+		}()
 	}
+
+	wg.Wait()
 }
 
 func (m *Manager) handleSecurityCommands(cmd *ApplicationCommandHandler, frame *Frame) {
 	switch cmd.CommandData[1] {
 	case commandclass.CommandSecurityCommandsSupportedReport:
 		cc := commandclass.ParseSecurityCommandsSupportedReport(cmd.CommandData)
+		if node, ok := m.Nodes[cmd.SrcNodeId]; ok {
+			node.receiveSecurityCommandsSupportedReport(cc)
+		}
 		fmt.Println(cc.SupportedCommandClasses)
 
 	default:
@@ -201,6 +209,7 @@ func (m *Manager) handleSecurityCommands(cmd *ApplicationCommandHandler, frame *
 func (m *Manager) handleUnsolicitedFrames() {
 	for frame := range m.session.UnsolicitedFrames {
 		switch frame.Payload[0] {
+
 		case FnApplicationCommandHandlerBridge:
 			cmd := ParseApplicationCommandHandler(frame.Payload)
 			if cmd.CmdLength > 0 {
@@ -208,8 +217,20 @@ func (m *Manager) handleUnsolicitedFrames() {
 			} else {
 				fmt.Println("wat", cmd)
 			}
+
+		case FnApplicationControllerUpdate:
+			cmd := ParseApplicationControllerUpdate(frame.Payload)
+			if cmd.Status != UpdateStateNodeInfoReceived {
+				fmt.Printf("Node update (%d): %s\n", cmd.NodeId, cmd.GetStatusString())
+			} else {
+				if node, ok := m.Nodes[cmd.NodeId]; ok {
+					node.setFromApplicationControllerUpdate(cmd)
+				}
+			}
+
 		default:
 			fmt.Println("Received unsolicited frame:", frame)
+
 		}
 	}
 }
