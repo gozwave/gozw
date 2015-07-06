@@ -1,7 +1,6 @@
 package zwave
 
 import (
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"runtime"
@@ -88,40 +87,17 @@ func (s *SecurityLayer) SecurityFrameHandler(cmd *ApplicationCommandHandler, fra
 	case commandclass.CommandSecurityVersion:
 		fmt.Println("Received SecurityVersion")
 
-	case commandclass.CommandNetworkKeySet:
-		fmt.Println("Illegal network key set received (network may be under attack or something)")
-
 	case commandclass.CommandNetworkKeyVerify:
 		// @todo implement me
 		fmt.Println("Received network key verify")
 
-	case commandclass.CommandSecurityCommandsSupportedGet:
-		// @todo implement me maybe
-		fmt.Println("Received request for supported security commands")
-
-	case commandclass.CommandSecurityCommandsSupportedReport:
-		// @todo implement me maybe
-		fmt.Println("Received response for supported security commands")
-
-	case commandclass.CommandSecurityMessageEncapsulation, commandclass.CommandSecurityMessageEncapsulationNonceGet:
-		fmt.Println("mother of god...", cmd)
-		// 1. decrypt message
-		// 2. if it's the first half of a sequenced message, wait for the second half
-		// 2.5  if it's an EncapsulationGetNonce, then send a NonceReport back to the sender
-		// 3. if it's the second half of a sequenced message, reassemble the payloads
-		// 4. emit the payload back to the session layer
-
 	case commandclass.CommandSecurityNonceGet:
+		fmt.Println("received nonce get")
 		s.handleNonceGet(cmd)
 
 	case commandclass.CommandSecurityNonceReport:
+		fmt.Println("received nonce report")
 		s.handleNonceReport(cmd)
-
-	case commandclass.CommandSecuritySchemeGet:
-		fmt.Println("received request for security scheme")
-
-	case commandclass.CommandSecuritySchemeInherit:
-		fmt.Println("received security scheme inherit")
 
 	case commandclass.CommandSecuritySchemeReport:
 		fmt.Println("received security scheme report: ", cmd.CommandData)
@@ -186,6 +162,23 @@ func (s *SecurityLayer) sendDataSecure(nodeId uint8, data []byte, inclusionMode 
 	}
 }
 
+func (s *SecurityLayer) DecryptMessage(data *commandclass.SecurityMessageEncapsulation) ([]byte, error) {
+	receiverNonce, err := s.internalNonceTable.Get(data.ReceiverNonceId)
+	if err != nil {
+		return nil, err
+	}
+
+	senderNonce := make([]byte, 8)
+	copy(senderNonce, data.SenderNonce)
+	iv := append(senderNonce, receiverNonce...)
+
+	pl := make([]byte, len(data.EncryptedPayload))
+	copy(pl, data.EncryptedPayload)
+	decryptedPayload := CryptMessage(pl, iv, NetworkEncKey)
+
+	return decryptedPayload[1:], nil
+}
+
 func (s *SecurityLayer) sendSecurePayload(
 	nodeId uint8,
 	data []byte,
@@ -238,37 +231,16 @@ func (s *SecurityLayer) sendSecurePayload(
 
 	data = append([]byte{securityByte}, data...)
 
-	fmt.Println("input:")
-	fmt.Println(hex.Dump(data))
-
 	// full initialization vector = senderNonce + receiverNonce
 	iv := append(senderNonce, receiverNonce...)
 
-	fmt.Println("iv:")
-	fmt.Println(hex.Dump(iv))
-
-	fmt.Println("enc key:")
-	fmt.Println(hex.Dump(encKey))
-
 	encryptedPayload := CryptMessage(data, iv, encKey)
-
-	fmt.Printf("encrypted output (%d):\n", len(encryptedPayload))
-	fmt.Println(hex.Dump(encryptedPayload))
 
 	authDataBuf := append(iv, commandclass.CommandSecurityMessageEncapsulation) // @todo CC should be determined by sequencing
 	authDataBuf = append(authDataBuf, 1)                                        // sender node
 	authDataBuf = append(authDataBuf, nodeId)                                   // receiver node
 	authDataBuf = append(authDataBuf, uint8(len(encryptedPayload)))
 	authDataBuf = append(authDataBuf, encryptedPayload...)
-
-	fmt.Println("auth iv:")
-	fmt.Println(hex.Dump(iv))
-
-	fmt.Println("auth key:")
-	fmt.Println(hex.Dump(authKey))
-
-	fmt.Println("auth data:")
-	fmt.Println(hex.Dump(authDataBuf))
 
 	authIV := []byte{
 		0x00, 0x00, 0x00, 0x00,
@@ -279,18 +251,12 @@ func (s *SecurityLayer) sendSecurePayload(
 
 	hmac := CalculateHMAC(authDataBuf, authIV, authKey)
 
-	fmt.Println("hmac:")
-	fmt.Println(hex.Dump(hmac))
-
 	encapsulatedMessage := commandclass.NewSecurityMessageEncapsulation(
 		senderNonce,
 		encryptedPayload,
 		hmac,
 		receiverNonce[0],
 	)
-
-	fmt.Println("encapsulated:")
-	fmt.Println(hex.Dump(encapsulatedMessage))
 
 	_, err = s.session.sendDataUnsafe(nodeId, encapsulatedMessage)
 

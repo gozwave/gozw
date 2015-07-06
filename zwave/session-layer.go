@@ -79,11 +79,6 @@ func NewSessionLayer(frameLayer *FrameLayer) *SessionLayer {
 
 	session.securityLayer = NewSecurityLayer(session)
 
-	session.registerApplicationCommandHandler(
-		commandclass.CommandClassSecurity,
-		session.securityLayer.SecurityFrameHandler,
-	)
-
 	go session.readFrames()
 
 	return session
@@ -514,11 +509,12 @@ func (s *SessionLayer) processFrame(frame Frame) {
 
 		case FnApplicationCommandHandler, FnApplicationCommandHandlerBridge:
 			cmd := ParseApplicationCommandHandler(frame.Payload)
-			cc := cmd.CommandData[0]
-			if callback, ok := s.applicationCommandHandlers[cc]; ok {
-				go callback(cmd, &frame)
+
+			handled := s.handleApplicationCommand(cmd, &frame)
+			if handled {
 				return
 			}
+
 			// never a callback
 			callbackId = 0
 
@@ -535,6 +531,56 @@ func (s *SessionLayer) processFrame(frame Frame) {
 			s.UnsolicitedFrames <- frame
 		}
 	}
+}
+
+func (s *SessionLayer) handleApplicationCommand(cmd *ApplicationCommandHandler, frame *Frame) bool {
+	cc := cmd.CommandData[0]
+
+	if cc == commandclass.CommandClassSecurity {
+		switch cmd.CommandData[1] {
+
+		case commandclass.CommandSecurityMessageEncapsulation, commandclass.CommandSecurityMessageEncapsulationNonceGet:
+			// @todo determine whether to bother with sequenced messages
+
+			// 1. decrypt message
+			// 2. if it's the first half of a sequenced message, wait for the second half
+			// 2.5  if it's an EncapsulationGetNonce, then send a NonceReport back to the sender
+			// 3. if it's the second half of a sequenced message, reassemble the payloads
+			// 4. emit the payload back to the session layer
+
+			data := commandclass.ParseSecurityMessageEncapsulation(cmd.CommandData)
+			msg, err := s.securityLayer.DecryptMessage(data)
+
+			if msg[0] == commandclass.CommandClassSecurity && msg[1] == commandclass.CommandNetworkKeyVerify {
+				s.securityLayer.SecurityFrameHandler(cmd, frame)
+				return true
+			}
+
+			if err != nil {
+				fmt.Println("error handling encrypted message", err)
+				return false
+			}
+
+			cmd.CommandData = msg
+			cc = cmd.CommandData[0]
+
+			fmt.Println(cmd.CommandData)
+
+		case commandclass.CommandSecurityNonceGet,
+			commandclass.CommandSecurityNonceReport,
+			commandclass.CommandSecuritySchemeReport,
+			commandclass.CommandNetworkKeyVerify:
+			s.securityLayer.SecurityFrameHandler(cmd, frame)
+			return true
+		}
+	}
+
+	if callback, ok := s.applicationCommandHandlers[cc]; ok {
+		go callback(cmd, frame)
+		return true
+	}
+
+	return false
 }
 
 // This will prevent these command classes from reaching the application layer
