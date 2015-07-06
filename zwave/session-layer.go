@@ -363,6 +363,19 @@ func (s *SessionLayer) GetInitAppData() (*NodeListResponse, error) {
 	return ParseNodeListResponse(response.Payload), nil
 }
 
+func (s *SessionLayer) isNodeFailing(nodeId uint8) (bool, error) {
+	response, err := s.writeSimple(FnIsNodeFailed, []byte{nodeId})
+	if err != nil {
+		return false, err
+	}
+
+	if response.Payload[1] == 0 {
+		return false, nil
+	}
+
+	return true, nil
+}
+
 func (s *SessionLayer) GetSerialApiCapabilities() (*SerialApiCapabilitiesResponse, error) {
 	response, err := s.writeSimple(FnSerialApiCapabilities, []byte{})
 	if err != nil {
@@ -395,6 +408,11 @@ func (s *SessionLayer) SetSerialAPIReady(ready bool) {
 
 	payload := []byte{FnSerialAPIReady, rdy}
 	s.write(NewRequestFrame(payload))
+}
+
+func (s *SessionLayer) requestNodeInformationFrame(nodeId uint8) error {
+	_, err := s.writeSimple(FnRequestNodeInfo, []byte{nodeId})
+	return err
 }
 
 func (s *SessionLayer) SendData(nodeId uint8, data []byte, secure bool) (*Frame, error) {
@@ -464,6 +482,33 @@ func (s *SessionLayer) writeSimple(funcId uint8, payload []byte) (*Frame, error)
 	}
 }
 
+func (s *SessionLayer) removeFailedNode(nodeId uint8) (*Frame, error) {
+	done := make(chan CallbackResult)
+
+	callback := func(callbackFrame Frame) {
+		done <- CallbackResult{
+			frame: &callbackFrame,
+			err:   nil,
+		}
+	}
+
+	seqNo := s.registerCallback(callback)
+	defer s.unregisterCallback(seqNo)
+
+	payload := []byte{
+		FnRemoveFailingNode,
+		nodeId,
+		seqNo,
+	}
+
+	frame := NewRequestFrame(payload)
+
+	s.write(frame)
+
+	result := <-done
+	return result.frame, result.err
+}
+
 // DO NOT CALL THIS WITHOUT ALREADY HAVING OBTAINED THE LOCK
 func (s *SessionLayer) write(frame *Frame) {
 	s.lastRequestedFn = frame.Payload[0]
@@ -517,6 +562,11 @@ func (s *SessionLayer) processFrame(frame Frame) {
 
 			// never a callback
 			callbackId = 0
+
+		case FnApplicationControllerUpdate:
+			cmd := ParseApplicationControllerUpdate(frame.Payload)
+			fmt.Println(cmd.GetStatusString())
+			fmt.Println("Application controller update")
 
 		default:
 			fmt.Println("session-layer: Potentially missed callback!")

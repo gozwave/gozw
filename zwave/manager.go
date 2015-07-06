@@ -77,6 +77,11 @@ func (m *Manager) init() {
 
 	m.loadNodes()
 
+	m.session.registerApplicationCommandHandler(
+		commandclass.CommandClassSecurity,
+		m.handleSecurityCommands,
+	)
+
 	go m.handleUnsolicitedFrames()
 
 	m.session.SetSerialAPIReady(true)
@@ -117,13 +122,6 @@ func (m *Manager) AddNode() {
 	fmt.Println(node.String())
 }
 
-func (m *Manager) includeSecureNode(node *Node) {
-	// fmt.Println(node.NodeId)
-	// m.SendData(node.NodeId, commandclass.NewSecuritySchemeGet())
-	// schemeReport := m.session.WaitForFrame()
-	// fmt.Println(schemeReport.Payload)
-}
-
 func (m *Manager) RemoveNode() {
 	node, err := m.session.RemoveNodeFromNetwork()
 	if err != nil {
@@ -161,14 +159,42 @@ func (m *Manager) SendData(nodeId uint8, data []byte) {
 	}
 }
 
+func (m *Manager) removeFailedNode(nodeId uint8) {
+	result, err := m.session.removeFailedNode(nodeId)
+	if err != nil {
+		fmt.Println("error removing failed node: ", err)
+	} else {
+		fmt.Println("remove failed node result:", result.Payload)
+	}
+}
+
 func (m *Manager) loadNodes() {
 	for _, nodeId := range m.nodeList {
+		fmt.Println(nodeId)
 		nodeInfo, _ := m.session.GetNodeProtocolInfo(nodeId)
 		node := NewNode(m, nodeId)
 
+		if node.NodeId != 1 && node.isFailing() {
+			fmt.Printf("node %d is failing\n", node.NodeId)
+		}
+
 		node.setFromNodeProtocolInfo(nodeInfo)
+		node.requestNodeInformationFrame()
+
+		fmt.Println(nodeId)
 
 		m.Nodes[nodeId] = node
+	}
+}
+
+func (m *Manager) handleSecurityCommands(cmd *ApplicationCommandHandler, frame *Frame) {
+	switch cmd.CommandData[1] {
+	case commandclass.CommandSecurityCommandsSupportedReport:
+		cc := commandclass.ParseSecurityCommandsSupportedReport(cmd.CommandData)
+		fmt.Println(cc.SupportedCommandClasses)
+
+	default:
+		fmt.Println(cmd)
 	}
 }
 
