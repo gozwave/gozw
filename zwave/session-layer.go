@@ -378,7 +378,7 @@ func (s *SessionLayer) GetSerialApiCapabilities() (*SerialApiCapabilitiesRespons
 }
 
 func (s *SessionLayer) GetNodeProtocolInfo(nodeId uint8) (*NodeProtocolInfoResponse, error) {
-	response, err := s.writeSimple(FnGetNodeProtocolInfo, []byte{})
+	response, err := s.writeSimple(FnGetNodeProtocolInfo, []byte{nodeId})
 	if err != nil {
 		return nil, err
 	}
