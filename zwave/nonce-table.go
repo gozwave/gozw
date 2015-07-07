@@ -1,6 +1,7 @@
 package zwave
 
 import (
+	"crypto/rand"
 	"errors"
 	"runtime"
 	"sync"
@@ -116,4 +117,15 @@ func (t *NonceTable) delete(key byte) {
 		timer.Stop()
 		delete(t.timers, key)
 	}
+}
+
+func GenerateNonce() []byte {
+	buf := make([]byte, 8)
+	_, err := rand.Read(buf)
+	if err != nil {
+		// @todo
+		panic(err)
+	}
+
+	return buf
 }

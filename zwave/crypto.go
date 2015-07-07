@@ -3,7 +3,6 @@ package zwave
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rand"
 )
 
 var AuthPassword = []byte{
@@ -88,17 +87,6 @@ var InclusionAuthKey = EncryptEBS(InclusionKey, AuthPassword)
 
 var NetworkEncKey = EncryptEBS(NetworkKey, EncryptPassword)
 var NetworkAuthKey = EncryptEBS(NetworkKey, AuthPassword)
-
-func GenerateNonce() []byte {
-	buf := make([]byte, 8)
-	_, err := rand.Read(buf)
-	if err != nil {
-		// @todo
-		panic(err)
-	}
-
-	return buf
-}
 
 func EncryptEBS(key []byte, message []byte) []byte {
 	block, err := aes.NewCipher(key)
