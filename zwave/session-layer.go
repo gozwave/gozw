@@ -42,7 +42,7 @@ type AddRemoveNodeResult struct {
 
 type SessionLayer struct {
 	manager       *Manager
-	frameLayer    *FrameLayer
+	frameLayer    FrameLayer
 	securityLayer *SecurityLayer
 
 	UnsolicitedFrames chan Frame
@@ -61,7 +61,7 @@ type SessionLayer struct {
 	execLock *sync.Mutex
 }
 
-func NewSessionLayer(frameLayer *FrameLayer) *SessionLayer {
+func NewSessionLayer(frameLayer *SerialFrameLayer) *SessionLayer {
 	session := &SessionLayer{
 		frameLayer: frameLayer,
 
@@ -516,7 +516,7 @@ func (s *SessionLayer) write(frame *Frame) {
 }
 
 func (s *SessionLayer) readFrames() {
-	for frame := range s.frameLayer.frameOutput {
+	for frame := range s.frameLayer.GetOutputChannel() {
 		s.processFrame(frame)
 	}
 }
@@ -612,8 +612,6 @@ func (s *SessionLayer) handleApplicationCommand(cmd *ApplicationCommandHandler, 
 
 			cmd.CommandData = msg
 			cc = cmd.CommandData[0]
-
-			fmt.Println(cmd.CommandData)
 
 		case commandclass.CommandSecurityNonceGet,
 			commandclass.CommandSecurityNonceReport,

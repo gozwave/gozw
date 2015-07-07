@@ -2,7 +2,12 @@ package zwave
 
 import "fmt"
 
-type FrameLayer struct {
+type FrameLayer interface {
+	Write(frame *Frame)
+	GetOutputChannel() <-chan Frame
+}
+
+type SerialFrameLayer struct {
 	transportLayer TransportLayer
 
 	frameParser      *FrameParser
@@ -14,14 +19,14 @@ type FrameLayer struct {
 	frameOutput   chan Frame
 }
 
-func NewFrameLayer(transportLayer TransportLayer) *FrameLayer {
+func NewFrameLayer(transportLayer TransportLayer) *SerialFrameLayer {
 	parserInput := make(chan byte)
 	parserOutput := make(chan *FrameParseEvent, 1)
 	acks := make(chan bool, 1)
 	naks := make(chan bool, 1)
 	cans := make(chan bool, 1)
 
-	frameLayer := &FrameLayer{
+	frameLayer := &SerialFrameLayer{
 		transportLayer: transportLayer,
 
 		frameParser:  NewFrameParser(parserInput, parserOutput, acks, naks, cans),
@@ -41,7 +46,7 @@ func NewFrameLayer(transportLayer TransportLayer) *FrameLayer {
 	return frameLayer
 }
 
-func (layer *FrameLayer) bgWork() {
+func (layer *SerialFrameLayer) bgWork() {
 
 	for {
 		select {
@@ -70,32 +75,32 @@ func (layer *FrameLayer) bgWork() {
 	}
 }
 
-func (f *FrameLayer) Write(frame *Frame) {
+func (f *SerialFrameLayer) Write(frame *Frame) {
 	go func() {
 		f.pendingWrites <- frame
 	}()
 }
 
-func (f *FrameLayer) GetOutputChannel() <-chan Frame {
+func (f *SerialFrameLayer) GetOutputChannel() <-chan Frame {
 	return f.frameOutput
 }
 
-func (f *FrameLayer) bgRead() {
+func (f *SerialFrameLayer) bgRead() {
 	for eachByte := range f.transportLayer.Read() {
 		f.parserInput <- eachByte
 	}
 }
 
-func (f *FrameLayer) writeToTransport(buf []byte) (int, error) {
+func (f *SerialFrameLayer) writeToTransport(buf []byte) (int, error) {
 	return f.transportLayer.Write(buf)
 }
 
-func (f *FrameLayer) sendAck() error {
+func (f *SerialFrameLayer) sendAck() error {
 	_, err := f.transportLayer.Write([]byte{FrameHeaderAck})
 	return err
 }
 
-func (f *FrameLayer) sendNak() error {
+func (f *SerialFrameLayer) sendNak() error {
 	_, err := f.transportLayer.Write([]byte{FrameHeaderNak})
 	return err
 }
