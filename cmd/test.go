@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	transport, err := zwave.NewTransportLayer("/tmp/usbmodem", 115200)
+	transport, err := zwave.NewSerialTransportLayer("/tmp/usbmodem", 115200)
 	if err != nil {
 		panic(err)
 	}

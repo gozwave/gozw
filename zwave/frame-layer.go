@@ -3,7 +3,7 @@ package zwave
 import "fmt"
 
 type FrameLayer struct {
-	transportLayer *TransportLayer
+	transportLayer TransportLayer
 
 	frameParser      *FrameParser
 	parserInput      chan<- byte
@@ -14,7 +14,7 @@ type FrameLayer struct {
 	frameOutput   chan Frame
 }
 
-func NewFrameLayer(transportLayer *TransportLayer) *FrameLayer {
+func NewFrameLayer(transportLayer TransportLayer) *FrameLayer {
 	parserInput := make(chan byte)
 	parserOutput := make(chan *FrameParseEvent, 1)
 	acks := make(chan bool, 1)
