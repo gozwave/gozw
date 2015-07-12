@@ -100,7 +100,7 @@ func (n *Node) Initialize() chan bool {
 		case <-time.After(time.Second * 5):
 		}
 
-		if n.IsSecure() {
+		if n.IsSecure() && !n.Failing {
 			n.updateSupportedSecureCommands()
 			select {
 			case <-n.receivedSecure:
