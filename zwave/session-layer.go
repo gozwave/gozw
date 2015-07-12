@@ -67,7 +67,7 @@ type SessionLayer interface {
 type ZWaveSessionLayer struct {
 	manager       *Manager
 	frameLayer    FrameLayer
-	securityLayer *SecurityLayer
+	securityLayer SecurityLayer
 
 	UnsolicitedFrames chan Frame
 

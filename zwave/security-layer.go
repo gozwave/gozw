@@ -36,7 +36,14 @@ const (
 	SecuritySequenceCounterMax       = 15
 )
 
-type SecurityLayer struct {
+type SecurityLayer interface {
+	includeSecureNode(node *Node) error
+	sendDataSecure(nodeId uint8, data []byte, inclusionMode bool) error
+	DecryptMessage(data *commandclass.SecurityMessageEncapsulation) ([]byte, error)
+	SecurityFrameHandler(cmd *ApplicationCommandHandler, frame *Frame)
+}
+
+type ZWaveSecurityLayer struct {
 	session SessionLayer
 
 	// internal nonce table is keyed by the first byte of the nonce
@@ -60,8 +67,8 @@ type SecurityLayer struct {
 	includingNode           *Node
 }
 
-func NewSecurityLayer(session SessionLayer) *SecurityLayer {
-	securityLayer := &SecurityLayer{
+func NewSecurityLayer(session SessionLayer) *ZWaveSecurityLayer {
+	securityLayer := &ZWaveSecurityLayer{
 		session: session,
 
 		internalNonceTable: NewNonceTable(),
@@ -81,7 +88,7 @@ func NewSecurityLayer(session SessionLayer) *SecurityLayer {
 	return securityLayer
 }
 
-func (s *SecurityLayer) SecurityFrameHandler(cmd *ApplicationCommandHandler, frame *Frame) {
+func (s *ZWaveSecurityLayer) SecurityFrameHandler(cmd *ApplicationCommandHandler, frame *Frame) {
 
 	switch cmd.CommandData[1] {
 	case commandclass.CommandSecurityVersion:
@@ -113,7 +120,7 @@ func (s *SecurityLayer) SecurityFrameHandler(cmd *ApplicationCommandHandler, fra
 	}
 }
 
-func (s *SecurityLayer) sendDataSecure(nodeId uint8, data []byte, inclusionMode bool) error {
+func (s *ZWaveSecurityLayer) sendDataSecure(nodeId uint8, data []byte, inclusionMode bool) error {
 	fmt.Println("sending secure data", len(data))
 	if len(data) > SecurePayloadMaxSizeAutoRoute {
 		fmt.Println("segmenting")
@@ -162,7 +169,7 @@ func (s *SecurityLayer) sendDataSecure(nodeId uint8, data []byte, inclusionMode 
 	}
 }
 
-func (s *SecurityLayer) DecryptMessage(data *commandclass.SecurityMessageEncapsulation) ([]byte, error) {
+func (s *ZWaveSecurityLayer) DecryptMessage(data *commandclass.SecurityMessageEncapsulation) ([]byte, error) {
 	receiverNonce, err := s.internalNonceTable.Get(data.ReceiverNonceId)
 	if err != nil {
 		return nil, err
@@ -179,7 +186,7 @@ func (s *SecurityLayer) DecryptMessage(data *commandclass.SecurityMessageEncapsu
 	return decryptedPayload[1:], nil
 }
 
-func (s *SecurityLayer) sendSecurePayload(
+func (s *ZWaveSecurityLayer) sendSecurePayload(
 	nodeId uint8,
 	data []byte,
 	inclusionMode bool,
@@ -263,7 +270,7 @@ func (s *SecurityLayer) sendSecurePayload(
 	return err
 }
 
-func (s *SecurityLayer) getNextSequenceCounter(nodeId uint8) uint8 {
+func (s *ZWaveSecurityLayer) getNextSequenceCounter(nodeId uint8) uint8 {
 	var counter uint8
 	var ok bool
 
@@ -283,7 +290,7 @@ func (s *SecurityLayer) getNextSequenceCounter(nodeId uint8) uint8 {
 	return counter
 }
 
-func (s *SecurityLayer) includeSecureNode(node *Node) error {
+func (s *ZWaveSecurityLayer) includeSecureNode(node *Node) error {
 	s.secureInclusionMode = true
 	s.includingNode = node
 	fmt.Printf("secure inclusion: %v\n", s.secureInclusionMode)
@@ -306,7 +313,7 @@ func (s *SecurityLayer) includeSecureNode(node *Node) error {
 	return err
 }
 
-func (s *SecurityLayer) getExternalNonce(nodeId uint8) (Nonce, error) {
+func (s *ZWaveSecurityLayer) getExternalNonce(nodeId uint8) (Nonce, error) {
 	var nonce Nonce
 	var err error
 
@@ -320,7 +327,7 @@ func (s *SecurityLayer) getExternalNonce(nodeId uint8) (Nonce, error) {
 	return s.waitForExternalNonce(nodeId)
 }
 
-func (s *SecurityLayer) waitForExternalNonce(nodeId uint8) (Nonce, error) {
+func (s *ZWaveSecurityLayer) waitForExternalNonce(nodeId uint8) (Nonce, error) {
 	var waitChan chan bool
 	var ok bool
 
@@ -351,7 +358,7 @@ func (s *SecurityLayer) waitForExternalNonce(nodeId uint8) (Nonce, error) {
 	return nil, errors.New("Failed to get external nonce")
 }
 
-func (s *SecurityLayer) cleanupSecureInclusionMode() {
+func (s *ZWaveSecurityLayer) cleanupSecureInclusionMode() {
 	fmt.Println("cleaning up secure inclusion mode")
 	s.secureInclusionMode = false
 	s.includingNode = nil
@@ -362,7 +369,7 @@ func (s *SecurityLayer) cleanupSecureInclusionMode() {
 // NOTE: The Z-Wave docs are not very clear on this, but the "receiver nonce id"
 // is simply the first byte of the nonce (which must be unique among all of the
 // active internal nonces)
-func (s *SecurityLayer) handleNonceGet(cmd *ApplicationCommandHandler) {
+func (s *ZWaveSecurityLayer) handleNonceGet(cmd *ApplicationCommandHandler) {
 	nonce, err := s.internalNonceTable.Generate(InternalNonceTTL)
 
 	if err != nil {
@@ -377,7 +384,7 @@ func (s *SecurityLayer) handleNonceGet(cmd *ApplicationCommandHandler) {
 // nonce table. Additionally, it sets a timeout on the nonce (after which the
 // nonce will be deleted from the nonce table) and notifies any goroutines that
 // may be waiting for a nonce from the given node
-func (s *SecurityLayer) handleNonceReport(cmd *ApplicationCommandHandler) {
+func (s *ZWaveSecurityLayer) handleNonceReport(cmd *ApplicationCommandHandler) {
 	cc := commandclass.ParseSecurityNonceReport(cmd.CommandData)
 	fmt.Printf("handleNonceReport: received nonce from %d, %v\n", cmd.SrcNodeId, cc.Nonce)
 	s.externalNonceTable.Set(cmd.SrcNodeId, cc.Nonce, ExternalNonceTTL)
