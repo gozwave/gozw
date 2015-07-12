@@ -37,7 +37,7 @@ const (
 )
 
 type SecurityLayer struct {
-	session *SessionLayer
+	session SessionLayer
 
 	// internal nonce table is keyed by the first byte of the nonce
 	internalNonceTable *NonceTable
@@ -60,7 +60,7 @@ type SecurityLayer struct {
 	includingNode           *Node
 }
 
-func NewSecurityLayer(session *SessionLayer) *SecurityLayer {
+func NewSecurityLayer(session SessionLayer) *SecurityLayer {
 	securityLayer := &SecurityLayer{
 		session: session,
 

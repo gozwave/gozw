@@ -8,7 +8,7 @@ import (
 import "github.com/bjyoungblood/gozw/zwave/commandclass"
 
 type Manager struct {
-	session *SessionLayer
+	session SessionLayer
 
 	ApiVersion     string
 	ApiLibraryType string
@@ -28,13 +28,13 @@ type Manager struct {
 	Nodes    map[uint8]*Node
 }
 
-func NewManager(session *SessionLayer) *Manager {
+func NewManager(session SessionLayer) *Manager {
 	manager := &Manager{
 		session: session,
 		Nodes:   map[uint8]*Node{},
 	}
 
-	session.manager = manager
+	session.SetManager(manager)
 
 	manager.init()
 
@@ -191,7 +191,8 @@ func (m *Manager) handleSecurityCommands(cmd *ApplicationCommandHandler, frame *
 }
 
 func (m *Manager) handleUnsolicitedFrames() {
-	for frame := range m.session.UnsolicitedFrames {
+	frames := m.session.GetUnsolicitedFrames()
+	for frame := range frames {
 		switch frame.Payload[0] {
 
 		case FnApplicationCommandHandlerBridge, FnApplicationCommandHandler:

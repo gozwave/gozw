@@ -38,9 +38,33 @@ type AddRemoveNodeResult struct {
 	err  error
 }
 
+type SessionLayer interface {
+	SetManager(manager *Manager)
+
+	GetUnsolicitedFrames() chan Frame
+	ApplicationNodeInformation(deviceOptions uint8, genericType uint8, specificType uint8, supportedCommandClasses []uint8)
+	SetDefault()
+	AddNodeToNetwork() (*Node, error)
+	RemoveNodeFromNetwork() (*Node, error)
+	GetVersion() (*VersionResponse, error)
+	MemoryGetId() (*MemoryGetIdResponse, error)
+	GetInitAppData() (*NodeListResponse, error)
+	GetSerialApiCapabilities() (*SerialApiCapabilitiesResponse, error)
+	GetNodeProtocolInfo(nodeId uint8) (*NodeProtocolInfoResponse, error)
+	SetSerialAPIReady(ready bool)
+	SendData(nodeId uint8, data []byte) (*Frame, error)
+	SendDataSecure(nodeId uint8, data []byte) error
+
+	registerApplicationCommandHandler(commandClass uint8, callback CommandClassHandlerCallback)
+	sendDataUnsafe(nodeId uint8, data []byte) (*Frame, error)
+	requestNodeInformationFrame(nodeId uint8) error
+	isNodeFailing(nodeId uint8) (bool, error)
+	removeFailedNode(nodeId uint8) (*Frame, error)
+}
+
 // @todo: ack timeouts, retransmission, backoff, etc.
 
-type SessionLayer struct {
+type ZWaveSessionLayer struct {
 	manager       *Manager
 	frameLayer    FrameLayer
 	securityLayer *SecurityLayer
@@ -61,8 +85,8 @@ type SessionLayer struct {
 	execLock *sync.Mutex
 }
 
-func NewSessionLayer(frameLayer *SerialFrameLayer) *SessionLayer {
-	session := &SessionLayer{
+func NewSessionLayer(frameLayer *SerialFrameLayer) *ZWaveSessionLayer {
+	session := &ZWaveSessionLayer{
 		frameLayer: frameLayer,
 
 		UnsolicitedFrames: make(chan Frame),
@@ -84,7 +108,15 @@ func NewSessionLayer(frameLayer *SerialFrameLayer) *SessionLayer {
 	return session
 }
 
-func (s *SessionLayer) ApplicationNodeInformation(
+func (s *ZWaveSessionLayer) GetUnsolicitedFrames() chan Frame {
+	return s.UnsolicitedFrames
+}
+
+func (s *ZWaveSessionLayer) SetManager(manager *Manager) {
+	s.manager = manager
+}
+
+func (s *ZWaveSessionLayer) ApplicationNodeInformation(
 	deviceOptions uint8,
 	genericType uint8,
 	specificType uint8,
@@ -109,7 +141,7 @@ func (s *SessionLayer) ApplicationNodeInformation(
 
 }
 
-func (s *SessionLayer) SetDefault() {
+func (s *ZWaveSessionLayer) SetDefault() {
 	done := make(chan bool)
 
 	s.execLock.Lock()
@@ -134,7 +166,7 @@ func (s *SessionLayer) SetDefault() {
 	<-done
 }
 
-func (s *SessionLayer) AddNodeToNetwork() (*Node, error) {
+func (s *ZWaveSessionLayer) AddNodeToNetwork() (*Node, error) {
 	done := make(chan *AddRemoveNodeResult)
 
 	// Just keep in mind that this will lock all other z-wave traffic until the
@@ -218,7 +250,7 @@ func (s *SessionLayer) AddNodeToNetwork() (*Node, error) {
 }
 
 // Believe it or not, this function is exempt from execLock
-func (s *SessionLayer) AddRemoveNodeStop(funcId uint8) {
+func (s *ZWaveSessionLayer) AddRemoveNodeStop(funcId uint8) {
 	done := make(chan bool)
 
 	callback := func(cb Frame) {
@@ -262,7 +294,7 @@ func (s *SessionLayer) AddRemoveNodeStop(funcId uint8) {
 }
 
 // @todo remove node is currently breaking things after it runs
-func (s *SessionLayer) RemoveNodeFromNetwork() (*Node, error) {
+func (s *ZWaveSessionLayer) RemoveNodeFromNetwork() (*Node, error) {
 	done := make(chan *AddRemoveNodeResult)
 
 	// Just keep in mind that this will lock all other z-wave traffic until the
@@ -336,7 +368,7 @@ func (s *SessionLayer) RemoveNodeFromNetwork() (*Node, error) {
 	}
 }
 
-func (s *SessionLayer) GetVersion() (*VersionResponse, error) {
+func (s *ZWaveSessionLayer) GetVersion() (*VersionResponse, error) {
 	response, err := s.writeSimple(FnGetVersion, []byte{})
 	if err != nil {
 		return nil, err
@@ -345,7 +377,7 @@ func (s *SessionLayer) GetVersion() (*VersionResponse, error) {
 	return ParseVersionResponse(response.Payload), nil
 }
 
-func (s *SessionLayer) MemoryGetId() (*MemoryGetIdResponse, error) {
+func (s *ZWaveSessionLayer) MemoryGetId() (*MemoryGetIdResponse, error) {
 	response, err := s.writeSimple(FnMemoryGetId, []byte{})
 	if err != nil {
 		return nil, err
@@ -354,7 +386,7 @@ func (s *SessionLayer) MemoryGetId() (*MemoryGetIdResponse, error) {
 	return ParseMemoryGetIdResponse(response.Payload), nil
 }
 
-func (s *SessionLayer) GetInitAppData() (*NodeListResponse, error) {
+func (s *ZWaveSessionLayer) GetInitAppData() (*NodeListResponse, error) {
 	response, err := s.writeSimple(FnGetInitAppData, []byte{})
 	if err != nil {
 		return nil, err
@@ -363,7 +395,7 @@ func (s *SessionLayer) GetInitAppData() (*NodeListResponse, error) {
 	return ParseNodeListResponse(response.Payload), nil
 }
 
-func (s *SessionLayer) isNodeFailing(nodeId uint8) (bool, error) {
+func (s *ZWaveSessionLayer) isNodeFailing(nodeId uint8) (bool, error) {
 	response, err := s.writeSimple(FnIsNodeFailed, []byte{nodeId})
 	if err != nil {
 		return false, err
@@ -376,7 +408,7 @@ func (s *SessionLayer) isNodeFailing(nodeId uint8) (bool, error) {
 	return true, nil
 }
 
-func (s *SessionLayer) GetSerialApiCapabilities() (*SerialApiCapabilitiesResponse, error) {
+func (s *ZWaveSessionLayer) GetSerialApiCapabilities() (*SerialApiCapabilitiesResponse, error) {
 	response, err := s.writeSimple(FnSerialApiCapabilities, []byte{})
 	if err != nil {
 		return nil, err
@@ -385,7 +417,7 @@ func (s *SessionLayer) GetSerialApiCapabilities() (*SerialApiCapabilitiesRespons
 	return ParseSerialApiCapabilitiesResponse(response.Payload), nil
 }
 
-func (s *SessionLayer) GetNodeProtocolInfo(nodeId uint8) (*NodeProtocolInfoResponse, error) {
+func (s *ZWaveSessionLayer) GetNodeProtocolInfo(nodeId uint8) (*NodeProtocolInfoResponse, error) {
 	response, err := s.writeSimple(FnGetNodeProtocolInfo, []byte{nodeId})
 	if err != nil {
 		return nil, err
@@ -394,7 +426,7 @@ func (s *SessionLayer) GetNodeProtocolInfo(nodeId uint8) (*NodeProtocolInfoRespo
 	return ParseNodeProtocolInfoResponse(response.Payload), nil
 }
 
-func (s *SessionLayer) SetSerialAPIReady(ready bool) {
+func (s *ZWaveSessionLayer) SetSerialAPIReady(ready bool) {
 	var rdy byte
 	if ready {
 		rdy = 1
@@ -410,7 +442,7 @@ func (s *SessionLayer) SetSerialAPIReady(ready bool) {
 	s.write(NewRequestFrame(payload))
 }
 
-func (s *SessionLayer) requestNodeInformationFrame(nodeId uint8) error {
+func (s *ZWaveSessionLayer) requestNodeInformationFrame(nodeId uint8) error {
 	_, err := s.writeSimple(FnRequestNodeInfo, []byte{nodeId})
 	return err
 }
@@ -423,7 +455,7 @@ func (s *ZWaveSessionLayer) SendData(nodeId uint8, data []byte) (*Frame, error) 
 	return s.sendDataUnsafe(nodeId, data)
 }
 
-func (s *SessionLayer) SendDataSecure(nodeId uint8, data []byte) error {
+func (s *ZWaveSessionLayer) SendDataSecure(nodeId uint8, data []byte) error {
 	s.execLock.Lock()
 	defer s.execLock.Unlock()
 	defer runtime.Gosched()
@@ -431,7 +463,7 @@ func (s *SessionLayer) SendDataSecure(nodeId uint8, data []byte) error {
 	return s.securityLayer.sendDataSecure(nodeId, data, false)
 }
 
-func (s *SessionLayer) sendDataUnsafe(nodeId uint8, data []byte) (*Frame, error) {
+func (s *ZWaveSessionLayer) sendDataUnsafe(nodeId uint8, data []byte) (*Frame, error) {
 	done := make(chan CallbackResult)
 
 	callback := func(callbackFrame Frame) {
@@ -464,7 +496,7 @@ func (s *SessionLayer) sendDataUnsafe(nodeId uint8, data []byte) (*Frame, error)
 }
 
 // Writes a single byte function call and awaits the response frame
-func (s *SessionLayer) writeSimple(funcId uint8, payload []byte) (*Frame, error) {
+func (s *ZWaveSessionLayer) writeSimple(funcId uint8, payload []byte) (*Frame, error) {
 	s.execLock.Lock()
 	defer s.execLock.Unlock()
 	defer runtime.Gosched()
@@ -482,7 +514,7 @@ func (s *SessionLayer) writeSimple(funcId uint8, payload []byte) (*Frame, error)
 	}
 }
 
-func (s *SessionLayer) removeFailedNode(nodeId uint8) (*Frame, error) {
+func (s *ZWaveSessionLayer) removeFailedNode(nodeId uint8) (*Frame, error) {
 	done := make(chan CallbackResult)
 
 	callback := func(callbackFrame Frame) {
@@ -510,12 +542,12 @@ func (s *SessionLayer) removeFailedNode(nodeId uint8) (*Frame, error) {
 }
 
 // DO NOT CALL THIS WITHOUT ALREADY HAVING OBTAINED THE LOCK
-func (s *SessionLayer) write(frame *Frame) {
+func (s *ZWaveSessionLayer) write(frame *Frame) {
 	s.lastRequestedFn = frame.Payload[0]
 	s.frameLayer.Write(frame)
 }
 
-func (s *SessionLayer) readFrames() {
+func (s *ZWaveSessionLayer) readFrames() {
 	for frame := range s.frameLayer.GetOutputChannel() {
 		s.processFrame(frame)
 	}
@@ -523,7 +555,7 @@ func (s *SessionLayer) readFrames() {
 
 // for each incoming frame, determine how to handle it based on whether it is a
 // return value (response), a callback (request), or an unsolicited frame (request)
-func (s *SessionLayer) processFrame(frame Frame) {
+func (s *ZWaveSessionLayer) processFrame(frame Frame) {
 	if frame.IsResponse() {
 		// handle frame as a response
 		if frame.Payload[0] == s.lastRequestedFn {
@@ -582,7 +614,7 @@ func (s *SessionLayer) processFrame(frame Frame) {
 	}
 }
 
-func (s *SessionLayer) handleApplicationCommand(cmd *ApplicationCommandHandler, frame *Frame) bool {
+func (s *ZWaveSessionLayer) handleApplicationCommand(cmd *ApplicationCommandHandler, frame *Frame) bool {
 	cc := cmd.CommandData[0]
 
 	if cc == commandclass.CommandClassSecurity {
@@ -632,15 +664,15 @@ func (s *SessionLayer) handleApplicationCommand(cmd *ApplicationCommandHandler, 
 
 // This will prevent these command classes from reaching the application layer
 // until they are unregistered
-func (s *SessionLayer) registerApplicationCommandHandler(commandClass uint8, callback CommandClassHandlerCallback) {
+func (s *ZWaveSessionLayer) registerApplicationCommandHandler(commandClass uint8, callback CommandClassHandlerCallback) {
 	s.applicationCommandHandlers[commandClass] = callback
 }
 
-func (s *SessionLayer) unregisterApplicationCommandHandler(commandClass uint8) {
+func (s *ZWaveSessionLayer) unregisterApplicationCommandHandler(commandClass uint8) {
 	delete(s.applicationCommandHandlers, commandClass)
 }
 
-func (s *SessionLayer) registerCallback(callback Callback) uint8 {
+func (s *ZWaveSessionLayer) registerCallback(callback Callback) uint8 {
 	seqNo := s.getSequenceNumber()
 
 	s.callbacks[seqNo] = callback
@@ -648,11 +680,11 @@ func (s *SessionLayer) registerCallback(callback Callback) uint8 {
 	return seqNo
 }
 
-func (s *SessionLayer) unregisterCallback(seqNo uint8) {
+func (s *ZWaveSessionLayer) unregisterCallback(seqNo uint8) {
 	delete(s.callbacks, seqNo)
 }
 
-func (s *SessionLayer) getSequenceNumber() uint8 {
+func (s *ZWaveSessionLayer) getSequenceNumber() uint8 {
 	if s.currentSequenceNumber == MaxSequenceNumber {
 		s.currentSequenceNumber = MinSequenceNumber
 	} else {
