@@ -131,7 +131,7 @@ func (n *Node) updateSupportedSecureCommands() {
 func (n *Node) sendNoOp() {
 	n.manager.session.SendData(n.NodeId, []byte{
 		commandclass.CommandClassNoOperation,
-	}, false)
+	})
 }
 
 func (n *Node) IsFailing() bool {

@@ -137,7 +137,7 @@ func (m *Manager) RemoveNode() {
 }
 
 func (m *Manager) SendData(nodeId uint8, data []byte) {
-	resp, err := m.session.SendData(nodeId, data, false)
+	resp, err := m.session.SendData(nodeId, data)
 	fmt.Println(resp, err)
 	if err != nil {
 		fmt.Println("senddata error", resp)

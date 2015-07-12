@@ -415,7 +415,7 @@ func (s *SessionLayer) requestNodeInformationFrame(nodeId uint8) error {
 	return err
 }
 
-func (s *SessionLayer) SendData(nodeId uint8, data []byte, secure bool) (*Frame, error) {
+func (s *ZWaveSessionLayer) SendData(nodeId uint8, data []byte) (*Frame, error) {
 	s.execLock.Lock()
 	defer s.execLock.Unlock()
 	defer runtime.Gosched()
