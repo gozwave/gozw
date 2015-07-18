@@ -549,7 +549,7 @@ func (s *ZWaveSessionLayer) write(frame *Frame) {
 
 func (s *ZWaveSessionLayer) readFrames() {
 	for frame := range s.frameLayer.GetOutputChannel() {
-		s.processFrame(frame)
+		go s.processFrame(frame)
 	}
 }
 
