@@ -1,4 +1,4 @@
-package zwave
+package security
 
 import (
 	"testing"

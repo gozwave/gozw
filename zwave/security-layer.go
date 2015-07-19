@@ -9,6 +9,7 @@ import (
 
 	"github.com/bjyoungblood/gozw/zwave/commandclass"
 	"github.com/bjyoungblood/gozw/zwave/frame"
+	"github.com/bjyoungblood/gozw/zwave/security"
 )
 
 const (
@@ -48,10 +49,10 @@ type ZWaveSecurityLayer struct {
 	session SessionLayer
 
 	// internal nonce table is keyed by the first byte of the nonce
-	internalNonceTable *NonceTable
+	internalNonceTable *security.NonceTable
 
 	// external nonce table is keyed by the node id
-	externalNonceTable *NonceTable
+	externalNonceTable *security.NonceTable
 
 	// maps node id to
 	waitForNonce map[byte]chan bool
@@ -72,8 +73,8 @@ func NewSecurityLayer(session SessionLayer) *ZWaveSecurityLayer {
 	securityLayer := &ZWaveSecurityLayer{
 		session: session,
 
-		internalNonceTable: NewNonceTable(),
-		externalNonceTable: NewNonceTable(),
+		internalNonceTable: security.NewNonceTable(),
+		externalNonceTable: security.NewNonceTable(),
 
 		waitForNonce: map[byte]chan bool{},
 		waitMapLock:  &sync.Mutex{}, // @todo add locking
@@ -113,7 +114,7 @@ func (s *ZWaveSecurityLayer) SecurityFrameHandler(cmd *ApplicationCommandHandler
 			fmt.Println("in secure inclusion mode")
 			s.sendDataSecure(
 				cmd.SrcNodeId,
-				commandclass.NewSecurityNetworkKeySet(NetworkKey),
+				commandclass.NewSecurityNetworkKeySet(security.NetworkKey), // @todo
 				true,
 			)
 		}
@@ -182,7 +183,7 @@ func (s *ZWaveSecurityLayer) DecryptMessage(data *commandclass.SecurityMessageEn
 
 	pl := make([]byte, len(data.EncryptedPayload))
 	copy(pl, data.EncryptedPayload)
-	decryptedPayload := CryptMessage(pl, iv, NetworkEncKey)
+	decryptedPayload := security.CryptMessage(pl, iv, security.NetworkEncKey)
 
 	return decryptedPayload[1:], nil
 }
@@ -196,7 +197,7 @@ func (s *ZWaveSecurityLayer) sendSecurePayload(
 	sequenceCounter uint8,
 ) error {
 
-	var receiverNonce Nonce
+	var receiverNonce security.Nonce
 	var err error
 
 	if isSecondFrame {
@@ -230,11 +231,11 @@ func (s *ZWaveSecurityLayer) sendSecurePayload(
 
 	var encKey, authKey []byte
 	if inclusionMode {
-		encKey = InclusionEncKey
-		authKey = InclusionAuthKey
+		encKey = security.InclusionEncKey
+		authKey = security.InclusionAuthKey
 	} else {
-		encKey = NetworkEncKey
-		authKey = NetworkAuthKey
+		encKey = security.NetworkEncKey
+		authKey = security.NetworkAuthKey
 	}
 
 	data = append([]byte{securityByte}, data...)
@@ -242,7 +243,7 @@ func (s *ZWaveSecurityLayer) sendSecurePayload(
 	// full initialization vector = senderNonce + receiverNonce
 	iv := append(senderNonce, receiverNonce...)
 
-	encryptedPayload := CryptMessage(data, iv, encKey)
+	encryptedPayload := security.CryptMessage(data, iv, encKey)
 
 	authDataBuf := append(iv, commandclass.CommandSecurityMessageEncapsulation) // @todo CC should be determined by sequencing
 	authDataBuf = append(authDataBuf, 1)                                        // sender node
@@ -257,7 +258,7 @@ func (s *ZWaveSecurityLayer) sendSecurePayload(
 		0x00, 0x00, 0x00, 0x00,
 	}
 
-	hmac := CalculateHMAC(authDataBuf, authIV, authKey)
+	hmac := security.CalculateHMAC(authDataBuf, authIV, authKey)
 
 	encapsulatedMessage := commandclass.NewSecurityMessageEncapsulation(
 		senderNonce,
@@ -314,8 +315,8 @@ func (s *ZWaveSecurityLayer) includeSecureNode(node *Node) error {
 	return err
 }
 
-func (s *ZWaveSecurityLayer) getExternalNonce(nodeId uint8) (Nonce, error) {
-	var nonce Nonce
+func (s *ZWaveSecurityLayer) getExternalNonce(nodeId uint8) (security.Nonce, error) {
+	var nonce security.Nonce
 	var err error
 
 	nonce, err = s.externalNonceTable.Get(nodeId)
@@ -328,7 +329,7 @@ func (s *ZWaveSecurityLayer) getExternalNonce(nodeId uint8) (Nonce, error) {
 	return s.waitForExternalNonce(nodeId)
 }
 
-func (s *ZWaveSecurityLayer) waitForExternalNonce(nodeId uint8) (Nonce, error) {
+func (s *ZWaveSecurityLayer) waitForExternalNonce(nodeId uint8) (security.Nonce, error) {
 	var waitChan chan bool
 	var ok bool
 
