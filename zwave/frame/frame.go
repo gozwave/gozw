@@ -1,4 +1,4 @@
-package zwave
+package frame
 
 import (
 	"bytes"

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/bjyoungblood/gozw/zwave/commandclass"
+	"github.com/bjyoungblood/gozw/zwave/frame"
 )
 
 const (
@@ -40,7 +41,7 @@ type SecurityLayer interface {
 	includeSecureNode(node *Node) error
 	sendDataSecure(nodeId uint8, data []byte, inclusionMode bool) error
 	DecryptMessage(data *commandclass.SecurityMessageEncapsulation) ([]byte, error)
-	SecurityFrameHandler(cmd *ApplicationCommandHandler, frame *Frame)
+	SecurityFrameHandler(cmd *ApplicationCommandHandler, frame *frame.Frame)
 }
 
 type ZWaveSecurityLayer struct {
@@ -88,7 +89,7 @@ func NewSecurityLayer(session SessionLayer) *ZWaveSecurityLayer {
 	return securityLayer
 }
 
-func (s *ZWaveSecurityLayer) SecurityFrameHandler(cmd *ApplicationCommandHandler, frame *Frame) {
+func (s *ZWaveSecurityLayer) SecurityFrameHandler(cmd *ApplicationCommandHandler, frame *frame.Frame) {
 
 	switch cmd.CommandData[1] {
 	case commandclass.CommandSecurityVersion:

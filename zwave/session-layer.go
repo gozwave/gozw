@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/bjyoungblood/gozw/zwave/commandclass"
+	"github.com/bjyoungblood/gozw/zwave/frame"
 )
 
 const (
@@ -25,11 +26,11 @@ const (
 	AddRemoveNodeFoundTimeout = time.Second * 30 // @todo recommended is 60, but 30 is nicer for testing
 )
 
-type CommandClassHandlerCallback func(*ApplicationCommandHandler, *Frame)
+type CommandClassHandlerCallback func(*ApplicationCommandHandler, *frame.Frame)
 
-type Callback func(Frame)
+type Callback func(frame.Frame)
 type CallbackResult struct {
-	frame *Frame
+	frame *frame.Frame
 	err   error
 }
 
@@ -41,7 +42,7 @@ type AddRemoveNodeResult struct {
 type SessionLayer interface {
 	SetManager(manager *Manager)
 
-	GetUnsolicitedFrames() chan Frame
+	GetUnsolicitedFrames() chan frame.Frame
 	ApplicationNodeInformation(deviceOptions uint8, genericType uint8, specificType uint8, supportedCommandClasses []uint8)
 	SetDefault()
 	AddNodeToNetwork() (*Node, error)
@@ -52,27 +53,27 @@ type SessionLayer interface {
 	GetSerialApiCapabilities() (*SerialApiCapabilitiesResponse, error)
 	GetNodeProtocolInfo(nodeId uint8) (*NodeProtocolInfoResponse, error)
 	SetSerialAPIReady(ready bool)
-	SendData(nodeId uint8, data []byte) (*Frame, error)
+	SendData(nodeId uint8, data []byte) (*frame.Frame, error)
 	SendDataSecure(nodeId uint8, data []byte) error
 
 	registerApplicationCommandHandler(commandClass uint8, callback CommandClassHandlerCallback)
-	sendDataUnsafe(nodeId uint8, data []byte) (*Frame, error)
+	sendDataUnsafe(nodeId uint8, data []byte) (*frame.Frame, error)
 	requestNodeInformationFrame(nodeId uint8) error
 	isNodeFailing(nodeId uint8) (bool, error)
-	removeFailedNode(nodeId uint8) (*Frame, error)
+	removeFailedNode(nodeId uint8) (*frame.Frame, error)
 }
 
 // @todo: ack timeouts, retransmission, backoff, etc.
 
 type ZWaveSessionLayer struct {
 	manager       *Manager
-	frameLayer    FrameLayer
+	frameLayer    frame.FrameLayer
 	securityLayer SecurityLayer
 
-	UnsolicitedFrames chan Frame
+	UnsolicitedFrames chan frame.Frame
 
 	lastRequestedFn uint8
-	responses       chan Frame
+	responses       chan frame.Frame
 
 	// maps sequence number to callback
 	callbacks map[uint8]Callback
@@ -85,14 +86,14 @@ type ZWaveSessionLayer struct {
 	execLock *sync.Mutex
 }
 
-func NewSessionLayer(frameLayer *SerialFrameLayer) *ZWaveSessionLayer {
+func NewSessionLayer(frameLayer *frame.SerialFrameLayer) *ZWaveSessionLayer {
 	session := &ZWaveSessionLayer{
 		frameLayer: frameLayer,
 
-		UnsolicitedFrames: make(chan Frame),
+		UnsolicitedFrames: make(chan frame.Frame),
 
 		lastRequestedFn: 0,
-		responses:       make(chan Frame),
+		responses:       make(chan frame.Frame),
 
 		callbacks: map[uint8]Callback{},
 
@@ -108,7 +109,7 @@ func NewSessionLayer(frameLayer *SerialFrameLayer) *ZWaveSessionLayer {
 	return session
 }
 
-func (s *ZWaveSessionLayer) GetUnsolicitedFrames() chan Frame {
+func (s *ZWaveSessionLayer) GetUnsolicitedFrames() chan frame.Frame {
 	return s.UnsolicitedFrames
 }
 
@@ -137,7 +138,7 @@ func (s *ZWaveSessionLayer) ApplicationNodeInformation(
 
 	payload = append(payload, supportedCommandClasses...)
 
-	s.write(NewRequestFrame(payload))
+	s.write(frame.NewRequestFrame(payload))
 
 }
 
@@ -148,7 +149,7 @@ func (s *ZWaveSessionLayer) SetDefault() {
 	defer s.execLock.Unlock()
 	defer runtime.Gosched()
 
-	callback := func(frame Frame) {
+	callback := func(frame frame.Frame) {
 		done <- true
 	}
 
@@ -160,7 +161,7 @@ func (s *ZWaveSessionLayer) SetDefault() {
 		seqNo,
 	}
 
-	s.write(NewRequestFrame(payload))
+	s.write(frame.NewRequestFrame(payload))
 
 	// @todo timeout
 	<-done
@@ -178,7 +179,7 @@ func (s *ZWaveSessionLayer) AddNodeToNetwork() (*Node, error) {
 	var newNode *Node = nil
 	timeout := time.NewTimer(0)
 
-	callback := func(cb Frame) {
+	callback := func(cb frame.Frame) {
 		payload := ParseAddNodeCallback(cb.Payload)
 		fmt.Println("ADD NODE: FRAME", payload)
 		// at each step, don't forget to kick the timer to the correct value
@@ -231,7 +232,7 @@ func (s *ZWaveSessionLayer) AddNodeToNetwork() (*Node, error) {
 	seqNo := s.registerCallback(callback)
 	defer s.unregisterCallback(seqNo)
 
-	frame := NewRequestFrame([]byte{
+	frame := frame.NewRequestFrame([]byte{
 		FnAddNodeToNetwork,
 		AddNodeAny | AddNodeOptionNetworkWide | AddNodeOptionNormalPower,
 		seqNo,
@@ -253,7 +254,7 @@ func (s *ZWaveSessionLayer) AddNodeToNetwork() (*Node, error) {
 func (s *ZWaveSessionLayer) AddRemoveNodeStop(funcId uint8) {
 	done := make(chan bool)
 
-	callback := func(cb Frame) {
+	callback := func(cb frame.Frame) {
 		payload := ParseAddNodeCallback(cb.Payload)
 		fmt.Println("ADD NODE2: FRAME", payload)
 		switch {
@@ -264,7 +265,7 @@ func (s *ZWaveSessionLayer) AddRemoveNodeStop(funcId uint8) {
 		}
 
 		// this should happen regardless of what the previous status was
-		s.write(NewRequestFrame([]byte{
+		s.write(frame.NewRequestFrame([]byte{
 			funcId,
 			AddNodeStop,
 			0x00, // @todo should this be 0x0 or omitted entirely?
@@ -277,7 +278,7 @@ func (s *ZWaveSessionLayer) AddRemoveNodeStop(funcId uint8) {
 	defer s.unregisterCallback(seqNo)
 	fmt.Println("remove node stop seq", seqNo)
 
-	frame := NewRequestFrame([]byte{
+	frame := frame.NewRequestFrame([]byte{
 		funcId,
 		AddNodeStop,
 		seqNo,
@@ -306,7 +307,7 @@ func (s *ZWaveSessionLayer) RemoveNodeFromNetwork() (*Node, error) {
 	var newNode *Node = nil
 	timeout := time.NewTimer(0)
 
-	callback := func(cb Frame) {
+	callback := func(cb frame.Frame) {
 		payload := ParseAddNodeCallback(cb.Payload)
 		fmt.Println("REMOVE NODE: FRAME", payload)
 		// at each step, don't forget to kick the timer to the correct value
@@ -351,7 +352,7 @@ func (s *ZWaveSessionLayer) RemoveNodeFromNetwork() (*Node, error) {
 	fmt.Println("remove node seq", seqNo)
 	defer s.unregisterCallback(seqNo)
 
-	frame := NewRequestFrame([]byte{
+	frame := frame.NewRequestFrame([]byte{
 		FnRemoveNodeFromNetwork,
 		RemoveNodeAny,
 		seqNo,
@@ -439,7 +440,7 @@ func (s *ZWaveSessionLayer) SetSerialAPIReady(ready bool) {
 	defer runtime.Gosched()
 
 	payload := []byte{FnSerialAPIReady, rdy}
-	s.write(NewRequestFrame(payload))
+	s.write(frame.NewRequestFrame(payload))
 }
 
 func (s *ZWaveSessionLayer) requestNodeInformationFrame(nodeId uint8) error {
@@ -447,7 +448,7 @@ func (s *ZWaveSessionLayer) requestNodeInformationFrame(nodeId uint8) error {
 	return err
 }
 
-func (s *ZWaveSessionLayer) SendData(nodeId uint8, data []byte) (*Frame, error) {
+func (s *ZWaveSessionLayer) SendData(nodeId uint8, data []byte) (*frame.Frame, error) {
 	s.execLock.Lock()
 	defer s.execLock.Unlock()
 	defer runtime.Gosched()
@@ -463,10 +464,10 @@ func (s *ZWaveSessionLayer) SendDataSecure(nodeId uint8, data []byte) error {
 	return s.securityLayer.sendDataSecure(nodeId, data, false)
 }
 
-func (s *ZWaveSessionLayer) sendDataUnsafe(nodeId uint8, data []byte) (*Frame, error) {
+func (s *ZWaveSessionLayer) sendDataUnsafe(nodeId uint8, data []byte) (*frame.Frame, error) {
 	done := make(chan CallbackResult)
 
-	callback := func(callbackFrame Frame) {
+	callback := func(callbackFrame frame.Frame) {
 		// @todo implement me better maybe
 		done <- CallbackResult{
 			frame: &callbackFrame,
@@ -487,7 +488,7 @@ func (s *ZWaveSessionLayer) sendDataUnsafe(nodeId uint8, data []byte) (*Frame, e
 	payload = append(payload, TransmitOptionAck) // @todo implement ability to choose options
 	payload = append(payload, seqNo)
 
-	frame := NewRequestFrame(payload)
+	frame := frame.NewRequestFrame(payload)
 
 	s.write(frame)
 
@@ -496,14 +497,14 @@ func (s *ZWaveSessionLayer) sendDataUnsafe(nodeId uint8, data []byte) (*Frame, e
 }
 
 // Writes a single byte function call and awaits the response frame
-func (s *ZWaveSessionLayer) writeSimple(funcId uint8, payload []byte) (*Frame, error) {
+func (s *ZWaveSessionLayer) writeSimple(funcId uint8, payload []byte) (*frame.Frame, error) {
 	s.execLock.Lock()
 	defer s.execLock.Unlock()
 	defer runtime.Gosched()
 
 	payload = append([]byte{funcId}, payload...)
 
-	s.write(NewRequestFrame(payload))
+	s.write(frame.NewRequestFrame(payload))
 
 	// @todo correct timeout implementation?
 	select {
@@ -514,10 +515,10 @@ func (s *ZWaveSessionLayer) writeSimple(funcId uint8, payload []byte) (*Frame, e
 	}
 }
 
-func (s *ZWaveSessionLayer) removeFailedNode(nodeId uint8) (*Frame, error) {
+func (s *ZWaveSessionLayer) removeFailedNode(nodeId uint8) (*frame.Frame, error) {
 	done := make(chan CallbackResult)
 
-	callback := func(callbackFrame Frame) {
+	callback := func(callbackFrame frame.Frame) {
 		done <- CallbackResult{
 			frame: &callbackFrame,
 			err:   nil,
@@ -533,7 +534,7 @@ func (s *ZWaveSessionLayer) removeFailedNode(nodeId uint8) (*Frame, error) {
 		seqNo,
 	}
 
-	frame := NewRequestFrame(payload)
+	frame := frame.NewRequestFrame(payload)
 
 	s.write(frame)
 
@@ -542,7 +543,7 @@ func (s *ZWaveSessionLayer) removeFailedNode(nodeId uint8) (*Frame, error) {
 }
 
 // DO NOT CALL THIS WITHOUT ALREADY HAVING OBTAINED THE LOCK
-func (s *ZWaveSessionLayer) write(frame *Frame) {
+func (s *ZWaveSessionLayer) write(frame *frame.Frame) {
 	s.lastRequestedFn = frame.Payload[0]
 	s.frameLayer.Write(frame)
 }
@@ -555,7 +556,7 @@ func (s *ZWaveSessionLayer) readFrames() {
 
 // for each incoming frame, determine how to handle it based on whether it is a
 // return value (response), a callback (request), or an unsolicited frame (request)
-func (s *ZWaveSessionLayer) processFrame(frame Frame) {
+func (s *ZWaveSessionLayer) processFrame(frame frame.Frame) {
 	if frame.IsResponse() {
 		// handle frame as a response
 		if frame.Payload[0] == s.lastRequestedFn {
@@ -614,7 +615,7 @@ func (s *ZWaveSessionLayer) processFrame(frame Frame) {
 	}
 }
 
-func (s *ZWaveSessionLayer) handleApplicationCommand(cmd *ApplicationCommandHandler, frame *Frame) bool {
+func (s *ZWaveSessionLayer) handleApplicationCommand(cmd *ApplicationCommandHandler, frame *frame.Frame) bool {
 	cc := cmd.CommandData[0]
 
 	if cc == commandclass.CommandClassSecurity {

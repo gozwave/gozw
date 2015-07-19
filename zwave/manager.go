@@ -5,7 +5,10 @@ import (
 	"sync"
 )
 
-import "github.com/bjyoungblood/gozw/zwave/commandclass"
+import (
+	"github.com/bjyoungblood/gozw/zwave/commandclass"
+	"github.com/bjyoungblood/gozw/zwave/frame"
+)
 
 type Manager struct {
 	session SessionLayer
@@ -176,7 +179,7 @@ func (m *Manager) loadNodes() {
 	wg.Wait()
 }
 
-func (m *Manager) handleSecurityCommands(cmd *ApplicationCommandHandler, frame *Frame) {
+func (m *Manager) handleSecurityCommands(cmd *ApplicationCommandHandler, frame *frame.Frame) {
 	switch cmd.CommandData[1] {
 	case commandclass.CommandSecurityCommandsSupportedReport:
 		cc := commandclass.ParseSecurityCommandsSupportedReport(cmd.CommandData)

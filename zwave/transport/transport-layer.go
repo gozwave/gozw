@@ -1,4 +1,4 @@
-package zwave
+package transport
 
 import (
 	"bufio"

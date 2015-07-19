@@ -6,16 +6,18 @@ import (
 
 	"github.com/bjyoungblood/gozw/zwave"
 	"github.com/bjyoungblood/gozw/zwave/commandclass"
+	"github.com/bjyoungblood/gozw/zwave/frame"
+	"github.com/bjyoungblood/gozw/zwave/transport"
 	"github.com/peterh/liner"
 )
 
 func main() {
-	transport, err := zwave.NewSerialTransportLayer("/tmp/usbmodem", 115200)
+	transport, err := transport.NewSerialTransportLayer("/tmp/usbmodem", 115200)
 	if err != nil {
 		panic(err)
 	}
 
-	frameLayer := zwave.NewFrameLayer(transport)
+	frameLayer := frame.NewFrameLayer(transport)
 	sessionLayer := zwave.NewSessionLayer(frameLayer)
 	manager := zwave.NewManager(sessionLayer)
 
