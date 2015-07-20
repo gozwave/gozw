@@ -7,6 +7,7 @@ import (
 )
 
 func TestMarshalFrame(t *testing.T) {
+	t.Parallel()
 
 	frame := NewRequestFrame([]byte{
 		0x13,
@@ -33,6 +34,8 @@ func TestMarshalFrame(t *testing.T) {
 }
 
 func TestChecksum(t *testing.T) {
+	t.Parallel()
+
 	frame := NewRequestFrame([]byte{
 		0x13,
 		0x01,
@@ -48,6 +51,8 @@ func TestChecksum(t *testing.T) {
 }
 
 func TestUnmarshalFrame(t *testing.T) {
+	t.Parallel()
+
 	frame := NewRequestFrame([]byte{
 		0x13,
 		0x01,

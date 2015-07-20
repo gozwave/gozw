@@ -8,6 +8,8 @@ import (
 )
 
 func TestGetSetNonce(t *testing.T) {
+	t.Parallel()
+
 	table := NewNonceTable()
 
 	table.Set(0x00, []byte{0x00, 0x01, 0x02, 0x03}, time.Second)
@@ -22,6 +24,8 @@ func TestGetSetNonce(t *testing.T) {
 }
 
 func TestGetDeletesItem(t *testing.T) {
+	t.Parallel()
+
 	table := NewNonceTable()
 
 	table.Set(0x00, []byte{0x00, 0x01, 0x02, 0x03}, time.Second)
@@ -36,6 +40,8 @@ func TestGetDeletesItem(t *testing.T) {
 }
 
 func TestDeleteItem(t *testing.T) {
+	t.Parallel()
+
 	table := NewNonceTable()
 
 	table.Set(0x00, []byte{0x00, 0x01, 0x02, 0x03}, time.Second)
@@ -47,6 +53,8 @@ func TestDeleteItem(t *testing.T) {
 }
 
 func TestGenerate(t *testing.T) {
+	t.Parallel()
+
 	table := NewNonceTable()
 
 	nonce, err := table.Generate(time.Second)
@@ -55,6 +63,8 @@ func TestGenerate(t *testing.T) {
 }
 
 func TestNoncesTimeOut(t *testing.T) {
+	t.Parallel()
+
 	table := NewNonceTable()
 
 	table.Set(0x00, []byte{0x00}, time.Microsecond*10)
@@ -66,6 +76,8 @@ func TestNoncesTimeOut(t *testing.T) {
 }
 
 func TestNonceSetResetsTimeout(t *testing.T) {
+	t.Parallel()
+
 	table := NewNonceTable()
 
 	table.Set(0x00, []byte{0x00}, time.Millisecond*100)

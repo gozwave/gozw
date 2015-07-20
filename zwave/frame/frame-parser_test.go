@@ -8,6 +8,7 @@ import (
 )
 
 func TestParsingDataFrame(t *testing.T) {
+	t.Parallel()
 
 	parserInput := make(chan byte)
 	parserOutput := make(chan *FrameParseEvent, 1)
@@ -44,6 +45,7 @@ func TestParsingDataFrame(t *testing.T) {
 }
 
 func TestInvalidChecksum(t *testing.T) {
+	t.Parallel()
 
 	parserInput := make(chan byte)
 	parserOutput := make(chan *FrameParseEvent, 1)
@@ -81,6 +83,8 @@ func TestInvalidChecksum(t *testing.T) {
 }
 
 func TestParseTimeout(t *testing.T) {
+	t.Parallel()
+
 	parserInput := make(chan byte)
 	parserOutput := make(chan *FrameParseEvent, 1)
 	acks := make(chan bool, 1)
@@ -102,6 +106,8 @@ func TestParseTimeout(t *testing.T) {
 }
 
 func TestAcksNaksCans(t *testing.T) {
+	t.Parallel()
+
 	parserInput := make(chan byte)
 	parserOutput := make(chan *FrameParseEvent, 1)
 	acks := make(chan bool, 1)
@@ -129,6 +135,8 @@ func TestAcksNaksCans(t *testing.T) {
 }
 
 func TestRecoversAfterInvalidLength(t *testing.T) {
+	t.Parallel()
+
 	parserInput := make(chan byte)
 	parserOutput := make(chan *FrameParseEvent, 1)
 	acks := make(chan bool, 1)

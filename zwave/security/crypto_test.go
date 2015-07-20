@@ -27,16 +27,22 @@ var authIV = []byte{
 }
 
 func TestGenerateNonceReturns8ByteSlice(t *testing.T) {
+	t.Parallel()
+
 	assert.Equal(t, 8, len(GenerateNonce()))
 }
 
 func TestEncryptEBS(t *testing.T) {
+	t.Parallel()
+
 	encryptedKey := EncryptEBS(InclusionKey, EncryptPassword)
 	assert.NotEqual(t, InclusionKey, encryptedKey)
 	assert.Len(t, encryptedKey, 16)
 }
 
 func TestCryptMessage(t *testing.T) {
+	t.Parallel()
+
 	encryptedMessage := CryptMessage(testMessagePlaintext, testIV, testEncryptionKey)
 
 	assert.Equal(t, testMessageCiphertext, encryptedMessage)
@@ -48,6 +54,7 @@ func TestCryptMessage(t *testing.T) {
 }
 
 func TestCalculateHMAC(t *testing.T) {
+	t.Parallel()
 
 	authData := []byte{
 		commandclass.CommandSecurityMessageEncapsulation,
@@ -71,6 +78,8 @@ func TestCalculateHMAC(t *testing.T) {
 }
 
 func TestPadPayloadToBlockSize(t *testing.T) {
+	t.Parallel()
+
 	short := []byte{0, 1, 2, 3, 4}
 	message := []byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}
 

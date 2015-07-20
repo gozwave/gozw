@@ -9,6 +9,8 @@ import (
 )
 
 func TestGoodIncomingFrameResultsInAck(t *testing.T) {
+	t.Parallel()
+
 	bytes := make(chan byte, 100)
 	var bytesFromTransport <-chan byte = bytes
 
@@ -43,6 +45,8 @@ func TestGoodIncomingFrameResultsInAck(t *testing.T) {
 }
 
 func TestBadIncomingFrameResultsInNak(t *testing.T) {
+	t.Parallel()
+
 	bytes := make(chan byte, 100)
 	var bytesFromTransport <-chan byte = bytes
 
