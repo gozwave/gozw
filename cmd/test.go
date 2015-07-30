@@ -1,6 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"time"
+
+	"github.com/bjyoungblood/gozw/zwave/commandclass"
 	"github.com/bjyoungblood/gozw/zwave/frame"
 	"github.com/bjyoungblood/gozw/zwave/serial-api"
 	"github.com/bjyoungblood/gozw/zwave/session"
@@ -20,11 +24,27 @@ func main() {
 
 	// apiLayer.SoftReset()
 
-	spew.Dump(apiLayer.GetVersion())
-	spew.Dump(apiLayer.GetNodeList())
-	spew.Dump(apiLayer.MemoryGetId())
-	spew.Dump(apiLayer.GetNodeProtocolInfo(1))
-	spew.Dump(apiLayer.GetSerialApiCapabilities())
+	// spew.Dump(apiLayer.GetVersion())
+	nodeList, err := apiLayer.GetNodeList()
+	fmt.Println(nodeList.GetNodeIds())
+	// spew.Dump(apiLayer.MemoryGetId())
+	spew.Dump(apiLayer.GetNodeProtocolInfo(27))
+	// spew.Dump(apiLayer.GetSerialApiCapabilities())
+
+	time.Sleep(time.Second * 1)
+
+	txTime, err := apiLayer.SendData(27, commandclass.NewVersionGet())
+	fmt.Println("TX: ", txTime)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	<-time.After(30 * time.Second)
+
+	// if apiLayer.AddNode() != nil {
+	// 	apiLayer.AddNode()
+	// }
+
 	// sessionLayer := zwave.NewSessionLayer(frameLayer)
 	// manager := zwave.NewManager(sessionLayer)
 
