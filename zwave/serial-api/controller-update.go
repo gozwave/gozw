@@ -1,7 +1,6 @@
-package zwave
+package serialapi
 
-type ApplicationControllerUpdate struct {
-	CommandId      byte
+type ControllerUpdate struct {
 	Status         byte
 	NodeId         byte
 	Length         byte
@@ -11,12 +10,21 @@ type ApplicationControllerUpdate struct {
 	CommandClasses []byte
 }
 
-func ParseApplicationControllerUpdate(payload []byte) *ApplicationControllerUpdate {
-	val := &ApplicationControllerUpdate{
-		CommandId: payload[0],
-		Status:    payload[1],
-		NodeId:    payload[2],
-		Length:    payload[3],
+const (
+	UpdateStateNodeInfoReceived  = 0x84
+	UpdateStateNodeInfoReqDone   = 0x82
+	UpdateStateNodeInfoReqFailed = 0x81
+	UpdateStateRoutingPending    = 0x80
+	UpdateStateNewIdAssigned     = 0x40
+	UpdateStateDeleteDone        = 0x20
+	UpdateStateSucId             = 0x10
+)
+
+func parseControllerUpdate(payload []byte) ControllerUpdate {
+	val := ControllerUpdate{
+		Status: payload[1],
+		NodeId: payload[2],
+		Length: payload[3],
 	}
 
 	if val.Length == 0 {
@@ -42,7 +50,7 @@ func ParseApplicationControllerUpdate(payload []byte) *ApplicationControllerUpda
 	return val
 }
 
-func (a *ApplicationControllerUpdate) GetStatusString() string {
+func (a *ControllerUpdate) GetStatusString() string {
 	switch a.Status {
 	case UpdateStateNodeInfoReceived:
 		return "Node Info Received"
@@ -53,7 +61,7 @@ func (a *ApplicationControllerUpdate) GetStatusString() string {
 	case UpdateStateRoutingPending:
 		return "Routing Pending"
 	case UpdateStateNewIdAssigned:
-		return "New IDA ssigned"
+		return "New ID Assigned"
 	case UpdateStateDeleteDone:
 		return "Delete Done"
 	case UpdateStateSucId:

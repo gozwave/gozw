@@ -1,18 +1,20 @@
-package zwave
+package serialapi
 
-type ApplicationCommandHandler struct {
+import "github.com/bjyoungblood/gozw/zwave/protocol"
+
+type ApplicationCommand struct {
 	CommandId     byte
 	ReceiveStatus byte
 	DstNodeId     uint8
 	SrcNodeId     uint8
 	CmdLength     uint8
 	CommandData   []byte
-	// @todo implement multicast functionality
+	// @todo implement multicast functionality (maybe? only needed for bridge library)
 }
 
-func ParseApplicationCommandHandler(payload []byte) *ApplicationCommandHandler {
-	if payload[0] == FnApplicationCommandHandler {
-		return &ApplicationCommandHandler{
+func parseApplicationCommand(payload []byte) ApplicationCommand {
+	if payload[0] == protocol.FnApplicationCommandHandler {
+		return ApplicationCommand{
 			CommandId:     payload[0],
 			ReceiveStatus: payload[1],
 			DstNodeId:     1, // always controller
@@ -21,7 +23,7 @@ func ParseApplicationCommandHandler(payload []byte) *ApplicationCommandHandler {
 			CommandData:   payload[4 : 4+payload[3]],
 		}
 	} else {
-		return &ApplicationCommandHandler{
+		return ApplicationCommand{
 			CommandId:     payload[0],
 			ReceiveStatus: payload[1],
 			DstNodeId:     payload[2],
