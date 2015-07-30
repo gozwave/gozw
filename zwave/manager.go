@@ -118,28 +118,6 @@ func (m *Manager) FactoryReset() {
 	m.session.SetDefault()
 }
 
-func (m *Manager) AddNode() {
-	node, err := m.session.AddNodeToNetwork()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	m.Nodes[node.NodeId] = node
-	fmt.Println(node.String())
-}
-
-func (m *Manager) RemoveNode() {
-	node, err := m.session.RemoveNodeFromNetwork()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	delete(m.Nodes, node.NodeId)
-	fmt.Println(node.String())
-}
-
 func (m *Manager) SendData(nodeId uint8, data []byte) {
 	resp, err := m.session.SendData(nodeId, data)
 	fmt.Println(resp, err)

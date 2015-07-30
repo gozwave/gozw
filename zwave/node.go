@@ -170,13 +170,13 @@ func (n *Node) setFromApplicationControllerUpdate(nodeInfo *ApplicationControlle
 	}
 }
 
-func (n *Node) setFromNodeProtocolInfo(nodeInfo *NodeProtocolInfoResponse) {
-	n.Capability = nodeInfo.Capability
-	n.Security = nodeInfo.Security
-	n.BasicDeviceClass = nodeInfo.BasicDeviceClass
-	n.GenericDeviceClass = nodeInfo.GenericDeviceClass
-	n.SpecificDeviceClass = nodeInfo.SpecificDeviceClass
-}
+// func (n *Node) setFromNodeProtocolInfo(nodeInfo *NodeProtocolInfoResponse) {
+// 	n.Capability = nodeInfo.Capability
+// 	n.Security = nodeInfo.Security
+// 	n.BasicDeviceClass = nodeInfo.BasicDeviceClass
+// 	n.GenericDeviceClass = nodeInfo.GenericDeviceClass
+// 	n.SpecificDeviceClass = nodeInfo.SpecificDeviceClass
+// }
 
 func (n *Node) requestNodeInformationFrame() {
 	n.manager.session.requestNodeInformationFrame(n.NodeId)
