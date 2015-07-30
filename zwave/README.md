@@ -8,13 +8,16 @@
 1. **Application Layer** - interaction point for userland code.
 
 ```
-Application Layer
+Application Layer   < ---- >   Security layer
        |
        V
- Session Layer   < ---- >   Security Layer
+ Serial API Layer
        |
        V
-  Frame Layer    < ---- >   Frame parser (plus state machine)
+  Session Layer
+       |
+       V
+   Frame Layer      < ---- >   Frame parser (plus state machine)
        |
        V
  Transport Layer
