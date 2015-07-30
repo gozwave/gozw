@@ -93,16 +93,3 @@ const (
 	RemoveNodeStatusDone               = AddNodeStatusDone
 	RemoveNodeStatusFailed             = AddNodeStatusFailed
 )
-
-const (
-	LibraryControllerStatic = 0x01
-	LibraryController       = 0x02
-	LibrarySlaveEnhanced    = 0x03
-	LibrarySlave            = 0x04
-	LibraryInstaller        = 0x05
-	LibrarySlaveRouting     = 0x06
-	LibraryControllerBridge = 0x07
-	LibraryDUT              = 0x08
-	LibraryAvRemote         = 0x0A
-	LibraryAvDevice         = 0x0B
-)
