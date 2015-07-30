@@ -52,6 +52,7 @@ func (s *SerialAPILayer) SendData(nodeId byte, payload []byte) (txTime uint16, e
 				status.TxTime = binary.BigEndian.Uint16(cbFrame.Payload[3:5])
 			}
 
+			transmitDone <- true
 			txStatus <- status
 		},
 	}
