@@ -19,13 +19,6 @@ var testIV = []byte{
 	0x01, 0x48, 0x7B, 0xFF,
 }
 
-var authIV = []byte{
-	0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00,
-}
-
 func TestGenerateNonceReturns8ByteSlice(t *testing.T) {
 	t.Parallel()
 
@@ -67,7 +60,7 @@ func TestCalculateHMAC(t *testing.T) {
 
 	authData = append(authData, testMessageCiphertext...)
 
-	hmac := CalculateHMAC(authData, authIV, testAuthKey)
+	hmac := CalculateHMAC(authData, testAuthKey)
 
 	expectedHmac := []byte{
 		0xF0, 0xDE, 0x2E, 0xB2,

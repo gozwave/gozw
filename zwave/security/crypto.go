@@ -5,6 +5,13 @@ import (
 	"crypto/cipher"
 )
 
+var authIV = []byte{
+	0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00,
+}
+
 var AuthPassword = []byte{
 	0x55,
 	0x55,
@@ -113,7 +120,7 @@ func CryptMessage(input, iv, key []byte) []byte {
 	return output
 }
 
-func CalculateHMAC(payload, iv, key []byte) []byte {
+func CalculateHMAC(payload, key []byte) []byte {
 	input := padPayloadToBlockSize(payload)
 
 	block, err := aes.NewCipher(key)
@@ -123,7 +130,7 @@ func CalculateHMAC(payload, iv, key []byte) []byte {
 
 	output := make([]byte, len(input))
 
-	mode := cipher.NewCBCEncrypter(block, iv)
+	mode := cipher.NewCBCEncrypter(block, authIV)
 	mode.CryptBlocks(output, input)
 
 	totalBlocks := (len(output) / 16)
