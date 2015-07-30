@@ -3,7 +3,7 @@ package zwave
 import (
 	"fmt"
 
-	"github.com/bjyoungblood/gozw/zwave/commandclass"
+	"github.com/bjyoungblood/gozw/zwave/command-class"
 	"github.com/bjyoungblood/gozw/zwave/protocol"
 	set "github.com/deckarep/golang-set"
 )

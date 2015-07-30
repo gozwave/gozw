@@ -6,7 +6,7 @@ import (
 )
 
 import (
-	"github.com/bjyoungblood/gozw/zwave/commandclass"
+	"github.com/bjyoungblood/gozw/zwave/command-class"
 	"github.com/bjyoungblood/gozw/zwave/frame"
 	"github.com/bjyoungblood/gozw/zwave/protocol"
 )

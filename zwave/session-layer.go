@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/bjyoungblood/gozw/zwave/commandclass"
+	"github.com/bjyoungblood/gozw/zwave/command-class"
 	"github.com/bjyoungblood/gozw/zwave/frame"
 )
 

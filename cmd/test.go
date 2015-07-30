@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bjyoungblood/gozw/zwave/commandclass"
+	"github.com/bjyoungblood/gozw/zwave/command-class"
 	"github.com/bjyoungblood/gozw/zwave/frame"
 	"github.com/bjyoungblood/gozw/zwave/serial-api"
 	"github.com/bjyoungblood/gozw/zwave/session"
