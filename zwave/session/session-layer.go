@@ -138,6 +138,10 @@ func (s *ZWaveSessionLayer) sendThread() {
 			}
 		}
 
+		if request.Payload == nil {
+			request.Payload = []byte{}
+		}
+
 		var frame = frame.NewRequestFrame(append([]byte{request.FunctionId}, request.Payload...))
 
 		s.lastRequestFuncId = request.FunctionId
