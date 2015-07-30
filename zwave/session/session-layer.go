@@ -162,6 +162,7 @@ func (s *SessionLayer) sendThread() {
 			select {
 			case <-request.Release:
 			case <-time.After(request.Timeout):
+				fmt.Println("session lock timeout")
 			}
 		}
 
