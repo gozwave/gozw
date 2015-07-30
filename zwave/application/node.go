@@ -1,10 +1,11 @@
-package zwave
+package application
 
 import (
 	"fmt"
 
 	"github.com/bjyoungblood/gozw/zwave/command-class"
 	"github.com/bjyoungblood/gozw/zwave/protocol"
+	"github.com/bjyoungblood/gozw/zwave/serial-api"
 	set "github.com/deckarep/golang-set"
 )
 
@@ -22,32 +23,20 @@ type Node struct {
 	SupportedCommandClasses        set.Set
 	SecureSupportedCommandClasses  set.Set
 	SecureControlledCommandClasses set.Set
-
-	initComplete   chan bool
-	receivedNIF    chan bool
-	receivedSecure chan bool
-
-	manager *Manager
 }
 
-func NewNode(manager *Manager, nodeId byte) *Node {
+func NewNode(nodeId byte) *Node {
 	return &Node{
 		NodeId: nodeId,
 
 		SupportedCommandClasses:        set.NewSet(),
 		SecureSupportedCommandClasses:  set.NewSet(),
 		SecureControlledCommandClasses: set.NewSet(),
-
-		initComplete:   make(chan bool),
-		receivedNIF:    make(chan bool),
-		receivedSecure: make(chan bool),
-
-		manager: manager,
 	}
 }
 
-func NewNodeFromAddNodeCallback(manager *Manager, callback *AddRemoveNodeCallback) *Node {
-	newNode := NewNode(manager, callback.Source)
+func NewNodeFromAddNodeCallback(callback *serialapi.AddRemoveNodeCallback) *Node {
+	newNode := NewNode(callback.Source)
 	newNode.setFromAddNodeCallback(callback)
 	return newNode
 }
@@ -76,75 +65,33 @@ func (n *Node) GetSpecificDeviceClassName() string {
 	return protocol.GetSpecificDeviceTypeName(n.GenericDeviceClass, n.SpecificDeviceClass)
 }
 
-func (n *Node) Initialize() chan bool {
-	// go func() {
-	// 	nodeInfo, err := n.manager.session.GetNodeProtocolInfo(n.NodeId)
-	// 	if err != nil {
-	// 		return
-	// 	}
-	//
-	// 	n.setFromNodeProtocolInfo(nodeInfo)
-	//
-	// 	if n.NodeId == 1 {
-	// 		n.Failing = false
-	// 	} else {
-	// 		n.Failing = n.IsFailing()
-	//
-	// 		if !n.Failing {
-	// 			n.requestNodeInformationFrame()
-	// 		}
-	// 	}
-	//
-	// 	select {
-	// 	case <-n.receivedNIF:
-	// 	case <-time.After(time.Second * 5):
-	// 	}
-	//
-	// 	if n.IsSecure() && !n.Failing {
-	// 		n.updateSupportedSecureCommands()
-	// 		select {
-	// 		case <-n.receivedSecure:
-	// 		case <-time.After(time.Second * 5):
-	// 		}
-	// 	}
-	//
-	// 	select {
-	// 	case n.initComplete <- true:
-	// 	default:
-	// 	}
-	// }()
-	//
-	// return n.initComplete
-	return nil
-}
+// func (n *Node) updateSupportedSecureCommands() {
+// if n.IsSecure() {
+// 	n.manager.SendDataSecure(n.NodeId, []byte{
+// 		commandclass.CommandClassSecurity,
+// 		commandclass.CommandSecurityCommandsSupportedGet,
+// 	})
+// } else {
+// 	n.receivedSecure <- true
+// }
+// }
 
-func (n *Node) updateSupportedSecureCommands() {
-	if n.IsSecure() {
-		n.manager.SendDataSecure(n.NodeId, []byte{
-			commandclass.CommandClassSecurity,
-			commandclass.CommandSecurityCommandsSupportedGet,
-		})
-	} else {
-		n.receivedSecure <- true
-	}
-}
+// func (n *Node) sendNoOp() {
+// 	n.manager.session.SendData(n.NodeId, []byte{
+// 		commandclass.CommandClassNoOperation,
+// 	})
+// }
 
-func (n *Node) sendNoOp() {
-	n.manager.session.SendData(n.NodeId, []byte{
-		commandclass.CommandClassNoOperation,
-	})
-}
+// func (n *Node) IsFailing() bool {
+// 	result, err := n.manager.session.isNodeFailing(n.NodeId)
+// 	if err != nil {
+// 		fmt.Println("node.isFailing error:", err)
+// 	}
+//
+// 	return result
+// }
 
-func (n *Node) IsFailing() bool {
-	result, err := n.manager.session.isNodeFailing(n.NodeId)
-	if err != nil {
-		fmt.Println("node.isFailing error:", err)
-	}
-
-	return result
-}
-
-func (n *Node) setFromAddNodeCallback(nodeInfo *AddRemoveNodeCallback) {
+func (n *Node) setFromAddNodeCallback(nodeInfo *serialapi.AddRemoveNodeCallback) {
 	n.NodeId = nodeInfo.Source
 	n.BasicDeviceClass = nodeInfo.Basic
 	n.GenericDeviceClass = nodeInfo.Generic
@@ -155,7 +102,7 @@ func (n *Node) setFromAddNodeCallback(nodeInfo *AddRemoveNodeCallback) {
 	}
 }
 
-func (n *Node) setFromApplicationControllerUpdate(nodeInfo *ApplicationControllerUpdate) {
+func (n *Node) setFromApplicationControllerUpdate(nodeInfo *serialapi.ControllerUpdate) {
 	n.BasicDeviceClass = nodeInfo.Basic
 	n.GenericDeviceClass = nodeInfo.Generic
 	n.SpecificDeviceClass = nodeInfo.Specific
@@ -163,23 +110,14 @@ func (n *Node) setFromApplicationControllerUpdate(nodeInfo *ApplicationControlle
 	for _, cc := range nodeInfo.CommandClasses {
 		n.SupportedCommandClasses.Add(cc)
 	}
-
-	select {
-	case n.receivedNIF <- true:
-	default:
-	}
 }
 
-// func (n *Node) setFromNodeProtocolInfo(nodeInfo *NodeProtocolInfoResponse) {
-// 	n.Capability = nodeInfo.Capability
-// 	n.Security = nodeInfo.Security
-// 	n.BasicDeviceClass = nodeInfo.BasicDeviceClass
-// 	n.GenericDeviceClass = nodeInfo.GenericDeviceClass
-// 	n.SpecificDeviceClass = nodeInfo.SpecificDeviceClass
-// }
-
-func (n *Node) requestNodeInformationFrame() {
-	n.manager.session.requestNodeInformationFrame(n.NodeId)
+func (n *Node) setFromNodeProtocolInfo(nodeInfo *serialapi.NodeProtocolInfo) {
+	n.Capability = nodeInfo.Capability
+	n.Security = nodeInfo.Security
+	n.BasicDeviceClass = nodeInfo.BasicDeviceClass
+	n.GenericDeviceClass = nodeInfo.GenericDeviceClass
+	n.SpecificDeviceClass = nodeInfo.SpecificDeviceClass
 }
 
 func (n *Node) receiveSecurityCommandsSupportedReport(cc *commandclass.SecurityCommandsSupportedReport) {
@@ -190,8 +128,6 @@ func (n *Node) receiveSecurityCommandsSupportedReport(cc *commandclass.SecurityC
 	for _, cc := range cc.ControlledCommandClasses {
 		n.SecureControlledCommandClasses.Add(cc)
 	}
-
-	n.receivedSecure <- true
 }
 
 func (n *Node) String() string {
