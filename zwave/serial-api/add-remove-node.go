@@ -11,7 +11,9 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-func (s *SerialAPILayer) AddNode() error {
+func (s *SerialAPILayer) AddNode() (*AddRemoveNodeCallback, error) {
+
+	var newNode *AddRemoveNodeCallback
 
 	addNodeDone := make(chan bool)
 	done := make(chan *frame.Frame)
@@ -38,11 +40,13 @@ func (s *SerialAPILayer) AddNode() error {
 
 			case protocol.AddNodeStatusAddingSlave:
 				fmt.Println("ADD NODE: adding slave node")
+				newNode = cbData
 
 			case protocol.AddNodeStatusAddingController:
 				// hey, i just met you, and this is crazy
 				// but it could happen, so implement me maybe
 				fmt.Println("ADD NODE: adding controller node")
+				newNode = cbData
 
 			case protocol.AddNodeStatusProtocolDone:
 				fmt.Println("ADD NODE: protocol done")
@@ -86,14 +90,16 @@ func (s *SerialAPILayer) AddNode() error {
 	ret := <-done
 
 	if ret == nil {
-		return errors.New("Error adding node")
+		return nil, errors.New("Error adding node")
 	}
 
-	return nil
+	return newNode, nil
 
 }
 
-func (s *SerialAPILayer) RemoveNode() error {
+func (s *SerialAPILayer) RemoveNode() (*AddRemoveNodeCallback, error) {
+
+	var removedNode *AddRemoveNodeCallback
 
 	removeNodeDone := make(chan bool)
 	done := make(chan *frame.Frame)
@@ -120,17 +126,19 @@ func (s *SerialAPILayer) RemoveNode() error {
 
 			case protocol.RemoveNodeStatusRemovingSlave:
 				fmt.Println("REMOVE NODE: removing slave node")
+				removedNode = cbData
 
 			case protocol.RemoveNodeStatusRemovingController:
 				// hey, i just met you, and this is crazy
 				// but it could happen, so implement me maybe
 				fmt.Println("REMOVE NODE: removing controller node")
+				removedNode = cbData
 
 			case protocol.RemoveNodeStatusProtocolDone:
 				fmt.Println("REMOVE NODE: protocol done")
 				reply := addRemoveStatusFrame(
-					protocol.FnAddNodeToNetwork,
-					protocol.AddNodeStop,
+					protocol.FnRemoveNodeFromNetwork,
+					protocol.RemoveNodeStop,
 					cbData.CallbackId,
 				)
 				s.sessionLayer.SendFrameDirect(reply)
@@ -138,8 +146,8 @@ func (s *SerialAPILayer) RemoveNode() error {
 			case protocol.RemoveNodeStatusDone:
 				fmt.Println("REMOVE NODE: done")
 				reply := addRemoveStatusFrame(
-					protocol.FnAddNodeToNetwork,
-					protocol.AddNodeStop,
+					protocol.FnRemoveNodeFromNetwork,
+					protocol.RemoveNodeStop,
 					0,
 				)
 				s.sessionLayer.SendFrameDirect(reply)
@@ -167,10 +175,10 @@ func (s *SerialAPILayer) RemoveNode() error {
 	ret := <-done
 
 	if ret == nil {
-		return errors.New("Error removing node")
+		return nil, errors.New("Error removing node")
 	}
 
-	return nil
+	return removedNode, nil
 
 }
 

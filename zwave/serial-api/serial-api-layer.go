@@ -11,19 +11,28 @@ import (
 type ISerialAPILayer interface {
 	ControllerUpdates() chan ControllerUpdate
 	ControllerCommands() chan ApplicationCommand
+	AddNode() (*AddRemoveNodeCallback, error)
+	RemoveNode() (*AddRemoveNodeCallback, error)
+	GetSerialApiCapabilities() (*SerialApiCapabilities, error)
+	GetVersion() (version *Version, err error)
+	MemoryGetId() (homeId uint32, nodeId uint8, err error)
+	GetNodeList() (*NodeListResponse, error)
+	GetNodeProtocolInfo(nodeId uint8) (nodeInfo *NodeProtocolInfo, err error)
+	SendData(nodeId byte, payload []byte) (txTime uint16, err error)
+	SoftReset()
 }
 
 type SerialAPILayer struct {
-	controllerUpdates  chan ControllerUpdate
-	controllerCommands chan ApplicationCommand
 	sessionLayer        session.ISessionLayer
+	controllerUpdates   chan ControllerUpdate
+	applicationCommands chan ApplicationCommand
 }
 
 func NewSerialAPILayer(sessionLayer session.ISessionLayer) *SerialAPILayer {
 	layer := &SerialAPILayer{
-		sessionLayer:       sessionLayer,
-		controllerUpdates:  make(chan ControllerUpdate, 10),
-		controllerCommands: make(chan ApplicationCommand, 10),
+		sessionLayer:        sessionLayer,
+		controllerUpdates:   make(chan ControllerUpdate, 10),
+		applicationCommands: make(chan ApplicationCommand, 10),
 	}
 
 	go layer.handleUnsolicitedFrames()
@@ -36,14 +45,14 @@ func (s *SerialAPILayer) ControllerUpdates() chan ControllerUpdate {
 }
 
 func (s *SerialAPILayer) ControllerCommands() chan ApplicationCommand {
-	return s.controllerCommands
+	return s.applicationCommands
 }
 
 func (s *SerialAPILayer) handleUnsolicitedFrames() {
 	for fr := range s.sessionLayer.UnsolicitedFramesChan() {
 		switch fr.Payload[0] {
 		case protocol.FnApplicationCommandHandler, protocol.FnApplicationCommandHandlerBridge:
-			s.controllerCommands <- parseApplicationCommand(fr.Payload)
+			s.applicationCommands <- parseApplicationCommand(fr.Payload)
 		case protocol.FnApplicationControllerUpdate:
 			s.controllerUpdates <- parseControllerUpdate(fr.Payload)
 		default:
