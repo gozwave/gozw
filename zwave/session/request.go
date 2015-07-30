@@ -8,6 +8,8 @@ import (
 
 // type CallbackType int
 
+type CallbackFunc func(frame.Frame)
+
 type Request struct {
 	FunctionId byte
 	Payload    []byte
@@ -16,7 +18,8 @@ type Request struct {
 	ReturnCallback func(error, *frame.Frame) bool
 
 	ReceivesCallback bool
-	Callback         func(frame.Frame) bool
-	Exclusive        bool
+	Callback         CallbackFunc
+	Lock             bool
+	Release          chan bool
 	Timeout          time.Duration
 }

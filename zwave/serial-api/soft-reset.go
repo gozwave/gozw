@@ -13,7 +13,6 @@ func (s *SerialAPILayer) SoftReset() {
 
 	request := &session.Request{
 		FunctionId: protocol.FnSerialApiSoftReset,
-		Payload:    []byte{},
 		HasReturn:  false,
 	}
 

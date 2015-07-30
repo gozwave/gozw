@@ -15,10 +15,9 @@ const (
 	MaxSequenceNumber = 127
 )
 
-type Callback func(frame.Frame)
-
 type SessionLayer interface {
 	MakeRequest(request *Request)
+	SendFrameDirect(req *frame.Frame)
 }
 
 type ZWaveSessionLayer struct {
@@ -31,7 +30,7 @@ type ZWaveSessionLayer struct {
 
 	// maps sequence number to callback
 	sequenceNumber uint8
-	callbacks      map[uint8]Callback
+	callbacks      map[uint8]CallbackFunc
 
 	requestQueue chan *Request
 }
@@ -46,7 +45,7 @@ func NewSessionLayer(frameLayer frame.FrameLayer) *ZWaveSessionLayer {
 		responses:         make(chan frame.Frame),
 
 		sequenceNumber: 0,
-		callbacks:      map[uint8]Callback{},
+		callbacks:      map[uint8]CallbackFunc{},
 
 		requestQueue: make(chan *Request, 10),
 	}
@@ -60,6 +59,11 @@ func NewSessionLayer(frameLayer frame.FrameLayer) *ZWaveSessionLayer {
 func (s *ZWaveSessionLayer) MakeRequest(request *Request) {
 	// Enqueue the request for processing
 	s.requestQueue <- request
+}
+
+// Be careful with this. Should not be called outside of a callback
+func (s *ZWaveSessionLayer) SendFrameDirect(req *frame.Frame) {
+	s.frameLayer.Write(req)
 }
 
 func (s *ZWaveSessionLayer) receiveThread() {
@@ -123,19 +127,7 @@ func (s *ZWaveSessionLayer) sendThread() {
 		if request.ReceivesCallback {
 			seqNo = s.getSequenceNumber()
 			request.Payload = append(request.Payload, seqNo)
-		}
-
-		done := make(chan bool)
-		if request.ReceivesCallback && request.Exclusive {
-			oldCb := request.Callback
-			request.Callback = func(cbFrame frame.Frame) bool {
-				if oldCb(cbFrame) == false {
-					done <- true
-					return false
-				}
-
-				return true
-			}
+			s.callbacks[seqNo] = request.Callback
 		}
 
 		if request.Payload == nil {
@@ -161,9 +153,9 @@ func (s *ZWaveSessionLayer) sendThread() {
 			}
 		}
 
-		if request.ReceivesCallback && request.Exclusive {
+		if request.ReceivesCallback && request.Lock {
 			select {
-			case <-done:
+			case <-request.Release:
 			case <-time.After(request.Timeout):
 			}
 		}

@@ -22,8 +22,7 @@ func (s *SerialAPILayer) GetNodeList() (*NodeListResponse, error) {
 	done := make(chan *frame.Frame)
 
 	request := &session.Request{
-		FunctionId: byte(protocol.FnSerialApiGetInitAppData),
-		Payload:    []byte{},
+		FunctionId: protocol.FnSerialApiGetInitAppData,
 		HasReturn:  true,
 		ReturnCallback: func(err error, ret *frame.Frame) bool {
 			done <- ret

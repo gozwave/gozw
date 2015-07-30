@@ -14,7 +14,6 @@ func (s *SerialAPILayer) GetVersion() (version *Version, err error) {
 
 	request := &session.Request{
 		FunctionId: protocol.FnGetVersion,
-		Payload:    []byte{},
 		HasReturn:  true,
 		ReturnCallback: func(err error, ret *frame.Frame) bool {
 			done <- ret
