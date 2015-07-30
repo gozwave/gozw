@@ -8,6 +8,7 @@ import (
 import (
 	"github.com/bjyoungblood/gozw/zwave/commandclass"
 	"github.com/bjyoungblood/gozw/zwave/frame"
+	"github.com/bjyoungblood/gozw/zwave/protocol"
 )
 
 type Manager struct {
@@ -100,8 +101,8 @@ func (m *Manager) Close() {
 func (m *Manager) SetApplicationNodeInformation() {
 	m.session.ApplicationNodeInformation(
 		ApplicationNodeInfoListening|ApplicationFreqListeningMode250ms|ApplicationNodeInfoOptionalFunctionality,
-		GenericTypeGenericController,
-		SpecificTypePortableSceneController,
+		protocol.GenericTypeGenericController,
+		protocol.SpecificTypePortableSceneController,
 		[]uint8{
 			commandclass.CommandClassBasic,
 		},

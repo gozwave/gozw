@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/bjyoungblood/gozw/zwave/commandclass"
+	"github.com/bjyoungblood/gozw/zwave/protocol"
 	set "github.com/deckarep/golang-set"
 )
 
@@ -65,15 +66,15 @@ func (n *Node) HasOptionalFunctions() bool {
 }
 
 func (n *Node) GetBasicDeviceClassName() string {
-	return GetBasicTypeName(n.BasicDeviceClass)
+	return protocol.GetBasicDeviceTypeName(n.BasicDeviceClass)
 }
 
 func (n *Node) GetGenericDeviceClassName() string {
-	return GetGenericTypeName(n.GenericDeviceClass)
+	return protocol.GetGenericDeviceTypeName(n.GenericDeviceClass)
 }
 
 func (n *Node) GetSpecificDeviceClassName() string {
-	return GetSpecificTypeName(n.GenericDeviceClass, n.SpecificDeviceClass)
+	return protocol.GetSpecificDeviceTypeName(n.GenericDeviceClass, n.SpecificDeviceClass)
 }
 
 func (n *Node) Initialize() chan bool {

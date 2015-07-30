@@ -1,5 +1,7 @@
 package zwave
 
+import "github.com/bjyoungblood/gozw/zwave/protocol"
+
 type NodeProtocolInfoResponse struct {
 	CommandId           byte
 	Capability          byte
@@ -27,13 +29,13 @@ func (n *NodeProtocolInfoResponse) IsListening() bool {
 }
 
 func (n *NodeProtocolInfoResponse) GetBasicDeviceClassName() string {
-	return GetBasicTypeName(n.BasicDeviceClass)
+	return protocol.GetBasicDeviceTypeName(n.BasicDeviceClass)
 }
 
 func (n *NodeProtocolInfoResponse) GetGenericDeviceClassName() string {
-	return GetGenericTypeName(n.GenericDeviceClass)
+	return protocol.GetGenericDeviceTypeName(n.GenericDeviceClass)
 }
 
 func (n *NodeProtocolInfoResponse) GetSpecificDeviceClassName() string {
-	return GetSpecificTypeName(n.GenericDeviceClass, n.SpecificDeviceClass)
+	return protocol.GetSpecificDeviceTypeName(n.GenericDeviceClass, n.SpecificDeviceClass)
 }

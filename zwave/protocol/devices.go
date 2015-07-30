@@ -1,4 +1,4 @@
-package zwave
+package protocol
 
 import "fmt"
 
@@ -347,7 +347,7 @@ var SpecificTypeNames map[byte]map[byte]string = map[byte]map[byte]string{
 	},
 }
 
-func GetBasicTypeName(basicType byte) string {
+func GetBasicDeviceTypeName(basicType byte) string {
 	if val, ok := BasicTypeNames[basicType]; ok {
 		return val + fmt.Sprintf(" (0x%X)", basicType)
 	} else {
@@ -355,7 +355,7 @@ func GetBasicTypeName(basicType byte) string {
 	}
 }
 
-func GetGenericTypeName(genericType byte) string {
+func GetGenericDeviceTypeName(genericType byte) string {
 	if val, ok := GenericTypeNames[genericType]; ok {
 		return val + fmt.Sprintf(" (0x%X)", genericType)
 	} else {
@@ -363,7 +363,7 @@ func GetGenericTypeName(genericType byte) string {
 	}
 }
 
-func GetSpecificTypeName(genericType byte, specificType byte) string {
+func GetSpecificDeviceTypeName(genericType byte, specificType byte) string {
 	if val, ok := SpecificTypeNames[genericType][specificType]; ok {
 		return val + fmt.Sprintf(" (0x%X)", specificType)
 	} else {
