@@ -1,13 +1,27 @@
 package serialapi
 
-import "github.com/bjyoungblood/gozw/zwave/session"
+import (
+	"fmt"
+
+	"github.com/bjyoungblood/gozw/zwave/session"
+	"github.com/davecgh/go-spew/spew"
+)
 
 type SerialAPILayer struct {
 	sessionLayer session.SessionLayer
 }
 
 func NewSerialAPILayer(sessionLayer session.SessionLayer) *SerialAPILayer {
-	return &SerialAPILayer{
+	layer := &SerialAPILayer{
 		sessionLayer: sessionLayer,
 	}
+
+	go func() {
+		for fr := range sessionLayer.UnsolicitedFramesChan() {
+			fmt.Println("unsolicited:")
+			spew.Dump(fr.Payload)
+		}
+	}()
+
+	return layer
 }

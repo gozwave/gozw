@@ -18,6 +18,7 @@ const (
 type SessionLayer interface {
 	MakeRequest(request *Request)
 	SendFrameDirect(req *frame.Frame)
+	UnsolicitedFramesChan() chan frame.Frame
 }
 
 type ZWaveSessionLayer struct {
@@ -64,6 +65,10 @@ func (s *ZWaveSessionLayer) MakeRequest(request *Request) {
 // Be careful with this. Should not be called outside of a callback
 func (s *ZWaveSessionLayer) SendFrameDirect(req *frame.Frame) {
 	s.frameLayer.Write(req)
+}
+
+func (s *ZWaveSessionLayer) UnsolicitedFramesChan() chan frame.Frame {
+	return s.UnsolicitedFrames
 }
 
 func (s *ZWaveSessionLayer) receiveThread() {

@@ -66,6 +66,14 @@ const (
 )
 
 const (
+	TransmitCompleteOk      uint8 = 0x00
+	TransmitCompleteNoAck         = 0x01
+	TransmitCompleteFail          = 0x02
+	TransmitRoutingNotIdle        = 0x03
+	TransmitCompleteNoRoute       = 0x04
+)
+
+const (
 	AddNodeOptionNormalPower uint8 = 0x80
 	AddNodeOptionNetworkWide       = 0x40
 )
