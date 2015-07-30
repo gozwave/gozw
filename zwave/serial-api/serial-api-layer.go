@@ -8,13 +8,18 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-type SerialAPILayer struct {
-	sessionLayer       session.SessionLayer
-	controllerUpdates  chan ControllerUpdate
-	controllerCommands chan ApplicationCommand
+type ISerialAPILayer interface {
+	ControllerUpdates() chan ControllerUpdate
+	ControllerCommands() chan ApplicationCommand
 }
 
-func NewSerialAPILayer(sessionLayer session.SessionLayer) *SerialAPILayer {
+type SerialAPILayer struct {
+	controllerUpdates  chan ControllerUpdate
+	controllerCommands chan ApplicationCommand
+	sessionLayer        session.ISessionLayer
+}
+
+func NewSerialAPILayer(sessionLayer session.ISessionLayer) *SerialAPILayer {
 	layer := &SerialAPILayer{
 		sessionLayer:       sessionLayer,
 		controllerUpdates:  make(chan ControllerUpdate, 10),

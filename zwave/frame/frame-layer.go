@@ -6,12 +6,12 @@ import (
 	"github.com/bjyoungblood/gozw/zwave/transport"
 )
 
-type FrameLayer interface {
+type IFrameLayer interface {
 	Write(frame *Frame)
 	GetOutputChannel() <-chan Frame
 }
 
-type SerialFrameLayer struct {
+type FrameLayer struct {
 	transportLayer transport.TransportLayer
 
 	frameParser      *FrameParser
@@ -23,14 +23,14 @@ type SerialFrameLayer struct {
 	frameOutput   chan Frame
 }
 
-func NewFrameLayer(transportLayer transport.TransportLayer) *SerialFrameLayer {
+func NewFrameLayer(transportLayer transport.TransportLayer) *FrameLayer {
 	parserInput := make(chan byte)
 	parserOutput := make(chan *FrameParseEvent, 1)
 	acks := make(chan bool, 1)
 	naks := make(chan bool, 1)
 	cans := make(chan bool, 1)
 
-	frameLayer := &SerialFrameLayer{
+	frameLayer := &FrameLayer{
 		transportLayer: transportLayer,
 
 		frameParser:  NewFrameParser(parserInput, parserOutput, acks, naks, cans),
@@ -50,7 +50,7 @@ func NewFrameLayer(transportLayer transport.TransportLayer) *SerialFrameLayer {
 	return frameLayer
 }
 
-func (layer *SerialFrameLayer) bgWork() {
+func (layer *FrameLayer) bgWork() {
 
 	for {
 		select {
@@ -79,32 +79,32 @@ func (layer *SerialFrameLayer) bgWork() {
 	}
 }
 
-func (f *SerialFrameLayer) Write(frame *Frame) {
+func (f *FrameLayer) Write(frame *Frame) {
 	go func() {
 		f.pendingWrites <- frame
 	}()
 }
 
-func (f *SerialFrameLayer) GetOutputChannel() <-chan Frame {
+func (f *FrameLayer) GetOutputChannel() <-chan Frame {
 	return f.frameOutput
 }
 
-func (f *SerialFrameLayer) bgRead() {
+func (f *FrameLayer) bgRead() {
 	for eachByte := range f.transportLayer.Read() {
 		f.parserInput <- eachByte
 	}
 }
 
-func (f *SerialFrameLayer) writeToTransport(buf []byte) (int, error) {
+func (f *FrameLayer) writeToTransport(buf []byte) (int, error) {
 	return f.transportLayer.Write(buf)
 }
 
-func (f *SerialFrameLayer) sendAck() error {
+func (f *FrameLayer) sendAck() error {
 	_, err := f.transportLayer.Write([]byte{FrameHeaderAck})
 	return err
 }
 
-func (f *SerialFrameLayer) sendNak() error {
+func (f *FrameLayer) sendNak() error {
 	_, err := f.transportLayer.Write([]byte{FrameHeaderNak})
 	return err
 }

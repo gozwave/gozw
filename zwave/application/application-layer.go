@@ -3,11 +3,11 @@ package application
 import "github.com/bjyoungblood/gozw/zwave/serial-api"
 
 type ApplicationLayer struct {
-	serialApi *serialapi.SerialAPILayer
+	serialApi serialapi.ISerialAPILayer
 }
 
-func NewApplicationLayer(serialApi *serialapi.SerialAPILayer) *ApplicationLayer {
 	appLayer := &ApplicationLayer{
+func NewApplicationLayer(serialApi serialapi.ISerialAPILayer) *ApplicationLayer {
 		serialApi: serialApi,
 	}
 

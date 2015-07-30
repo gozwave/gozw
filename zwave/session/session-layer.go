@@ -15,14 +15,14 @@ const (
 	MaxSequenceNumber = 127
 )
 
-type SessionLayer interface {
+type ISessionLayer interface {
 	MakeRequest(request *Request)
 	SendFrameDirect(req *frame.Frame)
 	UnsolicitedFramesChan() chan frame.Frame
 }
 
-type ZWaveSessionLayer struct {
-	frameLayer frame.FrameLayer
+type SessionLayer struct {
+	frameLayer frame.IFrameLayer
 
 	UnsolicitedFrames chan frame.Frame
 
@@ -36,8 +36,8 @@ type ZWaveSessionLayer struct {
 	requestQueue chan *Request
 }
 
-func NewSessionLayer(frameLayer frame.FrameLayer) *ZWaveSessionLayer {
-	session := &ZWaveSessionLayer{
+func NewSessionLayer(frameLayer frame.IFrameLayer) *SessionLayer {
+	session := &SessionLayer{
 		frameLayer: frameLayer,
 
 		UnsolicitedFrames: make(chan frame.Frame, 10),
@@ -57,21 +57,21 @@ func NewSessionLayer(frameLayer frame.FrameLayer) *ZWaveSessionLayer {
 	return session
 }
 
-func (s *ZWaveSessionLayer) MakeRequest(request *Request) {
+func (s *SessionLayer) MakeRequest(request *Request) {
 	// Enqueue the request for processing
 	s.requestQueue <- request
 }
 
 // Be careful with this. Should not be called outside of a callback
-func (s *ZWaveSessionLayer) SendFrameDirect(req *frame.Frame) {
+func (s *SessionLayer) SendFrameDirect(req *frame.Frame) {
 	s.frameLayer.Write(req)
 }
 
-func (s *ZWaveSessionLayer) UnsolicitedFramesChan() chan frame.Frame {
+func (s *SessionLayer) UnsolicitedFramesChan() chan frame.Frame {
 	return s.UnsolicitedFrames
 }
 
-func (s *ZWaveSessionLayer) receiveThread() {
+func (s *SessionLayer) receiveThread() {
 	for frame := range s.frameLayer.GetOutputChannel() {
 		if frame.IsResponse() {
 			if frame.Payload[0] == s.lastRequestFuncId {
@@ -125,7 +125,7 @@ func (s *ZWaveSessionLayer) receiveThread() {
 
 // This function currently assumes that every single function that expects a callback
 // sets the callback id as the last byte in the payload.
-func (s *ZWaveSessionLayer) sendThread() {
+func (s *SessionLayer) sendThread() {
 	for request := range s.requestQueue {
 		var seqNo uint8 = 0
 
@@ -168,7 +168,7 @@ func (s *ZWaveSessionLayer) sendThread() {
 	}
 }
 
-func (s *ZWaveSessionLayer) getSequenceNumber() uint8 {
+func (s *SessionLayer) getSequenceNumber() uint8 {
 	if s.sequenceNumber == MaxSequenceNumber {
 		s.sequenceNumber = MinSequenceNumber
 	} else {
