@@ -47,11 +47,6 @@ type SessionLayer interface {
 	SetDefault()
 	AddNodeToNetwork() (*Node, error)
 	RemoveNodeFromNetwork() (*Node, error)
-	GetVersion() (*VersionResponse, error)
-	MemoryGetId() (*MemoryGetIdResponse, error)
-	GetInitAppData() (*NodeListResponse, error)
-	GetSerialApiCapabilities() (*SerialApiCapabilitiesResponse, error)
-	GetNodeProtocolInfo(nodeId uint8) (*NodeProtocolInfoResponse, error)
 	SetSerialAPIReady(ready bool)
 	SendData(nodeId uint8, data []byte) (*frame.Frame, error)
 	SendDataSecure(nodeId uint8, data []byte) error
@@ -369,33 +364,6 @@ func (s *ZWaveSessionLayer) RemoveNodeFromNetwork() (*Node, error) {
 	}
 }
 
-func (s *ZWaveSessionLayer) GetVersion() (*VersionResponse, error) {
-	response, err := s.writeSimple(FnGetVersion, []byte{})
-	if err != nil {
-		return nil, err
-	}
-
-	return ParseVersionResponse(response.Payload), nil
-}
-
-func (s *ZWaveSessionLayer) MemoryGetId() (*MemoryGetIdResponse, error) {
-	response, err := s.writeSimple(FnMemoryGetId, []byte{})
-	if err != nil {
-		return nil, err
-	}
-
-	return ParseMemoryGetIdResponse(response.Payload), nil
-}
-
-func (s *ZWaveSessionLayer) GetInitAppData() (*NodeListResponse, error) {
-	response, err := s.writeSimple(FnGetInitAppData, []byte{})
-	if err != nil {
-		return nil, err
-	}
-
-	return ParseNodeListResponse(response.Payload), nil
-}
-
 func (s *ZWaveSessionLayer) isNodeFailing(nodeId uint8) (bool, error) {
 	response, err := s.writeSimple(FnIsNodeFailed, []byte{nodeId})
 	if err != nil {
@@ -407,24 +375,6 @@ func (s *ZWaveSessionLayer) isNodeFailing(nodeId uint8) (bool, error) {
 	}
 
 	return true, nil
-}
-
-func (s *ZWaveSessionLayer) GetSerialApiCapabilities() (*SerialApiCapabilitiesResponse, error) {
-	response, err := s.writeSimple(FnSerialApiCapabilities, []byte{})
-	if err != nil {
-		return nil, err
-	}
-
-	return ParseSerialApiCapabilitiesResponse(response.Payload), nil
-}
-
-func (s *ZWaveSessionLayer) GetNodeProtocolInfo(nodeId uint8) (*NodeProtocolInfoResponse, error) {
-	response, err := s.writeSimple(FnGetNodeProtocolInfo, []byte{nodeId})
-	if err != nil {
-		return nil, err
-	}
-
-	return ParseNodeProtocolInfoResponse(response.Payload), nil
 }
 
 func (s *ZWaveSessionLayer) SetSerialAPIReady(ready bool) {

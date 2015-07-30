@@ -46,52 +46,52 @@ func NewManager(session SessionLayer) *Manager {
 }
 
 func (m *Manager) init() {
-	version, err := m.session.GetVersion()
-	if err != nil {
-		panic(err)
-	}
-
-	m.ApiVersion = version.ApiVersion
-	m.ApiLibraryType = version.GetLibraryTypeString()
-
-	ids, err := m.session.MemoryGetId()
-	if err != nil {
-		panic(err)
-	}
-
-	m.HomeId = ids.HomeId
-	m.NodeId = ids.NodeId
-
-	appInfo, err := m.session.GetInitAppData()
-	if err != nil {
-		panic(err)
-	}
-
-	m.Version = appInfo.Version
-	m.ApiType = appInfo.GetApiType()
-	m.TimerFunctionsSupported = appInfo.TimerFunctionsSupported()
-	m.IsPrimaryController = appInfo.IsPrimaryController()
-	m.nodeList = appInfo.GetNodeIds()
-
-	serialApi, err := m.session.GetSerialApiCapabilities()
-	if err != nil {
-		panic(err)
-	}
-
-	m.ApplicationVersion = serialApi.ApplicationVersion
-	m.ApplicationRevision = serialApi.ApplicationRevision
-	m.SupportedFunctions = serialApi.GetSupportedFunctions()
-
-	go m.handleUnsolicitedFrames()
-
-	m.session.registerApplicationCommandHandler(
-		commandclass.CommandClassSecurity,
-		m.handleSecurityCommands,
-	)
-
-	m.loadNodes()
-
-	m.session.SetSerialAPIReady(true)
+	// version, err := m.session.GetVersion()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	//
+	// m.ApiVersion = version.ApiVersion
+	// m.ApiLibraryType = version.GetLibraryTypeString()
+	//
+	// ids, err := m.session.MemoryGetId()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	//
+	// m.HomeId = ids.HomeId
+	// m.NodeId = ids.NodeId
+	//
+	// appInfo, err := m.session.GetInitAppData()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	//
+	// m.Version = appInfo.Version
+	// m.ApiType = appInfo.GetApiType()
+	// m.TimerFunctionsSupported = appInfo.TimerFunctionsSupported()
+	// m.IsPrimaryController = appInfo.IsPrimaryController()
+	// m.nodeList = appInfo.GetNodeIds()
+	//
+	// serialApi, err := m.session.GetSerialApiCapabilities()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	//
+	// m.ApplicationVersion = serialApi.ApplicationVersion
+	// m.ApplicationRevision = serialApi.ApplicationRevision
+	// m.SupportedFunctions = serialApi.GetSupportedFunctions()
+	//
+	// go m.handleUnsolicitedFrames()
+	//
+	// m.session.registerApplicationCommandHandler(
+	// 	commandclass.CommandClassSecurity,
+	// 	m.handleSecurityCommands,
+	// )
+	//
+	// m.loadNodes()
+	//
+	// m.session.SetSerialAPIReady(true)
 }
 
 func (m *Manager) Close() {

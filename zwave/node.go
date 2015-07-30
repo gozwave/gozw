@@ -2,7 +2,6 @@ package zwave
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/bjyoungblood/gozw/zwave/commandclass"
 	"github.com/bjyoungblood/gozw/zwave/protocol"
@@ -78,44 +77,45 @@ func (n *Node) GetSpecificDeviceClassName() string {
 }
 
 func (n *Node) Initialize() chan bool {
-	go func() {
-		nodeInfo, err := n.manager.session.GetNodeProtocolInfo(n.NodeId)
-		if err != nil {
-			return
-		}
-
-		n.setFromNodeProtocolInfo(nodeInfo)
-
-		if n.NodeId == 1 {
-			n.Failing = false
-		} else {
-			n.Failing = n.IsFailing()
-
-			if !n.Failing {
-				n.requestNodeInformationFrame()
-			}
-		}
-
-		select {
-		case <-n.receivedNIF:
-		case <-time.After(time.Second * 5):
-		}
-
-		if n.IsSecure() && !n.Failing {
-			n.updateSupportedSecureCommands()
-			select {
-			case <-n.receivedSecure:
-			case <-time.After(time.Second * 5):
-			}
-		}
-
-		select {
-		case n.initComplete <- true:
-		default:
-		}
-	}()
-
-	return n.initComplete
+	// go func() {
+	// 	nodeInfo, err := n.manager.session.GetNodeProtocolInfo(n.NodeId)
+	// 	if err != nil {
+	// 		return
+	// 	}
+	//
+	// 	n.setFromNodeProtocolInfo(nodeInfo)
+	//
+	// 	if n.NodeId == 1 {
+	// 		n.Failing = false
+	// 	} else {
+	// 		n.Failing = n.IsFailing()
+	//
+	// 		if !n.Failing {
+	// 			n.requestNodeInformationFrame()
+	// 		}
+	// 	}
+	//
+	// 	select {
+	// 	case <-n.receivedNIF:
+	// 	case <-time.After(time.Second * 5):
+	// 	}
+	//
+	// 	if n.IsSecure() && !n.Failing {
+	// 		n.updateSupportedSecureCommands()
+	// 		select {
+	// 		case <-n.receivedSecure:
+	// 		case <-time.After(time.Second * 5):
+	// 		}
+	// 	}
+	//
+	// 	select {
+	// 	case n.initComplete <- true:
+	// 	default:
+	// 	}
+	// }()
+	//
+	// return n.initComplete
+	return nil
 }
 
 func (n *Node) updateSupportedSecureCommands() {
