@@ -129,7 +129,12 @@ func (s *SecurityLayer) ReceiveNonce(fromNode uint8, data *commandclass.Security
 	// either fetched the nonce for no reason, some node just randomly gave us one,
 	// or whatever process requested the nonce timed out already. in any case, we've
 	// stored the nonce, so it'll be valid for now
-	if ch, ok := s.waitForNonce[fromNode]; ok {
+	s.waitMapLock.Lock()
+	ch, ok := s.waitForNonce[fromNode]
+	s.waitMapLock.Unlock()
+	runtime.Gosched()
+
+	if ok {
 
 		// perform a non-blocking send. it's possible that some process asked for the
 		// nonce, but for whatever reason didn't bother to listen on the channel. in
@@ -149,7 +154,10 @@ func (s *SecurityLayer) ReceiveNonce(fromNode uint8, data *commandclass.Security
 
 		// delete the channel from the map; a new one will be created when we request
 		// another nonce from the node
+		s.waitMapLock.Lock()
 		delete(s.waitForNonce, fromNode)
+		s.waitMapLock.Unlock()
+		runtime.Gosched()
 	}
 }
 
