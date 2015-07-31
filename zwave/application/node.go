@@ -1,11 +1,13 @@
 package application
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/bjyoungblood/gozw/zwave/command-class"
 	"github.com/bjyoungblood/gozw/zwave/protocol"
 	"github.com/bjyoungblood/gozw/zwave/serial-api"
+	"github.com/davecgh/go-spew/spew"
 	set "github.com/deckarep/golang-set"
 )
 
@@ -24,9 +26,9 @@ type Node struct {
 	SecureSupportedCommandClasses  set.Set
 	SecureControlledCommandClasses set.Set
 
-	application         *ApplicationLayer
-	receivedUpdate      chan bool
-	initializationError error
+	application          *ApplicationLayer
+	receivedUpdate       chan bool
+	receivedSecurityInfo chan bool
 }
 
 func NewNode(application *ApplicationLayer, nodeId byte) *Node {
@@ -37,8 +39,9 @@ func NewNode(application *ApplicationLayer, nodeId byte) *Node {
 		SecureSupportedCommandClasses:  set.NewSet(),
 		SecureControlledCommandClasses: set.NewSet(),
 
-		application:    application,
-		receivedUpdate: make(chan bool),
+		application:          application,
+		receivedUpdate:       make(chan bool),
+		receivedSecurityInfo: make(chan bool),
 	}
 }
 
@@ -64,6 +67,46 @@ func (n *Node) GetGenericDeviceClassName() string {
 
 func (n *Node) GetSpecificDeviceClassName() string {
 	return protocol.GetSpecificDeviceTypeName(n.GenericDeviceClass, n.SpecificDeviceClass)
+}
+
+func (n *Node) AddAssociation(groupId uint8, nodeIds ...uint8) error {
+	// sort of an arbitrary limit for now, but I'm not sure what it should be
+	if len(nodeIds) > 20 {
+		return errors.New("Too many associated nodes")
+	}
+
+	fmt.Println("Associating")
+
+	payload := append([]byte{
+		commandclass.CommandClassAssociation,
+		commandclass.AssociationSet,
+		groupId,
+	}, nodeIds...)
+
+	return n.sendDataSecure(payload)
+}
+
+func (n *Node) RequestSupportedSecurityCommands() error {
+	return n.sendDataSecure([]byte{
+		commandclass.CommandClassSecurity,
+		commandclass.CommandSecurityCommandsSupportedGet,
+	})
+}
+
+func (n *Node) LoadUserCode(userId uint8) error {
+	return n.sendDataSecure([]byte{
+		commandclass.CommandClassUserCode,
+		commandclass.CommandUserCodeGet,
+		userId,
+	})
+}
+
+func (n *Node) sendData(payload []byte) error {
+	return n.application.SendData(n.NodeId, payload)
+}
+
+func (n *Node) sendDataSecure(payload []byte) error {
+	return n.application.SendDataSecure(n.NodeId, payload)
 }
 
 func (n *Node) initialize() {
@@ -160,6 +203,79 @@ func (n *Node) receiveSecurityCommandsSupportedReport(cc *commandclass.SecurityC
 
 	for _, cc := range cc.ControlledCommandClasses {
 		n.SecureControlledCommandClasses.Add(cc)
+	}
+
+	n.receivedSecurityInfo <- true
+}
+
+func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
+	switch cmd.CommandData[0] {
+	case commandclass.CommandClassSecurity:
+		switch cmd.CommandData[1] {
+		case commandclass.CommandSecurityCommandsSupportedReport:
+			fmt.Println("security commands supported report")
+
+			n.receiveSecurityCommandsSupportedReport(
+				commandclass.ParseSecurityCommandsSupportedReport(cmd.CommandData),
+			)
+		}
+
+	case commandclass.CommandClassAlarm:
+		// This is special handling code that will probably only work with yale locks
+		notif := commandclass.ParseAlarmReport(cmd.CommandData)
+		switch notif.Type {
+		case 0x70:
+			if notif.Level == 0x00 {
+				fmt.Println("Master code changed")
+			} else {
+				fmt.Println("User added", notif.Level)
+				n.LoadUserCode(notif.Level)
+			}
+		case 0xA1:
+			if notif.Level == 0x01 {
+				fmt.Println("Keypad limit exceeded")
+			} else {
+				fmt.Println("Physical tampering")
+			}
+		case 0x16:
+			fmt.Println("Manual unlock")
+		case 0x19:
+			fmt.Println("RF operate unlock")
+		case 0x15:
+			fmt.Println("Manual lock")
+		case 0x18:
+			fmt.Println("RF operate lock")
+		case 0x12:
+			fmt.Println("keypad lock by user", notif.Level)
+			n.LoadUserCode(notif.Level)
+		case 0x13:
+			fmt.Println("keypad unlock by user", notif.Level)
+			n.LoadUserCode(notif.Level)
+		case 0x09:
+			fmt.Println("deadbolt jammed")
+		case 0xA9:
+			fmt.Println("dead battery; lock inoperable")
+		case 0xA8:
+			fmt.Println("critical battery")
+		case 0xA7:
+			fmt.Println("low battery")
+		case 0x1B:
+			fmt.Println("auto re-lock syscle completed")
+		case 0x71:
+			fmt.Println("duplicate pin code error")
+		case 0x82:
+			fmt.Println("power restored")
+		case 0x21:
+			fmt.Println("user deleted", notif.Level)
+		}
+
+	case commandclass.CommandClassUserCode:
+		fmt.Println("user code")
+		code := commandclass.ParseUserCodeReport(cmd.CommandData)
+		spew.Dump(code)
+
+	default:
+		fmt.Printf("unhandled application command (%d): %s\n", n.NodeId, spew.Sdump(cmd))
 	}
 }
 

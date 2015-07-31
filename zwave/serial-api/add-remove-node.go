@@ -8,7 +8,6 @@ import (
 	"github.com/bjyoungblood/gozw/zwave/frame"
 	"github.com/bjyoungblood/gozw/zwave/protocol"
 	"github.com/bjyoungblood/gozw/zwave/session"
-	"github.com/davecgh/go-spew/spew"
 )
 
 func (s *SerialAPILayer) AddNode() (*AddRemoveNodeCallback, error) {
@@ -59,7 +58,6 @@ func (s *SerialAPILayer) AddNode() (*AddRemoveNodeCallback, error) {
 
 			case protocol.AddNodeStatusDone:
 				fmt.Println("ADD NODE: done")
-				spew.Dump(cbData)
 				reply := addRemoveStatusFrame(
 					protocol.FnAddNodeToNetwork,
 					protocol.AddNodeStop,

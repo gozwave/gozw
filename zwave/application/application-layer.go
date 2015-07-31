@@ -47,7 +47,7 @@ type ApplicationLayer struct {
 
 	serialApi     serialapi.ISerialAPILayer
 	securityLayer security.ISecurityLayer
-	Nodes         map[uint8]*Node
+	nodes         map[uint8]*Node
 
 	// maps node id to channel
 	secureInclusionStep map[uint8]chan error
@@ -57,7 +57,7 @@ func NewApplicationLayer(serialApi serialapi.ISerialAPILayer) (app *ApplicationL
 	app = &ApplicationLayer{
 		serialApi:     serialApi,
 		securityLayer: security.NewSecurityLayer(),
-		Nodes:         map[uint8]*Node{},
+		nodes:         map[uint8]*Node{},
 
 		secureInclusionStep: map[uint8]chan error{},
 	}
@@ -68,6 +68,18 @@ func NewApplicationLayer(serialApi serialapi.ISerialAPILayer) (app *ApplicationL
 	err = app.initialize()
 
 	return
+}
+
+func (a *ApplicationLayer) Nodes() map[uint8]*Node {
+	return a.nodes
+}
+
+func (a *ApplicationLayer) Node(nodeId uint8) (*Node, error) {
+	if node, ok := a.nodes[nodeId]; ok {
+		return node, nil
+	}
+
+	return nil, errors.New("Node not found")
 }
 
 func (a *ApplicationLayer) initialize() error {
@@ -104,8 +116,8 @@ func (a *ApplicationLayer) initialize() error {
 	a.NodeList = initData.GetNodeIds()
 
 	for _, nodeId := range a.NodeList {
-		a.Nodes[nodeId] = NewNode(a, nodeId)
-		a.Nodes[nodeId].initialize()
+		a.nodes[nodeId] = NewNode(a, nodeId)
+		a.nodes[nodeId].initialize()
 	}
 
 	return nil
@@ -119,14 +131,33 @@ func (a *ApplicationLayer) AddNode() error {
 
 	node := NewNode(a, newNodeInfo.Source)
 	node.setFromAddNodeCallback(newNodeInfo)
-	a.Nodes[node.NodeId] = node
+	a.nodes[node.NodeId] = node
 
-	if !node.IsSecure() {
-		return nil
+	if node.IsSecure() {
+		fmt.Println("Starting secure inclusion")
+		err = a.includeSecureNode(node.NodeId)
+		if err != nil {
+			return err
+		}
+
+		time.Sleep(time.Millisecond * 50)
+		err := node.RequestSupportedSecurityCommands()
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		select {
+		case <-node.receivedSecurityInfo:
+		case <-time.After(time.Second * 5):
+			fmt.Println("timed out after requesting security commands")
+		}
 	}
 
-	fmt.Println("Starting secure inclusion")
-	return a.includeSecureNode(node.NodeId)
+	spew.Dump(node)
+
+	node.AddAssociation(1, 1)
+
+	return nil
 }
 
 func (a *ApplicationLayer) RemoveNode() error {
@@ -140,14 +171,18 @@ func (a *ApplicationLayer) RemoveFailedNode(nodeId byte) (bool, error) {
 
 func (a *ApplicationLayer) handleApplicationCommands() {
 	for cmd := range a.serialApi.ControllerCommands() {
-		fmt.Println("app command loop")
-
 		switch cmd.CommandData[0] {
+
 		case commandclass.CommandClassSecurity:
 			a.handleSecurityCommand(cmd)
+
 		default:
-			// @todo emit command on channel
-			fmt.Println("application command:", spew.Sdump(cmd))
+			if node, err := a.Node(cmd.SrcNodeId); err != nil {
+				go node.receiveApplicationCommand(cmd)
+			} else {
+				fmt.Println("Received command for unknown node", cmd.SrcNodeId)
+			}
+
 		}
 
 	}
@@ -160,7 +195,7 @@ func (a *ApplicationLayer) handleControllerUpdates() {
 
 		case protocol.UpdateStateNodeInfoReceived,
 			protocol.UpdateStateNodeInfoReqFailed:
-			if node, ok := a.Nodes[update.NodeId]; ok {
+			if node, ok := a.nodes[update.NodeId]; ok {
 				node.receiveControllerUpdate(update)
 			} else {
 				fmt.Println("controller update:", spew.Sdump(update))
@@ -198,15 +233,15 @@ func (a *ApplicationLayer) sendDataSecure(dstNode byte, payload []byte, inclusio
 	// Get a nonce from the other node
 	receiverNonce, err := a.securityLayer.GetExternalNonce(dstNode)
 	if err != nil {
-		fmt.Println("sending get nonce")
+		fmt.Println("requesting nonce")
 		a.SendData(dstNode, commandclass.NewSecurityNonceGet())
 		receiverNonce, err = a.securityLayer.WaitForExternalNonce(dstNode)
+		fmt.Println("got nonce")
 
 		if err != nil {
 			fmt.Println("error getting nonce", err)
 			return err
 		}
-		fmt.Println("got nonce")
 	}
 
 	senderNonce, err := a.securityLayer.GenerateInternalNonce()
@@ -293,16 +328,18 @@ func (a *ApplicationLayer) handleSecurityCommand(cmd serialapi.ApplicationComman
 		}
 
 		if msg[0] == commandclass.CommandClassSecurity && msg[1] == commandclass.CommandNetworkKeyVerify {
-			fmt.Println("secure inclusion: network key verify", spew.Sdump(msg))
 			if ch, ok := a.secureInclusionStep[cmd.SrcNodeId]; ok {
 				ch <- nil
 			}
 			return
 		}
 
-		// cmd.CommandData = msg
-		// cc = cmd.CommandData[0]
-		// @todo emit decrypted command on channel
+		if node, ok := a.nodes[cmd.SrcNodeId]; ok {
+			cmd.CommandData = msg
+			go node.receiveApplicationCommand(cmd)
+		} else {
+			fmt.Println("Received secure command for unknown node", cmd.SrcNodeId)
+		}
 
 	case commandclass.CommandSecurityNonceGet:
 		nonce, err := a.securityLayer.GenerateInternalNonce()

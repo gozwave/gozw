@@ -59,18 +59,18 @@ func main() {
 	fmt.Println("Version:", appLayer.Version)
 	fmt.Println("API Type:", appLayer.ApiType)
 	fmt.Println("Is Primary Controller:", appLayer.IsPrimaryController)
-	fmt.Println("Node count:", len(appLayer.Nodes))
+	fmt.Println("Node count:", len(appLayer.Nodes()))
 	//
-	// manager.SendDataSecure(15, []byte{
+	// appLayer.SendDataSecure(42, []byte{
 	// 	commandclass.CommandClassDoorLock,
 	// 	0x01, // door lock operation set
-	// 	0x00, // unsecured
+	// 	0xFF, // unsecured
 	// })
 
 	// manager.SetApplicationNodeInformation()
 	// manager.FactoryReset()
 
-	for _, node := range appLayer.Nodes {
+	for _, node := range appLayer.Nodes() {
 		fmt.Println(node.String())
 	}
 

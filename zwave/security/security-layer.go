@@ -2,7 +2,6 @@ package security
 
 import (
 	"errors"
-	"fmt"
 	"runtime"
 	"sync"
 	"time"
@@ -124,25 +123,20 @@ func (s *SecurityLayer) GetExternalNonce(key byte) (Nonce, error) {
 // nonce table) and notifies any goroutine that may be waiting for a nonce from
 // the given node
 func (s *SecurityLayer) ReceiveNonce(fromNode uint8, data *commandclass.SecurityNonceReport) {
-	fmt.Printf("ReceiveNonce: received nonce from %d, %v\n", fromNode, data.Nonce)
 	s.externalNonceTable.Set(fromNode, data.Nonce, ExternalNonceTTL)
 
 	// if there is no matching channel in the waitForNonce map, then apparently we
 	// either fetched the nonce for no reason, some node just randomly gave us one,
 	// or whatever process requested the nonce timed out already. in any case, we've
 	// stored the nonce, so it'll be valid for now
-	fmt.Println("handleNonceReport: chan", fromNode)
 	if ch, ok := s.waitForNonce[fromNode]; ok {
-		fmt.Println("handleNonceReport: chan ok", fromNode, ch)
 
 		// perform a non-blocking send. it's possible that some process asked for the
 		// nonce, but for whatever reason didn't bother to listen on the channel. in
 		// any case, we never want to block here
 		select {
 		case ch <- true:
-			fmt.Println("handleNonceReport: chan wrote", fromNode)
 		default:
-			fmt.Println("handleNonceReport: chan not written", fromNode)
 		}
 
 		// closing the channel will unblock anything that is currently listening (in
@@ -152,7 +146,6 @@ func (s *SecurityLayer) ReceiveNonce(fromNode uint8, data *commandclass.Security
 		// a reference to this channel that it hasn't blocked on yet, but will at some
 		// point
 		close(ch)
-		fmt.Println("handleNonceReport: chan closed", fromNode)
 
 		// delete the channel from the map; a new one will be created when we request
 		// another nonce from the node
