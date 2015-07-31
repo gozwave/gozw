@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"time"
 
-	"github.com/bjyoungblood/gozw/zwave/command-class"
+	"github.com/bjyoungblood/gozw/zwave/application"
 	"github.com/bjyoungblood/gozw/zwave/frame"
 	"github.com/bjyoungblood/gozw/zwave/serial-api"
 	"github.com/bjyoungblood/gozw/zwave/session"
 	"github.com/bjyoungblood/gozw/zwave/transport"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/peterh/liner"
 )
 
 func main() {
@@ -21,25 +21,27 @@ func main() {
 	frameLayer := frame.NewFrameLayer(transport)
 	sessionLayer := session.NewSessionLayer(frameLayer)
 	apiLayer := serialapi.NewSerialAPILayer(sessionLayer)
+	appLayer, err := application.NewApplicationLayer(apiLayer)
+	if err != nil {
+		panic(err)
+	}
+
+	// spew.Dump(applicationLayer.Nodes)
 
 	// apiLayer.SoftReset()
 
 	// spew.Dump(apiLayer.GetVersion())
-	nodeList, err := apiLayer.GetNodeList()
-	fmt.Println(nodeList.GetNodeIds())
+	// nodeList, err := apiLayer.GetNodeList()
+	// fmt.Println(nodeList.GetNodeIds())
 	// spew.Dump(apiLayer.MemoryGetId())
-	spew.Dump(apiLayer.GetNodeProtocolInfo(27))
+	// spew.Dump(apiLayer.GetNodeProtocolInfo(27))
 	// spew.Dump(apiLayer.GetSerialApiCapabilities())
 
-	time.Sleep(time.Second * 1)
-
-	txTime, err := apiLayer.SendData(27, commandclass.NewVersionGet())
-	fmt.Println("TX: ", txTime)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	<-time.After(30 * time.Second)
+	// txTime, err := apiLayer.SendData(27, commandclass.NewVersionGet())
+	// fmt.Println("TX: ", txTime)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
 
 	// if apiLayer.AddNode() != nil {
 	// 	apiLayer.AddNode()
@@ -50,14 +52,13 @@ func main() {
 
 	// defer manager.Close()
 
-	// fmt.Printf("Home ID: 0x%x; Node ID: %d\n", manager.HomeId, manager.NodeId)
-	// fmt.Println("API Version:", manager.ApiVersion)
-	// fmt.Println("Library:", manager.ApiLibraryType)
-	// fmt.Println("Version:", manager.Version)
-	// fmt.Println("API Type:", manager.ApiType)
-	// fmt.Println("Timer Functions Supported:", manager.TimerFunctionsSupported)
-	// fmt.Println("Is Primary Controller:", manager.IsPrimaryController)
-	// fmt.Println("Node count:", len(manager.Nodes))
+	fmt.Printf("Home ID: 0x%x; Node ID: %d\n", appLayer.HomeId, appLayer.NodeId)
+	fmt.Println("API Version:", appLayer.ApiVersion)
+	fmt.Println("Library:", appLayer.ApiLibraryType)
+	fmt.Println("Version:", appLayer.Version)
+	fmt.Println("API Type:", appLayer.ApiType)
+	fmt.Println("Is Primary Controller:", appLayer.IsPrimaryController)
+	fmt.Println("Node count:", len(appLayer.Nodes))
 	//
 	// manager.SendDataSecure(15, []byte{
 	// 	commandclass.CommandClassDoorLock,
@@ -68,39 +69,39 @@ func main() {
 	// manager.SetApplicationNodeInformation()
 	// manager.FactoryReset()
 
-	// for _, node := range manager.Nodes {
-	// 	fmt.Println(node.String())
-	// }
+	for _, node := range appLayer.Nodes {
+		fmt.Println(node.String())
+	}
 
 	// manager.SendData(3, cc.NewSwitchMultilevelCommand(0))
 
-	// line := liner.NewLiner()
-	// defer line.Close()
-	//
-	// for {
-	// 	cmd, _ := line.Prompt("(a)dd node\n(r)emove node\n(g)et nonce\n(q)uit\n> ")
-	// 	switch cmd {
-	// 	case "a":
-	// 		manager.AddNode()
-	// 	case "r":
-	// 		manager.RemoveNode()
-	// 	case "s":
-	// 		input, _ := line.Prompt("node id: ")
-	// 		nodeId, _ := strconv.Atoi(input)
-	// 		manager.SendData(uint8(nodeId), commandclass.NewSecuritySchemeGet())
-	// 	case "g":
-	// 		input, _ := line.Prompt("node id: ")
-	// 		nodeId, _ := strconv.Atoi(input)
-	// 		manager.SendData(uint8(nodeId), commandclass.NewSecurityNonceGet())
-	// 	case "v":
-	// 		input, _ := line.Prompt("node id: ")
-	// 		nodeId, _ := strconv.Atoi(input)
-	// 		manager.SendData(uint8(nodeId), commandclass.NewVersionGet())
-	// 	case "q":
-	// 		return
-	// 	default:
-	// 		fmt.Println("invalid selection")
-	// 	}
-	// }
+	line := liner.NewLiner()
+	defer line.Close()
+
+	for {
+		cmd, _ := line.Prompt("(a)dd node\n(r)emove node\n(g)et nonce\n(q)uit\n> ")
+		switch cmd {
+		case "a":
+			spew.Dump(appLayer.AddNode())
+		case "r":
+			spew.Dump(appLayer.RemoveNode())
+		// case "s":
+		// 	input, _ := line.Prompt("node id: ")
+		// 	nodeId, _ := strconv.Atoi(input)
+		// 	manager.SendData(uint8(nodeId), commandclass.NewSecuritySchemeGet())
+		// case "g":
+		// 	input, _ := line.Prompt("node id: ")
+		// 	nodeId, _ := strconv.Atoi(input)
+		// 	manager.SendData(uint8(nodeId), commandclass.NewSecurityNonceGet())
+		// case "v":
+		// 	input, _ := line.Prompt("node id: ")
+		// 	nodeId, _ := strconv.Atoi(input)
+		// 	manager.SendData(uint8(nodeId), commandclass.NewVersionGet())
+		case "q":
+			return
+		default:
+			fmt.Println("invalid selection")
+		}
+	}
 
 }
