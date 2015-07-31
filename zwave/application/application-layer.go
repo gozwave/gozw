@@ -134,6 +134,10 @@ func (a *ApplicationLayer) RemoveNode() error {
 	return err
 }
 
+func (a *ApplicationLayer) RemoveFailedNode(nodeId byte) (bool, error) {
+	return a.serialApi.RemoveFailedNode(nodeId)
+}
+
 func (a *ApplicationLayer) handleApplicationCommands() {
 	for cmd := range a.serialApi.ControllerCommands() {
 		fmt.Println("app command loop")

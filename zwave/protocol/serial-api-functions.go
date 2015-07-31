@@ -57,3 +57,12 @@ const (
 	UpdateStateDeleteDone              = 0x20
 	UpdateStateSucId                   = 0x10
 )
+
+const (
+	NodeOk                  uint8 = 0
+	FailedNodeRemoved             = 1
+	FailedNodeNotRemoved          = 2
+	FailedNodeReplace             = 3
+	FailedNodeReplaceDone         = 4
+	FailedNodeReplaceFailed       = 5
+)

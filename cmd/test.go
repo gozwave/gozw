@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/bjyoungblood/gozw/zwave/application"
 	"github.com/bjyoungblood/gozw/zwave/frame"
@@ -85,6 +86,10 @@ func main() {
 			spew.Dump(appLayer.AddNode())
 		case "r":
 			spew.Dump(appLayer.RemoveNode())
+		case "F":
+			input, _ := line.Prompt("node id: ")
+			nodeId, _ := strconv.Atoi(input)
+			spew.Dump(appLayer.RemoveFailedNode(byte(nodeId)))
 		// case "s":
 		// 	input, _ := line.Prompt("node id: ")
 		// 	nodeId, _ := strconv.Atoi(input)

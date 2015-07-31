@@ -20,6 +20,7 @@ type ISerialAPILayer interface {
 	GetNodeProtocolInfo(nodeId uint8) (nodeInfo *NodeProtocolInfo, err error)
 	SendData(nodeId byte, payload []byte) (txTime uint16, err error)
 	IsFailedNode(nodeId byte) (failed bool, err error)
+	RemoveFailedNode(nodeId byte) (removed bool, err error)
 	RequestNodeInfo(nodeInfo byte) (err error)
 	SoftReset()
 }
