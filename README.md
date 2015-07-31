@@ -16,3 +16,7 @@ Golang Z/IP Portal
   - Be sure to update your config.yaml to point to `/tmp/<serialdevice>`
 1. `go run cmd/portald/main.go`
 1. `go run cmd/gatewayd/main.go`
+
+### Resources
+
+- http://pepper1.net/zwavedb/ Random Z-Wave device library (lots of technical info)
