@@ -16,7 +16,7 @@ type ISerialAPILayer interface {
 	GetSerialApiCapabilities() (*SerialApiCapabilities, error)
 	GetVersion() (version *Version, err error)
 	MemoryGetId() (homeId uint32, nodeId uint8, err error)
-	GetNodeList() (*NodeListResponse, error)
+	GetInitAppData() (*InitAppData, error)
 	GetNodeProtocolInfo(nodeId uint8) (nodeInfo *NodeProtocolInfo, err error)
 	SendData(nodeId byte, payload []byte) (txTime uint16, err error)
 	SoftReset()

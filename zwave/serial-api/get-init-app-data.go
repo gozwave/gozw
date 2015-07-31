@@ -8,7 +8,7 @@ import (
 	"github.com/bjyoungblood/gozw/zwave/session"
 )
 
-type NodeListResponse struct {
+type InitAppData struct {
 	CommandId    byte
 	Version      byte
 	Capabilities byte
@@ -17,7 +17,7 @@ type NodeListResponse struct {
 	ChipVersion  byte
 }
 
-func (s *SerialAPILayer) GetNodeList() (*NodeListResponse, error) {
+func (s *SerialAPILayer) GetInitAppData() (*InitAppData, error) {
 
 	done := make(chan *frame.Frame)
 
@@ -37,7 +37,7 @@ func (s *SerialAPILayer) GetNodeList() (*NodeListResponse, error) {
 		return nil, errors.New("Error getting node information")
 	}
 
-	return &NodeListResponse{
+	return &InitAppData{
 		CommandId:    ret.Payload[0],
 		Version:      ret.Payload[1],
 		Capabilities: ret.Payload[2],
@@ -56,7 +56,7 @@ func isBitSet(mask []byte, nodeId uint8) bool {
 	return false
 }
 
-func (n *NodeListResponse) GetApiType() string {
+func (n *InitAppData) GetApiType() string {
 	if n.CommandId&0x80 == 0x80 {
 		return "Slave"
 	} else {
@@ -64,7 +64,7 @@ func (n *NodeListResponse) GetApiType() string {
 	}
 }
 
-func (n *NodeListResponse) TimerFunctionsSupported() bool {
+func (n *InitAppData) TimerFunctionsSupported() bool {
 	if n.CommandId&0x40 == 0x40 {
 		return true
 	} else {
@@ -72,7 +72,7 @@ func (n *NodeListResponse) TimerFunctionsSupported() bool {
 	}
 }
 
-func (n *NodeListResponse) IsPrimaryController() bool {
+func (n *InitAppData) IsPrimaryController() bool {
 	if n.CommandId&0x20 == 0x20 {
 		return false
 	} else {
@@ -80,7 +80,7 @@ func (n *NodeListResponse) IsPrimaryController() bool {
 	}
 }
 
-func (n *NodeListResponse) GetNodeIds() []uint8 {
+func (n *InitAppData) GetNodeIds() []uint8 {
 	nodes := []uint8{}
 
 	var i uint8
