@@ -68,7 +68,7 @@ func TestNoncesTimeOut(t *testing.T) {
 	table := NewNonceTable()
 
 	table.Set(0x00, []byte{0x00}, time.Microsecond*10)
-	time.Sleep(time.Microsecond * 50)
+	time.Sleep(time.Millisecond * 50)
 
 	nonce, err := table.Get(0x00)
 	assert.Error(t, err)

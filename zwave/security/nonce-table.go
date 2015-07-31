@@ -51,8 +51,8 @@ func (t *NonceTable) Get(key byte) (Nonce, error) {
 
 func (t *NonceTable) Delete(key byte) {
 	t.lock.Lock()
-	t.lock.Unlock()
-	runtime.Gosched()
+	defer t.lock.Unlock()
+	defer runtime.Gosched()
 
 	t.delete(key)
 }
