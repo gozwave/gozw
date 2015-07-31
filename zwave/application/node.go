@@ -23,22 +23,23 @@ type Node struct {
 	SupportedCommandClasses        set.Set
 	SecureSupportedCommandClasses  set.Set
 	SecureControlledCommandClasses set.Set
+
+	application         *ApplicationLayer
+	receivedUpdate      chan bool
+	initializationError error
 }
 
-func NewNode(nodeId byte) *Node {
+func NewNode(application *ApplicationLayer, nodeId byte) *Node {
 	return &Node{
 		NodeId: nodeId,
 
 		SupportedCommandClasses:        set.NewSet(),
 		SecureSupportedCommandClasses:  set.NewSet(),
 		SecureControlledCommandClasses: set.NewSet(),
-	}
-}
 
-func NewNodeFromAddNodeCallback(callback *serialapi.AddRemoveNodeCallback) *Node {
-	newNode := NewNode(callback.Source)
-	newNode.setFromAddNodeCallback(callback)
-	return newNode
+		application:    application,
+		receivedUpdate: make(chan bool),
+	}
 }
 
 func (n *Node) IsSecure() bool {
@@ -63,6 +64,38 @@ func (n *Node) GetGenericDeviceClassName() string {
 
 func (n *Node) GetSpecificDeviceClassName() string {
 	return protocol.GetSpecificDeviceTypeName(n.GenericDeviceClass, n.SpecificDeviceClass)
+}
+
+func (n *Node) initialize() {
+	nodeInfo, err := n.application.serialApi.GetNodeProtocolInfo(n.NodeId)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		n.setFromNodeProtocolInfo(nodeInfo)
+	}
+
+	if n.NodeId == 1 {
+		// self is never failing
+		n.Failing = false
+	} else {
+		failing, err := n.application.serialApi.IsFailedNode(n.NodeId)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		n.Failing = failing
+	}
+
+}
+
+func (n *Node) receiveControllerUpdate(update serialapi.ControllerUpdate) {
+	select {
+	case n.receivedUpdate <- true:
+	default:
+	}
+
+	n.setFromApplicationControllerUpdate(update)
 }
 
 // func (n *Node) updateSupportedSecureCommands() {
@@ -102,7 +135,7 @@ func (n *Node) setFromAddNodeCallback(nodeInfo *serialapi.AddRemoveNodeCallback)
 	}
 }
 
-func (n *Node) setFromApplicationControllerUpdate(nodeInfo *serialapi.ControllerUpdate) {
+func (n *Node) setFromApplicationControllerUpdate(nodeInfo serialapi.ControllerUpdate) {
 	n.BasicDeviceClass = nodeInfo.Basic
 	n.GenericDeviceClass = nodeInfo.Generic
 	n.SpecificDeviceClass = nodeInfo.Specific

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/bjyoungblood/gozw/zwave/command-class"
+	"github.com/bjyoungblood/gozw/zwave/protocol"
 	"github.com/bjyoungblood/gozw/zwave/security"
 	"github.com/bjyoungblood/gozw/zwave/serial-api"
 	"github.com/davecgh/go-spew/spew"
@@ -29,17 +30,34 @@ const (
 )
 
 type ApplicationLayer struct {
+	ApiVersion     string
+	ApiLibraryType string
+
+	HomeId uint32
+	NodeId byte
+
+	Version             byte
+	ApiType             string
+	IsPrimaryController bool
+	ApplicationVersion  byte
+	ApplicationRevision byte
+	SupportedFunctions  []byte
+
+	NodeList []uint8
+
 	serialApi     serialapi.ISerialAPILayer
 	securityLayer security.ISecurityLayer
+	Nodes         map[uint8]*Node
 
 	// maps node id to channel
 	secureInclusionStep map[uint8]chan error
 }
 
-func NewApplicationLayer(serialApi serialapi.ISerialAPILayer) *ApplicationLayer {
-	app := &ApplicationLayer{
+func NewApplicationLayer(serialApi serialapi.ISerialAPILayer) (app *ApplicationLayer, err error) {
+	app = &ApplicationLayer{
 		serialApi:     serialApi,
 		securityLayer: security.NewSecurityLayer(),
+		Nodes:         map[uint8]*Node{},
 
 		secureInclusionStep: map[uint8]chan error{},
 	}
@@ -47,7 +65,50 @@ func NewApplicationLayer(serialApi serialapi.ISerialAPILayer) *ApplicationLayer 
 	go app.handleApplicationCommands()
 	go app.handleControllerUpdates()
 
-	return app
+	err = app.initialize()
+
+	return
+}
+
+func (a *ApplicationLayer) initialize() error {
+	version, err := a.serialApi.GetVersion()
+	if err != nil {
+		return err
+	}
+
+	a.ApiVersion = version.Version
+	a.ApiLibraryType = version.GetLibraryTypeString()
+
+	a.HomeId, a.NodeId, err = a.serialApi.MemoryGetId()
+	if err != nil {
+		return err
+	}
+
+	serialApiCapabilities, err := a.serialApi.GetSerialApiCapabilities()
+	if err != nil {
+		return err
+	}
+
+	a.ApplicationVersion = serialApiCapabilities.ApplicationVersion
+	a.ApplicationRevision = serialApiCapabilities.ApplicationRevision
+	a.SupportedFunctions = serialApiCapabilities.GetSupportedFunctions()
+
+	initData, err := a.serialApi.GetInitAppData()
+	if err != nil {
+		return err
+	}
+
+	a.Version = initData.Version
+	a.ApiType = initData.GetApiType()
+	a.IsPrimaryController = initData.IsPrimaryController()
+	a.NodeList = initData.GetNodeIds()
+
+	for _, nodeId := range a.NodeList {
+		a.Nodes[nodeId] = NewNode(a, nodeId)
+		a.Nodes[nodeId].initialize()
+	}
+
+	return nil
 }
 
 func (a *ApplicationLayer) AddNode() error {
@@ -56,7 +117,9 @@ func (a *ApplicationLayer) AddNode() error {
 		return err
 	}
 
-	node := NewNodeFromAddNodeCallback(newNodeInfo)
+	node := NewNode(a, newNodeInfo.Source)
+	node.setFromAddNodeCallback(newNodeInfo)
+	a.Nodes[node.NodeId] = node
 
 	if !node.IsSecure() {
 		return nil
@@ -88,7 +151,22 @@ func (a *ApplicationLayer) handleApplicationCommands() {
 
 func (a *ApplicationLayer) handleControllerUpdates() {
 	for update := range a.serialApi.ControllerUpdates() {
-		fmt.Println("application update:", spew.Sdump(update))
+
+		switch update.Status {
+
+		case protocol.UpdateStateNodeInfoReceived,
+			protocol.UpdateStateNodeInfoReqFailed:
+			if node, ok := a.Nodes[update.NodeId]; ok {
+				node.receiveControllerUpdate(update)
+			} else {
+				fmt.Println("controller update:", spew.Sdump(update))
+			}
+
+		default:
+			fmt.Println("controller update:", spew.Sdump(update))
+
+		}
+
 	}
 }
 

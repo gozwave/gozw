@@ -1,5 +1,7 @@
 package serialapi
 
+import "github.com/bjyoungblood/gozw/zwave/protocol"
+
 type ControllerUpdate struct {
 	Status         byte
 	NodeId         byte
@@ -10,16 +12,6 @@ type ControllerUpdate struct {
 	CommandClasses []byte
 }
 
-const (
-	UpdateStateNodeInfoReceived  = 0x84
-	UpdateStateNodeInfoReqDone   = 0x82
-	UpdateStateNodeInfoReqFailed = 0x81
-	UpdateStateRoutingPending    = 0x80
-	UpdateStateNewIdAssigned     = 0x40
-	UpdateStateDeleteDone        = 0x20
-	UpdateStateSucId             = 0x10
-)
-
 func parseControllerUpdate(payload []byte) ControllerUpdate {
 	val := ControllerUpdate{
 		Status: payload[1],
@@ -27,7 +19,7 @@ func parseControllerUpdate(payload []byte) ControllerUpdate {
 		Length: payload[3],
 	}
 
-	if val.Length == 0 {
+	if val.Length == 0 || val.Status == protocol.UpdateStateNodeInfoReqFailed {
 		return val
 	}
 
@@ -52,19 +44,19 @@ func parseControllerUpdate(payload []byte) ControllerUpdate {
 
 func (a *ControllerUpdate) GetStatusString() string {
 	switch a.Status {
-	case UpdateStateNodeInfoReceived:
+	case protocol.UpdateStateNodeInfoReceived:
 		return "Node Info Received"
-	case UpdateStateNodeInfoReqDone:
+	case protocol.UpdateStateNodeInfoReqDone:
 		return "Node Info Req Done"
-	case UpdateStateNodeInfoReqFailed:
+	case protocol.UpdateStateNodeInfoReqFailed:
 		return "Node Info Req Failed"
-	case UpdateStateRoutingPending:
+	case protocol.UpdateStateRoutingPending:
 		return "Routing Pending"
-	case UpdateStateNewIdAssigned:
+	case protocol.UpdateStateNewIdAssigned:
 		return "New ID Assigned"
-	case UpdateStateDeleteDone:
+	case protocol.UpdateStateDeleteDone:
 		return "Delete Done"
-	case UpdateStateSucId:
+	case protocol.UpdateStateSucId:
 		return "Update SUC ID"
 	default:
 		return "Unknown"

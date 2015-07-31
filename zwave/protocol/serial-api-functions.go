@@ -47,3 +47,13 @@ const (
 	LibraryAvRemote               = 0x0A
 	LibraryAvDevice               = 0x0B
 )
+
+const (
+	UpdateStateNodeInfoReceived  uint8 = 0x84
+	UpdateStateNodeInfoReqDone         = 0x82
+	UpdateStateNodeInfoReqFailed       = 0x81
+	UpdateStateRoutingPending          = 0x80
+	UpdateStateNewIdAssigned           = 0x40
+	UpdateStateDeleteDone              = 0x20
+	UpdateStateSucId                   = 0x10
+)
