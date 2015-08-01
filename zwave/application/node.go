@@ -4,27 +4,34 @@ import (
 	"errors"
 	"fmt"
 
+	"gopkg.in/vmihailenco/msgpack.v2"
+
 	"github.com/bjyoungblood/gozw/zwave/command-class"
 	"github.com/bjyoungblood/gozw/zwave/protocol"
 	"github.com/bjyoungblood/gozw/zwave/serial-api"
+	"github.com/boltdb/bolt"
 	"github.com/davecgh/go-spew/spew"
-	set "github.com/deckarep/golang-set"
 )
 
 type Node struct {
 	NodeId byte
 
 	Capability          byte
-	Security            byte
 	BasicDeviceClass    byte
 	GenericDeviceClass  byte
 	SpecificDeviceClass byte
 
 	Failing bool
 
-	SupportedCommandClasses        set.Set
-	SecureSupportedCommandClasses  set.Set
-	SecureControlledCommandClasses set.Set
+	SupportedCommandClasses        map[byte]bool
+	SecureSupportedCommandClasses  map[byte]bool
+	SecureControlledCommandClasses map[byte]bool
+
+	CommandClassVersions map[byte]int
+
+	ManufacturerID uint16
+	ProductTypeID  uint16
+	ProductID      uint16
 
 	application          *ApplicationLayer
 	receivedUpdate       chan bool
@@ -35,9 +42,9 @@ func NewNode(application *ApplicationLayer, nodeId byte) *Node {
 	return &Node{
 		NodeId: nodeId,
 
-		SupportedCommandClasses:        set.NewSet(),
-		SecureSupportedCommandClasses:  set.NewSet(),
-		SecureControlledCommandClasses: set.NewSet(),
+		SupportedCommandClasses:        map[byte]bool{},
+		SecureSupportedCommandClasses:  map[byte]bool{},
+		SecureControlledCommandClasses: map[byte]bool{},
 
 		application:          application,
 		receivedUpdate:       make(chan bool),
@@ -45,16 +52,39 @@ func NewNode(application *ApplicationLayer, nodeId byte) *Node {
 	}
 }
 
+func NewNodeFromDb(application *ApplicationLayer, nodeId byte) (*Node, error) {
+	var data []byte
+	err := application.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("nodes"))
+		data = bucket.Get([]byte{nodeId})
+
+		if len(data) == 0 {
+			return errors.New("Node not found")
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	node := NewNode(application, nodeId)
+	err = msgpack.Unmarshal(data, &node)
+	if err != nil {
+		return nil, err
+	}
+
+	return node, nil
+}
+
 func (n *Node) IsSecure() bool {
-	return n.SupportedCommandClasses.Contains(byte(commandclass.CommandClassSecurity))
+	_, found := n.SupportedCommandClasses[commandclass.CommandClassSecurity]
+	return found
 }
 
 func (n *Node) IsListening() bool {
 	return n.Capability&0x80 == 0x80
-}
-
-func (n *Node) HasOptionalFunctions() bool {
-	return n.Security&0x80 == 0x80
 }
 
 func (n *Node) GetBasicDeviceClassName() string {
@@ -109,7 +139,7 @@ func (n *Node) sendDataSecure(payload []byte) error {
 	return n.application.SendDataSecure(n.NodeId, payload)
 }
 
-func (n *Node) initialize() {
+func (n *Node) initialize() error {
 	nodeInfo, err := n.application.serialApi.GetNodeProtocolInfo(n.NodeId)
 	if err != nil {
 		fmt.Println(err)
@@ -124,12 +154,25 @@ func (n *Node) initialize() {
 		failing, err := n.application.serialApi.IsFailedNode(n.NodeId)
 		if err != nil {
 			fmt.Println(err)
-			return
+			return nil
 		}
 
 		n.Failing = failing
 	}
 
+	return n.saveToDb()
+}
+
+func (n *Node) saveToDb() error {
+	data, err := msgpack.Marshal(n)
+	if err != nil {
+		return err
+	}
+
+	return n.application.db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("nodes"))
+		return bucket.Put([]byte{n.NodeId}, data)
+	})
 }
 
 func (n *Node) receiveControllerUpdate(update serialapi.ControllerUpdate) {
@@ -139,6 +182,7 @@ func (n *Node) receiveControllerUpdate(update serialapi.ControllerUpdate) {
 	}
 
 	n.setFromApplicationControllerUpdate(update)
+	n.saveToDb()
 }
 
 // func (n *Node) updateSupportedSecureCommands() {
@@ -174,8 +218,10 @@ func (n *Node) setFromAddNodeCallback(nodeInfo *serialapi.AddRemoveNodeCallback)
 	n.SpecificDeviceClass = nodeInfo.Specific
 
 	for _, cc := range nodeInfo.CommandClasses {
-		n.SupportedCommandClasses.Add(cc)
+		n.SupportedCommandClasses[cc] = true
 	}
+
+	n.saveToDb()
 }
 
 func (n *Node) setFromApplicationControllerUpdate(nodeInfo serialapi.ControllerUpdate) {
@@ -184,28 +230,36 @@ func (n *Node) setFromApplicationControllerUpdate(nodeInfo serialapi.ControllerU
 	n.SpecificDeviceClass = nodeInfo.Specific
 
 	for _, cc := range nodeInfo.CommandClasses {
-		n.SupportedCommandClasses.Add(cc)
+		n.SupportedCommandClasses[cc] = true
 	}
+
+	n.saveToDb()
 }
 
 func (n *Node) setFromNodeProtocolInfo(nodeInfo *serialapi.NodeProtocolInfo) {
 	n.Capability = nodeInfo.Capability
-	n.Security = nodeInfo.Security
 	n.BasicDeviceClass = nodeInfo.BasicDeviceClass
 	n.GenericDeviceClass = nodeInfo.GenericDeviceClass
 	n.SpecificDeviceClass = nodeInfo.SpecificDeviceClass
+
+	n.saveToDb()
 }
 
 func (n *Node) receiveSecurityCommandsSupportedReport(cc *commandclass.SecurityCommandsSupportedReport) {
 	for _, cc := range cc.SupportedCommandClasses {
-		n.SecureSupportedCommandClasses.Add(cc)
+		n.SecureSupportedCommandClasses[cc] = true
 	}
 
 	for _, cc := range cc.ControlledCommandClasses {
-		n.SecureControlledCommandClasses.Add(cc)
+		n.SecureControlledCommandClasses[cc] = true
 	}
 
-	n.receivedSecurityInfo <- true
+	select {
+	case n.receivedSecurityInfo <- true:
+	default:
+	}
+
+	n.saveToDb()
 }
 
 func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
@@ -218,6 +272,8 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 			n.receiveSecurityCommandsSupportedReport(
 				commandclass.ParseSecurityCommandsSupportedReport(cmd.CommandData),
 			)
+
+			fmt.Println(n.GetSupportedSecureCommandClassStrings())
 		}
 
 	case commandclass.CommandClassAlarm:
@@ -292,7 +348,7 @@ func (n *Node) String() string {
 		str += fmt.Sprintf("    - %s\n", cc)
 	}
 
-	if n.SecureSupportedCommandClasses.Cardinality() > 0 {
+	if len(n.SecureSupportedCommandClasses) > 0 {
 		secureCommands := commandClassSetToStrings(n.SecureSupportedCommandClasses)
 		str += fmt.Sprintf("  Supported command classes (secure):\n")
 		for _, cc := range secureCommands {
@@ -300,7 +356,7 @@ func (n *Node) String() string {
 		}
 	}
 
-	if n.SecureControlledCommandClasses.Cardinality() > 0 {
+	if len(n.SecureControlledCommandClasses) > 0 {
 		secureCommands := commandClassSetToStrings(n.SecureControlledCommandClasses)
 		str += fmt.Sprintf("  Controlled command classes (secure):\n")
 		for _, cc := range secureCommands {
@@ -327,15 +383,15 @@ func (n *Node) GetSupportedSecureCommandClassStrings() []string {
 	return strings
 }
 
-func commandClassSetToStrings(commandClasses set.Set) []string {
-	if commandClasses.Cardinality() == 0 {
+func commandClassSetToStrings(commandClasses map[byte]bool) []string {
+	if len(commandClasses) == 0 {
 		return []string{}
 	}
 
 	ccStrings := []string{}
 
-	for cc := range commandClasses.Iter() {
-		ccStrings = append(ccStrings, commandclass.GetCommandClassString(cc.(byte)))
+	for cc, _ := range commandClasses {
+		ccStrings = append(ccStrings, commandclass.GetCommandClassString(cc))
 	}
 
 	return ccStrings

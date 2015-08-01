@@ -9,6 +9,7 @@ import (
 	"github.com/bjyoungblood/gozw/zwave/protocol"
 	"github.com/bjyoungblood/gozw/zwave/security"
 	"github.com/bjyoungblood/gozw/zwave/serial-api"
+	"github.com/boltdb/bolt"
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -49,6 +50,8 @@ type ApplicationLayer struct {
 	securityLayer security.ISecurityLayer
 	nodes         map[byte]*Node
 
+	db *bolt.DB
+
 	// maps node id to channel
 	secureInclusionStep map[byte]chan error
 }
@@ -62,10 +65,15 @@ func NewApplicationLayer(serialApi serialapi.ISerialAPILayer) (app *ApplicationL
 		secureInclusionStep: map[byte]chan error{},
 	}
 
+	err = app.initDb()
+	if err != nil {
+		return
+	}
+
 	go app.handleApplicationCommands()
 	go app.handleControllerUpdates()
 
-	err = app.initialize()
+	err = app.initZWave()
 
 	return
 }
@@ -82,7 +90,25 @@ func (a *ApplicationLayer) Node(nodeId byte) (*Node, error) {
 	return nil, errors.New("Node not found")
 }
 
-func (a *ApplicationLayer) initialize() error {
+func (a *ApplicationLayer) initDb() (err error) {
+	a.db, err = bolt.Open("data.db", 0600, &bolt.Options{})
+	if err != nil {
+		return
+	}
+
+	a.db.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte("nodes"))
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return nil
+}
+
+func (a *ApplicationLayer) initZWave() error {
 	version, err := a.serialApi.GetVersion()
 	if err != nil {
 		return err
@@ -116,11 +142,27 @@ func (a *ApplicationLayer) initialize() error {
 	a.NodeList = initData.GetNodeIds()
 
 	for _, nodeId := range a.NodeList {
+		node, err := NewNodeFromDb(a, nodeId)
+		if err == nil {
+			a.nodes[nodeId] = node
+			continue
+		}
+
+		spew.Dump(err)
+
 		a.nodes[nodeId] = NewNode(a, nodeId)
 		a.nodes[nodeId].initialize()
+
+		if nodeId == 52 {
+			a.nodes[nodeId].RequestSupportedSecurityCommands()
+		}
 	}
 
 	return nil
+}
+
+func (a *ApplicationLayer) Shutdown() error {
+	return a.db.Close()
 }
 
 func (a *ApplicationLayer) AddNode() error {
@@ -161,12 +203,27 @@ func (a *ApplicationLayer) AddNode() error {
 }
 
 func (a *ApplicationLayer) RemoveNode() error {
-	_, err := a.serialApi.RemoveNode()
-	return err
+	result, err := a.serialApi.RemoveNode()
+
+	if err != nil {
+		return err
+	}
+
+	return a.db.Update(func(tx *bolt.Tx) error {
+		return tx.Bucket([]byte("nodes")).Delete([]byte{result.Source})
+	})
 }
 
-func (a *ApplicationLayer) RemoveFailedNode(nodeId byte) (bool, error) {
-	return a.serialApi.RemoveFailedNode(nodeId)
+func (a *ApplicationLayer) RemoveFailedNode(nodeId byte) (ok bool, err error) {
+	ok, err = a.serialApi.RemoveFailedNode(nodeId)
+
+	if ok && err != nil {
+		err = a.db.Update(func(tx *bolt.Tx) error {
+			return tx.Bucket([]byte("nodes")).Delete([]byte{nodeId})
+		})
+	}
+
+	return
 }
 
 func (a *ApplicationLayer) handleApplicationCommands() {

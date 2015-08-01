@@ -103,6 +103,7 @@ func main() {
 		// 	nodeId, _ := strconv.Atoi(input)
 		// 	manager.SendData(uint8(nodeId), commandclass.NewVersionGet())
 		case "q":
+			appLayer.Shutdown()
 			return
 		default:
 			fmt.Println("invalid selection")
