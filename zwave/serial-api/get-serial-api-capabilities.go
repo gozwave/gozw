@@ -55,10 +55,10 @@ type SerialApiCapabilities struct {
 	SupportedFunctions  []byte
 }
 
-func (n *SerialApiCapabilities) GetSupportedFunctions() []uint8 {
-	supportedFunctions := []uint8{}
+func (n *SerialApiCapabilities) GetSupportedFunctions() []byte {
+	supportedFunctions := []byte{}
 
-	var i uint8
+	var i byte
 	for i = 1; i < 255; i++ {
 		if isBitSet(n.SupportedFunctions, i) {
 			supportedFunctions = append(supportedFunctions, i)

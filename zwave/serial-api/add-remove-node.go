@@ -180,7 +180,7 @@ func (s *SerialAPILayer) RemoveNode() (*AddRemoveNodeCallback, error) {
 
 }
 
-func addRemoveStatusFrame(functionId, status, callbackId uint8) *frame.Frame {
+func addRemoveStatusFrame(functionId, status, callbackId byte) *frame.Frame {
 	return frame.NewRequestFrame([]byte{
 		functionId,
 		status,
@@ -194,9 +194,9 @@ type AddRemoveNodeCallback struct {
 	Status         byte
 	Source         byte
 	Length         byte
-	Basic          uint8
-	Generic        uint8
-	Specific       uint8
+	Basic          byte
+	Generic        byte
+	Specific       byte
 	CommandClasses []byte
 }
 

@@ -6,24 +6,24 @@ import (
 )
 
 const (
-	SecuritySequenceCounterMin uint8 = 1
-	SecuritySequenceCounterMax       = 15
+	SecuritySequenceCounterMin byte = 1
+	SecuritySequenceCounterMax      = 15
 )
 
 type SequenceCounter struct {
 	// maps a node id to a sequence counter (unique per node)
-	counters map[uint8]uint8
+	counters map[byte]byte
 	lock     *sync.Mutex
 }
 
 func NewSequenceCounter() *SequenceCounter {
 	return &SequenceCounter{
-		counters: map[uint8]uint8{},
+		counters: map[byte]byte{},
 		lock:     &sync.Mutex{},
 	}
 }
 
-func (s *SequenceCounter) Get(nodeId uint8) (counter uint8) {
+func (s *SequenceCounter) Get(nodeId byte) (counter byte) {
 	var ok bool
 
 	s.lock.Lock()

@@ -5,9 +5,9 @@ import "github.com/bjyoungblood/gozw/zwave/protocol"
 type ApplicationCommand struct {
 	CommandId     byte
 	ReceiveStatus byte
-	DstNodeId     uint8
-	SrcNodeId     uint8
-	CmdLength     uint8
+	DstNodeId     byte
+	SrcNodeId     byte
+	CmdLength     byte
 	CommandData   []byte
 	// @todo implement multicast functionality (maybe? only needed for bridge library)
 }

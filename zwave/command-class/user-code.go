@@ -1,7 +1,7 @@
 package commandclass
 
 const (
-	CommandUserCodeVersion   uint = 0x01
+	CommandUserCodeVersion   byte = 0x01
 	CommandUserCodeGet            = 0x02
 	CommandUserCodeReport         = 0x03
 	CommandUserCodeSet            = 0x01
@@ -10,22 +10,22 @@ const (
 )
 
 const (
-	UserCodeReportAvailableNotSet         uint8 = 0x00
-	UserCodeReportOccupied                      = 0x01
-	UserCodeReportReservedByAdministrator       = 0x02
-	UserCodeReportStatusNotAvailable            = 0xFE
+	UserCodeReportAvailableNotSet         byte = 0x00
+	UserCodeReportOccupied                     = 0x01
+	UserCodeReportReservedByAdministrator      = 0x02
+	UserCodeReportStatusNotAvailable           = 0xFE
 )
 
 const (
-	UserCodeSetAvailableNotSet         uint8 = 0x00
-	UserCodeSetOccupied                      = 0x01
-	UserCodeSetReservedByAdministrator       = 0x02
-	UserCodeSetStatusNotAvailable            = 0xFE
+	UserCodeSetAvailableNotSet         byte = 0x00
+	UserCodeSetOccupied                     = 0x01
+	UserCodeSetReservedByAdministrator      = 0x02
+	UserCodeSetStatusNotAvailable           = 0xFE
 )
 
 type UserCodeReport struct {
-	UserIdentifier uint8
-	UserStatus     uint8
+	UserIdentifier byte
+	UserStatus     byte
 	Code           string
 }
 

@@ -24,9 +24,9 @@ const (
 )
 
 const (
-	SecuritySequenceSequencedFlag   uint8 = 0x10
-	SecuritySequenceSecondFrameFlag       = 0x20
-	SecuritySequenceCounterMask           = 0x0f
+	SecuritySequenceSequencedFlag   byte = 0x10
+	SecuritySequenceSecondFrameFlag      = 0x20
+	SecuritySequenceCounterMask          = 0x0f
 )
 
 type ApplicationLayer struct {
@@ -43,23 +43,23 @@ type ApplicationLayer struct {
 	ApplicationRevision byte
 	SupportedFunctions  []byte
 
-	NodeList []uint8
+	NodeList []byte
 
 	serialApi     serialapi.ISerialAPILayer
 	securityLayer security.ISecurityLayer
-	nodes         map[uint8]*Node
+	nodes         map[byte]*Node
 
 	// maps node id to channel
-	secureInclusionStep map[uint8]chan error
+	secureInclusionStep map[byte]chan error
 }
 
 func NewApplicationLayer(serialApi serialapi.ISerialAPILayer) (app *ApplicationLayer, err error) {
 	app = &ApplicationLayer{
 		serialApi:     serialApi,
 		securityLayer: security.NewSecurityLayer(),
-		nodes:         map[uint8]*Node{},
+		nodes:         map[byte]*Node{},
 
-		secureInclusionStep: map[uint8]chan error{},
+		secureInclusionStep: map[byte]chan error{},
 	}
 
 	go app.handleApplicationCommands()
@@ -70,11 +70,11 @@ func NewApplicationLayer(serialApi serialapi.ISerialAPILayer) (app *ApplicationL
 	return
 }
 
-func (a *ApplicationLayer) Nodes() map[uint8]*Node {
+func (a *ApplicationLayer) Nodes() map[byte]*Node {
 	return a.nodes
 }
 
-func (a *ApplicationLayer) Node(nodeId uint8) (*Node, error) {
+func (a *ApplicationLayer) Node(nodeId byte) (*Node, error) {
 	if node, ok := a.nodes[nodeId]; ok {
 		return node, nil
 	}

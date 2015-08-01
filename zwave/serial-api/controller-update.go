@@ -6,9 +6,9 @@ type ControllerUpdate struct {
 	Status         byte
 	NodeId         byte
 	Length         byte
-	Basic          uint8
-	Generic        uint8
-	Specific       uint8
+	Basic          byte
+	Generic        byte
+	Specific       byte
 	CommandClasses []byte
 }
 

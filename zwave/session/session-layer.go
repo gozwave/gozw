@@ -26,12 +26,12 @@ type SessionLayer struct {
 
 	UnsolicitedFrames chan frame.Frame
 
-	lastRequestFuncId uint8
+	lastRequestFuncId byte
 	responses         chan frame.Frame
 
 	// maps sequence number to callback
-	sequenceNumber uint8
-	callbacks      map[uint8]CallbackFunc
+	sequenceNumber byte
+	callbacks      map[byte]CallbackFunc
 
 	requestQueue chan *Request
 }
@@ -46,7 +46,7 @@ func NewSessionLayer(frameLayer frame.IFrameLayer) *SessionLayer {
 		responses:         make(chan frame.Frame),
 
 		sequenceNumber: 0,
-		callbacks:      map[uint8]CallbackFunc{},
+		callbacks:      map[byte]CallbackFunc{},
 
 		requestQueue: make(chan *Request, 10),
 	}
@@ -85,7 +85,7 @@ func (s *SessionLayer) receiveThread() {
 				fmt.Println("Received an unexpected response frame: ", frame)
 			}
 		} else {
-			var callbackId uint8
+			var callbackId byte
 
 			switch frame.Payload[0] {
 
@@ -127,7 +127,7 @@ func (s *SessionLayer) receiveThread() {
 // sets the callback id as the last byte in the payload.
 func (s *SessionLayer) sendThread() {
 	for request := range s.requestQueue {
-		var seqNo uint8 = 0
+		var seqNo byte = 0
 
 		if request.ReceivesCallback {
 			seqNo = s.getSequenceNumber()
@@ -169,7 +169,7 @@ func (s *SessionLayer) sendThread() {
 	}
 }
 
-func (s *SessionLayer) getSequenceNumber() uint8 {
+func (s *SessionLayer) getSequenceNumber() byte {
 	if s.sequenceNumber == MaxSequenceNumber {
 		s.sequenceNumber = MinSequenceNumber
 	} else {

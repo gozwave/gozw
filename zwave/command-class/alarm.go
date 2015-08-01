@@ -1,14 +1,14 @@
 package commandclass
 
 const (
-	CommandAlarmVersion uint8 = 0x01
-	CommandAlarmGet           = 0x04
-	CommandAlarmReport        = 0x05
+	CommandAlarmVersion byte = 0x01
+	CommandAlarmGet          = 0x04
+	CommandAlarmReport       = 0x05
 )
 
 type AlarmReport struct {
-	Type  uint8
-	Level uint8
+	Type  byte
+	Level byte
 }
 
 // @todo handle multiple versions, since this one has a lot

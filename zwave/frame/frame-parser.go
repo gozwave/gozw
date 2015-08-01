@@ -32,7 +32,7 @@ type FrameParser struct {
 	input                              <-chan byte
 	framesReceived                     chan<- *FrameParseEvent
 	acks, naks, cans                   chan<- bool
-	sof, length, checksum, readCounter uint8
+	sof, length, checksum, readCounter byte
 	payloadReadBuffer                  *bytes.Buffer
 	parseTimeout                       *time.Timer
 }
@@ -91,15 +91,15 @@ func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent, acks, nak
 				frameParser.cans <- true
 			},
 			"RX_SOF": func(e *fsm.Event) {
-				frameParser.sof = e.Args[0].(uint8)
+				frameParser.sof = e.Args[0].(byte)
 				frameParser.parseTimeout.Reset(readTimeout)
 			},
 			"RX_LENGTH": func(e *fsm.Event) {
-				frameParser.length = e.Args[0].(uint8)
+				frameParser.length = e.Args[0].(byte)
 				frameParser.readCounter = frameParser.length - 2
 			},
 			"RX_DATA": func(e *fsm.Event) {
-				frameParser.payloadReadBuffer.WriteByte(e.Args[0].(uint8))
+				frameParser.payloadReadBuffer.WriteByte(e.Args[0].(byte))
 				frameParser.readCounter--
 			},
 			"checksum": func(e *fsm.Event) {

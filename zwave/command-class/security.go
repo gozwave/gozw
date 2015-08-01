@@ -3,50 +3,50 @@ package commandclass
 import "errors"
 
 const (
-	CommandSecurityVersion                      uint8 = 0x01
-	CommandNetworkKeySet                              = 0x06
-	CommandNetworkKeyVerify                           = 0x07
-	CommandSecurityCommandsSupportedGet               = 0x02
-	CommandSecurityCommandsSupportedReport            = 0x03
-	CommandSecurityMessageEncapsulation               = 0x81
-	CommandSecurityMessageEncapsulationNonceGet       = 0xC1
-	CommandSecurityNonceGet                           = 0x40
-	CommandSecurityNonceReport                        = 0x80
-	CommandSecuritySchemeGet                          = 0x04
-	CommandSecuritySchemeInherit                      = 0x08
-	CommandSecuritySchemeReport                       = 0x05
+	CommandSecurityVersion                      byte = 0x01
+	CommandNetworkKeySet                             = 0x06
+	CommandNetworkKeyVerify                          = 0x07
+	CommandSecurityCommandsSupportedGet              = 0x02
+	CommandSecurityCommandsSupportedReport           = 0x03
+	CommandSecurityMessageEncapsulation              = 0x81
+	CommandSecurityMessageEncapsulationNonceGet      = 0xC1
+	CommandSecurityNonceGet                          = 0x40
+	CommandSecurityNonceReport                       = 0x80
+	CommandSecuritySchemeGet                         = 0x04
+	CommandSecuritySchemeInherit                     = 0x08
+	CommandSecuritySchemeReport                      = 0x05
 )
 
 const SecurityCommandsSupportedReportCommandClassMark = 0xEF
 
 type SecuritySchemeGet struct {
-	CommandClass             uint8
-	Command                  uint8
+	CommandClass             byte
+	Command                  byte
 	SupportedSecuritySchemes byte
 }
 
 type SecurityNonceGet struct {
-	CommandClass uint8
-	Command      uint8
+	CommandClass byte
+	Command      byte
 }
 
 type SecurityNonceReport struct {
-	CommandClass uint8
-	Command      uint8
+	CommandClass byte
+	Command      byte
 	Nonce        []byte
 }
 
 type SecurityCommandsSupportedReport struct {
-	CommandClass             uint8
-	Command                  uint8
-	RemainingFrames          uint8
+	CommandClass             byte
+	Command                  byte
+	RemainingFrames          byte
 	SupportedCommandClasses  []byte
 	ControlledCommandClasses []byte
 }
 
 type SecurityMessageEncapsulation struct {
-	CommandClass     uint8
-	Command          uint8
+	CommandClass     byte
+	Command          byte
 	SenderNonce      []byte
 	EncryptedPayload []byte
 	ReceiverNonceId  byte

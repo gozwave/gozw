@@ -6,37 +6,37 @@ import (
 	"errors"
 )
 
-type FrameHeader uint8
-type FrameType uint8
+type FrameHeader byte
+type FrameType byte
 
 const (
-	FrameHeaderData uint8 = 0x01
-	FrameHeaderAck  uint8 = 0x06
-	FrameHeaderNak  uint8 = 0x15
-	FrameHeaderCan  uint8 = 0x18
+	FrameHeaderData byte = 0x01
+	FrameHeaderAck  byte = 0x06
+	FrameHeaderNak  byte = 0x15
+	FrameHeaderCan  byte = 0x18
 )
 
 const (
-	FrameTypeReq uint8 = 0x00
-	FrameTypeRes uint8 = 0x01
+	FrameTypeReq byte = 0x00
+	FrameTypeRes byte = 0x01
 )
 
 type Frame struct {
 
 	// Header is one of FrameHeader*
-	Header uint8
+	Header byte
 
 	// Length = byte length of all fields, excluding Header and Checksum
-	Length uint8
+	Length byte
 
 	// Type is one of FrameType*
-	Type uint8
+	Type byte
 
 	// Payload is the command id and command payload
 	Payload []byte
 
 	// Checksum = 0xff XOR Type XOR Length XOR payload[0] XOR [...payload[n]]
-	Checksum uint8
+	Checksum byte
 }
 
 func NewRequestFrame(payload []byte) *Frame {
@@ -91,8 +91,8 @@ func (z *Frame) IsData() bool {
 
 // CalcChecksum calculates the checksum for this frame, given the current data.
 // The Z-Wave checksum is calculated by taking 0xFF XOR Length XOR Type XOR Payload[0:n]
-func (z *Frame) CalcChecksum() uint8 {
-	var csum uint8 = 0xff
+func (z *Frame) CalcChecksum() byte {
+	var csum byte = 0xff
 	csum ^= z.Length
 	csum ^= z.Type
 
@@ -126,20 +126,20 @@ func (z *Frame) VerifyChecksum() error {
 func (z *Frame) Marshal() []byte {
 	buf := new(bytes.Buffer)
 
-	z.Length = uint8(len(z.Payload) + 2)
+	z.Length = byte(len(z.Payload) + 2)
 	z.SetChecksum()
 
 	switch z.Header {
 	case FrameHeaderData:
 		// Data frames have the whole kit and caboodle
-		binary.Write(buf, binary.BigEndian, uint8(z.Header))
-		binary.Write(buf, binary.BigEndian, uint8(z.Length))
-		binary.Write(buf, binary.BigEndian, uint8(z.Type))
+		binary.Write(buf, binary.BigEndian, byte(z.Header))
+		binary.Write(buf, binary.BigEndian, byte(z.Length))
+		binary.Write(buf, binary.BigEndian, byte(z.Type))
 		buf.Write(z.Payload)
-		binary.Write(buf, binary.BigEndian, uint8(z.Checksum))
+		binary.Write(buf, binary.BigEndian, byte(z.Checksum))
 	default:
 		// Non-data frames are just a single byte
-		binary.Write(buf, binary.BigEndian, uint8(z.Header))
+		binary.Write(buf, binary.BigEndian, byte(z.Header))
 	}
 
 	return buf.Bytes()

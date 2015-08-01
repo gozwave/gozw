@@ -20,8 +20,8 @@ type ISecurityLayer interface {
 	EncapsulateMessage(payload []byte, senderNonce []byte, receiverNonce []byte, srcNode byte, dstNode byte, inclusionMode bool) []byte
 	GenerateInternalNonce() (Nonce, error)
 	GetExternalNonce(key byte) (Nonce, error)
-	ReceiveNonce(fromNode uint8, data *commandclass.SecurityNonceReport)
-	WaitForExternalNonce(nodeId uint8) (Nonce, error)
+	ReceiveNonce(fromNode byte, data *commandclass.SecurityNonceReport)
+	WaitForExternalNonce(nodeId byte) (Nonce, error)
 }
 
 type SecurityLayer struct {
@@ -73,7 +73,7 @@ func (s *SecurityLayer) EncapsulateMessage(
 	authDataBuf := append(iv, commandclass.CommandSecurityMessageEncapsulation) // @todo CC should be determined by sequencing
 	authDataBuf = append(authDataBuf, srcNode)                                  // sender node
 	authDataBuf = append(authDataBuf, dstNode)                                  // receiver node
-	authDataBuf = append(authDataBuf, uint8(len(encryptedPayload)))
+	authDataBuf = append(authDataBuf, byte(len(encryptedPayload)))
 	authDataBuf = append(authDataBuf, encryptedPayload...)
 
 	hmac := CalculateHMAC(authDataBuf, authKey)
@@ -122,7 +122,7 @@ func (s *SecurityLayer) GetExternalNonce(key byte) (Nonce, error) {
 // it sets a timeout on the nonce (after which the nonce will be deleted from the
 // nonce table) and notifies any goroutine that may be waiting for a nonce from
 // the given node
-func (s *SecurityLayer) ReceiveNonce(fromNode uint8, data *commandclass.SecurityNonceReport) {
+func (s *SecurityLayer) ReceiveNonce(fromNode byte, data *commandclass.SecurityNonceReport) {
 	s.externalNonceTable.Set(fromNode, data.Nonce, ExternalNonceTTL)
 
 	// if there is no matching channel in the waitForNonce map, then apparently we
@@ -161,7 +161,7 @@ func (s *SecurityLayer) ReceiveNonce(fromNode uint8, data *commandclass.Security
 	}
 }
 
-func (s *SecurityLayer) WaitForExternalNonce(nodeId uint8) (Nonce, error) {
+func (s *SecurityLayer) WaitForExternalNonce(nodeId byte) (Nonce, error) {
 	var waitChan chan bool
 	var ok bool
 

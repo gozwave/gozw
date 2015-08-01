@@ -48,7 +48,7 @@ func (s *SerialAPILayer) GetInitAppData() (*InitAppData, error) {
 
 }
 
-func isBitSet(mask []byte, nodeId uint8) bool {
+func isBitSet(mask []byte, nodeId byte) bool {
 	if (nodeId > 0) && (nodeId <= 232) {
 		return ((mask[(nodeId-1)>>3] & (1 << ((nodeId - 1) & 0x07))) != 0)
 	}
@@ -80,10 +80,10 @@ func (n *InitAppData) IsPrimaryController() bool {
 	}
 }
 
-func (n *InitAppData) GetNodeIds() []uint8 {
-	nodes := []uint8{}
+func (n *InitAppData) GetNodeIds() []byte {
+	nodes := []byte{}
 
-	var i uint8
+	var i byte
 	for i = 1; i <= 232; i++ {
 		if isBitSet(n.Nodes, i) {
 			nodes = append(nodes, i)

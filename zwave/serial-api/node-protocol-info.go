@@ -8,7 +8,7 @@ import (
 	"github.com/bjyoungblood/gozw/zwave/session"
 )
 
-func (s *SerialAPILayer) GetNodeProtocolInfo(nodeId uint8) (nodeInfo *NodeProtocolInfo, err error) {
+func (s *SerialAPILayer) GetNodeProtocolInfo(nodeId byte) (nodeInfo *NodeProtocolInfo, err error) {
 
 	done := make(chan *frame.Frame)
 

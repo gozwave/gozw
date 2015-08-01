@@ -9,7 +9,7 @@ import (
 	"github.com/bjyoungblood/gozw/zwave/session"
 )
 
-func (s *SerialAPILayer) MemoryGetId() (homeId uint32, nodeId uint8, err error) {
+func (s *SerialAPILayer) MemoryGetId() (homeId uint32, nodeId byte, err error) {
 
 	done := make(chan *frame.Frame)
 

@@ -69,7 +69,7 @@ func (n *Node) GetSpecificDeviceClassName() string {
 	return protocol.GetSpecificDeviceTypeName(n.GenericDeviceClass, n.SpecificDeviceClass)
 }
 
-func (n *Node) AddAssociation(groupId uint8, nodeIds ...uint8) error {
+func (n *Node) AddAssociation(groupId byte, nodeIds ...byte) error {
 	// sort of an arbitrary limit for now, but I'm not sure what it should be
 	if len(nodeIds) > 20 {
 		return errors.New("Too many associated nodes")
@@ -93,7 +93,7 @@ func (n *Node) RequestSupportedSecurityCommands() error {
 	})
 }
 
-func (n *Node) LoadUserCode(userId uint8) error {
+func (n *Node) LoadUserCode(userId byte) error {
 	return n.sendDataSecure([]byte{
 		commandclass.CommandClassUserCode,
 		commandclass.CommandUserCodeGet,

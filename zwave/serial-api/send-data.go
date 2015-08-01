@@ -12,7 +12,7 @@ import (
 )
 
 type TransmitStatus struct {
-	Status uint8
+	Status byte
 	TxTime uint16
 }
 
@@ -22,7 +22,7 @@ func (s *SerialAPILayer) SendData(nodeId byte, payload []byte) (txTime uint16, e
 	retStatus := make(chan error)
 	txStatus := make(chan TransmitStatus)
 
-	payload = append([]byte{nodeId, uint8(len(payload))}, payload...)
+	payload = append([]byte{nodeId, byte(len(payload))}, payload...)
 	payload = append(payload, protocol.TransmitOptionAck)
 
 	request := &session.Request{
