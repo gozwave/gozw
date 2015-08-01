@@ -3,6 +3,7 @@ package application
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"gopkg.in/vmihailenco/msgpack.v2"
 
@@ -29,6 +30,8 @@ type Node struct {
 
 	CommandClassVersions map[byte]int
 
+	UserCodes map[byte]commandclass.UserCodeReport
+
 	ManufacturerID uint16
 	ProductTypeID  uint16
 	ProductID      uint16
@@ -45,6 +48,8 @@ func NewNode(application *ApplicationLayer, nodeId byte) *Node {
 		SupportedCommandClasses:        map[byte]bool{},
 		SecureSupportedCommandClasses:  map[byte]bool{},
 		SecureControlledCommandClasses: map[byte]bool{},
+
+		UserCodes: map[byte]commandclass.UserCodeReport{},
 
 		application:          application,
 		receivedUpdate:       make(chan bool),
@@ -74,6 +79,8 @@ func NewNodeFromDb(application *ApplicationLayer, nodeId byte) (*Node, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	spew.Dump(node.UserCodes)
 
 	return node, nil
 }
@@ -129,6 +136,21 @@ func (n *Node) LoadUserCode(userId byte) error {
 		commandclass.CommandUserCodeGet,
 		userId,
 	})
+}
+
+func (n *Node) LoadAllUserCodes() error {
+	var i byte
+
+	// @todo change fixed 200
+	for i = 0; i < 200; i++ {
+		err := n.LoadUserCode(i)
+		time.Sleep(1 * time.Second)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (n *Node) sendData(payload []byte) error {
@@ -328,7 +350,13 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 	case commandclass.CommandClassUserCode:
 		fmt.Println("user code")
 		code := commandclass.ParseUserCodeReport(cmd.CommandData)
+		if code.UserStatus == 0x0 { // code slot is available; don't save
+			return
+		}
+
+		n.UserCodes[code.UserIdentifier] = code
 		spew.Dump(code)
+		n.saveToDb()
 
 	default:
 		fmt.Printf("unhandled application command (%d): %s\n", n.NodeId, spew.Sdump(cmd))

@@ -86,6 +86,16 @@ func main() {
 			spew.Dump(appLayer.AddNode())
 		case "r":
 			spew.Dump(appLayer.RemoveNode())
+		case "L":
+			input, _ := line.Prompt("node id: ")
+			nodeId, _ := strconv.Atoi(input)
+			node, err := appLayer.Node(byte(nodeId))
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			spew.Dump(node.LoadAllUserCodes())
 		case "F":
 			input, _ := line.Prompt("node id: ")
 			nodeId, _ := strconv.Atoi(input)
