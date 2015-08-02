@@ -87,6 +87,16 @@ func (s *SessionLayer) receiveThread() {
 		} else {
 			var callbackId byte
 
+			if s.lastRequestFuncId != 0 {
+				fmt.Println("REQUEST/RESPONSE COLLISION; SENDING CAN FRAME AND RETRYING PREVIOUS SEND")
+				s.frameLayer.Write(frame.NewCanFrame())
+				select {
+				case s.responses <- *frame.NewCanFrame():
+				default:
+				}
+				return
+			}
+
 			switch frameIn.Payload[0] {
 
 			// These commands, when received as requests, are always callbacks and will
@@ -140,13 +150,31 @@ func (s *SessionLayer) sendThread() {
 		}
 
 		var frame = frame.NewRequestFrame(append([]byte{request.FunctionId}, request.Payload...))
+		attempts := 0
 
-		s.lastRequestFuncId = request.FunctionId
+	retry:
+		if request.HasReturn {
+			s.lastRequestFuncId = request.FunctionId
+		}
+
 		s.frameLayer.Write(frame)
 
 		if request.HasReturn {
 			select {
 			case response := <-s.responses:
+				if response.IsCan() {
+					// Hopefully we won't collide again if we wait for 10ms :)
+					time.Sleep(100 * time.Millisecond)
+					if attempts > 3 {
+						fmt.Println("TOO MANY RETRIES")
+						request.ReturnCallback(errors.New("Too many retries sending command"), nil)
+						return
+					}
+
+					attempts += 1
+					goto retry // lol not even joking
+				}
+
 				if request.ReturnCallback(nil, &response) == false {
 					continue
 				}
