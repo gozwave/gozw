@@ -41,7 +41,7 @@ func NewFrameLayer(transportLayer transport.TransportLayer) *FrameLayer {
 		cans:         cans,
 
 		pendingWrites: make(chan *Frame),
-		frameOutput:   make(chan Frame),
+		frameOutput:   make(chan Frame, 5),
 	}
 
 	go frameLayer.bgWork()
