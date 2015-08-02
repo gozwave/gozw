@@ -279,6 +279,34 @@ func (a *ApplicationLayer) SendDataSecure(dstNode byte, payload []byte) error {
 	return a.sendDataSecure(dstNode, payload, false)
 }
 
+func (a *ApplicationLayer) requestNonceForNode(dstNode byte) (security.Nonce, error) {
+	err := a.SendData(dstNode, commandclass.NewSecurityNonceGet())
+
+	if err != nil {
+		return nil, err
+	}
+
+	return a.securityLayer.WaitForExternalNonce(dstNode)
+}
+
+func (a *ApplicationLayer) getOrRequestNonceForNode(dstNode byte) (nonce security.Nonce, err error) {
+	if nonce, err = a.securityLayer.GetExternalNonce(dstNode); err == nil {
+		return nonce, nil
+	}
+
+	for i := 0; i < 3; i++ {
+		nonce, err = a.requestNonceForNode(dstNode)
+		if err == nil {
+			break
+		}
+
+		fmt.Printf("get nonce attempt #%d failed\n", i)
+		time.Sleep(50 * time.Millisecond)
+	}
+
+	return nonce, err
+}
+
 func (a *ApplicationLayer) sendDataSecure(dstNode byte, payload []byte, inclusionMode bool) error {
 	// Previously, this function would just split and prepare the payload based on
 	// whether it should be split after figuring out whether to segment. For now,
@@ -288,17 +316,9 @@ func (a *ApplicationLayer) sendDataSecure(dstNode byte, payload []byte, inclusio
 	// it while refactoring (for simplicity's sake).
 
 	// Get a nonce from the other node
-	receiverNonce, err := a.securityLayer.GetExternalNonce(dstNode)
+	receiverNonce, err := a.getOrRequestNonceForNode(dstNode)
 	if err != nil {
-		fmt.Println("requesting nonce")
-		a.SendData(dstNode, commandclass.NewSecurityNonceGet())
-		receiverNonce, err = a.securityLayer.WaitForExternalNonce(dstNode)
-		fmt.Println("got nonce")
-
-		if err != nil {
-			fmt.Println("error getting nonce", err)
-			return err
-		}
+		return err
 	}
 
 	senderNonce, err := a.securityLayer.GenerateInternalNonce()
