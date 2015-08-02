@@ -28,7 +28,7 @@ type Node struct {
 	SecureSupportedCommandClasses  map[byte]bool
 	SecureControlledCommandClasses map[byte]bool
 
-	CommandClassVersions map[byte]int
+	CommandClassVersions map[byte]byte
 
 	UserCodes map[byte]commandclass.UserCodeReport
 
@@ -160,6 +160,13 @@ func (n *Node) sendData(payload []byte) error {
 func (n *Node) sendDataSecure(payload []byte) error {
 	return n.application.SendDataSecure(n.NodeId, payload)
 }
+func (n *Node) LoadCommandClassVersions() error {
+	for cc, _ := range n.SupportedCommandClasses {
+		err := n.sendData([]byte{
+			commandclass.CommandClassVersion,
+			commandclass.CommandVersionCommandClassGet,
+			cc,
+		})
 
 func (n *Node) initialize() error {
 	nodeInfo, err := n.application.serialApi.GetNodeProtocolInfo(n.NodeId)
@@ -356,6 +363,14 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 
 		n.UserCodes[code.UserIdentifier] = code
 		spew.Dump(code)
+
+	case commandclass.CommandClassVersion:
+
+		if cmd.CommandData[1] == commandclass.CommandVersionCommandClassReport {
+			version := commandclass.ParseVersionCommandClassReport(cmd.CommandData)
+			n.CommandClassVersions[version.CommandClass] = version.Version
+		}
+
 		n.saveToDb()
 
 	default:
