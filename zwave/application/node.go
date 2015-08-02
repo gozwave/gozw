@@ -38,7 +38,7 @@ type Node struct {
 
 	CommandClassVersions map[byte]byte
 
-	UserCodes map[byte]commandclass.UserCodeReport
+	DoorLock *DoorLock
 
 	ManufacturerID uint16
 	ProductTypeID  uint16
@@ -56,8 +56,6 @@ func NewNode(application *ApplicationLayer, nodeId byte) *Node {
 		SupportedCommandClasses:        map[byte]bool{},
 		SecureSupportedCommandClasses:  map[byte]bool{},
 		SecureControlledCommandClasses: map[byte]bool{},
-
-		UserCodes: map[byte]commandclass.UserCodeReport{},
 
 		application:          application,
 		receivedUpdate:       make(chan bool),
@@ -88,7 +86,11 @@ func NewNodeFromDb(application *ApplicationLayer, nodeId byte) (*Node, error) {
 		return nil, err
 	}
 
-	spew.Dump(node.UserCodes)
+	if node.DoorLock != nil {
+		node.DoorLock.node = node
+	} else {
+		node.DoorLock = NewDoorLock(node)
+	}
 
 	return node, nil
 }
@@ -112,6 +114,18 @@ func (n *Node) GetGenericDeviceClassName() string {
 
 func (n *Node) GetSpecificDeviceClassName() string {
 	return protocol.GetSpecificDeviceTypeName(n.GenericDeviceClass, n.SpecificDeviceClass)
+}
+
+func (n *Node) GetDoorLock() (*DoorLock, error) {
+	if !IsDoorLock(n) {
+		return nil, errors.New("Node is not designated as a door lock")
+	}
+
+	if n.DoorLock == nil {
+		n.DoorLock = NewDoorLock(n)
+	}
+
+	return n.DoorLock, nil
 }
 
 func (n *Node) SupportsCommandClass(commandClass byte) CommandClassSupport {
@@ -375,14 +389,13 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 		}
 
 	case commandclass.CommandClassUserCode:
-		fmt.Println("user code")
-		code := commandclass.ParseUserCodeReport(cmd.CommandData)
-		if code.UserStatus == 0x0 { // code slot is available; don't save
+		lock, err := n.GetDoorLock()
+		if err != nil {
+			fmt.Println(err)
 			return
 		}
 
-		n.UserCodes[code.UserIdentifier] = code
-		spew.Dump(code)
+		lock.handleUserCodeCommandClass(cmd)
 
 	case commandclass.CommandClassVersion:
 
