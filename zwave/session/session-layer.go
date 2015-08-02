@@ -172,7 +172,7 @@ func (s *SessionLayer) sendThread() {
 					}
 
 					attempts += 1
-					goto retry // lol not even joking
+					goto retry // https://xkcd.com/292/
 				}
 
 				if request.ReturnCallback(nil, &response) == false {
