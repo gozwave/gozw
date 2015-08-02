@@ -177,6 +177,10 @@ func (n *Node) RequestSupportedSecurityCommands() error {
 	})
 }
 
+func (n *Node) RequestNodeInformationFrame() error {
+	return n.application.serialApi.RequestNodeInfo(n.NodeId)
+}
+
 func (n *Node) LoadUserCode(userId byte) error {
 	return n.SendCommand(
 		commandclass.CommandClassUserCode,
