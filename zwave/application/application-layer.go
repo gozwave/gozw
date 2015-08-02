@@ -234,7 +234,7 @@ func (a *ApplicationLayer) handleApplicationCommands() {
 			a.handleSecurityCommand(cmd)
 
 		default:
-			if node, err := a.Node(cmd.SrcNodeId); err != nil {
+			if node, err := a.Node(cmd.SrcNodeId); err == nil {
 				go node.receiveApplicationCommand(cmd)
 			} else {
 				fmt.Println("Received command for unknown node", cmd.SrcNodeId)
