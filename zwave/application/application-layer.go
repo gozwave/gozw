@@ -48,6 +48,7 @@ type ApplicationLayer struct {
 
 	serialApi     serialapi.ISerialAPILayer
 	securityLayer security.ISecurityLayer
+	networkKey    []byte
 	nodes         map[byte]*Node
 
 	db *bolt.DB
@@ -58,9 +59,8 @@ type ApplicationLayer struct {
 
 func NewApplicationLayer(serialApi serialapi.ISerialAPILayer) (app *ApplicationLayer, err error) {
 	app = &ApplicationLayer{
-		serialApi:     serialApi,
-		securityLayer: security.NewSecurityLayer(),
-		nodes:         map[byte]*Node{},
+		serialApi: serialApi,
+		nodes:     map[byte]*Node{},
 
 		secureInclusionStep: map[byte]chan error{},
 	}
@@ -69,6 +69,14 @@ func NewApplicationLayer(serialApi serialapi.ISerialAPILayer) (app *ApplicationL
 	if err != nil {
 		return
 	}
+
+	networkKey, err := app.initNetworkKey()
+	if err != nil {
+		return
+	}
+
+	app.networkKey = networkKey
+	app.securityLayer = security.NewSecurityLayer(networkKey)
 
 	go app.handleApplicationCommands()
 	go app.handleControllerUpdates()
@@ -102,10 +110,44 @@ func (a *ApplicationLayer) initDb() (err error) {
 			return err
 		}
 
+		_, err = tx.CreateBucketIfNotExists([]byte("controller"))
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 
-	return nil
+	return err
+}
+
+func (a *ApplicationLayer) initNetworkKey() ([]byte, error) {
+	var networkKey []byte
+
+	err := a.db.View(func(tx *bolt.Tx) error {
+		networkKey = tx.Bucket([]byte("controller")).Get([]byte("networkKey"))
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(networkKey) == 16 {
+		return networkKey, nil
+	}
+
+	networkKey = security.GenerateNetworkKey()
+
+	err = a.db.Update(func(tx *bolt.Tx) error {
+		return tx.Bucket([]byte("controller")).Put([]byte("networkKey"), networkKey)
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return networkKey, nil
 }
 
 func (a *ApplicationLayer) initZWave() error {
@@ -368,7 +410,7 @@ func (a *ApplicationLayer) includeSecureNode(nodeId byte) error {
 
 	a.sendDataSecure(
 		nodeId,
-		commandclass.NewSecurityNetworkKeySet(security.NetworkKey), // @todo
+		commandclass.NewSecurityNetworkKeySet(a.networkKey),
 		true,
 	)
 

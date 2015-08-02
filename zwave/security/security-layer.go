@@ -25,6 +25,11 @@ type ISecurityLayer interface {
 }
 
 type SecurityLayer struct {
+	networkKey []byte
+
+	networkEncKey  []byte
+	networkAuthKey []byte
+
 	// internal nonce table is keyed by the first byte of the nonce
 	internalNonceTable *NonceTable
 
@@ -36,8 +41,13 @@ type SecurityLayer struct {
 	waitMapLock  *sync.Mutex
 }
 
-func NewSecurityLayer() *SecurityLayer {
+func NewSecurityLayer(networkKey []byte) *SecurityLayer {
 	securityLayer := &SecurityLayer{
+		networkKey: networkKey,
+
+		networkEncKey:  EncryptEBS(networkKey, EncryptPassword),
+		networkAuthKey: EncryptEBS(networkKey, AuthPassword),
+
 		internalNonceTable: NewNonceTable(),
 		externalNonceTable: NewNonceTable(),
 
@@ -62,8 +72,8 @@ func (s *SecurityLayer) EncapsulateMessage(
 		encKey = InclusionEncKey
 		authKey = InclusionAuthKey
 	} else {
-		encKey = NetworkEncKey
-		authKey = NetworkAuthKey
+		encKey = s.networkEncKey
+		authKey = s.networkAuthKey
 	}
 
 	iv := append(senderNonce, receiverNonce...)
@@ -99,7 +109,7 @@ func (s *SecurityLayer) DecryptMessage(data *commandclass.SecurityMessageEncapsu
 
 	pl := make([]byte, len(data.EncryptedPayload))
 	copy(pl, data.EncryptedPayload)
-	decryptedPayload := CryptMessage(pl, iv, NetworkEncKey)
+	decryptedPayload := CryptMessage(pl, iv, s.networkEncKey)
 
 	return decryptedPayload[1:], nil
 }

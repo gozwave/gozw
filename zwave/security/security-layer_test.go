@@ -8,8 +8,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var testNetworkKey = []byte{
+	0x01,
+	0x02,
+	0x03,
+	0x04,
+	0x05,
+	0x06,
+	0x07,
+	0x08,
+	0x09,
+	0x0A,
+	0x0B,
+	0x0C,
+	0x0D,
+	0x0E,
+	0x0F,
+	0x10,
+}
+
 func TestSecurityLayerNonceGeneration(t *testing.T) {
-	securityLayer := NewSecurityLayer()
+	securityLayer := NewSecurityLayer(testNetworkKey)
 	nonce, err := securityLayer.GenerateInternalNonce()
 
 	assert.NoError(t, err)
@@ -22,7 +41,7 @@ func TestSecurityLayerNonceGeneration(t *testing.T) {
 }
 
 func TestSecurityLayerGetExternalNonce(t *testing.T) {
-	securityLayer := NewSecurityLayer()
+	securityLayer := NewSecurityLayer(testNetworkKey)
 
 	nonce, err := securityLayer.GetExternalNonce(1)
 	assert.Error(t, err)
@@ -42,7 +61,7 @@ func TestSecurityLayerGetExternalNonce(t *testing.T) {
 }
 
 func TestSecurityLayerWaitForExternalNonce(t *testing.T) {
-	securityLayer := NewSecurityLayer()
+	securityLayer := NewSecurityLayer(testNetworkKey)
 
 	done := make(chan bool)
 
