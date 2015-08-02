@@ -35,6 +35,12 @@ func (s *SerialAPILayer) SendData(nodeId byte, payload []byte) (txTime uint16, e
 		Timeout:          10 * time.Second,
 
 		ReturnCallback: func(err error, ret *frame.Frame) bool {
+			if err != nil {
+				transmitDone <- true
+				retStatus <- err
+				return false
+			}
+
 			if ret.Payload[1] == 0 {
 				transmitDone <- true
 				retStatus <- errors.New("SendData: transmit buffer overflow")
@@ -61,7 +67,7 @@ func (s *SerialAPILayer) SendData(nodeId byte, payload []byte) (txTime uint16, e
 
 	err = <-retStatus
 	if err != nil {
-		return
+		return 0, err
 	}
 
 	status := <-txStatus
