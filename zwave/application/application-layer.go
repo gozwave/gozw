@@ -213,6 +213,10 @@ func (a *ApplicationLayer) AddNode() error {
 		return err
 	}
 
+	if newNodeInfo == nil {
+		return errors.New("Adding node failed")
+	}
+
 	node := NewNode(a, newNodeInfo.Source)
 	node.setFromAddNodeCallback(newNodeInfo)
 	a.nodes[node.NodeId] = node
@@ -249,6 +253,10 @@ func (a *ApplicationLayer) RemoveNode() error {
 
 	if err != nil {
 		return err
+	}
+
+	if result == nil {
+		return errors.New("Removing node failed")
 	}
 
 	return a.db.Update(func(tx *bolt.Tx) error {
