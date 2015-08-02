@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/bjyoungblood/gozw/zwave/application"
+	"github.com/bjyoungblood/gozw/zwave/command-class"
 	"github.com/bjyoungblood/gozw/zwave/frame"
 	"github.com/bjyoungblood/gozw/zwave/serial-api"
 	"github.com/bjyoungblood/gozw/zwave/session"
@@ -37,7 +38,10 @@ func main() {
 		"(a)dd node",
 		"(r)emove node",
 		"(V) load command class versions for node",
+		"(PV) print the result of the above",
 		"(L) load all user codes for node",
+		"(UN) request and print the number of supported user codes",
+		"(UC) request a single user code",
 		"(NIF) request node information frame from node",
 		"(F)ailed node removal",
 		"(p)rint network info",
@@ -63,6 +67,31 @@ func main() {
 			}
 
 			spew.Dump(node.LoadCommandClassVersions())
+		case "PV":
+			input, _ := line.Prompt("node id: ")
+			nodeId, _ := strconv.Atoi(input)
+			node, err := appLayer.Node(byte(nodeId))
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			for cc, _ := range node.SupportedCommandClasses {
+				fmt.Printf(
+					"%s: %d\n",
+					commandclass.GetCommandClassString(cc),
+					node.CommandClassVersions[cc],
+				)
+			}
+
+			for cc, _ := range node.SecureSupportedCommandClasses {
+				fmt.Printf(
+					"%s: %d\n",
+					commandclass.GetCommandClassString(cc),
+					node.CommandClassVersions[cc],
+				)
+			}
+
 		case "L":
 			input, _ := line.Prompt("node id: ")
 			nodeId, _ := strconv.Atoi(input)
@@ -72,7 +101,54 @@ func main() {
 				continue
 			}
 
-			spew.Dump(node.LoadAllUserCodes())
+			lock, err := node.GetDoorLock()
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			lock.LoadAllUserCodes()
+		case "UN":
+			input, _ := line.Prompt("node id: ")
+			nodeId, _ := strconv.Atoi(input)
+			node, err := appLayer.Node(byte(nodeId))
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			lock, err := node.GetDoorLock()
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			count, err := lock.GetSupportedUserCount()
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			fmt.Printf("Supported users: %d\n", count)
+		case "UC":
+			input, _ := line.Prompt("node id: ")
+			nodeId, _ := strconv.Atoi(input)
+			node, err := appLayer.Node(byte(nodeId))
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			lock, err := node.GetDoorLock()
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			input, _ = line.Prompt("user id: ")
+			userId, _ := strconv.Atoi(input)
+
+			lock.LoadUserCode(byte(userId))
 		case "NIF":
 			input, _ := line.Prompt("node id: ")
 			nodeId, _ := strconv.Atoi(input)
@@ -97,7 +173,7 @@ func main() {
 		case "q":
 			return
 		default:
-			fmt.Println("invalid selection\n")
+			fmt.Printf("invalid selection\n\n")
 			fmt.Println(commands)
 		}
 	}
