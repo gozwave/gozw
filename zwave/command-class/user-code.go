@@ -36,3 +36,7 @@ func ParseUserCodeReport(payload []byte) UserCodeReport {
 		Code:           string(payload[4:]),
 	}
 }
+
+func ParseUsersNumberReport(payload []byte) byte {
+	return payload[2]
+}

@@ -86,10 +86,12 @@ func NewNodeFromDb(application *ApplicationLayer, nodeId byte) (*Node, error) {
 		return nil, err
 	}
 
-	if node.DoorLock != nil {
-		node.DoorLock.node = node
-	} else {
-		node.DoorLock = NewDoorLock(node)
+	if IsDoorLock(node) {
+		if node.DoorLock != nil {
+			node.DoorLock.initialize(node)
+		} else {
+			node.DoorLock = NewDoorLock(node)
+		}
 	}
 
 	return node, nil
@@ -221,31 +223,9 @@ func (n *Node) RequestNodeInformationFrame() error {
 	return n.application.serialApi.RequestNodeInfo(n.NodeId)
 }
 
-func (n *Node) LoadUserCode(userId byte) error {
-	return n.SendCommand(
-		commandclass.CommandClassUserCode,
-		commandclass.CommandUserCodeGet,
-		userId,
-	)
-}
-
-func (n *Node) LoadAllUserCodes() error {
-	var i byte
-
-	// @todo change fixed 200
-	for i = 0; i < 200; i++ {
-		err := n.LoadUserCode(i)
-		time.Sleep(1 * time.Second)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (n *Node) LoadCommandClassVersions() error {
 	for cc, _ := range n.SupportedCommandClasses {
+		time.Sleep(1 * time.Second)
 		err := n.sendData([]byte{
 			commandclass.CommandClassVersion,
 			commandclass.CommandVersionCommandClassGet,
@@ -382,52 +362,17 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 		}
 
 	case commandclass.CommandClassAlarm:
-		// This is special handling code that will probably only work with yale locks
-		notif := commandclass.ParseAlarmReport(cmd.CommandData)
-		switch notif.Type {
-		case 0x70:
-			if notif.Level == 0x00 {
-				fmt.Println("Master code changed")
-			} else {
-				fmt.Println("User added", notif.Level)
-				n.LoadUserCode(notif.Level)
+		if IsDoorLock(n) {
+			lock, err := n.GetDoorLock()
+			if err != nil {
+				fmt.Println(err)
+				return
 			}
-		case 0xA1:
-			if notif.Level == 0x01 {
-				fmt.Println("Keypad limit exceeded")
-			} else {
-				fmt.Println("Physical tampering")
-			}
-		case 0x16:
-			fmt.Println("Manual unlock")
-		case 0x19:
-			fmt.Println("RF operate unlock")
-		case 0x15:
-			fmt.Println("Manual lock")
-		case 0x18:
-			fmt.Println("RF operate lock")
-		case 0x12:
-			fmt.Println("keypad lock by user", notif.Level)
-			n.LoadUserCode(notif.Level)
-		case 0x13:
-			fmt.Println("keypad unlock by user", notif.Level)
-			n.LoadUserCode(notif.Level)
-		case 0x09:
-			fmt.Println("deadbolt jammed")
-		case 0xA9:
-			fmt.Println("dead battery; lock inoperable")
-		case 0xA8:
-			fmt.Println("critical battery")
-		case 0xA7:
-			fmt.Println("low battery")
-		case 0x1B:
-			fmt.Println("auto re-lock syscle completed")
-		case 0x71:
-			fmt.Println("duplicate pin code error")
-		case 0x82:
-			fmt.Println("power restored")
-		case 0x21:
-			fmt.Println("user deleted", notif.Level)
+
+			lock.handleAlarmCommandClass(cmd)
+		} else {
+			fmt.Println("Alarm command for non-lock")
+			spew.Dump(cmd)
 		}
 
 	case commandclass.CommandClassUserCode:
@@ -438,6 +383,15 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 		}
 
 		lock.handleUserCodeCommandClass(cmd)
+
+	case commandclass.CommandClassDoorLock:
+		lock, err := n.GetDoorLock()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		lock.handleDoorLockCommandClass(cmd)
 
 	case commandclass.CommandClassVersion:
 
