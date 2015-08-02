@@ -128,6 +128,21 @@ func (n *Node) GetDoorLock() (*DoorLock, error) {
 	return n.DoorLock, nil
 }
 
+func (n *Node) SendCommand(commandClass byte, command byte, commandPayload ...byte) error {
+	supportType := n.SupportsCommandClass(commandClass)
+
+	switch supportType {
+	case CommandClassSupportedSecure:
+		return n.sendDataSecure(append([]byte{commandClass, command}, commandPayload...))
+	case CommandClassSupportedInsecure:
+		return n.sendData(append([]byte{commandClass, command}, commandPayload...))
+	case CommandClassNotSupported:
+		return errors.New("Command class not supported")
+	default:
+		return errors.New("Command class not supported")
+	}
+}
+
 func (n *Node) SupportsCommandClass(commandClass byte) CommandClassSupport {
 	if supported, ok := n.SupportedCommandClasses[commandClass]; ok && supported {
 		return CommandClassSupportedInsecure
@@ -148,13 +163,11 @@ func (n *Node) AddAssociation(groupId byte, nodeIds ...byte) error {
 
 	fmt.Println("Associating")
 
-	payload := append([]byte{
+	return n.SendCommand(
 		commandclass.CommandClassAssociation,
 		commandclass.AssociationSet,
-		groupId,
-	}, nodeIds...)
-
-	return n.sendDataSecure(payload)
+		append([]byte{groupId}, nodeIds...)...,
+	)
 }
 
 func (n *Node) RequestSupportedSecurityCommands() error {
@@ -165,11 +178,11 @@ func (n *Node) RequestSupportedSecurityCommands() error {
 }
 
 func (n *Node) LoadUserCode(userId byte) error {
-	return n.sendDataSecure([]byte{
+	return n.SendCommand(
 		commandclass.CommandClassUserCode,
 		commandclass.CommandUserCodeGet,
 		userId,
-	})
+	)
 }
 
 func (n *Node) LoadAllUserCodes() error {
