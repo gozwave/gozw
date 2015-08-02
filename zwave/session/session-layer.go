@@ -72,22 +72,22 @@ func (s *SessionLayer) UnsolicitedFramesChan() chan frame.Frame {
 }
 
 func (s *SessionLayer) receiveThread() {
-	for frame := range s.frameLayer.GetOutputChannel() {
-		if frame.IsResponse() {
-			if frame.Payload[0] == s.lastRequestFuncId {
+	for frameIn := range s.frameLayer.GetOutputChannel() {
+		if frameIn.IsResponse() {
+			if frameIn.Payload[0] == s.lastRequestFuncId {
 				select {
-				case s.responses <- frame:
+				case s.responses <- frameIn:
 				default:
 				}
 
 				s.lastRequestFuncId = 0
 			} else {
-				fmt.Println("Received an unexpected response frame: ", frame)
+				fmt.Println("Received an unexpected response frame: ", frameIn)
 			}
 		} else {
 			var callbackId byte
 
-			switch frame.Payload[0] {
+			switch frameIn.Payload[0] {
 
 			// These commands, when received as requests, are always callbacks and will
 			// have the callback id as the first byte after the function id
@@ -98,7 +98,7 @@ func (s *SessionLayer) receiveThread() {
 				protocol.FnRequestNetworkUpdate,
 				protocol.FnRemoveFailingNode:
 
-				callbackId = frame.Payload[1]
+				callbackId = frameIn.Payload[1]
 
 				// These commands are never callbacks and shouldn't ever be handled as such
 			case protocol.FnApplicationControllerUpdate,
@@ -109,14 +109,14 @@ func (s *SessionLayer) receiveThread() {
 
 				// Log in case we need to set up a callback for a function
 			default:
-				fmt.Println("session-layer: got unknown callback for func: ", hex.EncodeToString([]byte{frame.Payload[0]}))
+				fmt.Println("session-layer: got unknown callback for func: ", hex.EncodeToString([]byte{frameIn.Payload[0]}))
 				callbackId = 0
 			}
 
 			if callback, ok := s.callbacks[callbackId]; ok {
-				go callback(frame)
+				go callback(frameIn)
 			} else {
-				s.UnsolicitedFrames <- frame
+				s.UnsolicitedFrames <- frameIn
 			}
 
 		}
