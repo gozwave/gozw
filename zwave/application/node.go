@@ -14,6 +14,14 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
+type CommandClassSupport int
+
+const (
+	CommandClassNotSupported CommandClassSupport = iota
+	CommandClassSupportedInsecure
+	CommandClassSupportedSecure
+)
+
 type Node struct {
 	NodeId byte
 
@@ -104,6 +112,18 @@ func (n *Node) GetGenericDeviceClassName() string {
 
 func (n *Node) GetSpecificDeviceClassName() string {
 	return protocol.GetSpecificDeviceTypeName(n.GenericDeviceClass, n.SpecificDeviceClass)
+}
+
+func (n *Node) SupportsCommandClass(commandClass byte) CommandClassSupport {
+	if supported, ok := n.SupportedCommandClasses[commandClass]; ok && supported {
+		return CommandClassSupportedInsecure
+	}
+
+	if supported, ok := n.SecureSupportedCommandClasses[commandClass]; ok && supported {
+		return CommandClassSupportedSecure
+	}
+
+	return CommandClassNotSupported
 }
 
 func (n *Node) AddAssociation(groupId byte, nodeIds ...byte) error {
