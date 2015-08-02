@@ -95,6 +95,46 @@ func NewNodeFromDb(application *ApplicationLayer, nodeId byte) (*Node, error) {
 	return node, nil
 }
 
+func (n *Node) initialize() error {
+	nodeInfo, err := n.application.serialApi.GetNodeProtocolInfo(n.NodeId)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		n.setFromNodeProtocolInfo(nodeInfo)
+	}
+
+	if n.NodeId == 1 {
+		// self is never failing
+		n.Failing = false
+	} else {
+		failing, err := n.application.serialApi.IsFailedNode(n.NodeId)
+		if err != nil {
+			fmt.Println(err)
+			return nil
+		}
+
+		n.Failing = failing
+	}
+
+	if IsDoorLock(n) {
+		n.DoorLock = NewDoorLock(n)
+	}
+
+	return n.saveToDb()
+}
+
+func (n *Node) saveToDb() error {
+	data, err := msgpack.Marshal(n)
+	if err != nil {
+		return err
+	}
+
+	return n.application.db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("nodes"))
+		return bucket.Put([]byte{n.NodeId}, data)
+	})
+}
+
 func (n *Node) IsSecure() bool {
 	_, found := n.SupportedCommandClasses[commandclass.CommandClassSecurity]
 	return found
@@ -204,13 +244,6 @@ func (n *Node) LoadAllUserCodes() error {
 	return nil
 }
 
-func (n *Node) sendData(payload []byte) error {
-	return n.application.SendData(n.NodeId, payload)
-}
-
-func (n *Node) sendDataSecure(payload []byte) error {
-	return n.application.SendDataSecure(n.NodeId, payload)
-}
 func (n *Node) LoadCommandClassVersions() error {
 	for cc, _ := range n.SupportedCommandClasses {
 		err := n.sendData([]byte{
@@ -219,40 +252,32 @@ func (n *Node) LoadCommandClassVersions() error {
 			cc,
 		})
 
-func (n *Node) initialize() error {
-	nodeInfo, err := n.application.serialApi.GetNodeProtocolInfo(n.NodeId)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		n.setFromNodeProtocolInfo(nodeInfo)
-	}
-
-	if n.NodeId == 1 {
-		// self is never failing
-		n.Failing = false
-	} else {
-		failing, err := n.application.serialApi.IsFailedNode(n.NodeId)
 		if err != nil {
-			fmt.Println(err)
-			return nil
+			return err
 		}
-
-		n.Failing = failing
 	}
 
-	return n.saveToDb()
+	for cc, _ := range n.SecureSupportedCommandClasses {
+		err := n.sendDataSecure([]byte{
+			commandclass.CommandClassVersion,
+			commandclass.CommandVersionCommandClassGet,
+			cc,
+		})
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
-func (n *Node) saveToDb() error {
-	data, err := msgpack.Marshal(n)
-	if err != nil {
-		return err
-	}
+func (n *Node) sendData(payload []byte) error {
+	return n.application.SendData(n.NodeId, payload)
+}
 
-	return n.application.db.Update(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte("nodes"))
-		return bucket.Put([]byte{n.NodeId}, data)
-	})
+func (n *Node) sendDataSecure(payload []byte) error {
+	return n.application.SendDataSecure(n.NodeId, payload)
 }
 
 func (n *Node) receiveControllerUpdate(update serialapi.ControllerUpdate) {
