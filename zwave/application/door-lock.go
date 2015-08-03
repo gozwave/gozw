@@ -82,6 +82,22 @@ func (d *DoorLock) LoadUserCode(userId byte) error {
 	)
 }
 
+func (d *DoorLock) SetUserCode(userId byte, code []byte) error {
+	return d.node.SendCommand(
+		commandclass.CommandClassUserCode,
+		commandclass.CommandUserCodeSet,
+		append([]byte{userId, 0x01}, code...)..., // 0x01 = occupied
+	)
+}
+
+func (d *DoorLock) ClearUserCode(userId byte) error {
+	return d.node.SendCommand(
+		commandclass.CommandClassUserCode,
+		commandclass.CommandUserCodeSet,
+		append([]byte{userId, 0x00})..., // 0x00 = available / not set
+	)
+}
+
 func (d *DoorLock) LoadAllUserCodes() error {
 	var i byte
 
@@ -169,12 +185,12 @@ func (d *DoorLock) handleUserCodeCommandClass(cmd serialapi.ApplicationCommand) 
 
 func (d *DoorLock) receiveUserCodeReport(code commandclass.UserCodeReport) {
 	fmt.Println("user code")
+	spew.Dump(code)
 	if code.UserStatus == 0x0 { // code slot is available; don't save
 		return
 	}
 
 	d.UserCodes[code.UserIdentifier] = code
-	spew.Dump(code)
 	d.node.saveToDb()
 }
 

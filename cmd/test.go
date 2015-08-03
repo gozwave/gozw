@@ -42,6 +42,8 @@ func main() {
 		"(L) load all user codes for node",
 		"(UN) request and print the number of supported user codes",
 		"(UC) request a single user code",
+		"(UCS) user code set",
+		"(UCC) user code clear",
 		"(NIF) request node information frame from node",
 		"(F)ailed node removal",
 		"(p)rint network info",
@@ -149,6 +151,61 @@ func main() {
 			userId, _ := strconv.Atoi(input)
 
 			lock.LoadUserCode(byte(userId))
+
+		case "UCS":
+			input, _ := line.Prompt("node id: ")
+			nodeId, _ := strconv.Atoi(input)
+			node, err := appLayer.Node(byte(nodeId))
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			lock, err := node.GetDoorLock()
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			input, _ = line.Prompt("user id: ")
+			userId, err := strconv.Atoi(input)
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			code, _ := line.Prompt("code: ")
+			if len(code) < 4 || len(code) > 8 {
+				fmt.Println("Invalid code length")
+				continue
+			}
+
+			lock.SetUserCode(byte(userId), []byte(code))
+
+		case "UCC":
+			input, _ := line.Prompt("node id: ")
+			nodeId, _ := strconv.Atoi(input)
+			node, err := appLayer.Node(byte(nodeId))
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			lock, err := node.GetDoorLock()
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			input, _ = line.Prompt("user id: ")
+			userId, err := strconv.Atoi(input)
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			lock.ClearUserCode(byte(userId))
+
 		case "NIF":
 			input, _ := line.Prompt("node id: ")
 			nodeId, _ := strconv.Atoi(input)
