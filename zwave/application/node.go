@@ -38,7 +38,8 @@ type Node struct {
 
 	CommandClassVersions map[byte]byte
 
-	DoorLock *DoorLock
+	DoorLock   *DoorLock
+	Thermostat *Thermostat
 
 	ManufacturerID uint16
 	ProductTypeID  uint16
@@ -79,6 +80,14 @@ func NewNode(application *ApplicationLayer, nodeId byte) (*Node, error) {
 			node.DoorLock.initialize(node)
 		} else {
 			node.DoorLock = NewDoorLock(node)
+		}
+	}
+
+	if IsThermostat(node) {
+		if node.Thermostat != nil {
+			node.Thermostat.initialize(node)
+		} else {
+			node.Thermostat = NewThermostat(node)
 		}
 	}
 
@@ -181,6 +190,18 @@ func (n *Node) GetDoorLock() (*DoorLock, error) {
 	}
 
 	return n.DoorLock, nil
+}
+
+func (n *Node) GetThermostat() (*Thermostat, error) {
+	if !IsThermostat(n) {
+		return nil, errors.New("Node is not designated as a thermostat")
+	}
+
+	if n.Thermostat == nil {
+		n.Thermostat = NewThermostat(n)
+	}
+
+	return n.Thermostat, nil
 }
 
 func (n *Node) SendCommand(commandClass byte, command byte, commandPayload ...byte) error {

@@ -184,20 +184,14 @@ func (a *ApplicationLayer) initZWave() error {
 	a.NodeList = initData.GetNodeIds()
 
 	for _, nodeId := range a.NodeList {
-		node, err := NewNodeFromDb(a, nodeId)
-		if err == nil {
-			a.nodes[nodeId] = node
+		node, err := NewNode(a, nodeId)
+
+		if err != nil {
+			spew.Dump(err)
 			continue
 		}
 
-		spew.Dump(err)
-
-		a.nodes[nodeId] = NewNode(a, nodeId)
-		a.nodes[nodeId].initialize()
-
-		if nodeId == 52 {
-			a.nodes[nodeId].RequestSupportedSecurityCommands()
-		}
+		a.nodes[nodeId] = node
 	}
 
 	return nil
@@ -217,7 +211,11 @@ func (a *ApplicationLayer) AddNode() error {
 		return errors.New("Adding node failed")
 	}
 
-	node := NewNode(a, newNodeInfo.Source)
+	node, err := NewNode(a, newNodeInfo.Source)
+	if err != nil {
+		return err
+	}
+
 	node.setFromAddNodeCallback(newNodeInfo)
 	a.nodes[node.NodeId] = node
 
