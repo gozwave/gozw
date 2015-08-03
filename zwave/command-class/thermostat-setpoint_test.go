@@ -199,3 +199,56 @@ func TestGetTemperatureInvalidSize(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, temp)
 }
+
+func TestNewThermostatSetpoint(t *testing.T) {
+	setpoint, err := NewThermostatSetpoint(ThermostatSetpointTypeCooling, Temperature{
+		Scale: SetpointScaleFarenheit,
+		Value: 85,
+	})
+
+	assert.NoError(t, err)
+	assert.EqualValues(t, ThermostatSetpointTypeCooling, setpoint.Type)
+	assert.EqualValues(t, 0, setpoint.Precision)
+	assert.EqualValues(t, SetpointScaleFarenheit, setpoint.Scale)
+	assert.EqualValues(t, []byte{byte(int8(85))}, setpoint.Value)
+
+	setpoint, err = NewThermostatSetpoint(ThermostatSetpointTypeCooling, Temperature{
+		Scale: SetpointScaleFarenheit,
+		Value: 101,
+	})
+
+	assert.Error(t, err)
+	assert.Nil(t, setpoint)
+
+	setpoint, err = NewThermostatSetpoint(ThermostatSetpointTypeCooling, Temperature{
+		Scale: SetpointScaleFarenheit,
+		Value: -1,
+	})
+
+	assert.Error(t, err)
+	assert.Nil(t, setpoint)
+}
+
+func TestNewThermostatSetpointSet(t *testing.T) {
+	payload, err := NewThermostatSetpointSet(ThermostatSetpointTypeHeating, Temperature{
+		Scale: SetpointScaleFarenheit,
+		Value: 85,
+	})
+
+	assert.NoError(t, err)
+	assert.Len(t, payload, 5)
+	assert.EqualValues(t, CommandClassThermostatSetpoint, payload[0])
+	assert.EqualValues(t, CommandThermostatSetpointSet, payload[1])
+	assert.EqualValues(t, SetpointScaleFarenheit&0x0F, payload[2])
+	assert.EqualValues(t, 0x09, payload[3])
+	assert.EqualValues(t, byte(int8(85)), payload[4])
+
+	payload, err = NewThermostatSetpointSet(ThermostatSetpointTypeCooling, Temperature{
+		Scale: SetpointScaleFarenheit,
+		Value: -1,
+	})
+
+	assert.Error(t, err)
+	assert.Nil(t, payload)
+
+}
