@@ -1,12 +1,19 @@
 package application
 
 import (
+	"fmt"
+
 	"github.com/bjyoungblood/gozw/zwave/command-class"
 	"github.com/bjyoungblood/gozw/zwave/protocol"
+	"github.com/bjyoungblood/gozw/zwave/serial-api"
+	"github.com/davecgh/go-spew/spew"
 )
 
 type Thermostat struct {
 	node *Node
+
+	CoolingSetpoint commandclass.ThermostatSetpoint
+	HeatingSetpoint commandclass.ThermostatSetpoint
 }
 
 func IsThermostat(node *Node) bool {
@@ -49,4 +56,40 @@ func (t *Thermostat) SetpointSet(setpointType commandclass.ThermostatSetpointTyp
 	}
 
 	return t.node.SendCommand(payload[0], payload[1], payload[2:]...)
+}
+
+func (t *Thermostat) handleThermostatSetpointCommandClass(cmd serialapi.ApplicationCommand) {
+	if cmd.CommandData[1] == commandclass.CommandThermostatSetpointReport {
+		report := commandclass.ParseThermostatSetpointReport(cmd.CommandData)
+		t.receiveSetpointReport(report)
+	}
+}
+
+func (t *Thermostat) receiveSetpointReport(setpoint commandclass.ThermostatSetpoint) {
+	switch setpoint.Type {
+	case commandclass.ThermostatSetpointTypeCooling:
+		t.CoolingSetpoint = setpoint
+		temperature, err := setpoint.GetTemperature()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		fmt.Println("New cooling setpoint:", temperature.Value)
+	case commandclass.ThermostatSetpointTypeHeating:
+		t.HeatingSetpoint = setpoint
+		temperature, err := setpoint.GetTemperature()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		fmt.Println("New heating setpoint:", temperature.Value)
+	default:
+		fmt.Println("Unknown setpoint update")
+		spew.Dump(setpoint)
+		return
+	}
+
+	t.node.saveToDb()
 }

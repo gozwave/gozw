@@ -427,6 +427,15 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 
 		lock.handleDoorLockCommandClass(cmd)
 
+	case commandclass.CommandClassThermostatSetpoint:
+		thermostat, err := n.GetThermostat()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		thermostat.handleThermostatSetpointCommandClass(cmd)
+
 	case commandclass.CommandClassVersion:
 
 		if cmd.CommandData[1] == commandclass.CommandVersionCommandClassReport {
