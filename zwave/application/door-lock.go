@@ -20,6 +20,7 @@ type DoorLock struct {
 	node *Node
 
 	receiveUsersNumber chan byte
+	receiveLockStatus  chan byte
 }
 
 func NewDoorLock(node *Node) *DoorLock {
@@ -27,6 +28,7 @@ func NewDoorLock(node *Node) *DoorLock {
 		UserCodes:          map[byte]commandclass.UserCodeReport{},
 		node:               node,
 		receiveUsersNumber: make(chan byte),
+		receiveLockStatus:  make(chan byte),
 	}
 }
 
@@ -50,6 +52,7 @@ func IsDoorLock(node *Node) bool {
 func (d *DoorLock) initialize(node *Node) {
 	d.node = node
 	d.receiveUsersNumber = make(chan byte)
+	d.receiveLockStatus = make(chan byte)
 
 	if d.UserCodes == nil {
 		d.UserCodes = make(map[byte]commandclass.UserCodeReport)
@@ -96,6 +99,24 @@ func (d *DoorLock) ClearUserCode(userId byte) error {
 		commandclass.CommandUserCodeSet,
 		append([]byte{userId, 0x00})..., // 0x00 = available / not set
 	)
+}
+
+func (d *DoorLock) GetLockStatus() (status byte, err error) {
+	err = d.node.SendCommand(
+		commandclass.CommandClassDoorLock,
+		commandclass.CommandDoorLockOperationGet,
+	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	select {
+	case <-d.receiveLockStatus:
+		return d.LockStatus, nil
+	case <-time.After(time.Second * 5):
+		return 0, errors.New("Timed out waiting for report")
+	}
 }
 
 func (d *DoorLock) LoadAllUserCodes() error {
@@ -168,8 +189,13 @@ func (d *DoorLock) handleAlarmCommandClass(cmd serialapi.ApplicationCommand) {
 }
 
 func (d *DoorLock) handleDoorLockCommandClass(cmd serialapi.ApplicationCommand) {
-	fmt.Println("Door lock cc")
-	spew.Dump(cmd)
+	switch cmd.CommandData[1] {
+	case commandclass.CommandDoorLockOperationReport:
+		d.receiveDoorLockOperationReport(commandclass.ParseDoorLockOperationReport(cmd.CommandData))
+	default:
+		fmt.Println("Door lock cc")
+		spew.Dump(cmd)
+	}
 }
 
 func (d *DoorLock) handleUserCodeCommandClass(cmd serialapi.ApplicationCommand) {
@@ -197,4 +223,9 @@ func (d *DoorLock) receiveUserCodeReport(code commandclass.UserCodeReport) {
 func (d *DoorLock) receiveUsersNumberReport(number byte) {
 	d.UsersNumber = number
 	d.receiveUsersNumber <- number
+}
+
+func (d *DoorLock) receiveDoorLockOperationReport(report commandclass.DoorLockOperationReport) {
+	d.LockStatus = report.DoorLockMode
+	d.receiveLockStatus <- report.DoorLockMode
 }

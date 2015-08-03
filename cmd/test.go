@@ -206,6 +206,23 @@ func main() {
 
 			lock.ClearUserCode(byte(userId))
 
+		case "LS":
+			input, _ := line.Prompt("node id: ")
+			nodeId, _ := strconv.Atoi(input)
+			node, err := appLayer.Node(byte(nodeId))
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			lock, err := node.GetDoorLock()
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			spew.Dump(lock.GetLockStatus())
+
 		case "NIF":
 			input, _ := line.Prompt("node id: ")
 			nodeId, _ := strconv.Atoi(input)
