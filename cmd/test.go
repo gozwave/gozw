@@ -44,6 +44,7 @@ func main() {
 		"(UC) request a single user code",
 		"(UCS) user code set",
 		"(UCC) user code clear",
+		"(ST) set temperature",
 		"(NIF) request node information frame from node",
 		"(F)ailed node removal",
 		"(p)rint network info",
@@ -222,6 +223,42 @@ func main() {
 			}
 
 			spew.Dump(lock.GetLockStatus())
+
+		case "ST":
+			input, _ := line.Prompt("node id: ")
+			nodeId, _ := strconv.Atoi(input)
+			node, err := appLayer.Node(byte(nodeId))
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			thermostat, err := node.GetThermostat()
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			var setpointType commandclass.ThermostatSetpointType
+			input, _ = line.Prompt("(c)ooling or (h)eating> ")
+			switch input {
+			case "c":
+				setpointType = commandclass.ThermostatSetpointTypeCooling
+			case "h":
+				setpointType = commandclass.ThermostatSetpointTypeHeating
+			default:
+				fmt.Println("gg man")
+				continue
+			}
+
+			input, _ = line.Prompt("temperature> ")
+			temperature, err := strconv.Atoi(input)
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			thermostat.SetpointSet(setpointType, float64(temperature))
 
 		case "NIF":
 			input, _ := line.Prompt("node id: ")

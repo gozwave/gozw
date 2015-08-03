@@ -49,41 +49,29 @@ type Node struct {
 	receivedSecurityInfo chan bool
 }
 
-func NewNode(application *ApplicationLayer, nodeId byte) *Node {
-	return &Node{
+func NewNode(application *ApplicationLayer, nodeId byte) (*Node, error) {
+	node := &Node{
 		NodeId: nodeId,
 
 		SupportedCommandClasses:        map[byte]bool{},
 		SecureSupportedCommandClasses:  map[byte]bool{},
 		SecureControlledCommandClasses: map[byte]bool{},
 
+		CommandClassVersions: map[byte]byte{},
+
 		application:          application,
 		receivedUpdate:       make(chan bool),
 		receivedSecurityInfo: make(chan bool),
 	}
-}
 
-func NewNodeFromDb(application *ApplicationLayer, nodeId byte) (*Node, error) {
-	var data []byte
-	err := application.db.View(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte("nodes"))
-		data = bucket.Get([]byte{nodeId})
-
-		if len(data) == 0 {
-			return errors.New("Node not found")
+	err := node.loadFromDb()
+	if err != nil {
+		initErr := node.initialize()
+		if initErr != nil {
+			return nil, initErr
 		}
 
-		return nil
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	node := NewNode(application, nodeId)
-	err = msgpack.Unmarshal(data, &node)
-	if err != nil {
-		return nil, err
+		node.saveToDb()
 	}
 
 	if IsDoorLock(node) {
@@ -95,6 +83,31 @@ func NewNodeFromDb(application *ApplicationLayer, nodeId byte) (*Node, error) {
 	}
 
 	return node, nil
+}
+
+func (n *Node) loadFromDb() error {
+	var data []byte
+	err := n.application.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("nodes"))
+		data = bucket.Get([]byte{n.NodeId})
+
+		if len(data) == 0 {
+			return errors.New("Node not found")
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	err = msgpack.Unmarshal(data, n)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (n *Node) initialize() error {
