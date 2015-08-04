@@ -395,6 +395,13 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 			fmt.Println(n.GetSupportedSecureCommandClassStrings())
 		}
 
+	case commandclass.CommandClassBattery:
+		if cmd.CommandData[2] == 0xFF {
+			fmt.Printf("Node %d: low battery alert\n", n.NodeId)
+		} else {
+			fmt.Printf("Node %d: battery level is %d\n", n.NodeId, cmd.CommandData[2])
+		}
+
 	case commandclass.CommandClassAlarm:
 		if IsDoorLock(n) {
 			lock, err := n.GetDoorLock()
