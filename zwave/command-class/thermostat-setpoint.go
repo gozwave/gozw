@@ -8,10 +8,9 @@ import (
 
 /* Thermostat Setpoint command class commands */
 const (
-	CommandThermostatSetpointVersion         byte = 0x01
+	CommandThermostatSetpointSet             byte = 0x01
 	CommandThermostatSetpointGet                  = 0x02
 	CommandThermostatSetpointReport               = 0x03
-	CommandThermostatSetpointSet                  = 0x01
 	CommandThermostatSetpointSupportedGet         = 0x04
 	CommandThermostatSetpointSupportedReport      = 0x05
 )
