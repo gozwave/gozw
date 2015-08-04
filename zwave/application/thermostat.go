@@ -45,6 +45,14 @@ func (t *Thermostat) initialize(node *Node) {
 	t.node = node
 }
 
+func (t *Thermostat) SetpointGet(setpointType commandclass.ThermostatSetpointType, temperature float64) error {
+	return t.node.SendCommand(
+		commandclass.CommandClassThermostatSetpoint,
+		commandclass.CommandThermostatSetpointGet,
+		byte(setpointType),
+	)
+}
+
 func (t *Thermostat) SetpointSet(setpointType commandclass.ThermostatSetpointType, temperature float64) error {
 	payload, err := commandclass.NewThermostatSetpointSet(setpointType, commandclass.Temperature{
 		Scale: commandclass.SetpointScaleFarenheit,
