@@ -15,6 +15,7 @@ type Thermostat struct {
 	CoolingSetpoint commandclass.ThermostatSetpoint
 	HeatingSetpoint commandclass.ThermostatSetpoint
 	Mode            commandclass.ThermostatMode
+	OperatingState  commandclass.ThermostatOperatingState
 }
 
 func IsThermostat(node *Node) bool {
@@ -74,6 +75,45 @@ func (t *Thermostat) ModeGet() error {
 	)
 }
 
+func (t *Thermostat) OperatingStateGet() error {
+	return t.node.SendCommand(
+		commandclass.CommandClassThermostatOperatingState,
+		commandclass.CommandThermostatOperatingStateGet,
+	)
+}
+
+func (t *Thermostat) handleThermostatOperatingStateCommandClass(cmd serialapi.ApplicationCommand) {
+	if cmd.CommandData[1] == commandclass.CommandThermostatOperatingStateReport {
+		t.receiveOperatingStateReport(commandclass.ParseThermostatOperatingStateReport(cmd.CommandData))
+	} else {
+		spew.Dump(cmd)
+	}
+}
+
+func (t *Thermostat) receiveOperatingStateReport(operatingState commandclass.ThermostatOperatingState) {
+	t.OperatingState = operatingState
+	switch t.OperatingState {
+	case commandclass.ThermostatOperatingStateIdle:
+		fmt.Println("Thermostat operating state: Idle")
+	case commandclass.ThermostatOperatingStateHeating:
+		fmt.Println("Thermostat operating state: Heating")
+	case commandclass.ThermostatOperatingStateCooling:
+		fmt.Println("Thermostat operating state: Cooling")
+	case commandclass.ThermostatOperatingStateFanOnly:
+		fmt.Println("Thermostat operating state: Fan Only")
+	case commandclass.ThermostatOperatingStatePendingHeat:
+		fmt.Println("Thermostat operating state: Pending Heat")
+	case commandclass.ThermostatOperatingStatePendingCool:
+		fmt.Println("Thermostat operating state: Pending Cool")
+	case commandclass.ThermostatOperatingStateVentEconomizer:
+		fmt.Println("Thermostat operating state: Vent Economizer")
+	default:
+		fmt.Printf("Thermostat operating state: unknown (%d)\n", t.Mode)
+	}
+
+	t.node.saveToDb()
+}
+
 func (t *Thermostat) handleThermostatModeCommandClass(cmd serialapi.ApplicationCommand) {
 	if cmd.CommandData[1] == commandclass.CommandThermostatModeReport {
 		t.receiveModeReport(commandclass.ParseThermostatModeReport(cmd.CommandData))
@@ -108,7 +148,7 @@ func (t *Thermostat) receiveModeReport(mode commandclass.ThermostatMode) {
 	case commandclass.ThermostatModeModeAutoChangeover:
 		fmt.Println("Thermostat mode: Auto Changeover")
 	default:
-		fmt.Println("Thermostat mode: Unknown thermostat mode: ", t.Mode)
+		fmt.Printf("Thermostat mode: unknown (%d)\n", t.Mode)
 	}
 
 	t.node.saveToDb()

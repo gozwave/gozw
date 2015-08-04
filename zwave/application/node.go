@@ -436,6 +436,15 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 
 		thermostat.handleThermostatModeCommandClass(cmd)
 
+	case commandclass.CommandClassThermostatOperatingState:
+		thermostat, err := n.GetThermostat()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		thermostat.handleThermostatOperatingStateCommandClass(cmd)
+
 	case commandclass.CommandClassThermostatSetpoint:
 		thermostat, err := n.GetThermostat()
 		if err != nil {
