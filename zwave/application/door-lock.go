@@ -59,6 +59,22 @@ func (d *DoorLock) initialize(node *Node) {
 	}
 }
 
+func (d *DoorLock) Unlock() error {
+	return d.node.SendCommand(
+		commandclass.CommandClassDoorLock,
+		commandclass.CommandDoorLockOperationSet,
+		0x00,
+	)
+}
+
+func (d *DoorLock) Lock() error {
+	return d.node.SendCommand(
+		commandclass.CommandClassDoorLock,
+		commandclass.CommandDoorLockOperationSet,
+		0xFF,
+	)
+}
+
 func (d *DoorLock) GetSupportedUserCount() (byte, error) {
 	if d.UsersNumber != 0 {
 		return d.UsersNumber, nil

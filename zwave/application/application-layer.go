@@ -201,19 +201,19 @@ func (a *ApplicationLayer) Shutdown() error {
 	return a.db.Close()
 }
 
-func (a *ApplicationLayer) AddNode() error {
+func (a *ApplicationLayer) AddNode() (*Node, error) {
 	newNodeInfo, err := a.serialApi.AddNode()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if newNodeInfo == nil {
-		return errors.New("Adding node failed")
+		return nil, errors.New("Adding node failed")
 	}
 
 	node, err := NewNode(a, newNodeInfo.Source)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	node.setFromAddNodeCallback(newNodeInfo)
@@ -223,7 +223,7 @@ func (a *ApplicationLayer) AddNode() error {
 		fmt.Println("Starting secure inclusion")
 		err = a.includeSecureNode(node.NodeId)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		time.Sleep(time.Millisecond * 50)
@@ -243,23 +243,29 @@ func (a *ApplicationLayer) AddNode() error {
 
 	node.AddAssociation(1, 1)
 
-	return nil
+	return node, nil
 }
 
-func (a *ApplicationLayer) RemoveNode() error {
+func (a *ApplicationLayer) RemoveNode() (byte, error) {
 	result, err := a.serialApi.RemoveNode()
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	if result == nil {
-		return errors.New("Removing node failed")
+		return 0, errors.New("Removing node failed")
 	}
 
-	return a.db.Update(func(tx *bolt.Tx) error {
+	err = a.db.Update(func(tx *bolt.Tx) error {
 		return tx.Bucket([]byte("nodes")).Delete([]byte{result.Source})
 	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	return result.Source, nil
 }
 
 func (a *ApplicationLayer) RemoveFailedNode(nodeId byte) (ok bool, err error) {
