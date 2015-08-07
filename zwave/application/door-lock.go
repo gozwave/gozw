@@ -157,6 +157,9 @@ func (d *DoorLock) LoadAllUserCodes() error {
 func (d *DoorLock) handleAlarmCommandClass(cmd serialapi.ApplicationCommand) {
 	// This is special handling code that will probably only work with yale locks
 	notif := commandclass.ParseAlarmReport(cmd.CommandData)
+
+	d.node.emitNodeEvent(notif)
+
 	switch notif.Type {
 	case 0x70:
 		if notif.Level == 0x00 {

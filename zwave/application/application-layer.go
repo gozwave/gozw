@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/asaskevich/EventBus"
 	"github.com/bjyoungblood/gozw/zwave/command-class"
 	"github.com/bjyoungblood/gozw/zwave/protocol"
 	"github.com/bjyoungblood/gozw/zwave/security"
@@ -51,6 +52,8 @@ type ApplicationLayer struct {
 	networkKey    []byte
 	nodes         map[byte]*Node
 
+	EventBus *EventBus.EventBus
+
 	db *bolt.DB
 
 	// maps node id to channel
@@ -61,6 +64,8 @@ func NewApplicationLayer(serialApi serialapi.ISerialAPILayer) (app *ApplicationL
 	app = &ApplicationLayer{
 		serialApi: serialApi,
 		nodes:     map[byte]*Node{},
+
+		EventBus: EventBus.New(),
 
 		secureInclusionStep: map[byte]chan error{},
 	}

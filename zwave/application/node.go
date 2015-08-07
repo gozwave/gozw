@@ -7,6 +7,7 @@ import (
 
 	"gopkg.in/vmihailenco/msgpack.v2"
 
+	"github.com/bjyoungblood/gozw/proto"
 	"github.com/bjyoungblood/gozw/zwave/command-class"
 	"github.com/bjyoungblood/gozw/zwave/protocol"
 	"github.com/bjyoungblood/gozw/zwave/serial-api"
@@ -284,6 +285,15 @@ func (n *Node) LoadCommandClassVersions() error {
 	}
 
 	return nil
+}
+
+func (n *Node) emitNodeEvent(event interface{}) {
+	n.application.EventBus.Publish("event", proto.Event{
+		Payload: proto.NodeEvent{
+			NodeId: n.NodeId,
+			Event:  event,
+		},
+	})
 }
 
 func (n *Node) sendData(payload []byte) error {
