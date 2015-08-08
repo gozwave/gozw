@@ -5,12 +5,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bjyoungblood/gozw/zwave/application"
-	"github.com/bjyoungblood/gozw/zwave/command-class"
-	"github.com/bjyoungblood/gozw/zwave/frame"
-	"github.com/bjyoungblood/gozw/zwave/serial-api"
-	"github.com/bjyoungblood/gozw/zwave/session"
-	"github.com/bjyoungblood/gozw/zwave/transport"
+	"github.com/helioslabs/gozw/zwave/application"
+	"github.com/helioslabs/gozw/zwave/command-class"
+	"github.com/helioslabs/gozw/zwave/frame"
+	"github.com/helioslabs/gozw/zwave/serial-api"
+	"github.com/helioslabs/gozw/zwave/session"
+	"github.com/helioslabs/gozw/zwave/transport"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/peterh/liner"
 )

@@ -1,6 +1,6 @@
 package serialapi
 
-import "github.com/bjyoungblood/gozw/zwave/protocol"
+import "github.com/helioslabs/gozw/zwave/protocol"
 
 type ControllerUpdate struct {
 	Status         byte

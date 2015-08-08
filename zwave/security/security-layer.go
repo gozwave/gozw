@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bjyoungblood/gozw/zwave/command-class"
+	"github.com/helioslabs/gozw/zwave/command-class"
 )
 
 const (

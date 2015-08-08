@@ -3,9 +3,9 @@ package application
 import (
 	"fmt"
 
-	"github.com/bjyoungblood/gozw/zwave/command-class"
-	"github.com/bjyoungblood/gozw/zwave/protocol"
-	"github.com/bjyoungblood/gozw/zwave/serial-api"
+	"github.com/helioslabs/gozw/zwave/command-class"
+	"github.com/helioslabs/gozw/zwave/protocol"
+	"github.com/helioslabs/gozw/zwave/serial-api"
 	"github.com/davecgh/go-spew/spew"
 )
 

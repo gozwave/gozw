@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/bjyoungblood/gozw/ccgen"
+	"github.com/helioslabs/gozw/ccgen"
 )
 
 func main() {

@@ -4,9 +4,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/bjyoungblood/gozw/zwave/frame"
-	"github.com/bjyoungblood/gozw/zwave/protocol"
-	"github.com/bjyoungblood/gozw/zwave/session"
+	"github.com/helioslabs/gozw/zwave/frame"
+	"github.com/helioslabs/gozw/zwave/protocol"
+	"github.com/helioslabs/gozw/zwave/session"
 )
 
 func (s *SerialAPILayer) RemoveFailedNode(nodeId byte) (removed bool, err error) {

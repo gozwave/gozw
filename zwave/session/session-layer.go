@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bjyoungblood/gozw/zwave/frame"
-	"github.com/bjyoungblood/gozw/zwave/protocol"
+	"github.com/helioslabs/gozw/zwave/frame"
+	"github.com/helioslabs/gozw/zwave/protocol"
 )
 
 const (

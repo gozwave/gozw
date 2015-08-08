@@ -3,7 +3,7 @@ package frame
 import (
 	"fmt"
 
-	"github.com/bjyoungblood/gozw/zwave/transport"
+	"github.com/helioslabs/gozw/zwave/transport"
 )
 
 type IFrameLayer interface {

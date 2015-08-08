@@ -3,8 +3,8 @@ package serialapi
 import (
 	"fmt"
 
-	"github.com/bjyoungblood/gozw/zwave/protocol"
-	"github.com/bjyoungblood/gozw/zwave/session"
+	"github.com/helioslabs/gozw/zwave/protocol"
+	"github.com/helioslabs/gozw/zwave/session"
 	"github.com/davecgh/go-spew/spew"
 )
 

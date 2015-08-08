@@ -7,12 +7,12 @@ import (
 
 	"gopkg.in/vmihailenco/msgpack.v2"
 
-	"github.com/bjyoungblood/gozw/proto"
-	"github.com/bjyoungblood/gozw/zwave/command-class"
-	"github.com/bjyoungblood/gozw/zwave/protocol"
-	"github.com/bjyoungblood/gozw/zwave/serial-api"
 	"github.com/boltdb/bolt"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/helioslabs/gozw/zwave/command-class"
+	"github.com/helioslabs/gozw/zwave/protocol"
+	"github.com/helioslabs/gozw/zwave/serial-api"
+	"github.com/helioslabs/proto"
 )
 
 type CommandClassSupport int

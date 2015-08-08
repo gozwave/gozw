@@ -6,13 +6,13 @@ import (
 	"io"
 	"net"
 
-	"github.com/bjyoungblood/gozw/proto"
-	"github.com/bjyoungblood/gozw/zwave/application"
-	"github.com/bjyoungblood/gozw/zwave/frame"
-	"github.com/bjyoungblood/gozw/zwave/serial-api"
-	"github.com/bjyoungblood/gozw/zwave/session"
-	"github.com/bjyoungblood/gozw/zwave/transport"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/helioslabs/gozw/zwave/application"
+	"github.com/helioslabs/gozw/zwave/frame"
+	"github.com/helioslabs/gozw/zwave/serial-api"
+	"github.com/helioslabs/gozw/zwave/session"
+	"github.com/helioslabs/gozw/zwave/transport"
+	"github.com/helioslabs/proto"
 )
 
 type GatewayOptions struct {

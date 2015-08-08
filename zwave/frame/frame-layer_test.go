@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bjyoungblood/gozw/zwave/mocks"
+	"github.com/helioslabs/gozw/zwave/mocks"
 	"github.com/stretchr/testify/assert"
 )
 

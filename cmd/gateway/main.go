@@ -4,7 +4,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/bjyoungblood/gozw/gateway"
+	"github.com/helioslabs/gozw/gateway"
 )
 
 func main() {
