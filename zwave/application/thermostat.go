@@ -3,10 +3,11 @@ package application
 import (
 	"fmt"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/helioslabs/gozw/zwave/command-class"
 	"github.com/helioslabs/gozw/zwave/protocol"
 	"github.com/helioslabs/gozw/zwave/serial-api"
-	"github.com/davecgh/go-spew/spew"
+	"github.com/helioslabs/proto"
 )
 
 type Thermostat struct {
@@ -173,6 +174,12 @@ func (t *Thermostat) receiveSetpointReport(setpoint commandclass.ThermostatSetpo
 			return
 		}
 
+		t.node.emitNodeEvent(proto.ThermostatSetpointEvent{
+			SetpointType: setpoint.Type,
+			Scale:        temperature.Scale,
+			Setpoint:     temperature.Value,
+		})
+
 		fmt.Println("New cooling setpoint:", temperature.Value)
 	case commandclass.ThermostatSetpointTypeHeating:
 		t.HeatingSetpoint = setpoint
@@ -181,6 +188,12 @@ func (t *Thermostat) receiveSetpointReport(setpoint commandclass.ThermostatSetpo
 			fmt.Println(err)
 			return
 		}
+
+		t.node.emitNodeEvent(proto.ThermostatSetpointEvent{
+			SetpointType: setpoint.Type,
+			Scale:        temperature.Scale,
+			Setpoint:     temperature.Value,
+		})
 
 		fmt.Println("New heating setpoint:", temperature.Value)
 	default:
