@@ -11,12 +11,12 @@ func TestParsingDataFrame(t *testing.T) {
 	t.Parallel()
 
 	parserInput := make(chan byte)
-	parserOutput := make(chan *FrameParseEvent, 1)
+	parserOutput := make(chan *ParseEvent, 1)
 	acks := make(chan bool, 1)
 	naks := make(chan bool, 1)
 	cans := make(chan bool, 1)
 
-	NewFrameParser(parserInput, parserOutput, acks, naks, cans)
+	NewParser(parserInput, parserOutput, acks, naks, cans)
 
 	parserInput <- 0x01
 	parserInput <- 0x04
@@ -28,7 +28,7 @@ func TestParsingDataFrame(t *testing.T) {
 	parserEvent := <-parserOutput
 	frame := parserEvent.frame
 
-	assert.Equal(t, FrameParseOk, parserEvent.status)
+	assert.Equal(t, ParseOk, parserEvent.status)
 	assert.True(t, frame.IsData())
 	assert.True(t, frame.IsResponse())
 	assert.False(t, frame.IsAck())
@@ -48,12 +48,12 @@ func TestInvalidChecksum(t *testing.T) {
 	t.Parallel()
 
 	parserInput := make(chan byte)
-	parserOutput := make(chan *FrameParseEvent, 1)
+	parserOutput := make(chan *ParseEvent, 1)
 	acks := make(chan bool, 1)
 	naks := make(chan bool, 1)
 	cans := make(chan bool, 1)
 
-	NewFrameParser(parserInput, parserOutput, acks, naks, cans)
+	NewParser(parserInput, parserOutput, acks, naks, cans)
 
 	parserInput <- 0x01
 	parserInput <- 0x04
@@ -65,7 +65,7 @@ func TestInvalidChecksum(t *testing.T) {
 	parserEvent := <-parserOutput
 	frame := parserEvent.frame
 
-	assert.Equal(t, FrameParseNotOk, parserEvent.status)
+	assert.Equal(t, ParseNotOk, parserEvent.status)
 	assert.True(t, frame.IsData())
 	assert.True(t, frame.IsResponse())
 	assert.False(t, frame.IsAck())
@@ -86,12 +86,12 @@ func TestParseTimeout(t *testing.T) {
 	t.Parallel()
 
 	parserInput := make(chan byte)
-	parserOutput := make(chan *FrameParseEvent, 1)
+	parserOutput := make(chan *ParseEvent, 1)
 	acks := make(chan bool, 1)
 	naks := make(chan bool, 1)
 	cans := make(chan bool, 1)
 
-	NewFrameParser(parserInput, parserOutput, acks, naks, cans)
+	NewParser(parserInput, parserOutput, acks, naks, cans)
 
 	parserInput <- 0x01
 	parserInput <- 0x04
@@ -102,33 +102,33 @@ func TestParseTimeout(t *testing.T) {
 
 	parserEvent := <-parserOutput
 
-	assert.Equal(t, FrameParseTimeout, parserEvent.status)
+	assert.Equal(t, ParseTimeout, parserEvent.status)
 }
 
 func TestAcksNaksCans(t *testing.T) {
 	t.Parallel()
 
 	parserInput := make(chan byte)
-	parserOutput := make(chan *FrameParseEvent, 1)
+	parserOutput := make(chan *ParseEvent, 1)
 	acks := make(chan bool, 1)
 	naks := make(chan bool, 1)
 	cans := make(chan bool, 1)
 
-	NewFrameParser(parserInput, parserOutput, acks, naks, cans)
+	NewParser(parserInput, parserOutput, acks, naks, cans)
 
 	var event bool
 
-	parserInput <- FrameHeaderAck
+	parserInput <- HeaderAck
 	event = <-acks
 
 	assert.True(t, event)
 
-	parserInput <- FrameHeaderNak
+	parserInput <- HeaderNak
 	event = <-naks
 
 	assert.True(t, event)
 
-	parserInput <- FrameHeaderCan
+	parserInput <- HeaderCan
 	event = <-cans
 
 	assert.True(t, event)
@@ -138,12 +138,12 @@ func TestRecoversAfterInvalidLength(t *testing.T) {
 	t.Parallel()
 
 	parserInput := make(chan byte)
-	parserOutput := make(chan *FrameParseEvent, 1)
+	parserOutput := make(chan *ParseEvent, 1)
 	acks := make(chan bool, 1)
 	naks := make(chan bool, 1)
 	cans := make(chan bool, 1)
 
-	NewFrameParser(parserInput, parserOutput, acks, naks, cans)
+	NewParser(parserInput, parserOutput, acks, naks, cans)
 
 	parserInput <- 0x01
 	parserInput <- 0xFF
@@ -157,7 +157,7 @@ func TestRecoversAfterInvalidLength(t *testing.T) {
 	parserEvent := <-parserOutput
 	frame := parserEvent.frame
 
-	assert.Equal(t, FrameParseNotOk, parserEvent.status)
+	assert.Equal(t, ParseNotOk, parserEvent.status)
 	assert.True(t, frame.IsData())
 	assert.True(t, frame.IsResponse())
 

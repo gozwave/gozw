@@ -8,12 +8,12 @@ import (
 	"github.com/helioslabs/gozw/zwave/session"
 )
 
-func (s *SerialAPILayer) GetVersion() (version *Version, err error) {
+func (s *Layer) GetVersion() (version *Version, err error) {
 
 	done := make(chan *frame.Frame)
 
 	request := &session.Request{
-		FunctionId: protocol.FnGetVersion,
+		FunctionID: protocol.FnGetVersion,
 		HasReturn:  true,
 		ReturnCallback: func(err error, ret *frame.Frame) bool {
 			done <- ret

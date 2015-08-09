@@ -9,8 +9,8 @@ import (
 
 var testMessagePlaintext = []byte{0x00, 0x98, 0x06, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10}
 var testMessageCiphertext = []byte{0x4A, 0xD6, 0xB1, 0x33, 0xB8, 0xFA, 0x0F, 0x2E, 0x0A, 0xEB, 0x86, 0x87, 0x7B, 0xB2, 0xDF, 0x11, 0x13, 0x4E, 0xB4}
-var testEncryptionKey = EncryptEBS(InclusionKey, EncryptPassword)
-var testAuthKey = EncryptEBS(InclusionKey, AuthPassword)
+var testEncryptionKey = EncryptEBS(inclusionKey, encryptPassword)
+var testAuthKey = EncryptEBS(inclusionKey, authPassword)
 
 var testIV = []byte{
 	0xAA, 0xAA, 0xAA, 0xAA,
@@ -28,8 +28,8 @@ func TestGenerateNonceReturns8ByteSlice(t *testing.T) {
 func TestEncryptEBS(t *testing.T) {
 	t.Parallel()
 
-	encryptedKey := EncryptEBS(InclusionKey, EncryptPassword)
-	assert.NotEqual(t, InclusionKey, encryptedKey)
+	encryptedKey := EncryptEBS(inclusionKey, encryptPassword)
+	assert.NotEqual(t, inclusionKey, encryptedKey)
 	assert.Len(t, encryptedKey, 16)
 }
 

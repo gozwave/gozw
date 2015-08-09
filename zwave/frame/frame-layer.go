@@ -6,34 +6,34 @@ import (
 	"github.com/helioslabs/gozw/zwave/transport"
 )
 
-type IFrameLayer interface {
+type ILayer interface {
 	Write(frame *Frame)
 	GetOutputChannel() <-chan Frame
 }
 
-type FrameLayer struct {
-	transportLayer transport.TransportLayer
+type Layer struct {
+	transportLayer transport.Transport
 
-	frameParser      *FrameParser
+	frameParser      *Parser
 	parserInput      chan<- byte
-	parserOutput     <-chan *FrameParseEvent
+	parserOutput     <-chan *ParseEvent
 	acks, naks, cans <-chan bool
 
 	pendingWrites chan *Frame
 	frameOutput   chan Frame
 }
 
-func NewFrameLayer(transportLayer transport.TransportLayer) *FrameLayer {
+func NewFrameLayer(transportLayer transport.Transport) *Layer {
 	parserInput := make(chan byte)
-	parserOutput := make(chan *FrameParseEvent, 1)
+	parserOutput := make(chan *ParseEvent, 1)
 	acks := make(chan bool, 1)
 	naks := make(chan bool, 1)
 	cans := make(chan bool, 1)
 
-	frameLayer := &FrameLayer{
+	frameLayer := &Layer{
 		transportLayer: transportLayer,
 
-		frameParser:  NewFrameParser(parserInput, parserOutput, acks, naks, cans),
+		frameParser:  NewParser(parserInput, parserOutput, acks, naks, cans),
 		parserInput:  parserInput,
 		parserOutput: parserOutput,
 		acks:         acks,
@@ -50,61 +50,61 @@ func NewFrameLayer(transportLayer transport.TransportLayer) *FrameLayer {
 	return frameLayer
 }
 
-func (layer *FrameLayer) bgWork() {
+func (l *Layer) bgWork() {
 
 	for {
 		select {
-		case frameIn := <-layer.parserOutput:
-			if frameIn.status == FrameParseOk {
-				layer.sendAck()
-				layer.frameOutput <- frameIn.frame
-			} else if frameIn.status == FrameParseNotOk {
-				layer.sendNak()
+		case frameIn := <-l.parserOutput:
+			if frameIn.status == ParseOk {
+				l.sendAck()
+				l.frameOutput <- frameIn.frame
+			} else if frameIn.status == ParseNotOk {
+				l.sendNak()
 			} else {
 				// @todo handle timeout(?)
 			}
 
-		case <-layer.acks:
+		case <-l.acks:
 			fmt.Println("frame layer: rx ack")
-		case <-layer.naks:
+		case <-l.naks:
 			fmt.Println("frame layer: rx nak")
-		case <-layer.cans:
+		case <-l.cans:
 			fmt.Println("frame layer: rx can")
 
-		case frameToWrite := <-layer.pendingWrites:
-			layer.writeToTransport(frameToWrite.Marshal())
-			_ = <-layer.acks
+		case frameToWrite := <-l.pendingWrites:
+			l.writeToTransport(frameToWrite.Marshal())
+			_ = <-l.acks
 
 		}
 	}
 }
 
-func (f *FrameLayer) Write(frame *Frame) {
+func (l *Layer) Write(frame *Frame) {
 	go func() {
-		f.pendingWrites <- frame
+		l.pendingWrites <- frame
 	}()
 }
 
-func (f *FrameLayer) GetOutputChannel() <-chan Frame {
-	return f.frameOutput
+func (l *Layer) GetOutputChannel() <-chan Frame {
+	return l.frameOutput
 }
 
-func (f *FrameLayer) bgRead() {
-	for eachByte := range f.transportLayer.Read() {
-		f.parserInput <- eachByte
+func (l *Layer) bgRead() {
+	for eachByte := range l.transportLayer.Read() {
+		l.parserInput <- eachByte
 	}
 }
 
-func (f *FrameLayer) writeToTransport(buf []byte) (int, error) {
-	return f.transportLayer.Write(buf)
+func (l *Layer) writeToTransport(buf []byte) (int, error) {
+	return l.transportLayer.Write(buf)
 }
 
-func (f *FrameLayer) sendAck() error {
-	_, err := f.transportLayer.Write([]byte{FrameHeaderAck})
+func (l *Layer) sendAck() error {
+	_, err := l.transportLayer.Write([]byte{HeaderAck})
 	return err
 }
 
-func (f *FrameLayer) sendNak() error {
-	_, err := f.transportLayer.Write([]byte{FrameHeaderNak})
+func (l *Layer) sendNak() error {
+	_, err := l.transportLayer.Write([]byte{HeaderNak})
 	return err
 }

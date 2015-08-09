@@ -9,13 +9,13 @@ import (
 	"github.com/helioslabs/gozw/zwave/session"
 )
 
-func (s *SerialAPILayer) RemoveFailedNode(nodeId byte) (removed bool, err error) {
+func (s *Layer) RemoveFailedNode(nodeID byte) (removed bool, err error) {
 
 	done := make(chan frame.Frame)
 
 	request := &session.Request{
-		FunctionId:       protocol.FnRemoveFailingNode,
-		Payload:          []byte{nodeId},
+		FunctionID:       protocol.FnRemoveFailingNode,
+		Payload:          []byte{nodeID},
 		HasReturn:        true,
 		ReceivesCallback: true,
 		Timeout:          time.Second * 10,

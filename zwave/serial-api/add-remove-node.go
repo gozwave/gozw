@@ -10,7 +10,7 @@ import (
 	"github.com/helioslabs/gozw/zwave/session"
 )
 
-func (s *SerialAPILayer) AddNode() (*AddRemoveNodeCallback, error) {
+func (s *Layer) AddNode() (*AddRemoveNodeCallback, error) {
 
 	var newNode *AddRemoveNodeCallback
 
@@ -18,7 +18,7 @@ func (s *SerialAPILayer) AddNode() (*AddRemoveNodeCallback, error) {
 	done := make(chan *frame.Frame)
 
 	request := &session.Request{
-		FunctionId: protocol.FnAddNodeToNetwork,
+		FunctionID: protocol.FnAddNodeToNetwork,
 		Payload:    []byte{protocol.AddNodeAny | protocol.AddNodeOptionNetworkWide | protocol.AddNodeOptionNormalPower},
 
 		HasReturn:        false,
@@ -52,7 +52,7 @@ func (s *SerialAPILayer) AddNode() (*AddRemoveNodeCallback, error) {
 				reply := addRemoveStatusFrame(
 					protocol.FnAddNodeToNetwork,
 					protocol.AddNodeStop,
-					cbData.CallbackId,
+					cbData.CallbackID,
 				)
 				s.sessionLayer.SendFrameDirect(reply)
 
@@ -74,7 +74,7 @@ func (s *SerialAPILayer) AddNode() (*AddRemoveNodeCallback, error) {
 				reply := addRemoveStatusFrame(
 					protocol.FnAddNodeToNetwork,
 					protocol.AddNodeStop,
-					cbData.CallbackId,
+					cbData.CallbackID,
 				)
 				s.sessionLayer.SendFrameDirect(reply)
 
@@ -95,7 +95,7 @@ func (s *SerialAPILayer) AddNode() (*AddRemoveNodeCallback, error) {
 
 }
 
-func (s *SerialAPILayer) RemoveNode() (*AddRemoveNodeCallback, error) {
+func (s *Layer) RemoveNode() (*AddRemoveNodeCallback, error) {
 
 	var removedNode *AddRemoveNodeCallback
 
@@ -103,7 +103,7 @@ func (s *SerialAPILayer) RemoveNode() (*AddRemoveNodeCallback, error) {
 	done := make(chan *frame.Frame)
 
 	request := &session.Request{
-		FunctionId: protocol.FnRemoveNodeFromNetwork,
+		FunctionID: protocol.FnRemoveNodeFromNetwork,
 		Payload:    []byte{protocol.RemoveNodeAny | protocol.RemoveNodeOptionNetworkWide | protocol.RemoveNodeOptionNormalPower},
 
 		HasReturn:        false,
@@ -137,7 +137,7 @@ func (s *SerialAPILayer) RemoveNode() (*AddRemoveNodeCallback, error) {
 				reply := addRemoveStatusFrame(
 					protocol.FnRemoveNodeFromNetwork,
 					protocol.RemoveNodeStop,
-					cbData.CallbackId,
+					cbData.CallbackID,
 				)
 				s.sessionLayer.SendFrameDirect(reply)
 
@@ -159,7 +159,7 @@ func (s *SerialAPILayer) RemoveNode() (*AddRemoveNodeCallback, error) {
 				reply := addRemoveStatusFrame(
 					protocol.FnRemoveNodeFromNetwork,
 					protocol.RemoveNodeStop,
-					cbData.CallbackId,
+					cbData.CallbackID,
 				)
 				s.sessionLayer.SendFrameDirect(reply)
 
@@ -180,17 +180,17 @@ func (s *SerialAPILayer) RemoveNode() (*AddRemoveNodeCallback, error) {
 
 }
 
-func addRemoveStatusFrame(functionId, status, callbackId byte) *frame.Frame {
+func addRemoveStatusFrame(functionID, status, callbackID byte) *frame.Frame {
 	return frame.NewRequestFrame([]byte{
-		functionId,
+		functionID,
 		status,
-		callbackId,
+		callbackID,
 	})
 }
 
 type AddRemoveNodeCallback struct {
-	CommandId      byte
-	CallbackId     byte
+	CommandID      byte
+	CallbackID     byte
 	Status         byte
 	Source         byte
 	Length         byte
@@ -202,8 +202,8 @@ type AddRemoveNodeCallback struct {
 
 func parseAddRemoveNodeCallback(payload []byte) *AddRemoveNodeCallback {
 	val := &AddRemoveNodeCallback{
-		CommandId:  payload[0],
-		CallbackId: payload[1],
+		CommandID:  payload[0],
+		CallbackID: payload[1],
 		Status:     payload[2],
 		Source:     payload[3],
 		Length:     payload[4],

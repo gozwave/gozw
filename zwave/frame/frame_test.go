@@ -21,15 +21,15 @@ func TestMarshalFrame(t *testing.T) {
 
 	marshalled = NewAckFrame().Marshal()
 	assert.Len(t, marshalled, 1)
-	assert.EqualValues(t, []byte{FrameHeaderAck}, marshalled)
+	assert.EqualValues(t, []byte{HeaderAck}, marshalled)
 
 	marshalled = NewNakFrame().Marshal()
 	assert.Len(t, marshalled, 1)
-	assert.EqualValues(t, []byte{FrameHeaderNak}, marshalled)
+	assert.EqualValues(t, []byte{HeaderNak}, marshalled)
 
 	marshalled = NewCanFrame().Marshal()
 	assert.Len(t, marshalled, 1)
-	assert.EqualValues(t, []byte{FrameHeaderCan}, marshalled)
+	assert.EqualValues(t, []byte{HeaderCan}, marshalled)
 
 }
 

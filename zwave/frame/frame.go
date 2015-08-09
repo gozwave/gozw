@@ -6,19 +6,16 @@ import (
 	"errors"
 )
 
-type FrameHeader byte
-type FrameType byte
-
 const (
-	FrameHeaderData byte = 0x01
-	FrameHeaderAck  byte = 0x06
-	FrameHeaderNak  byte = 0x15
-	FrameHeaderCan  byte = 0x18
+	HeaderData byte = 0x01
+	HeaderAck       = 0x06
+	HeaderNak       = 0x15
+	HeaderCan       = 0x18
 )
 
 const (
-	FrameTypeReq byte = 0x00
-	FrameTypeRes byte = 0x01
+	TypeRequest  byte = 0x00
+	TypeResponse      = 0x01
 )
 
 type Frame struct {
@@ -41,52 +38,52 @@ type Frame struct {
 
 func NewRequestFrame(payload []byte) *Frame {
 	return &Frame{
-		Header:  FrameHeaderData,
-		Type:    FrameTypeReq,
+		Header:  HeaderData,
+		Type:    TypeRequest,
 		Payload: payload,
 	}
 }
 
 func NewNakFrame() *Frame {
 	return &Frame{
-		Header: FrameHeaderNak,
+		Header: HeaderNak,
 	}
 }
 
 func NewAckFrame() *Frame {
 	return &Frame{
-		Header: FrameHeaderAck,
+		Header: HeaderAck,
 	}
 }
 
 func NewCanFrame() *Frame {
 	return &Frame{
-		Header: FrameHeaderCan,
+		Header: HeaderCan,
 	}
 }
 
 func (z *Frame) IsRequest() bool {
-	return z.Type == FrameTypeReq
+	return z.Type == TypeRequest
 }
 
 func (z *Frame) IsResponse() bool {
-	return z.Type == FrameTypeRes
+	return z.Type == TypeResponse
 }
 
 func (z *Frame) IsAck() bool {
-	return z.Header == FrameHeaderAck
+	return z.Header == HeaderAck
 }
 
 func (z *Frame) IsNak() bool {
-	return z.Header == FrameHeaderNak
+	return z.Header == HeaderNak
 }
 
 func (z *Frame) IsCan() bool {
-	return z.Header == FrameHeaderCan
+	return z.Header == HeaderCan
 }
 
 func (z *Frame) IsData() bool {
-	return z.Header == FrameHeaderData
+	return z.Header == HeaderData
 }
 
 // CalcChecksum calculates the checksum for this frame, given the current data.
@@ -111,7 +108,7 @@ func (z *Frame) SetChecksum() {
 // VerifyChecksum calculates a checksum for the frame and compares it to the
 // frame's checksum, returning an error if they do not agree
 func (z *Frame) VerifyChecksum() error {
-	if z.Header != FrameHeaderData {
+	if z.Header != HeaderData {
 		return nil
 	}
 
@@ -130,7 +127,7 @@ func (z *Frame) Marshal() []byte {
 	z.SetChecksum()
 
 	switch z.Header {
-	case FrameHeaderData:
+	case HeaderData:
 		// Data frames have the whole kit and caboodle
 		binary.Write(buf, binary.BigEndian, byte(z.Header))
 		binary.Write(buf, binary.BigEndian, byte(z.Length))
@@ -147,7 +144,7 @@ func (z *Frame) Marshal() []byte {
 
 // UnmarshalFrame turns a byte slice into a Frame
 func UnmarshalFrame(frame []byte) *Frame {
-	if frame[0] != FrameHeaderData {
+	if frame[0] != HeaderData {
 		return &Frame{
 			Header: frame[0],
 		}

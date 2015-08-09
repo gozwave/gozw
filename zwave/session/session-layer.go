@@ -11,22 +11,22 @@ import (
 )
 
 const (
-	MinSequenceNumber = 1
-	MaxSequenceNumber = 127
+	minSequenceNumber = 1
+	maxSequenceNumber = 127
 )
 
-type ISessionLayer interface {
+type ILayer interface {
 	MakeRequest(request *Request)
 	SendFrameDirect(req *frame.Frame)
 	UnsolicitedFramesChan() chan frame.Frame
 }
 
-type SessionLayer struct {
-	frameLayer frame.IFrameLayer
+type Layer struct {
+	frameLayer frame.ILayer
 
 	UnsolicitedFrames chan frame.Frame
 
-	lastRequestFuncId byte
+	lastRequestFuncID byte
 	responses         chan frame.Frame
 
 	// maps sequence number to callback
@@ -36,13 +36,13 @@ type SessionLayer struct {
 	requestQueue chan *Request
 }
 
-func NewSessionLayer(frameLayer frame.IFrameLayer) *SessionLayer {
-	session := &SessionLayer{
+func NewSessionLayer(frameLayer frame.ILayer) *Layer {
+	session := &Layer{
 		frameLayer: frameLayer,
 
 		UnsolicitedFrames: make(chan frame.Frame, 10),
 
-		lastRequestFuncId: 0,
+		lastRequestFuncID: 0,
 		responses:         make(chan frame.Frame),
 
 		sequenceNumber: 0,
@@ -57,37 +57,37 @@ func NewSessionLayer(frameLayer frame.IFrameLayer) *SessionLayer {
 	return session
 }
 
-func (s *SessionLayer) MakeRequest(request *Request) {
+func (s *Layer) MakeRequest(request *Request) {
 	// Enqueue the request for processing
 	s.requestQueue <- request
 }
 
 // Be careful with this. Should not be called outside of a callback
-func (s *SessionLayer) SendFrameDirect(req *frame.Frame) {
+func (s *Layer) SendFrameDirect(req *frame.Frame) {
 	s.frameLayer.Write(req)
 }
 
-func (s *SessionLayer) UnsolicitedFramesChan() chan frame.Frame {
+func (s *Layer) UnsolicitedFramesChan() chan frame.Frame {
 	return s.UnsolicitedFrames
 }
 
-func (s *SessionLayer) receiveThread() {
+func (s *Layer) receiveThread() {
 	for frameIn := range s.frameLayer.GetOutputChannel() {
 		if frameIn.IsResponse() {
-			if frameIn.Payload[0] == s.lastRequestFuncId {
+			if frameIn.Payload[0] == s.lastRequestFuncID {
 				select {
 				case s.responses <- frameIn:
 				default:
 				}
 
-				s.lastRequestFuncId = 0
+				s.lastRequestFuncID = 0
 			} else {
 				fmt.Println("Received an unexpected response frame: ", frameIn)
 			}
 		} else {
-			var callbackId byte
+			var callbackID byte
 
-			if s.lastRequestFuncId != 0 {
+			if s.lastRequestFuncID != 0 {
 				fmt.Println("REQUEST/RESPONSE COLLISION; SENDING CAN FRAME AND RETRYING PREVIOUS SEND")
 				s.frameLayer.Write(frame.NewCanFrame())
 				select {
@@ -108,22 +108,22 @@ func (s *SessionLayer) receiveThread() {
 				protocol.FnRequestNetworkUpdate,
 				protocol.FnRemoveFailingNode:
 
-				callbackId = frameIn.Payload[1]
+				callbackID = frameIn.Payload[1]
 
 				// These commands are never callbacks and shouldn't ever be handled as such
 			case protocol.FnApplicationControllerUpdate,
 				protocol.FnApplicationCommandHandler,
 				protocol.FnApplicationCommandHandlerBridge:
 
-				callbackId = 0
+				callbackID = 0
 
 				// Log in case we need to set up a callback for a function
 			default:
 				fmt.Println("session-layer: got unknown callback for func: ", hex.EncodeToString([]byte{frameIn.Payload[0]}))
-				callbackId = 0
+				callbackID = 0
 			}
 
-			if callback, ok := s.callbacks[callbackId]; ok {
+			if callback, ok := s.callbacks[callbackID]; ok {
 				go callback(frameIn)
 			} else {
 				s.UnsolicitedFrames <- frameIn
@@ -135,9 +135,9 @@ func (s *SessionLayer) receiveThread() {
 
 // This function currently assumes that every single function that expects a callback
 // sets the callback id as the last byte in the payload.
-func (s *SessionLayer) sendThread() {
+func (s *Layer) sendThread() {
 	for request := range s.requestQueue {
-		var seqNo byte = 0
+		var seqNo byte
 
 		if request.ReceivesCallback {
 			seqNo = s.getSequenceNumber()
@@ -149,12 +149,12 @@ func (s *SessionLayer) sendThread() {
 			request.Payload = []byte{}
 		}
 
-		var frame = frame.NewRequestFrame(append([]byte{request.FunctionId}, request.Payload...))
+		var frame = frame.NewRequestFrame(append([]byte{request.FunctionID}, request.Payload...))
 		attempts := 0
 
 	retry:
 		if request.HasReturn {
-			s.lastRequestFuncId = request.FunctionId
+			s.lastRequestFuncID = request.FunctionID
 		}
 
 		s.frameLayer.Write(frame)
@@ -171,7 +171,7 @@ func (s *SessionLayer) sendThread() {
 						return
 					}
 
-					attempts += 1
+					attempts++
 					goto retry // https://xkcd.com/292/
 				}
 
@@ -197,9 +197,9 @@ func (s *SessionLayer) sendThread() {
 	}
 }
 
-func (s *SessionLayer) getSequenceNumber() byte {
-	if s.sequenceNumber == MaxSequenceNumber {
-		s.sequenceNumber = MinSequenceNumber
+func (s *Layer) getSequenceNumber() byte {
+	if s.sequenceNumber == maxSequenceNumber {
+		s.sequenceNumber = minSequenceNumber
 	} else {
 		s.sequenceNumber = s.sequenceNumber + 1
 	}

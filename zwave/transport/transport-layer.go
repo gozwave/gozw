@@ -7,16 +7,16 @@ import (
 	"github.com/tarm/serial"
 )
 
-type TransportLayer interface {
+type Transport interface {
 	Read() <-chan byte
 	Write(buf []byte) (int, error)
 }
 
-type SerialTransportLayer struct {
+type SerialPortTransport struct {
 	port *serial.Port
 }
 
-func NewSerialTransportLayer(device string, baud int) (*SerialTransportLayer, error) {
+func NewSerialPortTransport(device string, baud int) (*SerialPortTransport, error) {
 	var err error
 
 	port, err := serial.OpenPort(&serial.Config{
@@ -28,14 +28,14 @@ func NewSerialTransportLayer(device string, baud int) (*SerialTransportLayer, er
 		return nil, err
 	}
 
-	transport := &SerialTransportLayer{
+	transport := &SerialPortTransport{
 		port: port,
 	}
 
 	return transport, nil
 }
 
-func (t *SerialTransportLayer) Read() <-chan byte {
+func (t *SerialPortTransport) Read() <-chan byte {
 	readQueue := make(chan byte)
 
 	go t.readAsync(readQueue)
@@ -43,11 +43,11 @@ func (t *SerialTransportLayer) Read() <-chan byte {
 	return readQueue
 }
 
-func (t *SerialTransportLayer) Write(buf []byte) (int, error) {
+func (t *SerialPortTransport) Write(buf []byte) (int, error) {
 	return t.port.Write(buf)
 }
 
-func (t *SerialTransportLayer) readAsync(readQueue chan<- byte) {
+func (t *SerialPortTransport) readAsync(readQueue chan<- byte) {
 	reader := bufio.NewReader(t.port)
 
 	for {

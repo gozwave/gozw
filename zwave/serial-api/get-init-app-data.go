@@ -9,7 +9,7 @@ import (
 )
 
 type InitAppData struct {
-	CommandId    byte
+	CommandID    byte
 	Version      byte
 	Capabilities byte
 	Nodes        []byte
@@ -17,12 +17,12 @@ type InitAppData struct {
 	ChipVersion  byte
 }
 
-func (s *SerialAPILayer) GetInitAppData() (*InitAppData, error) {
+func (s *Layer) GetInitAppData() (*InitAppData, error) {
 
 	done := make(chan *frame.Frame)
 
 	request := &session.Request{
-		FunctionId: protocol.FnSerialApiGetInitAppData,
+		FunctionID: protocol.FnSerialAPIGetInitAppData,
 		HasReturn:  true,
 		ReturnCallback: func(err error, ret *frame.Frame) bool {
 			done <- ret
@@ -38,7 +38,7 @@ func (s *SerialAPILayer) GetInitAppData() (*InitAppData, error) {
 	}
 
 	return &InitAppData{
-		CommandId:    ret.Payload[0],
+		CommandID:    ret.Payload[0],
 		Version:      ret.Payload[1],
 		Capabilities: ret.Payload[2],
 		Nodes:        ret.Payload[4:33],
@@ -48,39 +48,39 @@ func (s *SerialAPILayer) GetInitAppData() (*InitAppData, error) {
 
 }
 
-func isBitSet(mask []byte, nodeId byte) bool {
-	if (nodeId > 0) && (nodeId <= 232) {
-		return ((mask[(nodeId-1)>>3] & (1 << ((nodeId - 1) & 0x07))) != 0)
+func isBitSet(mask []byte, nodeID byte) bool {
+	if (nodeID > 0) && (nodeID <= 232) {
+		return ((mask[(nodeID-1)>>3] & (1 << ((nodeID - 1) & 0x07))) != 0)
 	}
 
 	return false
 }
 
-func (n *InitAppData) GetApiType() string {
-	if n.CommandId&0x80 == 0x80 {
+func (n *InitAppData) GetAPIType() string {
+	if n.CommandID&0x80 == 0x80 {
 		return "Slave"
-	} else {
-		return "Controller"
 	}
+
+	return "Controller"
 }
 
 func (n *InitAppData) TimerFunctionsSupported() bool {
-	if n.CommandId&0x40 == 0x40 {
+	if n.CommandID&0x40 == 0x40 {
 		return true
-	} else {
-		return false
 	}
+
+	return false
 }
 
 func (n *InitAppData) IsPrimaryController() bool {
-	if n.CommandId&0x20 == 0x20 {
+	if n.CommandID&0x20 == 0x20 {
 		return false
-	} else {
-		return true
 	}
+
+	return true
 }
 
-func (n *InitAppData) GetNodeIds() []byte {
+func (n *InitAppData) GetNodeIDs() []byte {
 	nodes := []byte{}
 
 	var i byte

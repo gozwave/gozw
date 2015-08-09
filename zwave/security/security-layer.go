@@ -10,21 +10,21 @@ import (
 )
 
 const (
-	InternalNonceTTL    = time.Second * 15
-	ExternalNonceTTL    = time.Second * 10
-	NonceRequestTimeout = time.Second * 10
+	internalNonceTTL    = time.Second * 15
+	externalNonceTTL    = time.Second * 10
+	nonceRequestTimeout = time.Second * 10
 )
 
-type ISecurityLayer interface {
+type ILayer interface {
 	DecryptMessage(data *commandclass.SecurityMessageEncapsulation) ([]byte, error)
 	EncapsulateMessage(payload []byte, senderNonce []byte, receiverNonce []byte, srcNode byte, dstNode byte, inclusionMode bool) []byte
 	GenerateInternalNonce() (Nonce, error)
 	GetExternalNonce(key byte) (Nonce, error)
 	ReceiveNonce(fromNode byte, data *commandclass.SecurityNonceReport)
-	WaitForExternalNonce(nodeId byte) (Nonce, error)
+	WaitForExternalNonce(nodeID byte) (Nonce, error)
 }
 
-type SecurityLayer struct {
+type Layer struct {
 	networkKey []byte
 
 	networkEncKey  []byte
@@ -41,12 +41,12 @@ type SecurityLayer struct {
 	waitMapLock  *sync.Mutex
 }
 
-func NewSecurityLayer(networkKey []byte) *SecurityLayer {
-	securityLayer := &SecurityLayer{
+func NewLayer(networkKey []byte) *Layer {
+	securityLayer := &Layer{
 		networkKey: networkKey,
 
-		networkEncKey:  EncryptEBS(networkKey, EncryptPassword),
-		networkAuthKey: EncryptEBS(networkKey, AuthPassword),
+		networkEncKey:  EncryptEBS(networkKey, encryptPassword),
+		networkAuthKey: EncryptEBS(networkKey, authPassword),
 
 		internalNonceTable: NewNonceTable(),
 		externalNonceTable: NewNonceTable(),
@@ -58,7 +58,7 @@ func NewSecurityLayer(networkKey []byte) *SecurityLayer {
 	return securityLayer
 }
 
-func (s *SecurityLayer) EncapsulateMessage(
+func (s *Layer) EncapsulateMessage(
 	payload []byte,
 	senderNonce []byte,
 	receiverNonce []byte,
@@ -69,8 +69,8 @@ func (s *SecurityLayer) EncapsulateMessage(
 
 	var encKey, authKey []byte
 	if inclusionMode {
-		encKey = InclusionEncKey
-		authKey = InclusionAuthKey
+		encKey = inclusionEncKey
+		authKey = inclusionAuthKey
 	} else {
 		encKey = s.networkEncKey
 		authKey = s.networkAuthKey
@@ -97,8 +97,8 @@ func (s *SecurityLayer) EncapsulateMessage(
 }
 
 // @todo verify message hmac
-func (s *SecurityLayer) DecryptMessage(data *commandclass.SecurityMessageEncapsulation) ([]byte, error) {
-	receiverNonce, err := s.internalNonceTable.Get(data.ReceiverNonceId)
+func (s *Layer) DecryptMessage(data *commandclass.SecurityMessageEncapsulation) ([]byte, error) {
+	receiverNonce, err := s.internalNonceTable.Get(data.ReceiverNonceID)
 	if err != nil {
 		return nil, err
 	}
@@ -120,11 +120,11 @@ func (s *SecurityLayer) DecryptMessage(data *commandclass.SecurityMessageEncapsu
 // NOTE: The Z-Wave docs are not very clear on this, but the "receiver nonce id"
 // is simply the first byte of the nonce (which must be unique among all of the
 // active internal nonces)
-func (s *SecurityLayer) GenerateInternalNonce() (Nonce, error) {
-	return s.internalNonceTable.Generate(InternalNonceTTL)
+func (s *Layer) GenerateInternalNonce() (Nonce, error) {
+	return s.internalNonceTable.Generate(internalNonceTTL)
 }
 
-func (s *SecurityLayer) GetExternalNonce(key byte) (Nonce, error) {
+func (s *Layer) GetExternalNonce(key byte) (Nonce, error) {
 	return s.externalNonceTable.Get(key)
 }
 
@@ -132,8 +132,8 @@ func (s *SecurityLayer) GetExternalNonce(key byte) (Nonce, error) {
 // it sets a timeout on the nonce (after which the nonce will be deleted from the
 // nonce table) and notifies any goroutine that may be waiting for a nonce from
 // the given node
-func (s *SecurityLayer) ReceiveNonce(fromNode byte, data *commandclass.SecurityNonceReport) {
-	s.externalNonceTable.Set(fromNode, data.Nonce, ExternalNonceTTL)
+func (s *Layer) ReceiveNonce(fromNode byte, data *commandclass.SecurityNonceReport) {
+	s.externalNonceTable.Set(fromNode, data.Nonce, externalNonceTTL)
 
 	// if there is no matching channel in the waitForNonce map, then apparently we
 	// either fetched the nonce for no reason, some node just randomly gave us one,
@@ -171,26 +171,26 @@ func (s *SecurityLayer) ReceiveNonce(fromNode byte, data *commandclass.SecurityN
 	}
 }
 
-func (s *SecurityLayer) WaitForExternalNonce(nodeId byte) (Nonce, error) {
+func (s *Layer) WaitForExternalNonce(nodeID byte) (Nonce, error) {
 	var waitChan chan bool
 	var ok bool
 
 	// Get the wait channel, creating it if it doesn't exist (note the !ok condition)
 	s.waitMapLock.Lock()
-	if waitChan, ok = s.waitForNonce[nodeId]; !ok {
+	if waitChan, ok = s.waitForNonce[nodeID]; !ok {
 		waitChan = make(chan bool)
-		s.waitForNonce[nodeId] = waitChan
+		s.waitForNonce[nodeID] = waitChan
 	}
 	s.waitMapLock.Unlock()
 	runtime.Gosched()
 
 	select {
 	case <-waitChan:
-	case <-time.After(NonceRequestTimeout):
+	case <-time.After(nonceRequestTimeout):
 		return nil, errors.New("nonce timeout")
 	}
 
-	nonce, err := s.externalNonceTable.Get(nodeId)
+	nonce, err := s.externalNonceTable.Get(nodeID)
 	if err == nil {
 		return nonce, nil
 	}

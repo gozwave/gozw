@@ -8,13 +8,13 @@ import (
 	"github.com/helioslabs/gozw/zwave/session"
 )
 
-func (s *SerialAPILayer) IsFailedNode(nodeId byte) (failed bool, err error) {
+func (s *Layer) IsFailedNode(nodeID byte) (failed bool, err error) {
 
 	done := make(chan *frame.Frame)
 
 	request := &session.Request{
-		FunctionId: protocol.FnIsNodeFailed,
-		Payload:    []byte{nodeId},
+		FunctionID: protocol.FnIsNodeFailed,
+		Payload:    []byte{nodeID},
 		HasReturn:  true,
 		ReturnCallback: func(err error, ret *frame.Frame) bool {
 			done <- ret

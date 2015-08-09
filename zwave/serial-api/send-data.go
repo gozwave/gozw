@@ -11,22 +11,22 @@ import (
 	"github.com/helioslabs/gozw/zwave/session"
 )
 
-type TransmitStatus struct {
+type transmitStatus struct {
 	Status byte
 	TxTime uint16
 }
 
-func (s *SerialAPILayer) SendData(nodeId byte, payload []byte) (txTime uint16, err error) {
+func (s *Layer) SendData(nodeID byte, payload []byte) (txTime uint16, err error) {
 
 	transmitDone := make(chan bool)
 	retStatus := make(chan error)
-	txStatus := make(chan TransmitStatus)
+	txStatus := make(chan transmitStatus)
 
-	payload = append([]byte{nodeId, byte(len(payload))}, payload...)
+	payload = append([]byte{nodeID, byte(len(payload))}, payload...)
 	payload = append(payload, protocol.TransmitOptionAck)
 
 	request := &session.Request{
-		FunctionId:       protocol.FnSendData,
+		FunctionID:       protocol.FnSendData,
 		Payload:          payload,
 		HasReturn:        true,
 		ReceivesCallback: true,
@@ -52,7 +52,7 @@ func (s *SerialAPILayer) SendData(nodeId byte, payload []byte) (txTime uint16, e
 		},
 
 		Callback: func(cbFrame frame.Frame) {
-			status := TransmitStatus{}
+			status := transmitStatus{}
 			status.Status = cbFrame.Payload[2]
 			if len(cbFrame.Payload) == 5 {
 				status.TxTime = binary.BigEndian.Uint16(cbFrame.Payload[3:5])

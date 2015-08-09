@@ -11,7 +11,7 @@ import (
 type CallbackFunc func(frame.Frame)
 
 type Request struct {
-	FunctionId byte
+	FunctionID byte
 	Payload    []byte
 
 	HasReturn      bool

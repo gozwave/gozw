@@ -7,12 +7,12 @@ import (
 	"github.com/looplab/fsm"
 )
 
-type FrameParseStatus int
+type ParseStatus int
 
 const (
-	FrameParseOk FrameParseStatus = iota
-	FrameParseNotOk
-	FrameParseTimeout
+	ParseOk ParseStatus = iota
+	ParseNotOk
+	ParseTimeout
 )
 
 const (
@@ -22,23 +22,23 @@ const (
 
 const readTimeout time.Duration = 1500 * time.Millisecond
 
-type FrameParseEvent struct {
-	status FrameParseStatus
+type ParseEvent struct {
+	status ParseStatus
 	frame  Frame
 }
 
-type FrameParser struct {
+type Parser struct {
 	state                              *fsm.FSM
 	input                              <-chan byte
-	framesReceived                     chan<- *FrameParseEvent
+	framesReceived                     chan<- *ParseEvent
 	acks, naks, cans                   chan<- bool
 	sof, length, checksum, readCounter byte
 	payloadReadBuffer                  *bytes.Buffer
 	parseTimeout                       *time.Timer
 }
 
-func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent, acks, naks, cans chan bool) *FrameParser {
-	frameParser := &FrameParser{
+func NewParser(input <-chan byte, output chan<- *ParseEvent, acks, naks, cans chan bool) *Parser {
+	parser := &Parser{
 		input:             input,
 		framesReceived:    output,
 		acks:              acks,
@@ -48,9 +48,9 @@ func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent, acks, nak
 		parseTimeout:      time.NewTimer(readTimeout),
 	}
 
-	frameParser.parseTimeout.Stop()
+	parser.parseTimeout.Stop()
 
-	frameParser.state = fsm.NewFSM(
+	parser.state = fsm.NewFSM(
 		"idle",
 		fsm.Events{
 			{Name: "PARSE_TIMEOUT", Src: []string{"idle", "length", "data", "checksum"}, Dst: "idle"},
@@ -68,61 +68,61 @@ func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent, acks, nak
 		},
 		fsm.Callbacks{
 			"enter_idle": func(e *fsm.Event) {
-				frameParser.parseTimeout.Stop()
-				frameParser.payloadReadBuffer.Reset()
+				parser.parseTimeout.Stop()
+				parser.payloadReadBuffer.Reset()
 			},
 			"PARSE_TIMEOUT": func(e *fsm.Event) {
-				event := &FrameParseEvent{
-					status: FrameParseTimeout,
+				event := &ParseEvent{
+					status: ParseTimeout,
 					frame:  Frame{},
 				}
 
 				go func() {
-					frameParser.framesReceived <- event
+					parser.framesReceived <- event
 				}()
 			},
 			"RX_ACK": func(e *fsm.Event) {
-				frameParser.acks <- true
+				parser.acks <- true
 			},
 			"RX_NAK": func(e *fsm.Event) {
-				frameParser.naks <- true
+				parser.naks <- true
 			},
 			"RX_CAN": func(e *fsm.Event) {
-				frameParser.cans <- true
+				parser.cans <- true
 			},
 			"RX_SOF": func(e *fsm.Event) {
-				frameParser.sof = e.Args[0].(byte)
-				frameParser.parseTimeout.Reset(readTimeout)
+				parser.sof = e.Args[0].(byte)
+				parser.parseTimeout.Reset(readTimeout)
 			},
 			"RX_LENGTH": func(e *fsm.Event) {
-				frameParser.length = e.Args[0].(byte)
-				frameParser.readCounter = frameParser.length - 2
+				parser.length = e.Args[0].(byte)
+				parser.readCounter = parser.length - 2
 			},
 			"RX_DATA": func(e *fsm.Event) {
-				frameParser.payloadReadBuffer.WriteByte(e.Args[0].(byte))
-				frameParser.readCounter--
+				parser.payloadReadBuffer.WriteByte(e.Args[0].(byte))
+				parser.readCounter--
 			},
 			"checksum": func(e *fsm.Event) {
 				e.Async()
 			},
 			"CRC_OK": func(e *fsm.Event) {
-				event := &FrameParseEvent{
-					status: FrameParseOk,
+				event := &ParseEvent{
+					status: ParseOk,
 					frame:  e.Args[0].(Frame),
 				}
 
 				go func() {
-					frameParser.framesReceived <- event
+					parser.framesReceived <- event
 				}()
 			},
 			"CRC_NOTOK": func(e *fsm.Event) {
-				event := &FrameParseEvent{
-					status: FrameParseNotOk,
+				event := &ParseEvent{
+					status: ParseNotOk,
 					frame:  e.Args[0].(Frame),
 				}
 
 				go func() {
-					frameParser.framesReceived <- event
+					parser.framesReceived <- event
 				}()
 			},
 			// "before_event": func(e *fsm.Event) {
@@ -134,70 +134,70 @@ func NewFrameParser(input <-chan byte, output chan<- *FrameParseEvent, acks, nak
 		},
 	)
 
-	go frameParser.parse()
+	go parser.parse()
 
-	return frameParser
+	return parser
 }
 
-func (parser *FrameParser) parse() {
+func (p *Parser) parse() {
 	for {
 		select {
-		case <-parser.parseTimeout.C:
-			parser.state.Event("PARSE_TIMEOUT")
+		case <-p.parseTimeout.C:
+			p.state.Event("PARSE_TIMEOUT")
 
-		case currentByte := <-parser.input:
-			parser.processByte(currentByte)
+		case currentByte := <-p.input:
+			p.processByte(currentByte)
 		}
 	}
 }
 
-func (parser *FrameParser) processByte(currentByte byte) {
+func (p *Parser) processByte(currentByte byte) {
 	switch {
 
-	case parser.state.Is("idle"):
+	case p.state.Is("idle"):
 		switch currentByte {
-		case FrameHeaderData:
-			parser.state.Event("RX_SOF", currentByte)
-		case FrameHeaderAck:
-			parser.state.Event("RX_ACK", currentByte)
-		case FrameHeaderCan:
-			parser.state.Event("RX_CAN", currentByte)
-		case FrameHeaderNak:
-			parser.state.Event("RX_NAK", currentByte)
+		case HeaderData:
+			p.state.Event("RX_SOF", currentByte)
+		case HeaderAck:
+			p.state.Event("RX_ACK", currentByte)
+		case HeaderCan:
+			p.state.Event("RX_CAN", currentByte)
+		case HeaderNak:
+			p.state.Event("RX_NAK", currentByte)
 		}
 
-	case parser.state.Is("length"):
+	case p.state.Is("length"):
 		if currentByte < minFrameSize || currentByte > maxFrameSize {
-			parser.state.Event("INVALID_LENGTH")
+			p.state.Event("INVALID_LENGTH")
 		} else {
-			parser.state.Event("RX_LENGTH", currentByte)
+			p.state.Event("RX_LENGTH", currentByte)
 		}
 
-	case parser.state.Is("data"):
-		if parser.readCounter > 0 {
-			parser.state.Event("RX_DATA", currentByte)
+	case p.state.Is("data"):
+		if p.readCounter > 0 {
+			p.state.Event("RX_DATA", currentByte)
 		} else {
-			parser.state.Event("RX_DATA", currentByte)
-			parser.state.Event("RX_DATA_COMPLETE")
+			p.state.Event("RX_DATA", currentByte)
+			p.state.Event("RX_DATA_COMPLETE")
 		}
 
-	case parser.state.Is("data_complete"):
-		parser.state.Event("RX_CHECKSUM", currentByte)
-		parser.state.Transition()
+	case p.state.Is("data_complete"):
+		p.state.Event("RX_CHECKSUM", currentByte)
+		p.state.Transition()
 
-		payload := parser.payloadReadBuffer.Bytes()
+		payload := p.payloadReadBuffer.Bytes()
 		frame := Frame{
-			Header:   parser.sof,
-			Length:   parser.length,
+			Header:   p.sof,
+			Length:   p.length,
 			Type:     payload[0],
 			Payload:  payload[1:],
 			Checksum: currentByte,
 		}
 
 		if frame.VerifyChecksum() == nil {
-			parser.state.Event("CRC_OK", frame)
+			p.state.Event("CRC_OK", frame)
 		} else {
-			parser.state.Event("CRC_NOTOK", frame)
+			p.state.Event("CRC_NOTOK", frame)
 		}
 
 	}

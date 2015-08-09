@@ -4,7 +4,7 @@ import "github.com/helioslabs/gozw/zwave/protocol"
 
 type ControllerUpdate struct {
 	Status         byte
-	NodeId         byte
+	NodeID         byte
 	Length         byte
 	Basic          byte
 	Generic        byte
@@ -15,7 +15,7 @@ type ControllerUpdate struct {
 func parseControllerUpdate(payload []byte) ControllerUpdate {
 	val := ControllerUpdate{
 		Status: payload[1],
-		NodeId: payload[2],
+		NodeID: payload[2],
 		Length: payload[3],
 	}
 
@@ -52,11 +52,11 @@ func (a *ControllerUpdate) GetStatusString() string {
 		return "Node Info Req Failed"
 	case protocol.UpdateStateRoutingPending:
 		return "Routing Pending"
-	case protocol.UpdateStateNewIdAssigned:
+	case protocol.UpdateStateNewIDAssigned:
 		return "New ID Assigned"
 	case protocol.UpdateStateDeleteDone:
 		return "Delete Done"
-	case protocol.UpdateStateSucId:
+	case protocol.UpdateStateSucID:
 		return "Update SUC ID"
 	default:
 		return "Unknown"

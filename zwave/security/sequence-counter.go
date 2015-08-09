@@ -23,25 +23,25 @@ func NewSequenceCounter() *SequenceCounter {
 	}
 }
 
-func (s *SequenceCounter) Get(nodeId byte) (counter byte) {
+func (s *SequenceCounter) Get(nodeID byte) (counter byte) {
 	var ok bool
 
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	defer runtime.Gosched()
 
-	if counter, ok = s.counters[nodeId]; !ok {
-		s.counters[nodeId] = SecuritySequenceCounterMin
+	if counter, ok = s.counters[nodeID]; !ok {
+		s.counters[nodeID] = SecuritySequenceCounterMin
 		return SecuritySequenceCounterMin
 	}
 
 	if counter+1 > SecuritySequenceCounterMax {
 		counter = SecuritySequenceCounterMin
 	} else {
-		counter += 1
+		counter++
 	}
 
-	s.counters[nodeId] = counter
+	s.counters[nodeID] = counter
 
 	return
 }

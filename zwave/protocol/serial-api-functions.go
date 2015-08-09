@@ -1,13 +1,13 @@
 package protocol
 
 const (
-	FnSerialApiGetInitAppData             byte = 0x02
-	FnSerialApiApplicationNodeInformation      = 0x03
+	FnSerialAPIGetInitAppData             byte = 0x02
+	FnSerialAPIApplicationNodeInformation      = 0x03
 	FnApplicationCommandHandler                = 0x04
 	FnGetControllerCapabilities                = 0x05
-	FnSerialApiGetTimeouts                     = 0x06
-	FnSerialApiGetCapabilities                 = 0x07
-	FnSerialApiSoftReset                       = 0x08
+	FnSerialAPIGetTimeouts                     = 0x06
+	FnSerialAPIGetCapabilities                 = 0x07
+	FnSerialAPISoftReset                       = 0x08
 	FnGetProtocolVersion                       = 0x09
 	FnSendNodeInformation                      = 0x12
 	FnSendData                                 = 0x13
@@ -18,7 +18,7 @@ const (
 	FnSendDataMeta                             = 0x18
 	FnSetRoutingInfo                           = 0x1B
 	FnRFPowerLevelRediscoverySet               = 0x1E
-	FnMemoryGetId                              = 0x20
+	FnMemoryGetID                              = 0x20
 	FnGetNodeProtocolInfo                      = 0x41
 	FnSetDefault                               = 0x42
 	FnAssignReturnRoute                        = 0x46
@@ -53,9 +53,9 @@ const (
 	UpdateStateNodeInfoReqDone        = 0x82
 	UpdateStateNodeInfoReqFailed      = 0x81
 	UpdateStateRoutingPending         = 0x80
-	UpdateStateNewIdAssigned          = 0x40
+	UpdateStateNewIDAssigned          = 0x40
 	UpdateStateDeleteDone             = 0x20
-	UpdateStateSucId                  = 0x10
+	UpdateStateSucID                  = 0x10
 )
 
 const (

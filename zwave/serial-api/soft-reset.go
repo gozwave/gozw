@@ -9,10 +9,10 @@ import (
 
 // WARNING: This can (and often will) cause the device to get a new USB address,
 // rendering the serial port's file descriptor invalid.
-func (s *SerialAPILayer) SoftReset() {
+func (s *Layer) SoftReset() {
 
 	request := &session.Request{
-		FunctionId: protocol.FnSerialApiSoftReset,
+		FunctionID: protocol.FnSerialAPISoftReset,
 		HasReturn:  false,
 	}
 

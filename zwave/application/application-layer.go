@@ -6,40 +6,59 @@ import (
 	"time"
 
 	"github.com/asaskevich/EventBus"
+	"github.com/boltdb/bolt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/helioslabs/gozw/zwave/command-class"
 	"github.com/helioslabs/gozw/zwave/protocol"
 	"github.com/helioslabs/gozw/zwave/security"
 	"github.com/helioslabs/gozw/zwave/serial-api"
-	"github.com/boltdb/bolt"
-	"github.com/davecgh/go-spew/spew"
 )
 
-// @todo should probably be 60 seconds, but 30 is easier for dev
-const MaxSecureInclusionDuration = time.Second * 30
+// MaxSecureInclusionDuration is the timeout for secure inclusion mode. If this
+// timeout expires, secure inclusion will be canceled no matter how far the
+// process has proceeded.
+const MaxSecureInclusionDuration = time.Second * 60
 
-// Note: always use the smallest size based on the options
-// @todo: also, implement the ability to use different options
+// Maximum possible size (in bytes) of the plaintext payload to be sent when
+// sending a secure frame, based on the SendData options. The smallest possible
+// must be used based on the given option bitset (e.g. if using both no route
+// and explore, the maximum size is 26).
 const (
 	SecurePayloadMaxSizeExplore   = 26 // in bytes
 	SecurePayloadMaxSizeAutoRoute = 28
 	SecurePayloadMaxSizeNoRoute   = 34
 )
 
-const (
-	SecuritySequenceSequencedFlag   byte = 0x10
-	SecuritySequenceSecondFrameFlag      = 0x20
-	SecuritySequenceCounterMask          = 0x0f
-)
+// These are used in the security message encapsulation command to indicate how
+// the message is sequenced.
+// const (
+// 	// securitySequenceSequencedFlag indicates that the message is sequenced if set.
+// 	securitySequenceSequencedFlag byte = 0x10
+//
+// 	// securitySequenceSecondFrameFlag indicates that the message is the second in
+// 	// the sequence if set.
+// 	securitySequenceSecondFrameFlag = 0x20
+//
+// 	// securitySequenceCounterMask masks the non-counter bytes from the sequence
+// 	// counter in the security byte
+// 	securitySequenceCounterMask = 0x0f
+// )
 
-type ApplicationLayer struct {
-	ApiVersion     string
-	ApiLibraryType string
+// Layer is the top-level controlling layer for the Z-Wave network. It maintains
+// information about the controller itself, as well as a list of network nodes.
+// It is responsible for routing messages between the Z-Wave controller and the
+// in-memory representations of network nodes. This involves coordinating Z-Wave
+// security functions (encrypting/decrypting messages, fetching nonces, etc.)
+// and interaction with the Serial API layer.
+type Layer struct {
+	APIVersion     string
+	APILibraryType string
 
-	HomeId uint32
-	NodeId byte
+	HomeID uint32
+	NodeID byte
 
 	Version             byte
-	ApiType             string
+	APIType             string
 	IsPrimaryController bool
 	ApplicationVersion  byte
 	ApplicationRevision byte
@@ -47,8 +66,8 @@ type ApplicationLayer struct {
 
 	NodeList []byte
 
-	serialApi     serialapi.ISerialAPILayer
-	securityLayer security.ISecurityLayer
+	serialAPI     serialapi.ILayer
+	securityLayer security.ILayer
 	networkKey    []byte
 	nodes         map[byte]*Node
 
@@ -60,9 +79,9 @@ type ApplicationLayer struct {
 	secureInclusionStep map[byte]chan error
 }
 
-func NewApplicationLayer(serialApi serialapi.ISerialAPILayer) (app *ApplicationLayer, err error) {
-	app = &ApplicationLayer{
-		serialApi: serialApi,
+func NewApplicationLayer(serialAPI serialapi.ILayer) (app *Layer, err error) {
+	app = &Layer{
+		serialAPI: serialAPI,
 		nodes:     map[byte]*Node{},
 
 		EventBus: EventBus.New(),
@@ -81,7 +100,7 @@ func NewApplicationLayer(serialApi serialapi.ISerialAPILayer) (app *ApplicationL
 	}
 
 	app.networkKey = networkKey
-	app.securityLayer = security.NewSecurityLayer(networkKey)
+	app.securityLayer = security.NewLayer(networkKey)
 
 	go app.handleApplicationCommands()
 	go app.handleControllerUpdates()
@@ -91,19 +110,19 @@ func NewApplicationLayer(serialApi serialapi.ISerialAPILayer) (app *ApplicationL
 	return
 }
 
-func (a *ApplicationLayer) Nodes() map[byte]*Node {
+func (a *Layer) Nodes() map[byte]*Node {
 	return a.nodes
 }
 
-func (a *ApplicationLayer) Node(nodeId byte) (*Node, error) {
-	if node, ok := a.nodes[nodeId]; ok {
+func (a *Layer) Node(nodeID byte) (*Node, error) {
+	if node, ok := a.nodes[nodeID]; ok {
 		return node, nil
 	}
 
 	return nil, errors.New("Node not found")
 }
 
-func (a *ApplicationLayer) initDb() (err error) {
+func (a *Layer) initDb() (err error) {
 	a.db, err = bolt.Open("data.db", 0600, &bolt.Options{})
 	if err != nil {
 		return
@@ -126,7 +145,7 @@ func (a *ApplicationLayer) initDb() (err error) {
 	return err
 }
 
-func (a *ApplicationLayer) initNetworkKey() ([]byte, error) {
+func (a *Layer) initNetworkKey() ([]byte, error) {
 	var networkKey []byte
 
 	err := a.db.View(func(tx *bolt.Tx) error {
@@ -155,59 +174,59 @@ func (a *ApplicationLayer) initNetworkKey() ([]byte, error) {
 	return networkKey, nil
 }
 
-func (a *ApplicationLayer) initZWave() error {
-	version, err := a.serialApi.GetVersion()
+func (a *Layer) initZWave() error {
+	version, err := a.serialAPI.GetVersion()
 	if err != nil {
 		return err
 	}
 
-	a.ApiVersion = version.Version
-	a.ApiLibraryType = version.GetLibraryTypeString()
+	a.APIVersion = version.Version
+	a.APILibraryType = version.GetLibraryTypeString()
 
-	a.HomeId, a.NodeId, err = a.serialApi.MemoryGetId()
+	a.HomeID, a.NodeID, err = a.serialAPI.MemoryGetID()
 	if err != nil {
 		return err
 	}
 
-	serialApiCapabilities, err := a.serialApi.GetSerialApiCapabilities()
+	serialAPICapabilities, err := a.serialAPI.GetSerialAPICapabilities()
 	if err != nil {
 		return err
 	}
 
-	a.ApplicationVersion = serialApiCapabilities.ApplicationVersion
-	a.ApplicationRevision = serialApiCapabilities.ApplicationRevision
-	a.SupportedFunctions = serialApiCapabilities.GetSupportedFunctions()
+	a.ApplicationVersion = serialAPICapabilities.ApplicationVersion
+	a.ApplicationRevision = serialAPICapabilities.ApplicationRevision
+	a.SupportedFunctions = serialAPICapabilities.GetSupportedFunctions()
 
-	initData, err := a.serialApi.GetInitAppData()
+	initData, err := a.serialAPI.GetInitAppData()
 	if err != nil {
 		return err
 	}
 
 	a.Version = initData.Version
-	a.ApiType = initData.GetApiType()
+	a.APIType = initData.GetAPIType()
 	a.IsPrimaryController = initData.IsPrimaryController()
-	a.NodeList = initData.GetNodeIds()
+	a.NodeList = initData.GetNodeIDs()
 
-	for _, nodeId := range a.NodeList {
-		node, err := NewNode(a, nodeId)
+	for _, nodeID := range a.NodeList {
+		node, err := NewNode(a, nodeID)
 
 		if err != nil {
 			spew.Dump(err)
 			continue
 		}
 
-		a.nodes[nodeId] = node
+		a.nodes[nodeID] = node
 	}
 
 	return nil
 }
 
-func (a *ApplicationLayer) Shutdown() error {
+func (a *Layer) Shutdown() error {
 	return a.db.Close()
 }
 
-func (a *ApplicationLayer) AddNode() (*Node, error) {
-	newNodeInfo, err := a.serialApi.AddNode()
+func (a *Layer) AddNode() (*Node, error) {
+	newNodeInfo, err := a.serialAPI.AddNode()
 	if err != nil {
 		return nil, err
 	}
@@ -222,11 +241,11 @@ func (a *ApplicationLayer) AddNode() (*Node, error) {
 	}
 
 	node.setFromAddNodeCallback(newNodeInfo)
-	a.nodes[node.NodeId] = node
+	a.nodes[node.NodeID] = node
 
 	if node.IsSecure() {
 		fmt.Println("Starting secure inclusion")
-		err = a.includeSecureNode(node.NodeId)
+		err = a.includeSecureNode(node.NodeID)
 		if err != nil {
 			return nil, err
 		}
@@ -251,8 +270,8 @@ func (a *ApplicationLayer) AddNode() (*Node, error) {
 	return node, nil
 }
 
-func (a *ApplicationLayer) RemoveNode() (byte, error) {
-	result, err := a.serialApi.RemoveNode()
+func (a *Layer) RemoveNode() (byte, error) {
+	result, err := a.serialAPI.RemoveNode()
 
 	if err != nil {
 		return 0, err
@@ -273,30 +292,30 @@ func (a *ApplicationLayer) RemoveNode() (byte, error) {
 	return result.Source, nil
 }
 
-func (a *ApplicationLayer) RemoveFailedNode(nodeId byte) (ok bool, err error) {
-	ok, err = a.serialApi.RemoveFailedNode(nodeId)
+func (a *Layer) RemoveFailedNode(nodeID byte) (ok bool, err error) {
+	ok, err = a.serialAPI.RemoveFailedNode(nodeID)
 
 	if ok && err != nil {
 		err = a.db.Update(func(tx *bolt.Tx) error {
-			return tx.Bucket([]byte("nodes")).Delete([]byte{nodeId})
+			return tx.Bucket([]byte("nodes")).Delete([]byte{nodeID})
 		})
 	}
 
 	return
 }
 
-func (a *ApplicationLayer) handleApplicationCommands() {
-	for cmd := range a.serialApi.ControllerCommands() {
+func (a *Layer) handleApplicationCommands() {
+	for cmd := range a.serialAPI.ControllerCommands() {
 		switch cmd.CommandData[0] {
 
 		case commandclass.CommandClassSecurity:
 			a.handleSecurityCommand(cmd)
 
 		default:
-			if node, err := a.Node(cmd.SrcNodeId); err == nil {
+			if node, err := a.Node(cmd.SrcNodeID); err == nil {
 				go node.receiveApplicationCommand(cmd)
 			} else {
-				fmt.Println("Received command for unknown node", cmd.SrcNodeId)
+				fmt.Println("Received command for unknown node", cmd.SrcNodeID)
 			}
 
 		}
@@ -304,14 +323,14 @@ func (a *ApplicationLayer) handleApplicationCommands() {
 	}
 }
 
-func (a *ApplicationLayer) handleControllerUpdates() {
-	for update := range a.serialApi.ControllerUpdates() {
+func (a *Layer) handleControllerUpdates() {
+	for update := range a.serialAPI.ControllerUpdates() {
 
 		switch update.Status {
 
 		case protocol.UpdateStateNodeInfoReceived,
 			protocol.UpdateStateNodeInfoReqFailed:
-			if node, ok := a.nodes[update.NodeId]; ok {
+			if node, ok := a.nodes[update.NodeID]; ok {
 				node.receiveControllerUpdate(update)
 			} else {
 				fmt.Println("controller update:", spew.Sdump(update))
@@ -325,20 +344,20 @@ func (a *ApplicationLayer) handleControllerUpdates() {
 	}
 }
 
-func (a *ApplicationLayer) SendData(dstNode byte, payload []byte) error {
-	_, err := a.serialApi.SendData(dstNode, payload)
+func (a *Layer) SendData(dstNode byte, payload []byte) error {
+	_, err := a.serialAPI.SendData(dstNode, payload)
 	return err
 }
 
 // SendDataSecure encapsulates payload in a security encapsulation command and
 // sends it to the destination node.
-func (a *ApplicationLayer) SendDataSecure(dstNode byte, payload []byte) error {
+func (a *Layer) SendDataSecure(dstNode byte, payload []byte) error {
 	// This function wraps the private sendDataSecure because no external packages
 	// should ever call this while in inclusion mode (and doing so would be incorrect)
 	return a.sendDataSecure(dstNode, payload, false)
 }
 
-func (a *ApplicationLayer) requestNonceForNode(dstNode byte) (security.Nonce, error) {
+func (a *Layer) requestNonceForNode(dstNode byte) (security.Nonce, error) {
 	err := a.SendData(dstNode, commandclass.NewSecurityNonceGet())
 
 	if err != nil {
@@ -348,7 +367,7 @@ func (a *ApplicationLayer) requestNonceForNode(dstNode byte) (security.Nonce, er
 	return a.securityLayer.WaitForExternalNonce(dstNode)
 }
 
-func (a *ApplicationLayer) getOrRequestNonceForNode(dstNode byte) (nonce security.Nonce, err error) {
+func (a *Layer) getOrRequestNonceForNode(dstNode byte) (nonce security.Nonce, err error) {
 	if nonce, err = a.securityLayer.GetExternalNonce(dstNode); err == nil {
 		return nonce, nil
 	}
@@ -366,7 +385,7 @@ func (a *ApplicationLayer) getOrRequestNonceForNode(dstNode byte) (nonce securit
 	return nonce, err
 }
 
-func (a *ApplicationLayer) sendDataSecure(dstNode byte, payload []byte, inclusionMode bool) error {
+func (a *Layer) sendDataSecure(dstNode byte, payload []byte, inclusionMode bool) error {
 	// Previously, this function would just split and prepare the payload based on
 	// whether it should be split after figuring out whether to segment. For now,
 	// we're just going to assume that we will never have to worry about segmenting.
@@ -385,7 +404,7 @@ func (a *ApplicationLayer) sendDataSecure(dstNode byte, payload []byte, inclusio
 		return err
 	}
 
-	var securityByte byte = 0
+	var securityByte byte
 	// var securityByte byte = sequenceCounter & SecuritySequenceCounterMask
 	// if sequenced {
 	// 	securityByte |= SecuritySequenceSequencedFlag
@@ -409,15 +428,15 @@ func (a *ApplicationLayer) sendDataSecure(dstNode byte, payload []byte, inclusio
 	return a.SendData(dstNode, encapsulatedMessage)
 }
 
-func (a *ApplicationLayer) includeSecureNode(nodeId byte) error {
-	a.secureInclusionStep[nodeId] = make(chan error)
-	a.SendData(nodeId, commandclass.NewSecuritySchemeGet())
+func (a *Layer) includeSecureNode(nodeID byte) error {
+	a.secureInclusionStep[nodeID] = make(chan error)
+	a.SendData(nodeID, commandclass.NewSecuritySchemeGet())
 
-	defer close(a.secureInclusionStep[nodeId])
-	defer delete(a.secureInclusionStep, nodeId)
+	defer close(a.secureInclusionStep[nodeID])
+	defer delete(a.secureInclusionStep, nodeID)
 
 	select {
-	case err := <-a.secureInclusionStep[nodeId]:
+	case err := <-a.secureInclusionStep[nodeID]:
 		if err != nil {
 			return err
 		}
@@ -426,20 +445,20 @@ func (a *ApplicationLayer) includeSecureNode(nodeId byte) error {
 	}
 
 	a.sendDataSecure(
-		nodeId,
+		nodeID,
 		commandclass.NewSecurityNetworkKeySet(a.networkKey),
 		true,
 	)
 
 	select {
-	case err := <-a.secureInclusionStep[nodeId]:
+	case err := <-a.secureInclusionStep[nodeID]:
 		return err
 	case <-time.After(time.Second * 20):
 		return errors.New("Secure inclusion timeout")
 	}
 }
 
-func (a *ApplicationLayer) handleSecurityCommand(cmd serialapi.ApplicationCommand) {
+func (a *Layer) handleSecurityCommand(cmd serialapi.ApplicationCommand) {
 	switch cmd.CommandData[1] {
 
 	case commandclass.CommandSecurityMessageEncapsulation, commandclass.CommandSecurityMessageEncapsulationNonceGet:
@@ -464,17 +483,17 @@ func (a *ApplicationLayer) handleSecurityCommand(cmd serialapi.ApplicationComman
 		}
 
 		if msg[0] == commandclass.CommandClassSecurity && msg[1] == commandclass.CommandNetworkKeyVerify {
-			if ch, ok := a.secureInclusionStep[cmd.SrcNodeId]; ok {
+			if ch, ok := a.secureInclusionStep[cmd.SrcNodeID]; ok {
 				ch <- nil
 			}
 			return
 		}
 
-		if node, ok := a.nodes[cmd.SrcNodeId]; ok {
+		if node, ok := a.nodes[cmd.SrcNodeID]; ok {
 			cmd.CommandData = msg
 			go node.receiveApplicationCommand(cmd)
 		} else {
-			fmt.Println("Received secure command for unknown node", cmd.SrcNodeId)
+			fmt.Println("Received secure command for unknown node", cmd.SrcNodeID)
 		}
 
 	case commandclass.CommandSecurityNonceGet:
@@ -484,14 +503,14 @@ func (a *ApplicationLayer) handleSecurityCommand(cmd serialapi.ApplicationComman
 		}
 
 		reply := commandclass.NewSecurityNonceReport(nonce)
-		a.SendData(cmd.SrcNodeId, reply)
+		a.SendData(cmd.SrcNodeID, reply)
 
 	case commandclass.CommandSecurityNonceReport:
 		nonceReport := commandclass.ParseSecurityNonceReport(cmd.CommandData)
-		a.securityLayer.ReceiveNonce(cmd.SrcNodeId, nonceReport)
+		a.securityLayer.ReceiveNonce(cmd.SrcNodeID, nonceReport)
 
 	case commandclass.CommandSecuritySchemeReport:
-		if ch, ok := a.secureInclusionStep[cmd.SrcNodeId]; ok {
+		if ch, ok := a.secureInclusionStep[cmd.SrcNodeID]; ok {
 			ch <- nil
 		}
 

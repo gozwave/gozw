@@ -16,14 +16,14 @@ import (
 )
 
 func main() {
-	transport, err := transport.NewSerialTransportLayer("/tmp/usbmodem", 115200)
+	transport, err := transport.NewSerialPortTransport("/tmp/usbmodem", 115200)
 	if err != nil {
 		panic(err)
 	}
 
 	frameLayer := frame.NewFrameLayer(transport)
 	sessionLayer := session.NewSessionLayer(frameLayer)
-	apiLayer := serialapi.NewSerialAPILayer(sessionLayer)
+	apiLayer := serialapi.NewLayer(sessionLayer)
 	appLayer, err := application.NewApplicationLayer(apiLayer)
 	if err != nil {
 		panic(err)
@@ -282,11 +282,11 @@ func main() {
 			nodeId, _ := strconv.Atoi(input)
 			spew.Dump(appLayer.RemoveFailedNode(byte(nodeId)))
 		case "p":
-			fmt.Printf("Home ID: 0x%x; Node ID: %d\n", appLayer.HomeId, appLayer.NodeId)
-			fmt.Println("API Version:", appLayer.ApiVersion)
-			fmt.Println("Library:", appLayer.ApiLibraryType)
+			fmt.Printf("Home ID: 0x%x; Node ID: %d\n", appLayer.HomeID, appLayer.NodeID)
+			fmt.Println("API Version:", appLayer.APIVersion)
+			fmt.Println("Library:", appLayer.APILibraryType)
 			fmt.Println("Version:", appLayer.Version)
-			fmt.Println("API Type:", appLayer.ApiType)
+			fmt.Println("API Type:", appLayer.APIType)
 			fmt.Println("Is Primary Controller:", appLayer.IsPrimaryController)
 			fmt.Println("Node count:", len(appLayer.Nodes()))
 

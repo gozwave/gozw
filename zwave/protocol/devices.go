@@ -9,7 +9,7 @@ const (
 	BasicTypeRoutingSlave          = 0x04
 )
 
-var BasicTypeNames map[byte]string = map[byte]string{
+var BasicTypeNames = map[byte]string{
 	BasicTypeController:       "Controller",
 	BasicTypeStaticController: "Static Controller",
 	BasicTypeSlave:            "Slave",
@@ -45,7 +45,7 @@ const (
 	GenericTypeNonInteroperable        = 0xFF
 )
 
-var GenericTypeNames map[byte]string = map[byte]string{
+var GenericTypeNames = map[byte]string{
 	GenericTypeGenericController:  "Generic Controller",
 	GenericTypeStaticController:   "Static Controller",
 	GenericTypeAVControlPoint:     "AV Control Point",
@@ -184,7 +184,7 @@ const (
 	SpecificTypeNotificationSensor = 0x01
 )
 
-var SpecificTypeNames map[byte]map[byte]string = map[byte]map[byte]string{
+var SpecificTypeNames = map[byte]map[byte]string{
 	GenericTypeAVControlPoint: map[byte]string{
 		SpecificTypeNotUsed:             "Unspecified",
 		SpecificTypeDoorbell:            "Doorbell",
@@ -350,23 +350,23 @@ var SpecificTypeNames map[byte]map[byte]string = map[byte]map[byte]string{
 func GetBasicDeviceTypeName(basicType byte) string {
 	if val, ok := BasicTypeNames[basicType]; ok {
 		return val + fmt.Sprintf(" (0x%X)", basicType)
-	} else {
-		return "Unknown" + fmt.Sprintf(" (0x%X)", basicType)
 	}
+
+	return "Unknown" + fmt.Sprintf(" (0x%X)", basicType)
 }
 
 func GetGenericDeviceTypeName(genericType byte) string {
 	if val, ok := GenericTypeNames[genericType]; ok {
 		return val + fmt.Sprintf(" (0x%X)", genericType)
-	} else {
-		return "Unknown" + fmt.Sprintf(" (0x%X)", genericType)
 	}
+
+	return "Unknown" + fmt.Sprintf(" (0x%X)", genericType)
 }
 
 func GetSpecificDeviceTypeName(genericType byte, specificType byte) string {
 	if val, ok := SpecificTypeNames[genericType][specificType]; ok {
 		return val + fmt.Sprintf(" (0x%X)", specificType)
-	} else {
-		return "Unknown" + fmt.Sprintf(" (0x%X)", specificType)
 	}
+
+	return "Unknown" + fmt.Sprintf(" (0x%X)", specificType)
 }

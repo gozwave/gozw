@@ -15,16 +15,28 @@ import (
 	"github.com/helioslabs/proto"
 )
 
+// CommandClassSupport defines a node's support level for a command class
 type CommandClassSupport int
 
 const (
+	// CommandClassNotSupported indicates that the command class is not supported
+	// at all
 	CommandClassNotSupported CommandClassSupport = iota
+
+	// CommandClassSupportedInsecure indicates that the command class is supported
+	// regardless of the security environment. The node may or may not be incldued
+	// securely, and the command may or may not be sent securely.
 	CommandClassSupportedInsecure
+
+	// CommandClassSupportedSecure indicates that the command class is only
+	// supported through Z-Wave security. The node *MUST* be securely included
+	// in order to use this command class.
 	CommandClassSupportedSecure
 )
 
+// Node is an in-memory representation of a Z-Wave node
 type Node struct {
-	NodeId byte
+	NodeID byte
 
 	Capability          byte
 	BasicDeviceClass    byte
@@ -46,14 +58,14 @@ type Node struct {
 	ProductTypeID  uint16
 	ProductID      uint16
 
-	application          *ApplicationLayer
+	application          *Layer
 	receivedUpdate       chan bool
 	receivedSecurityInfo chan bool
 }
 
-func NewNode(application *ApplicationLayer, nodeId byte) (*Node, error) {
+func NewNode(application *Layer, nodeID byte) (*Node, error) {
 	node := &Node{
-		NodeId: nodeId,
+		NodeID: nodeID,
 
 		SupportedCommandClasses:        map[byte]bool{},
 		SecureSupportedCommandClasses:  map[byte]bool{},
@@ -99,7 +111,7 @@ func (n *Node) loadFromDb() error {
 	var data []byte
 	err := n.application.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("nodes"))
-		data = bucket.Get([]byte{n.NodeId})
+		data = bucket.Get([]byte{n.NodeID})
 
 		if len(data) == 0 {
 			return errors.New("Node not found")
@@ -121,18 +133,18 @@ func (n *Node) loadFromDb() error {
 }
 
 func (n *Node) initialize() error {
-	nodeInfo, err := n.application.serialApi.GetNodeProtocolInfo(n.NodeId)
+	nodeInfo, err := n.application.serialAPI.GetNodeProtocolInfo(n.NodeID)
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		n.setFromNodeProtocolInfo(nodeInfo)
 	}
 
-	if n.NodeId == 1 {
+	if n.NodeID == 1 {
 		// self is never failing
 		n.Failing = false
 	} else {
-		failing, err := n.application.serialApi.IsFailedNode(n.NodeId)
+		failing, err := n.application.serialAPI.IsFailedNode(n.NodeID)
 		if err != nil {
 			fmt.Println(err)
 			return nil
@@ -156,7 +168,7 @@ func (n *Node) saveToDb() error {
 
 	return n.application.db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("nodes"))
-		return bucket.Put([]byte{n.NodeId}, data)
+		return bucket.Put([]byte{n.NodeID}, data)
 	})
 }
 
@@ -232,9 +244,9 @@ func (n *Node) SupportsCommandClass(commandClass byte) CommandClassSupport {
 	return CommandClassNotSupported
 }
 
-func (n *Node) AddAssociation(groupId byte, nodeIds ...byte) error {
+func (n *Node) AddAssociation(groupID byte, nodeIDs ...byte) error {
 	// sort of an arbitrary limit for now, but I'm not sure what it should be
-	if len(nodeIds) > 20 {
+	if len(nodeIDs) > 20 {
 		return errors.New("Too many associated nodes")
 	}
 
@@ -243,7 +255,7 @@ func (n *Node) AddAssociation(groupId byte, nodeIds ...byte) error {
 	return n.SendCommand(
 		commandclass.CommandClassAssociation,
 		commandclass.AssociationSet,
-		append([]byte{groupId}, nodeIds...)...,
+		append([]byte{groupID}, nodeIDs...)...,
 	)
 }
 
@@ -255,11 +267,11 @@ func (n *Node) RequestSupportedSecurityCommands() error {
 }
 
 func (n *Node) RequestNodeInformationFrame() error {
-	return n.application.serialApi.RequestNodeInfo(n.NodeId)
+	return n.application.serialAPI.RequestNodeInfo(n.NodeID)
 }
 
 func (n *Node) LoadCommandClassVersions() error {
-	for cc, _ := range n.SupportedCommandClasses {
+	for cc := range n.SupportedCommandClasses {
 		time.Sleep(1 * time.Second)
 		err := n.sendData([]byte{
 			commandclass.CommandClassVersion,
@@ -272,7 +284,7 @@ func (n *Node) LoadCommandClassVersions() error {
 		}
 	}
 
-	for cc, _ := range n.SecureSupportedCommandClasses {
+	for cc := range n.SecureSupportedCommandClasses {
 		err := n.sendDataSecure([]byte{
 			commandclass.CommandClassVersion,
 			commandclass.CommandVersionCommandClassGet,
@@ -297,18 +309,18 @@ func (n *Node) LoadManufacturerInfo() error {
 func (n *Node) emitNodeEvent(event interface{}) {
 	n.application.EventBus.Publish("event", proto.Event{
 		Payload: proto.NodeEvent{
-			NodeId: n.NodeId,
+			NodeId: n.NodeID,
 			Event:  event,
 		},
 	})
 }
 
 func (n *Node) sendData(payload []byte) error {
-	return n.application.SendData(n.NodeId, payload)
+	return n.application.SendData(n.NodeID, payload)
 }
 
 func (n *Node) sendDataSecure(payload []byte) error {
-	return n.application.SendDataSecure(n.NodeId, payload)
+	return n.application.SendDataSecure(n.NodeID, payload)
 }
 
 func (n *Node) receiveControllerUpdate(update serialapi.ControllerUpdate) {
@@ -348,7 +360,7 @@ func (n *Node) receiveControllerUpdate(update serialapi.ControllerUpdate) {
 // }
 
 func (n *Node) setFromAddNodeCallback(nodeInfo *serialapi.AddRemoveNodeCallback) {
-	n.NodeId = nodeInfo.Source
+	n.NodeID = nodeInfo.Source
 	n.BasicDeviceClass = nodeInfo.Basic
 	n.GenericDeviceClass = nodeInfo.Generic
 	n.SpecificDeviceClass = nodeInfo.Specific
@@ -414,9 +426,9 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 
 	case commandclass.CommandClassBattery:
 		if cmd.CommandData[2] == 0xFF {
-			fmt.Printf("Node %d: low battery alert\n", n.NodeId)
+			fmt.Printf("Node %d: low battery alert\n", n.NodeID)
 		} else {
-			fmt.Printf("Node %d: battery level is %d\n", n.NodeId, cmd.CommandData[2])
+			fmt.Printf("Node %d: battery level is %d\n", n.NodeID, cmd.CommandData[2])
 		}
 
 	case commandclass.CommandClassAlarm:
@@ -499,12 +511,12 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 		n.saveToDb()
 
 	default:
-		fmt.Printf("unhandled application command (%d): %s\n", n.NodeId, spew.Sdump(cmd))
+		fmt.Printf("unhandled application command (%d): %s\n", n.NodeID, spew.Sdump(cmd))
 	}
 }
 
 func (n *Node) String() string {
-	str := fmt.Sprintf("Node %d: \n", n.NodeId)
+	str := fmt.Sprintf("Node %d: \n", n.NodeID)
 	str += fmt.Sprintf("  Failing? %t\n", n.Failing)
 	str += fmt.Sprintf("  Is listening? %t\n", n.IsListening())
 	str += fmt.Sprintf("  Is secure? %t\n", n.IsSecure())
@@ -561,7 +573,7 @@ func commandClassSetToStrings(commandClasses map[byte]bool) []string {
 
 	ccStrings := []string{}
 
-	for cc, _ := range commandClasses {
+	for cc := range commandClasses {
 		ccStrings = append(ccStrings, commandclass.GetCommandClassString(cc))
 	}
 

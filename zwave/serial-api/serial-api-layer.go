@@ -3,36 +3,36 @@ package serialapi
 import (
 	"fmt"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/helioslabs/gozw/zwave/protocol"
 	"github.com/helioslabs/gozw/zwave/session"
-	"github.com/davecgh/go-spew/spew"
 )
 
-type ISerialAPILayer interface {
+type ILayer interface {
 	ControllerUpdates() chan ControllerUpdate
 	ControllerCommands() chan ApplicationCommand
 	AddNode() (*AddRemoveNodeCallback, error)
 	RemoveNode() (*AddRemoveNodeCallback, error)
-	GetSerialApiCapabilities() (*SerialApiCapabilities, error)
+	GetSerialAPICapabilities() (*SerialAPICapabilities, error)
 	GetVersion() (version *Version, err error)
-	MemoryGetId() (homeId uint32, nodeId byte, err error)
+	MemoryGetID() (homeID uint32, nodeID byte, err error)
 	GetInitAppData() (*InitAppData, error)
-	GetNodeProtocolInfo(nodeId byte) (nodeInfo *NodeProtocolInfo, err error)
-	SendData(nodeId byte, payload []byte) (txTime uint16, err error)
-	IsFailedNode(nodeId byte) (failed bool, err error)
-	RemoveFailedNode(nodeId byte) (removed bool, err error)
+	GetNodeProtocolInfo(nodeID byte) (nodeInfo *NodeProtocolInfo, err error)
+	SendData(nodeID byte, payload []byte) (txTime uint16, err error)
+	IsFailedNode(nodeID byte) (failed bool, err error)
+	RemoveFailedNode(nodeID byte) (removed bool, err error)
 	RequestNodeInfo(nodeInfo byte) (err error)
 	SoftReset()
 }
 
-type SerialAPILayer struct {
-	sessionLayer        session.ISessionLayer
+type Layer struct {
+	sessionLayer        session.ILayer
 	controllerUpdates   chan ControllerUpdate
 	applicationCommands chan ApplicationCommand
 }
 
-func NewSerialAPILayer(sessionLayer session.ISessionLayer) *SerialAPILayer {
-	layer := &SerialAPILayer{
+func NewLayer(sessionLayer session.ILayer) *Layer {
+	layer := &Layer{
 		sessionLayer:        sessionLayer,
 		controllerUpdates:   make(chan ControllerUpdate, 10),
 		applicationCommands: make(chan ApplicationCommand, 10),
@@ -43,15 +43,15 @@ func NewSerialAPILayer(sessionLayer session.ISessionLayer) *SerialAPILayer {
 	return layer
 }
 
-func (s *SerialAPILayer) ControllerUpdates() chan ControllerUpdate {
+func (s *Layer) ControllerUpdates() chan ControllerUpdate {
 	return s.controllerUpdates
 }
 
-func (s *SerialAPILayer) ControllerCommands() chan ApplicationCommand {
+func (s *Layer) ControllerCommands() chan ApplicationCommand {
 	return s.applicationCommands
 }
 
-func (s *SerialAPILayer) handleUnsolicitedFrames() {
+func (s *Layer) handleUnsolicitedFrames() {
 	for fr := range s.sessionLayer.UnsolicitedFramesChan() {
 		switch fr.Payload[0] {
 		case protocol.FnApplicationCommandHandler, protocol.FnApplicationCommandHandlerBridge:

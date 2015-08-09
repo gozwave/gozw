@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/helioslabs/gozw/zwave/command-class"
 	"github.com/helioslabs/gozw/zwave/protocol"
 	"github.com/helioslabs/gozw/zwave/serial-api"
-	"github.com/davecgh/go-spew/spew"
 )
 
 type DoorLock struct {
@@ -93,27 +93,27 @@ func (d *DoorLock) GetSupportedUserCount() (byte, error) {
 	}
 }
 
-func (d *DoorLock) LoadUserCode(userId byte) error {
+func (d *DoorLock) LoadUserCode(userID byte) error {
 	return d.node.SendCommand(
 		commandclass.CommandClassUserCode,
 		commandclass.CommandUserCodeGet,
-		userId,
+		userID,
 	)
 }
 
-func (d *DoorLock) SetUserCode(userId byte, code []byte) error {
+func (d *DoorLock) SetUserCode(userID byte, code []byte) error {
 	return d.node.SendCommand(
 		commandclass.CommandClassUserCode,
 		commandclass.CommandUserCodeSet,
-		append([]byte{userId, 0x01}, code...)..., // 0x01 = occupied
+		append([]byte{userID, 0x01}, code...)..., // 0x01 = occupied
 	)
 }
 
-func (d *DoorLock) ClearUserCode(userId byte) error {
+func (d *DoorLock) ClearUserCode(userID byte) error {
 	return d.node.SendCommand(
 		commandclass.CommandClassUserCode,
 		commandclass.CommandUserCodeSet,
-		append([]byte{userId, 0x00})..., // 0x00 = available / not set
+		append([]byte{userID, 0x00})..., // 0x00 = available / not set
 	)
 }
 

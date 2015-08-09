@@ -97,7 +97,7 @@ const (
 	CommandClassDeviceResetLocally                            = 0x5A
 	CommandClassCentralScene                                  = 0x5B
 	CommandClassCentralSceneV2                                = 0x5B
-	CommandClassIpAssociation                                 = 0x5C
+	CommandClassIPAssociation                                 = 0x5C
 	CommandClassAntitheft                                     = 0x5D
 	CommandClassAntitheftV2                                   = 0x5D
 	CommandClassZwaveplusInfo                                 = 0x5E /*SDS11907-3*/
@@ -173,7 +173,7 @@ const (
 	CommandClassAvContentSearchMd                             = 0x97
 	CommandClassSecurity                                      = 0x98
 	CommandClassAvTaggingMd                                   = 0x99
-	CommandClassIpConfiguration                               = 0x9A
+	CommandClassIPConfiguration                               = 0x9A
 	CommandClassAssociationCommandConfiguration               = 0x9B
 	CommandClassSensorAlarm                                   = 0x9C /*SDS10963-4 The Sensor Alarm command class can be used to realize Sensor Alarms.*/
 	CommandClassSilenceAlarm                                  = 0x9D /*SDS10963-4 The Alarm Silence command class can be used to nuisance silence to temporarily disable the sounding*/
@@ -182,7 +182,7 @@ const (
 	CommandClassNonInteroperable                              = 0xF0
 )
 
-var CommandClassNames map[byte]string = map[byte]string{
+var CommandClassNames = map[byte]string{
 	CommandClassNoOperation:                              "NoOperation",
 	CommandClassBasic:                                    "Basic",
 	CommandClassControllerReplication:                    "ControllerReplication",
@@ -244,7 +244,7 @@ var CommandClassNames map[byte]string = map[byte]string{
 	CommandClassAssociationGrpInfo:                       "AssociationGrpInfo",
 	CommandClassDeviceResetLocally:                       "DeviceResetLocally",
 	CommandClassCentralScene:                             "CentralScene",
-	CommandClassIpAssociation:                            "IpAssociation",
+	CommandClassIPAssociation:                            "IpAssociation",
 	CommandClassAntitheft:                                "Antitheft",
 	CommandClassZwaveplusInfo:                            "ZwaveplusInfo",
 	CommandClassZipGateway:                               "ZipGateway",
@@ -294,7 +294,7 @@ var CommandClassNames map[byte]string = map[byte]string{
 	CommandClassAvContentSearchMd:                        "AvContentSearchMd",
 	CommandClassSecurity:                                 "Security",
 	CommandClassAvTaggingMd:                              "AvTaggingMd",
-	CommandClassIpConfiguration:                          "IpConfiguration",
+	CommandClassIPConfiguration:                          "IpConfiguration",
 	CommandClassAssociationCommandConfiguration:          "AssociationCommandConfiguration",
 	CommandClassSensorAlarm:                              "SensorAlarm",
 	CommandClassSilenceAlarm:                             "SilenceAlarm",
@@ -306,7 +306,7 @@ var CommandClassNames map[byte]string = map[byte]string{
 func GetCommandClassString(cc byte) string {
 	if val, ok := CommandClassNames[cc]; ok {
 		return val + fmt.Sprintf(" (0x%X)", cc)
-	} else {
-		return "Unknown" + fmt.Sprintf(" (0x%X)", cc)
 	}
+
+	return "Unknown" + fmt.Sprintf(" (0x%X)", cc)
 }

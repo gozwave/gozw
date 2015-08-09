@@ -49,7 +49,7 @@ type SecurityMessageEncapsulation struct {
 	Command          byte
 	SenderNonce      []byte
 	EncryptedPayload []byte
-	ReceiverNonceId  byte
+	ReceiverNonceID  byte
 	Hmac             []byte
 }
 
@@ -86,7 +86,7 @@ func NewSecurityNetworkKeySet(key []byte) []byte {
 	return append(buf, key...)
 }
 
-func NewSecurityMessageEncapsulation(iv, payload, hmac []byte, receiverNonceId byte) []byte {
+func NewSecurityMessageEncapsulation(iv, payload, hmac []byte, receiverNonceID byte) []byte {
 	buf := []byte{
 		CommandClassSecurity,
 		CommandSecurityMessageEncapsulation,
@@ -94,7 +94,7 @@ func NewSecurityMessageEncapsulation(iv, payload, hmac []byte, receiverNonceId b
 
 	buf = append(buf, iv...)
 	buf = append(buf, payload...)
-	buf = append(buf, receiverNonceId)
+	buf = append(buf, receiverNonceID)
 	buf = append(buf, hmac...)
 
 	return buf
@@ -119,7 +119,7 @@ func ParseSecurityCommandsSupportedReport(data []byte) *SecurityCommandsSupporte
 		supportedCommandClasses = append(supportedCommandClasses, data[i])
 	}
 
-	i += 1 // skip command class mark
+	i++ // skip command class mark
 
 	for i < len(data) {
 		controlledCommandClasses = append(controlledCommandClasses, data[i])
@@ -139,7 +139,7 @@ func ParseSecurityMessageEncapsulation(data []byte) *SecurityMessageEncapsulatio
 		Command:          data[1],
 		SenderNonce:      data[2:10],
 		EncryptedPayload: data[10 : 10+payloadLen],
-		ReceiverNonceId:  data[10+payloadLen],
+		ReceiverNonceID:  data[10+payloadLen],
 		Hmac:             data[11+payloadLen:],
 	}
 

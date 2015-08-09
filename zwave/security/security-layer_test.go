@@ -28,7 +28,7 @@ var testNetworkKey = []byte{
 }
 
 func TestSecurityLayerNonceGeneration(t *testing.T) {
-	securityLayer := NewSecurityLayer(testNetworkKey)
+	securityLayer := NewLayer(testNetworkKey)
 	nonce, err := securityLayer.GenerateInternalNonce()
 
 	assert.NoError(t, err)
@@ -41,7 +41,7 @@ func TestSecurityLayerNonceGeneration(t *testing.T) {
 }
 
 func TestSecurityLayerGetExternalNonce(t *testing.T) {
-	securityLayer := NewSecurityLayer(testNetworkKey)
+	securityLayer := NewLayer(testNetworkKey)
 
 	nonce, err := securityLayer.GetExternalNonce(1)
 	assert.Error(t, err)
@@ -61,7 +61,7 @@ func TestSecurityLayerGetExternalNonce(t *testing.T) {
 }
 
 func TestSecurityLayerWaitForExternalNonce(t *testing.T) {
-	securityLayer := NewSecurityLayer(testNetworkKey)
+	securityLayer := NewLayer(testNetworkKey)
 
 	done := make(chan bool)
 

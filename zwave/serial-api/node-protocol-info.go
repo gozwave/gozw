@@ -8,13 +8,13 @@ import (
 	"github.com/helioslabs/gozw/zwave/session"
 )
 
-func (s *SerialAPILayer) GetNodeProtocolInfo(nodeId byte) (nodeInfo *NodeProtocolInfo, err error) {
+func (s *Layer) GetNodeProtocolInfo(nodeID byte) (nodeInfo *NodeProtocolInfo, err error) {
 
 	done := make(chan *frame.Frame)
 
 	request := &session.Request{
-		FunctionId: protocol.FnGetNodeProtocolInfo,
-		Payload:    []byte{nodeId},
+		FunctionID: protocol.FnGetNodeProtocolInfo,
+		Payload:    []byte{nodeID},
 		HasReturn:  true,
 		ReturnCallback: func(err error, ret *frame.Frame) bool {
 			done <- ret

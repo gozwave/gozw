@@ -16,7 +16,7 @@ func TestGoodIncomingFrameResultsInAck(t *testing.T) {
 
 	transport := new(mocks.TransportLayer)
 	transport.On("Read").Return(bytesFromTransport).Once()
-	transport.On("Write", []byte{FrameHeaderAck}).Return(1, nil)
+	transport.On("Write", []byte{HeaderAck}).Return(1, nil)
 
 	frameLayer := NewFrameLayer(transport)
 
@@ -33,7 +33,7 @@ func TestGoodIncomingFrameResultsInAck(t *testing.T) {
 	time.Sleep(200 * time.Millisecond)
 
 	// Ensure ack was written back to the transport
-	transport.AssertCalled(t, "Write", []byte{FrameHeaderAck})
+	transport.AssertCalled(t, "Write", []byte{HeaderAck})
 	transport.AssertExpectations(t)
 
 	// Ensure the frame read from the transport is correct
@@ -52,7 +52,7 @@ func TestBadIncomingFrameResultsInNak(t *testing.T) {
 
 	transport := new(mocks.TransportLayer)
 	transport.On("Read").Return(bytesFromTransport)
-	transport.On("Write", []byte{FrameHeaderNak}).Return(1, nil)
+	transport.On("Write", []byte{HeaderNak}).Return(1, nil)
 
 	_ = NewFrameLayer(transport)
 
@@ -67,7 +67,7 @@ func TestBadIncomingFrameResultsInNak(t *testing.T) {
 	time.Sleep(200 * time.Millisecond)
 
 	// Ensure nak was written back to the transport
-	transport.AssertCalled(t, "Write", []byte{FrameHeaderNak})
+	transport.AssertCalled(t, "Write", []byte{HeaderNak})
 	transport.AssertExpectations(t)
 }
 

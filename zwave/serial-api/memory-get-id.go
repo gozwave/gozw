@@ -9,12 +9,12 @@ import (
 	"github.com/helioslabs/gozw/zwave/session"
 )
 
-func (s *SerialAPILayer) MemoryGetId() (homeId uint32, nodeId byte, err error) {
+func (s *Layer) MemoryGetID() (homeID uint32, nodeID byte, err error) {
 
 	done := make(chan *frame.Frame)
 
 	request := &session.Request{
-		FunctionId: protocol.FnMemoryGetId,
+		FunctionID: protocol.FnMemoryGetID,
 		HasReturn:  true,
 		ReturnCallback: func(err error, ret *frame.Frame) bool {
 			done <- ret
@@ -29,8 +29,8 @@ func (s *SerialAPILayer) MemoryGetId() (homeId uint32, nodeId byte, err error) {
 		return 0, 0, errors.New("Error getting home/node id")
 	}
 
-	homeId = binary.BigEndian.Uint32(ret.Payload[1:5])
-	nodeId = ret.Payload[5]
+	homeID = binary.BigEndian.Uint32(ret.Payload[1:5])
+	nodeID = ret.Payload[5]
 
 	return
 }

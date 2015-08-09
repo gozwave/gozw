@@ -25,7 +25,7 @@ type GatewayOptions struct {
 
 type Gateway struct {
 	opts GatewayOptions
-	app  *application.ApplicationLayer
+	app  *application.Layer
 	conn net.Conn
 
 	outgoingEvents chan proto.Event
@@ -60,14 +60,14 @@ func (g *Gateway) openCommPort() error {
 }
 
 func (g *Gateway) zwaveStart() error {
-	transport, err := transport.NewSerialTransportLayer(g.opts.ZWaveSerialPort, g.opts.BaudRate)
+	transport, err := transport.NewSerialPortTransport(g.opts.ZWaveSerialPort, g.opts.BaudRate)
 	if err != nil {
 		return err
 	}
 
 	frameLayer := frame.NewFrameLayer(transport)
 	sessionLayer := session.NewSessionLayer(frameLayer)
-	apiLayer := serialapi.NewSerialAPILayer(sessionLayer)
+	apiLayer := serialapi.NewLayer(sessionLayer)
 	appLayer, err := application.NewApplicationLayer(apiLayer)
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func (g *Gateway) Run() {
 	go g.processIncoming()
 
 	g.outgoingEvents <- proto.Event{
-		Payload: proto.IdentEvent{HomeId: g.app.HomeId},
+		Payload: proto.IdentEvent{HomeId: g.app.HomeID},
 	}
 }
 
