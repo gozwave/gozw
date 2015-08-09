@@ -33,6 +33,8 @@ const (
 	ThermostatSetpointTypeAutoChangeover                        = 0x0A
 )
 
+type ThermostatSetpointScale byte
+
 const (
 	SetpointScaleCelcius   byte = 0x0
 	SetpointScaleFarenheit      = 0x1
@@ -49,7 +51,7 @@ const (
 
 type Temperature struct {
 	Value float64
-	Scale byte
+	Scale ThermostatSetpointScale
 }
 
 type ThermostatSetpoint struct {
@@ -76,7 +78,7 @@ func NewThermostatSetpoint(setpointType ThermostatSetpointType, temp Temperature
 	setpoint := &ThermostatSetpoint{
 		Type:      setpointType,
 		Precision: 0,
-		Scale:     temp.Scale,
+		Scale:     byte(temp.Scale),
 		Size:      1,
 		Value:     []byte{byte(val)},
 	}
@@ -89,19 +91,19 @@ func (t *ThermostatSetpoint) GetTemperature() (*Temperature, error) {
 	case 1:
 		return &Temperature{
 			Value: float64(int8(t.Value[0])) / math.Pow(10, float64(t.Precision)),
-			Scale: t.Scale,
+			Scale: ThermostatSetpointScale(t.Scale),
 		}, nil
 	case 2:
 		value := int16(binary.BigEndian.Uint16(t.Value))
 		return &Temperature{
 			Value: float64(int16(value)) / math.Pow(10, float64(t.Precision)),
-			Scale: t.Scale,
+			Scale: ThermostatSetpointScale(t.Scale),
 		}, nil
 	case 4:
 		value := int32(binary.BigEndian.Uint32(t.Value))
 		return &Temperature{
 			Value: float64(int32(value)) / math.Pow(10, float64(t.Precision)),
-			Scale: t.Scale,
+			Scale: ThermostatSetpointScale(t.Scale),
 		}, nil
 	default:
 		return nil, errors.New("Invalid size field in setpoint report")
