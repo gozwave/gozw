@@ -287,6 +287,13 @@ func (n *Node) LoadCommandClassVersions() error {
 	return nil
 }
 
+func (n *Node) LoadManufacturerInfo() error {
+	return n.SendCommand(
+		commandclass.CommandClassManufacturerSpecific,
+		commandclass.CommandManufacturerSpecificGet,
+	)
+}
+
 func (n *Node) emitNodeEvent(event interface{}) {
 	n.application.EventBus.Publish("event", proto.Event{
 		Payload: proto.NodeEvent{
@@ -480,6 +487,17 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 
 		n.saveToDb()
 
+	case commandclass.CommandClassManufacturerSpecific:
+
+		if cmd.CommandData[1] == commandclass.CommandManufacturerSpecificReport {
+			mfgInfo := commandclass.ParseManufacturerSpecificReport(cmd.CommandData)
+			n.ManufacturerID = mfgInfo.ManufacturerID
+			n.ProductTypeID = mfgInfo.ProductTypeID
+			n.ProductID = mfgInfo.ProductID
+		}
+
+		n.saveToDb()
+
 	default:
 		fmt.Printf("unhandled application command (%d): %s\n", n.NodeId, spew.Sdump(cmd))
 	}
@@ -493,6 +511,9 @@ func (n *Node) String() string {
 	str += fmt.Sprintf("  Basic device class: %s\n", n.GetBasicDeviceClassName())
 	str += fmt.Sprintf("  Generic device class: %s\n", n.GetGenericDeviceClassName())
 	str += fmt.Sprintf("  Specific device class: %s\n", n.GetSpecificDeviceClassName())
+	str += fmt.Sprintf("  Manufacturer ID: %#x\n", n.ManufacturerID)
+	str += fmt.Sprintf("  Product Type ID: %#x\n", n.ProductTypeID)
+	str += fmt.Sprintf("  Product ID: %#x\n", n.ProductID)
 	str += fmt.Sprintf("  Supported command classes:\n")
 	for _, cc := range n.GetSupportedCommandClassStrings() {
 		str += fmt.Sprintf("    - %s\n", cc)

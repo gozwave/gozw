@@ -5,13 +5,13 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/helioslabs/gozw/zwave/application"
 	"github.com/helioslabs/gozw/zwave/command-class"
 	"github.com/helioslabs/gozw/zwave/frame"
 	"github.com/helioslabs/gozw/zwave/serial-api"
 	"github.com/helioslabs/gozw/zwave/session"
 	"github.com/helioslabs/gozw/zwave/transport"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/peterh/liner"
 )
 
@@ -38,6 +38,7 @@ func main() {
 		"(a)dd node",
 		"(r)emove node",
 		"(V) load command class versions for node",
+		"(M) load manufacturer-specific data for node",
 		"(PV) print the result of the above",
 		"(L) load all user codes for node",
 		"(UN) request and print the number of supported user codes",
@@ -70,6 +71,17 @@ func main() {
 			}
 
 			spew.Dump(node.LoadCommandClassVersions())
+		case "M":
+			input, _ := line.Prompt("node id: ")
+			nodeId, _ := strconv.Atoi(input)
+			node, err := appLayer.Node(byte(nodeId))
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			spew.Dump(node.LoadManufacturerInfo())
+
 		case "PV":
 			input, _ := line.Prompt("node id: ")
 			nodeId, _ := strconv.Atoi(input)
