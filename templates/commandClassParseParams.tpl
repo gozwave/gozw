@@ -19,9 +19,24 @@
     }
   {{end}}
   i += 1
+{{else if eq .Type "ARRAY"}}
+  {{if (index .ArrayAttrib 0).IsAscii}}
+  val.{{ToGoName .Name}} = string(payload[i:i+{{(index .ArrayAttrib 0).Length}}])
+  {{else}}
+  val.{{ToGoName .Name}} = payload[i:i+{{(index .ArrayAttrib 0).Length}}]
+  {{end}}
+  i += {{(index .ArrayAttrib 0).Length}}
+{{else if eq .Type "DWORD"}}
+  val.{{ToGoName .Name}} = binary.BigEndian.Uint32(payload[i:i+4])
+  i += 4
 {{else if eq .Type "BIT_24"}}
   val.{{ToGoName .Name}} = binary.BigEndian.Uint32(payload[i:i+3])
   i += 3
+{{else if eq .Type "WORD"}}
+  val.{{ToGoName .Name}} = binary.BigEndian.Uint16(payload[i:i+2])
+  i += 2
+{{else if eq .Type "MARKER"}}
+  // MARKER HERE
 {{else}}
   val.{{ToGoName .Name}} = payload[i]
   i++
