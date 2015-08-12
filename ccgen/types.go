@@ -52,17 +52,3 @@ type Command struct {
 
 	Params []Param `xml:"param"`
 }
-
-type Param struct {
-	Key            string `xml:"key,attr"`
-	Name           string `xml:"name,attr"`
-	Type           string `xml:"type,attr"`
-	TypeHashCode   string `xml:"typehashcode,attr"`
-	Comment        string `xml:"comment,attr"`
-	EncapType      string `xml:"encaptype,attr"`
-	OptionalOffset string `xml:"optionaloffs,attr"`
-	OptionalMask   string `xml:"optionalmask,attr"`
-	Encapsulated   bool   `xml:"encapsulated,attr"`
-	CommandMask    string `xml:"cmd_mask,attr"`
-	Affix          bool   `xml:"affix,attr"`
-}

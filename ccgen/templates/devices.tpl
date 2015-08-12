@@ -49,42 +49,42 @@ func (d DeviceType) SpecificDeviceString() string {
 }
 
 const (
-  {{#each BasicDevices}}
-  {{toPascalCase Name}} BasicDevice = {{Key}}
-  {{/each}}
+  {{range .BasicDevices}}
+  {{ToPascalCase .Name}} BasicDevice = {{.Key}}
+  {{end}}
 )
 
 var BasicDeviceNames map[BasicDevice]string = map[BasicDevice]string{
-  {{#each BasicDevices}}
-  {{toPascalCase Name}}: "{{Help}}",
-  {{/each}}
+  {{range .BasicDevices}}
+  {{ToPascalCase .Name}}: "{{.Help}}",
+  {{end}}
 }
 
 const (
-  {{#each GenericDevices}}
-  {{toPascalCase Name}} GenericDevice = {{Key}}
-  {{/each}}
+  {{range .GenericDevices}}
+  {{ToPascalCase .Name}} GenericDevice = {{.Key}}
+  {{end}}
 )
 
 var GenericDeviceNames map[GenericDevice]string = map[GenericDevice]string{
-  {{#each GenericDevices}}
-  {{toPascalCase Name}}: "{{Help}}",
-  {{/each}}
+  {{range .GenericDevices}}
+  {{ToPascalCase .Name}}: "{{.Help}}",
+  {{end}}
 }
 
 const (
   SpecificTypeNotUsed SpecificDevice = 0x00
-  {{#each GenericDevices}}{{#each SpecificDevices}}{{#notZeroByte Key}}
-  {{toPascalCase Name}} SpecificDevice = {{Key}}
-  {{/notZeroByte}}{{/each}}{{/each}}
+  {{range .GenericDevices}}{{range .SpecificDevices}}{{if NotZeroByte .Key}}
+  {{ToPascalCase .Name}} SpecificDevice = {{.Key}}
+  {{end}}{{end}}{{end}}
 )
 
 var SpecificTypeNames map[GenericDevice]map[SpecificDevice]string = map[GenericDevice]map[SpecificDevice]string{
-  {{#each GenericDevices}}{{toPascalCase Name}}: map[SpecificDevice]string{
-    {{#each SpecificDevices}}
-    {{toPascalCase Name}}: "{{Help}}",
-    {{/each}}
+  {{range .GenericDevices}}{{ToPascalCase .Name}}: map[SpecificDevice]string{
+    {{range .SpecificDevices}}
+    {{ToPascalCase .Name}}: "{{.Help}}",
+    {{end}}
   },
-  {{/each}}
+  {{end}}
 }
 `

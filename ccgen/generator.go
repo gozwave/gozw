@@ -1,18 +1,26 @@
 package ccgen
 
 import (
+	"bytes"
 	"encoding/xml"
 	"os"
+	"strings"
+	"text/template"
 
-	"github.com/aymerick/raymond"
+	"github.com/reiver/go-stringcase"
 )
 
 type Generator struct {
 	zwClasses *ZwClasses
+	tpl       *template.Template
 }
 
 func NewGenerator() (*Generator, error) {
 	gen := &Generator{}
+
+	if err := gen.initTemplates(); err != nil {
+		return nil, err
+	}
 
 	fp, err := os.Open("ccgen/zwave-defs.xml")
 	if err != nil {
@@ -33,19 +41,40 @@ func NewGenerator() (*Generator, error) {
 }
 
 func (g *Generator) GenDevices() (string, error) {
-	devices, err := raymond.Parse(devicesTemplate)
+	buf := bytes.NewBuffer([]byte{})
+	err := g.tpl.ExecuteTemplate(buf, "devices.tpl", g.zwClasses)
 	if err != nil {
 		return "", err
 	}
 
-	return devices.Exec(g.zwClasses)
+	return string(buf.Bytes()), nil
 }
 
 func (g *Generator) GenCommandClasses() (string, error) {
-	devices, err := raymond.Parse(commandClassTemplate)
+	buf := bytes.NewBuffer([]byte{})
+	err := g.tpl.ExecuteTemplate(buf, "commandClass.tpl", g.zwClasses.CommandClasses[1])
 	if err != nil {
 		return "", err
 	}
 
-	return devices.Exec(g.zwClasses.CommandClasses[1])
+	return string(buf.Bytes()), nil
+}
+
+func (g *Generator) initTemplates() error {
+	funcs := template.FuncMap{
+		"ToPascalCase":  stringcase.ToPascalCase,
+		"ToPackageName": toPackageName,
+		"GetGoType":     getGoType,
+		"NotZeroByte":   notZeroByte,
+		"Trim":          strings.TrimSpace,
+	}
+
+	tpl, err := template.New("").Funcs(funcs).ParseGlob("ccgen/templates/*.tpl")
+	if err != nil {
+		return err
+	}
+
+	g.tpl = tpl
+
+	return nil
 }
