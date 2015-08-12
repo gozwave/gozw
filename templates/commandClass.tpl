@@ -11,9 +11,7 @@ type {{$typeName}} struct {
 func Parse{{$typeName}}(payload []byte) {{$typeName}} {
   val := {{$typeName}}{}
 
-  {{range $_, $param := .Params}}
-  {{template "commandClassParseParam.tpl" $param}}
-  {{end}}
+  {{template "commandClassParseParams.tpl" .Params}}
 
   return val
 }
