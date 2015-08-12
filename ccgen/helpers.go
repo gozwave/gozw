@@ -2,6 +2,7 @@ package ccgen
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/reiver/go-stringcase"
 )
@@ -22,4 +23,17 @@ func notZeroByte(str string) string {
 		return str
 	}
 	return ""
+}
+
+func isReservedString(str string) bool {
+	str = strings.ToLower(str)
+	if strings.HasPrefix(str, "reserved") {
+		return true
+	}
+
+	if str == "res" {
+		return true
+	}
+
+	return false
 }

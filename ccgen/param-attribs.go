@@ -1,7 +1,5 @@
 package ccgen
 
-import "strings"
-
 type ArrayAttrib struct {
 	Key     string `xml:"key,attr"`
 	Length  int    `xml:"len,attr"`
@@ -29,11 +27,7 @@ type BitField struct {
 }
 
 func (b BitField) IsNotReserved() bool {
-	if strings.Contains(strings.ToLower(b.FieldName), "reserved") {
-		return false
-	}
-
-	return true
+	return !isReservedString(b.FieldName)
 }
 
 type BitFlag struct {
@@ -43,11 +37,7 @@ type BitFlag struct {
 }
 
 func (b BitFlag) IsNotReserved() bool {
-	if strings.Contains(strings.ToLower(b.FlagName), "reserved") {
-		return false
-	}
-
-	return true
+	return !isReservedString(b.FlagName)
 }
 
 type Const struct {
