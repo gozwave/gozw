@@ -42,19 +42,19 @@ func NewGenerator() (*Generator, error) {
 	return gen, nil
 }
 
-func (g *Generator) GenDevices() (string, error) {
+func (g *Generator) GenDevices() error {
 	buf := bytes.NewBuffer([]byte{})
 	err := g.tpl.ExecuteTemplate(buf, "devices.tpl", g.zwClasses)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	return string(buf.Bytes()), nil
+	fmt.Println(buf)
+
+	return nil
 }
 
-func (g *Generator) GenCommandClasses() (string, error) {
-	buf := bytes.NewBuffer([]byte{})
-
+func (g *Generator) GenCommandClasses() error {
 	skipped := []CommandClass{}
 	for _, cc := range g.zwClasses.CommandClasses {
 
@@ -63,33 +63,31 @@ func (g *Generator) GenCommandClasses() (string, error) {
 			continue
 		}
 
-		// fmt.Println(cc.Name)
 		buf := bytes.NewBuffer([]byte{})
 		err := g.tpl.ExecuteTemplate(buf, "commandClass.tpl", cc)
 		if err != nil {
-			panic(err)
-			return "", err
+			return err
 		}
 
-		dirName := "zwave/command-class/" + cc.GetPackageName()
-		filename := dirName + "/" + cc.GetPackageName() + ".go"
+		dirName := "zwave/command-class/" + cc.GetDirName()
+		filename := dirName + "/" + cc.GetDirName() + ".go"
 		os.Mkdir(dirName, 0775)
 		fp, err := os.Create(filename)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		formatted, err := format.Source(buf.Bytes())
 		if err != nil {
 			fmt.Println(string(buf.Bytes()))
 			fmt.Println(cc.Name)
-			panic(err)
+			return err
 		}
 
 		imported, err := imports.Process(filename, formatted, nil)
 		if err != nil {
 			fmt.Println(cc.Name)
-			panic(err)
+			return err
 		}
 
 		fp.Write(imported)
@@ -104,7 +102,7 @@ func (g *Generator) GenCommandClasses() (string, error) {
 		}
 	}
 
-	return string(buf.Bytes()), nil
+	return nil
 }
 
 func (g *Generator) initTemplates() error {

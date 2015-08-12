@@ -1,10 +1,6 @@
 package main
 
-import (
-	"fmt"
-
-	"github.com/helioslabs/gozw/ccgen"
-)
+import "github.com/helioslabs/gozw/ccgen"
 
 func main() {
 
@@ -19,9 +15,8 @@ func main() {
 	// }
 	// fmt.Println(devices)
 
-	cc, err := gen.GenCommandClasses()
+	err = gen.GenCommandClasses()
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(cc)
 }
