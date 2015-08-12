@@ -66,6 +66,19 @@ func (c CommandClass) CanGenerate() (can bool, reason string) {
 		return false, "Not an actual command class (also stupidly complicated parsing rules)"
 	}
 
+	if c.Name == "COMMAND_CLASS_ZIP_6LOWPAN" ||
+		c.Name == "COMMAND_CLASS_ZIP_ND" ||
+		c.Name == "COMMAND_CLASS_ZIP_GATEWAY" ||
+		c.Name == "COMMAND_CLASS_ZIP_PORTAL" ||
+		c.Name == "COMMAND_CLASS_ZIP" ||
+		c.Name == "COMMAND_CLASS_IP_ASSOCIATION" ||
+		c.Name == "COMMAND_CLASS_TRANSPORT_SERVICE" ||
+		c.Name == "COMMAND_CLASS_CONTROLLER_REPLICATION" ||
+		c.Name == "COMMAND_CLASS_CRC_16_ENCAP" ||
+		c.Name == "COMMAND_CLASS_IP_CONFIGURATION" {
+		return false, "Skipped (no current intention to support)"
+	}
+
 	for _, cmd := range c.Commands {
 		for _, param := range cmd.Params {
 			if param.Type == "MARKER" {
