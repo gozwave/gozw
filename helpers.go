@@ -7,15 +7,6 @@ import (
 	"github.com/reiver/go-stringcase"
 )
 
-func init() {
-	raymond.RegisterHelpers(map[string]interface{}{
-		"toPascalCase":  stringcase.ToPascalCase,
-		"toPackageName": toPackageName,
-		"getGoType":     getGoType,
-		"notZeroByte":   notZeroByte,
-	})
-}
-
 func getGoType(paramType string) string {
 	switch paramType {
 	case "ARRAY":
