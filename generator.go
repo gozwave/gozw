@@ -56,6 +56,10 @@ func (g *Generator) GenCommandClasses() (string, error) {
 	buf := bytes.NewBuffer([]byte{})
 
 	for _, cc := range g.zwClasses.CommandClasses {
+		if cc.Name == "ZWAVE_CMD_CLASS" {
+			continue
+		}
+
 		// fmt.Println(cc.Name)
 		buf := bytes.NewBuffer([]byte{})
 		err := g.tpl.ExecuteTemplate(buf, "commandClass.tpl", cc)
