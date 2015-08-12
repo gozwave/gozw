@@ -49,6 +49,18 @@ type CommandClass struct {
 	Commands []Command `xml:"cmd"`
 }
 
+func (c CommandClass) GetDirName() string {
+	ccname := strings.Replace(c.Name, "COMMAND_CLASS_", "", 1)
+	ccname = stringcase.ToPropertyCase(ccname)
+
+	if c.Version > 1 {
+		versionStr := strconv.Itoa(c.Version)
+		ccname += "-v" + versionStr
+	}
+
+	return ccname
+}
+
 func (c CommandClass) GetPackageName() string {
 	ccname := strings.Replace(c.Name, "COMMAND_CLASS_", "", 1)
 	ccname = stringcase.ToLowerCase(stringcase.ToPascalCase(ccname))
