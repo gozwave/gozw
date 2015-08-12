@@ -1,9 +1,6 @@
 package ccgen
 
-import (
-	"errors"
-	"strings"
-)
+import "errors"
 
 type Param struct {
 	Key            string `xml:"key,attr"`
@@ -32,11 +29,7 @@ type Param struct {
 }
 
 func (p Param) IsNotReserved() bool {
-	if strings.Contains(strings.ToLower(p.Name), "reserved") {
-		return false
-	}
-
-	return true
+	return !isReservedString(p.Name)
 }
 
 func (p Param) GetGoType() (string, error) {
