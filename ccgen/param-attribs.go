@@ -67,6 +67,10 @@ type FieldEnum struct {
 	EnumValues []FieldEnum `xml:"fieldenum"`
 }
 
+func (f FieldEnum) IsNotReserved() bool {
+	return !isReservedString(f.FieldName)
+}
+
 type ValueAttrib struct {
 	Key        string `xml:"key,attr"`
 	HasDefines bool   `xml:"hasdefines,attr"`

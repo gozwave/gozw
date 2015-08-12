@@ -13,6 +13,9 @@
         val.{{ToGoName .FieldName}} = (payload[i]{{with .FieldMask}}&{{.}}{{end}}){{with .Shifter}}<<{{.}}{{end}}
       {{end}}
     {{end}}
+    {{range $_, $subVal := .FieldEnum}}
+      val.{{ToGoName .FieldName}} = (payload[i]{{with .FieldMask}}&{{.}}{{end}}){{with .Shifter}}<<{{.}}{{end}}
+    {{end}}
     {{range $_, $subVal := .BitFlag}}
       {{if .IsNotReserved}}
         if payload[i] & {{.FlagMask}} == {{.FlagMask}} {

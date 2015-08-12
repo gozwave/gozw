@@ -10,6 +10,11 @@
         {{ToGoName .FlagName}} bool
       {{end}}
     {{end}}
+    {{range $_, $subVal := .FieldEnum}}
+      {{if .IsNotReserved}}
+        {{ToGoName .FieldName}} byte
+      {{end}}
+    {{end}}
   {{else}}
     {{ToGoName .Name}} {{.GetGoType}}
   {{end}}
