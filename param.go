@@ -1,5 +1,7 @@
 package ccgen
 
+import "errors"
+
 type Param struct {
 	Key            string `xml:"key,attr"`
 	Name           string `xml:"name,attr"`
@@ -26,59 +28,59 @@ type Param struct {
 	Word        []Word        `xml:"word"`
 }
 
-func (p Param) GetGoType() string {
+func (p Param) GetGoType() (string, error) {
 	switch p.Type {
 
 	case "ARRAY":
 		if p.ArrayAttrib != nil && len(p.ArrayAttrib) == 1 {
 			if p.ArrayAttrib[0].IsAscii {
-				return "string"
+				return "string", nil
 			} else {
-				return "[]byte"
+				return "[]byte", nil
 			}
 		} else if p.ArrayAttrib != nil {
-			panic("Weird number of <ArrayAttrib> elements")
+			return "", errors.New("Weird number of <ArrayAttrib> elements")
 		}
-		return "[]byte"
+		return "[]byte", nil
 
 	case "BIT_24":
-		return "uint32"
+		return "uint32", nil
 
 	case "BITMASK":
-		panic("Unimplemented param type: BITMASK")
+		return "byte", nil
 
 	case "BYTE":
-		return "byte"
+		return "byte", nil
 
 	case "CONST":
-		return "byte"
+		return "byte", nil
 
 	case "DWORD":
-		return "uint32"
+		return "uint32", nil
 
 	case "ENUM":
-		panic("Unimplemented param type: ENUM")
+		return "", errors.New("Unimplemented param type: ENUM")
 
 	case "ENUM_ARRAY":
-		panic("Unimplemented param type: ENUM_ARRAY")
+		return "", errors.New("Unimplemented param type: ENUM_ARRAY")
 
 	case "MARKER":
-		panic("Unimplemented param type: MARKER")
+		return "", errors.New("Unimplemented param type: MARKER")
 
 	case "MULTI_ARRAY":
-		panic("Unimplemented param type: MULTI_ARRAY")
+		return "", errors.New("Unimplemented param type: MULTI_ARRAY")
 
 	case "STRUCT_BYTE":
-		panic("Unimplemented param type: STRUCT_BYTE")
+		return "", errors.New("Unimplemented param type: STRUCT_BYTE")
 
 	case "VARIANT":
-		return "[]byte"
+		return "[]byte", nil
 
 	case "WORD":
-		return "uint16"
+		return "uint16", nil
 
 	default:
-		panic("Unknown param type: " + p.Type)
+		return "", errors.New("Unknown param type: " + p.Type)
 
 	}
 }
