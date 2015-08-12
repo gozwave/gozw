@@ -1,8 +1,12 @@
 {{with .}}i := 2{{end}}
 {{range $_, $param := .}}
 {{if eq .Type "VARIANT"}}
+  {{if eq (index .Variant 0).ParamOffset 255}}
+  val.{{ToGoName .Name}} = payload[i:]
+  {{else}}
   val.{{ToGoName .Name}} = payload[i:i+{{(index .Variant 0).ParamOffset}}]
   i += {{(index .Variant 0).ParamOffset}}
+  {{end}}
 {{else if eq .Type "STRUCT_BYTE"}}
   {{range $_, $subVal := .BitField}}
     val.{{ToGoName .FieldName}} = (payload[i]{{with .FieldMask}}&{{.}}{{end}}){{with .Shifter}}<<{{.}}{{end}}
