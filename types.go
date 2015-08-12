@@ -49,9 +49,12 @@ type CommandClass struct {
 	Commands []Command `xml:"cmd"`
 }
 
+func (c CommandClass) GetBaseName() string {
+	return strings.Replace(c.Name, "COMMAND_CLASS_", "", 1)
+}
+
 func (c CommandClass) GetDirName() string {
-	ccname := strings.Replace(c.Name, "COMMAND_CLASS_", "", 1)
-	ccname = stringcase.ToPropertyCase(ccname)
+	ccname := stringcase.ToPropertyCase(c.GetBaseName())
 
 	if c.Version > 1 {
 		versionStr := strconv.Itoa(c.Version)
@@ -62,8 +65,7 @@ func (c CommandClass) GetDirName() string {
 }
 
 func (c CommandClass) GetPackageName() string {
-	ccname := strings.Replace(c.Name, "COMMAND_CLASS_", "", 1)
-	ccname = stringcase.ToLowerCase(stringcase.ToPascalCase(ccname))
+	ccname := stringcase.ToLowerCase(stringcase.ToPascalCase(c.GetBaseName()))
 
 	if c.Version > 1 {
 		versionStr := strconv.Itoa(c.Version)
@@ -74,8 +76,12 @@ func (c CommandClass) GetPackageName() string {
 }
 
 func (c CommandClass) CanGenerate() (can bool, reason string) {
+	if len(c.Commands) == 0 {
+		return false, "No commands"
+	}
+
 	if c.Name == "ZWAVE_CMD_CLASS" {
-		return false, "Not an actual command class (also stupidly complicated parsing rules)"
+		return false, "Not an actual command class"
 	}
 
 	if c.Name == "COMMAND_CLASS_ZIP_6LOWPAN" ||
@@ -88,7 +94,7 @@ func (c CommandClass) CanGenerate() (can bool, reason string) {
 		c.Name == "COMMAND_CLASS_CONTROLLER_REPLICATION" ||
 		c.Name == "COMMAND_CLASS_CRC_16_ENCAP" ||
 		c.Name == "COMMAND_CLASS_IP_CONFIGURATION" {
-		return false, "Skipped (no current intention to support)"
+		return false, "Not supported"
 	}
 
 	for _, cmd := range c.Commands {
@@ -110,4 +116,23 @@ type Command struct {
 	Comment  string `xml:"comment,attr"`
 
 	Params []Param `xml:"param"`
+}
+
+func (c Command) GetFileName(cc CommandClass) string {
+	commandName := c.Name
+
+	if strings.HasPrefix(strings.ToLower(commandName), "command_") &&
+		!strings.HasPrefix(strings.ToLower(commandName), "command_class_") {
+		commandName = commandName[8:]
+	}
+
+	ccBaseName := cc.GetBaseName()
+
+	if strings.HasPrefix(commandName, ccBaseName) {
+		if len(commandName) > len(ccBaseName) {
+			commandName = commandName[len(ccBaseName)+1:]
+		}
+	}
+
+	return stringcase.ToPropertyCase(commandName)
 }
