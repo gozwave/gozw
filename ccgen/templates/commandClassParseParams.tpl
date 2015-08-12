@@ -1,4 +1,4 @@
-{{with .}}i := 0{{end}}
+{{with .}}i := 2{{end}}
 {{range $_, $param := .}}
 {{if eq .Type "VARIANT"}}
   val.{{ToGoName .Name}} = payload[i:i+{{(index .Variant 0).ParamOffset}}]
