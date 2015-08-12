@@ -1,6 +1,12 @@
 package ccgen
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+	"strconv"
+	"strings"
+
+	"github.com/reiver/go-stringcase"
+)
 
 type ZwClasses struct {
 	XMLName        xml.Name        `xml:"zw_classes"`
@@ -37,10 +43,22 @@ type SpecificDevice struct {
 type CommandClass struct {
 	Name     string    `xml:"name,attr"`
 	Key      string    `xml:"key,attr"`
-	Version  string    `xml:"version,attr"`
+	Version  int       `xml:"version,attr"`
 	Help     string    `xml:"help,attr"`
 	Comment  string    `xml:"comment,attr"`
 	Commands []Command `xml:"cmd"`
+}
+
+func (c CommandClass) GetPackageName() string {
+	ccname := strings.Replace(c.Name, "COMMAND_CLASS_", "", 1)
+	ccname = stringcase.ToLowerCase(stringcase.ToPascalCase(ccname))
+
+	if c.Version > 1 {
+		versionStr := strconv.Itoa(c.Version)
+		ccname += "v" + versionStr
+	}
+
+	return ccname
 }
 
 type Command struct {
