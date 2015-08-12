@@ -61,6 +61,22 @@ func (c CommandClass) GetPackageName() string {
 	return ccname
 }
 
+func (c CommandClass) CanGenerate() (can bool, reason string) {
+	if c.Name == "ZWAVE_CMD_CLASS" {
+		return false, "Not an actual command class (also stupidly complicated parsing rules)"
+	}
+
+	for _, cmd := range c.Commands {
+		for _, param := range cmd.Params {
+			if param.Type == "MARKER" {
+				return false, "Contains a MARKER"
+			}
+		}
+	}
+
+	return true, ""
+}
+
 type Command struct {
 	Name     string `xml:"name,attr"`
 	Key      string `xml:"key,attr"`

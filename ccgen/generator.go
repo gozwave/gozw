@@ -55,8 +55,11 @@ func (g *Generator) GenDevices() (string, error) {
 func (g *Generator) GenCommandClasses() (string, error) {
 	buf := bytes.NewBuffer([]byte{})
 
+	skipped := []CommandClass{}
 	for _, cc := range g.zwClasses.CommandClasses {
-		if cc.Name == "ZWAVE_CMD_CLASS" {
+
+		if can, _ := cc.CanGenerate(); !can {
+			skipped = append(skipped, cc)
 			continue
 		}
 
@@ -91,6 +94,14 @@ func (g *Generator) GenCommandClasses() (string, error) {
 
 		fp.Write(imported)
 		fp.Close()
+	}
+
+	if len(skipped) > 0 {
+		fmt.Println("Skipped generation for the following command classes:")
+		for _, cc := range skipped {
+			_, reason := cc.CanGenerate()
+			fmt.Printf("  - %s\n      Reason: %s\n", cc.Name, reason)
+		}
 	}
 
 	return string(buf.Bytes()), nil
