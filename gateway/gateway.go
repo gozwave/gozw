@@ -68,7 +68,7 @@ func (g *Gateway) zwaveStart() error {
 	frameLayer := frame.NewFrameLayer(transport)
 	sessionLayer := session.NewSessionLayer(frameLayer)
 	apiLayer := serialapi.NewLayer(sessionLayer)
-	appLayer, err := application.NewApplicationLayer(apiLayer)
+	appLayer, err := application.NewLayer(apiLayer)
 	if err != nil {
 		return err
 	}

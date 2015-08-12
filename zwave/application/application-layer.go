@@ -51,15 +51,31 @@ const (
 // security functions (encrypting/decrypting messages, fetching nonces, etc.)
 // and interaction with the Serial API layer.
 type Layer struct {
-	APIVersion     string
+
+	// APIVersion is the Z-Wave serial API Version
+	APIVersion string
+
+	// APILibraryType is the Z-Wave library type string (as returned from the
+	// controller)
 	APILibraryType string
 
+	// HomeID is the controller's home ID
 	HomeID uint32
+
+	// NodeID is the controller's node ID
 	NodeID byte
 
-	Version             byte
-	APIType             string
+	// Version is returned from the GetVersion serial API call
+	Version byte
+
+	// APIType
+	APIType string
+
+	// IsPrimaryController is true when this node is the network's primary
+	// controller (we don't currently support being a non-primary controller)
 	IsPrimaryController bool
+
+	// ApplicationVersion
 	ApplicationVersion  byte
 	ApplicationRevision byte
 	SupportedFunctions  []byte
@@ -79,7 +95,11 @@ type Layer struct {
 	secureInclusionStep map[byte]chan error
 }
 
-func NewApplicationLayer(serialAPI serialapi.ILayer) (app *Layer, err error) {
+// NewLayer instantiates a new application layer, handles opening and setting up
+// the local database, reads (or generates) a network key, starts threads to
+// handle incming Z-Wave commands and updates, and loads basic controller data
+// from the Z-Wave controller.
+func NewLayer(serialAPI serialapi.ILayer) (app *Layer, err error) {
 	app = &Layer{
 		serialAPI: serialAPI,
 		nodes:     map[byte]*Node{},
