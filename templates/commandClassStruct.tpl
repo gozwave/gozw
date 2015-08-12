@@ -1,8 +1,8 @@
 {{if eq .Type "STRUCT_BYTE"}}
-{{range $_, $subVal := .BitField}}{{ToPascalCase .FieldName}} byte
+{{range $_, $subVal := .BitField}}{{ToGoName .FieldName}} byte
 {{end}}
-{{range $_, $subVal := .BitFlag}}{{ToPascalCase .FlagName}} bool
+{{range $_, $subVal := .BitFlag}}{{ToGoName .FlagName}} bool
 {{end}}
 {{else}}
-{{ToPascalCase .Name}} {{GetGoType .Type}}
+{{ToGoName .Name}} {{.GetGoType}}
 {{end}}
