@@ -109,7 +109,7 @@
     <spec_dev key="0x03" name="SPECIFIC_TYPE_MOTOR_MULTIPOSITION" help="Motor Multiposition" comment="Multiposition Motor" />
     <spec_dev key="0x01" name="SPECIFIC_TYPE_POWER_SWITCH_MULTILEVEL" help="Power Switch Multilevel" comment="Light Dimmer Switch Device Type" />
     <spec_dev key="0x04" name="SPECIFIC_TYPE_SCENE_SWITCH_MULTILEVEL" help="Scene Switch Multilevel" comment="Multilevel Scene Switch" />
-    <spec_dev key="0x05" name="SPECIFIC_TYPE_FAN_SWITCH" help="Fan Switch" comment="Fan Switch Device Type" />
+    <!--<spec_dev key="0x05" name="SPECIFIC_TYPE_FAN_SWITCH" help="Fan Switch" comment="Fan Switch Device Type" />-->
   </gen_dev>
   <gen_dev key="0x12" name="GENERIC_TYPE_SWITCH_REMOTE" help="Switch Remote" read_only="False" comment="Remote Switch">
     <spec_dev key="0x00" name="SPECIFIC_TYPE_NOT_USED" help="Not Used" comment="Specific Device Class Not Used" />

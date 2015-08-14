@@ -53,6 +53,16 @@ func (c CommandClass) GetBaseName() string {
 	return strings.Replace(c.Name, "COMMAND_CLASS_", "", 1)
 }
 
+func (c CommandClass) GetConstName() string {
+	name := c.GetBaseName()
+	if c.Version > 1 {
+		versionStr := strconv.Itoa(c.Version)
+		name += "_V" + versionStr
+	}
+
+	return stringcase.ToPascalCase(name)
+}
+
 func (c CommandClass) GetDirName() string {
 	ccname := stringcase.ToPropertyCase(c.GetBaseName())
 
