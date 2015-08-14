@@ -49,7 +49,25 @@ func (g *Generator) GenDevices() error {
 		return err
 	}
 
-	fmt.Println(buf)
+	filename := "zwave/command-class/devices.gen.go"
+	fp, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+
+	defer fp.Close()
+
+	formatted, err := format.Source(buf.Bytes())
+	if err != nil {
+		return err
+	}
+
+	imported, err := imports.Process(filename, formatted, nil)
+	if err != nil {
+		return err
+	}
+
+	fp.Write(imported)
 
 	return nil
 }

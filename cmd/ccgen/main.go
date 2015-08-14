@@ -9,11 +9,10 @@ func main() {
 		panic(err)
 	}
 
-	// devices, err := gen.GenDevices()
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println(devices)
+	err = gen.GenDevices()
+	if err != nil {
+		panic(err)
+	}
 
 	err = gen.GenCommandClasses()
 	if err != nil {
