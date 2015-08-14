@@ -72,6 +72,36 @@ func (g *Generator) GenDevices() error {
 	return nil
 }
 
+func (g *Generator) GenParser() error {
+	buf := bytes.NewBuffer([]byte{})
+	err := g.tpl.ExecuteTemplate(buf, "command-classes.tpl", g.zwClasses)
+	if err != nil {
+		return err
+	}
+
+	filename := "zwave/command-class/command-classes.gen.go"
+	fp, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+
+	defer fp.Close()
+
+	formatted, err := format.Source(buf.Bytes())
+	if err != nil {
+		return err
+	}
+
+	imported, err := imports.Process(filename, formatted, nil)
+	if err != nil {
+		return err
+	}
+
+	fp.Write(imported)
+
+	return nil
+}
+
 func (g *Generator) GenCommandClasses() error {
 	skipped := []CommandClass{}
 	for _, cc := range g.zwClasses.CommandClasses {

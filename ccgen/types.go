@@ -118,6 +118,11 @@ func (c CommandClass) CanGenerate() (can bool, reason string) {
 	return true, ""
 }
 
+func (c CommandClass) CanGen() (can bool) {
+	can, _ = c.CanGenerate()
+	return
+}
+
 type Command struct {
 	Name     string `xml:"name,attr"`
 	Key      string `xml:"key,attr"`

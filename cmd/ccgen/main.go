@@ -18,4 +18,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	err = gen.GenParser()
+	if err != nil {
+		panic(err)
+	}
 }
