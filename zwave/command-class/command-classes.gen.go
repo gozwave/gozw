@@ -66,13 +66,16 @@ import (
 	"github.com/helioslabs/gozw/zwave/command-class/meter-v3"
 	"github.com/helioslabs/gozw/zwave/command-class/meter-v4"
 	"github.com/helioslabs/gozw/zwave/command-class/mtp-window-covering"
+	"github.com/helioslabs/gozw/zwave/command-class/multi-channel-association-v2"
 	"github.com/helioslabs/gozw/zwave/command-class/multi-channel-v2"
 	"github.com/helioslabs/gozw/zwave/command-class/multi-channel-v3"
 	"github.com/helioslabs/gozw/zwave/command-class/multi-cmd"
 	"github.com/helioslabs/gozw/zwave/command-class/multi-instance"
+	"github.com/helioslabs/gozw/zwave/command-class/multi-instance-association"
 	"github.com/helioslabs/gozw/zwave/command-class/network-management-basic"
 	"github.com/helioslabs/gozw/zwave/command-class/network-management-inclusion"
 	"github.com/helioslabs/gozw/zwave/command-class/network-management-primary"
+	"github.com/helioslabs/gozw/zwave/command-class/network-management-proxy"
 	"github.com/helioslabs/gozw/zwave/command-class/node-naming"
 	"github.com/helioslabs/gozw/zwave/command-class/notification-v3"
 	"github.com/helioslabs/gozw/zwave/command-class/notification-v4"
@@ -97,6 +100,7 @@ import (
 	"github.com/helioslabs/gozw/zwave/command-class/screen-attributes-v2"
 	"github.com/helioslabs/gozw/zwave/command-class/screen-md"
 	"github.com/helioslabs/gozw/zwave/command-class/screen-md-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/security"
 	"github.com/helioslabs/gozw/zwave/command-class/security-panel-mode"
 	"github.com/helioslabs/gozw/zwave/command-class/security-panel-zone"
 	"github.com/helioslabs/gozw/zwave/command-class/security-panel-zone-sensor"
@@ -816,7 +820,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return alarm.ParseAlarmReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Alarm")
 		}
 
 	case AlarmV2:
@@ -832,7 +836,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x08:
 			return alarmv2.ParseAlarmTypeSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Alarm")
 		}
 
 	case NotificationV3:
@@ -852,7 +856,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return notificationv3.ParseEventSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Notification")
 		}
 
 	case NotificationV4:
@@ -872,7 +876,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return notificationv4.ParseEventSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Notification")
 		}
 
 	case ApplicationStatus:
@@ -882,7 +886,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return applicationstatus.ParseApplicationRejectedRequest(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Application Status")
 		}
 
 	case AssociationCommandConfiguration:
@@ -898,7 +902,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return associationcommandconfiguration.ParseCommandRecordsSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Association Command Configuration")
 		}
 
 	case Association:
@@ -916,7 +920,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return association.ParseAssociationSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Association")
 		}
 
 	case AssociationV2:
@@ -938,7 +942,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x0C:
 			return associationv2.ParseAssociationSpecificGroupReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Association")
 		}
 
 	case AvContentDirectoryMd:
@@ -960,7 +964,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x08:
 			return avcontentdirectorymd.ParseAvMatchItemToRendererMdReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Av Content Directory Md")
 		}
 
 	case AvContentSearchMd:
@@ -970,7 +974,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return avcontentsearchmd.ParseAvContentSearchMdReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Av Content Search Md")
 		}
 
 	case AvRendererStatus:
@@ -980,7 +984,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return avrendererstatus.ParseAvRendererStatusReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Av Renderer Status")
 		}
 
 	case AvTaggingMd:
@@ -990,7 +994,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return avtaggingmd.ParseAvTaggingMdReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Av Tagging Md")
 		}
 
 	case BasicTariffInfo:
@@ -1000,7 +1004,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return basictariffinfo.ParseBasicTariffInfoReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Basic Tariff Info")
 		}
 
 	case BasicWindowCovering:
@@ -1010,7 +1014,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return basicwindowcovering.ParseBasicWindowCoveringStopLevelChange(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Basic Window Covering")
 		}
 
 	case Basic:
@@ -1022,7 +1026,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return basic.ParseBasicSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Basic")
 		}
 
 	case Battery:
@@ -1032,7 +1036,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x03:
 			return battery.ParseBatteryReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Battery")
 		}
 
 	case ChimneyFan:
@@ -1116,7 +1120,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x13:
 			return chimneyfan.ParseChimneyFanStopTimeSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Chimney Fan")
 		}
 
 	case ClimateControlSchedule:
@@ -1138,7 +1142,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return climatecontrolschedule.ParseScheduleSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Climate Control Schedule")
 		}
 
 	case Clock:
@@ -1150,7 +1154,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x04:
 			return clock.ParseClockSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Clock")
 		}
 
 	case Configuration:
@@ -1162,7 +1166,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x04:
 			return configuration.ParseConfigurationSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Configuration")
 		}
 
 	case ConfigurationV2:
@@ -1180,7 +1184,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x04:
 			return configurationv2.ParseConfigurationSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Configuration")
 		}
 
 	case DcpConfig:
@@ -1194,7 +1198,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return dcpconfig.ParseDcpListSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Dcp Config")
 		}
 
 	case DcpMonitor:
@@ -1208,7 +1212,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return dcpmonitor.ParseDcpListReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Dcp Monitor")
 		}
 
 	case DoorLockLogging:
@@ -1222,7 +1226,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x04:
 			return doorlocklogging.ParseRecordReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Door Lock Logging")
 		}
 
 	case DoorLock:
@@ -1240,7 +1244,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return doorlock.ParseDoorLockOperationSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Door Lock")
 		}
 
 	case DoorLockV2:
@@ -1258,7 +1262,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return doorlockv2.ParseDoorLockOperationSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Door Lock")
 		}
 
 	case EnergyProduction:
@@ -1268,7 +1272,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x03:
 			return energyproduction.ParseEnergyProductionReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Energy Production")
 		}
 
 	case FirmwareUpdateMd:
@@ -1288,7 +1292,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x07:
 			return firmwareupdatemd.ParseFirmwareUpdateMdStatusReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Firmware Update Md")
 		}
 
 	case FirmwareUpdateMdV2:
@@ -1308,7 +1312,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x07:
 			return firmwareupdatemdv2.ParseFirmwareUpdateMdStatusReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Firmware Update Md")
 		}
 
 	case FirmwareUpdateMdV3:
@@ -1328,7 +1332,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x07:
 			return firmwareupdatemdv3.ParseFirmwareUpdateMdStatusReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Firmware Update Md")
 		}
 
 	case GeographicLocation:
@@ -1340,7 +1344,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return geographiclocation.ParseGeographicLocationSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Geographic Location")
 		}
 
 	case GroupingName:
@@ -1352,7 +1356,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return groupingname.ParseGroupingNameSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Grouping Name")
 		}
 
 	case Hail:
@@ -1360,7 +1364,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return hail.ParseHail(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Hail")
 		}
 
 	case HrvControl:
@@ -1388,7 +1392,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x07:
 			return hrvcontrol.ParseHrvControlVentilationRateSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Hrv Control")
 		}
 
 	case HrvStatus:
@@ -1402,7 +1406,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x04:
 			return hrvstatus.ParseHrvStatusSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Hrv Status")
 		}
 
 	case Indicator:
@@ -1414,7 +1418,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return indicator.ParseIndicatorSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Indicator")
 		}
 
 	case Language:
@@ -1426,7 +1430,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return language.ParseLanguageSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Language")
 		}
 
 	case Lock:
@@ -1438,7 +1442,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return lock.ParseLockSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Lock")
 		}
 
 	case ManufacturerSpecific:
@@ -1448,7 +1452,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return manufacturerspecific.ParseManufacturerSpecificReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Manufacturer Specific")
 		}
 
 	case ManufacturerSpecificV2:
@@ -1462,7 +1466,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x07:
 			return manufacturerspecificv2.ParseDeviceSpecificReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Manufacturer Specific")
 		}
 
 	case MeterPulse:
@@ -1472,7 +1476,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return meterpulse.ParseMeterPulseReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Meter Pulse")
 		}
 
 	case MeterTblConfig:
@@ -1480,7 +1484,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return metertblconfig.ParseMeterTblTablePointAdmNoSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Meter Tbl Config")
 		}
 
 	case MeterTblMonitor:
@@ -1516,7 +1520,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return metertblmonitor.ParseMeterTblTablePointAdmNoReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Meter Tbl Monitor")
 		}
 
 	case MeterTblMonitorV2:
@@ -1552,7 +1556,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return metertblmonitorv2.ParseMeterTblTablePointAdmNoReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Meter Tbl Monitor")
 		}
 
 	case MeterTblPush:
@@ -1564,7 +1568,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return metertblpush.ParseMeterTblPushConfigurationSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Meter Tbl Push")
 		}
 
 	case Meter:
@@ -1574,7 +1578,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return meter.ParseMeterReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Meter")
 		}
 
 	case MeterV2:
@@ -1590,7 +1594,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x04:
 			return meterv2.ParseMeterSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Meter")
 		}
 
 	case MeterV3:
@@ -1606,7 +1610,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x04:
 			return meterv3.ParseMeterSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Meter")
 		}
 
 	case MeterV4:
@@ -1622,7 +1626,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x04:
 			return meterv4.ParseMeterSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Meter")
 		}
 
 	case MtpWindowCovering:
@@ -1634,7 +1638,25 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return mtpwindowcovering.ParseMoveToPositionSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Mtp Window Covering")
+		}
+
+	case MultiChannelAssociationV2:
+		switch payload[1] {
+		case 0x02:
+			return multichannelassociationv2.ParseMultiChannelAssociationGet(payload), nil
+		case 0x05:
+			return multichannelassociationv2.ParseMultiChannelAssociationGroupingsGet(payload), nil
+		case 0x06:
+			return multichannelassociationv2.ParseMultiChannelAssociationGroupingsReport(payload), nil
+		case 0x04:
+			return multichannelassociationv2.ParseMultiChannelAssociationRemove(payload), nil
+		case 0x03:
+			return multichannelassociationv2.ParseMultiChannelAssociationReport(payload), nil
+		case 0x01:
+			return multichannelassociationv2.ParseMultiChannelAssociationSet(payload), nil
+		default:
+			return nil, errors.New("Unknown command in command class Command Class Multi Channel Association")
 		}
 
 	case MultiChannelV2:
@@ -1660,7 +1682,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return multichannelv2.ParseMultiInstanceReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Multi Channel")
 		}
 
 	case MultiChannelV3:
@@ -1686,7 +1708,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return multichannelv3.ParseMultiInstanceReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Multi Channel")
 		}
 
 	case MultiCmd:
@@ -1694,7 +1716,25 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return multicmd.ParseMultiCmdEncap(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Multi Cmd")
+		}
+
+	case MultiInstanceAssociation:
+		switch payload[1] {
+		case 0x02:
+			return multiinstanceassociation.ParseMultiInstanceAssociationGet(payload), nil
+		case 0x05:
+			return multiinstanceassociation.ParseMultiInstanceAssociationGroupingsGet(payload), nil
+		case 0x06:
+			return multiinstanceassociation.ParseMultiInstanceAssociationGroupingsReport(payload), nil
+		case 0x04:
+			return multiinstanceassociation.ParseMultiInstanceAssociationRemove(payload), nil
+		case 0x03:
+			return multiinstanceassociation.ParseMultiInstanceAssociationReport(payload), nil
+		case 0x01:
+			return multiinstanceassociation.ParseMultiInstanceAssociationSet(payload), nil
+		default:
+			return nil, errors.New("Unknown command in command class Command Class Multi Instance Association")
 		}
 
 	case MultiInstance:
@@ -1706,7 +1746,21 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return multiinstance.ParseMultiInstanceReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Multi Instance")
+		}
+
+	case NetworkManagementProxy:
+		switch payload[1] {
+		case 0x03:
+			return networkmanagementproxy.ParseNodeInfoCachedGet(payload), nil
+		case 0x04:
+			return networkmanagementproxy.ParseNodeInfoCachedReport(payload), nil
+		case 0x01:
+			return networkmanagementproxy.ParseNodeListGet(payload), nil
+		case 0x02:
+			return networkmanagementproxy.ParseNodeListReport(payload), nil
+		default:
+			return nil, errors.New("Unknown command in command class Command Class Network Management Proxy")
 		}
 
 	case NetworkManagementBasic:
@@ -1726,7 +1780,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x07:
 			return networkmanagementbasic.ParseDefaultSetComplete(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Network Management Basic")
 		}
 
 	case NetworkManagementInclusion:
@@ -1760,7 +1814,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x10:
 			return networkmanagementinclusion.ParseReturnRouteDeleteComplete(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Network Management Inclusion")
 		}
 
 	case NodeNaming:
@@ -1778,7 +1832,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return nodenaming.ParseNodeNamingNodeNameSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Node Naming")
 		}
 
 	case Powerlevel:
@@ -1796,7 +1850,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x04:
 			return powerlevel.ParsePowerlevelTestNodeSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Powerlevel")
 		}
 
 	case PrepaymentEncapsulation:
@@ -1804,7 +1858,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return prepaymentencapsulation.ParseCmdEncapsulation(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Prepayment Encapsulation")
 		}
 
 	case Prepayment:
@@ -1818,7 +1872,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x04:
 			return prepayment.ParsePrepaymentSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Prepayment")
 		}
 
 	case Proprietary:
@@ -1830,7 +1884,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return proprietary.ParseProprietarySet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Proprietary")
 		}
 
 	case Protection:
@@ -1842,7 +1896,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return protection.ParseProtectionSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Protection")
 		}
 
 	case ProtectionV2:
@@ -1870,7 +1924,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x09:
 			return protectionv2.ParseProtectionTimeoutSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Protection")
 		}
 
 	case RateTblConfig:
@@ -1880,7 +1934,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return ratetblconfig.ParseRateTblSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Rate Tbl Config")
 		}
 
 	case RateTblMonitor:
@@ -1906,7 +1960,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return ratetblmonitor.ParseRateTblSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Rate Tbl Monitor")
 		}
 
 	case RemoteAssociationActivate:
@@ -1914,7 +1968,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return remoteassociationactivate.ParseRemoteAssociationActivate(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Remote Association Activate")
 		}
 
 	case RemoteAssociation:
@@ -1926,7 +1980,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return remoteassociation.ParseRemoteAssociationConfigurationSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Remote Association")
 		}
 
 	case SceneActivation:
@@ -1934,7 +1988,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return sceneactivation.ParseSceneActivationSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Scene Activation")
 		}
 
 	case SceneActuatorConf:
@@ -1946,7 +2000,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return sceneactuatorconf.ParseSceneActuatorConfSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Scene Actuator Conf")
 		}
 
 	case SceneControllerConf:
@@ -1958,7 +2012,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return scenecontrollerconf.ParseSceneControllerConfSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Scene Controller Conf")
 		}
 
 	case ScheduleEntryLock:
@@ -1984,7 +2038,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x0A:
 			return scheduleentrylock.ParseScheduleEntryTypeSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Schedule Entry Lock")
 		}
 
 	case ScheduleEntryLockV2:
@@ -2016,7 +2070,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x0A:
 			return scheduleentrylockv2.ParseScheduleEntryTypeSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Schedule Entry Lock")
 		}
 
 	case ScheduleEntryLockV3:
@@ -2054,7 +2108,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x10:
 			return scheduleentrylockv3.ParseScheduleEntryLockDailyRepeatingSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Schedule Entry Lock")
 		}
 
 	case ScreenAttributes:
@@ -2064,7 +2118,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return screenattributes.ParseScreenAttributesReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Screen Attributes")
 		}
 
 	case ScreenAttributesV2:
@@ -2074,7 +2128,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x03:
 			return screenattributesv2.ParseScreenAttributesReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Screen Attributes")
 		}
 
 	case ScreenMd:
@@ -2084,7 +2138,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return screenmd.ParseScreenMdReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Screen Md")
 		}
 
 	case ScreenMdV2:
@@ -2094,7 +2148,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x03:
 			return screenmdv2.ParseScreenMdReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Screen Md")
 		}
 
 	case SecurityPanelMode:
@@ -2110,7 +2164,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return securitypanelmode.ParseSecurityPanelModeSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Security Panel Mode")
 		}
 
 	case SecurityPanelZoneSensor:
@@ -2128,7 +2182,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x06:
 			return securitypanelzonesensor.ParseSecurityPanelZoneSensorStateReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Security Panel Zone Sensor")
 		}
 
 	case SecurityPanelZone:
@@ -2146,7 +2200,35 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x04:
 			return securitypanelzone.ParseSecurityPanelZoneTypeReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Security Panel Zone")
+		}
+
+	case Security:
+		switch payload[1] {
+		case 0x06:
+			return security.ParseNetworkKeySet(payload), nil
+		case 0x07:
+			return security.ParseNetworkKeyVerify(payload), nil
+		case 0x02:
+			return security.ParseSecurityCommandsSupportedGet(payload), nil
+		case 0x03:
+			return security.ParseSecurityCommandsSupportedReport(payload), nil
+		case 0x81:
+			return security.ParseSecurityMessageEncapsulation(payload), nil
+		case 0xC1:
+			return security.ParseSecurityMessageEncapsulationNonceGet(payload), nil
+		case 0x40:
+			return security.ParseSecurityNonceGet(payload), nil
+		case 0x80:
+			return security.ParseSecurityNonceReport(payload), nil
+		case 0x04:
+			return security.ParseSecuritySchemeGet(payload), nil
+		case 0x08:
+			return security.ParseSecuritySchemeInherit(payload), nil
+		case 0x05:
+			return security.ParseSecuritySchemeReport(payload), nil
+		default:
+			return nil, errors.New("Unknown command in command class Command Class Security")
 		}
 
 	case SensorAlarm:
@@ -2160,7 +2242,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x04:
 			return sensoralarm.ParseSensorAlarmSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Sensor Alarm")
 		}
 
 	case SensorBinary:
@@ -2170,7 +2252,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x03:
 			return sensorbinary.ParseSensorBinaryReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Sensor Binary")
 		}
 
 	case SensorBinaryV2:
@@ -2184,7 +2266,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x04:
 			return sensorbinaryv2.ParseSensorBinarySupportedSensorReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Sensor Binary")
 		}
 
 	case SensorConfiguration:
@@ -2196,7 +2278,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return sensorconfiguration.ParseSensorTriggerLevelSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Sensor Configuration")
 		}
 
 	case SensorMultilevel:
@@ -2206,7 +2288,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return sensormultilevel.ParseSensorMultilevelReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Sensor Multilevel")
 		}
 
 	case SensorMultilevelV2:
@@ -2216,7 +2298,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return sensormultilevelv2.ParseSensorMultilevelReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Sensor Multilevel")
 		}
 
 	case SensorMultilevelV3:
@@ -2226,7 +2308,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return sensormultilevelv3.ParseSensorMultilevelReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Sensor Multilevel")
 		}
 
 	case SensorMultilevelV4:
@@ -2236,7 +2318,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return sensormultilevelv4.ParseSensorMultilevelReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Sensor Multilevel")
 		}
 
 	case SensorMultilevelV5:
@@ -2254,7 +2336,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x06:
 			return sensormultilevelv5.ParseSensorMultilevelSupportedScaleReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Sensor Multilevel")
 		}
 
 	case SensorMultilevelV6:
@@ -2272,7 +2354,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x06:
 			return sensormultilevelv6.ParseSensorMultilevelSupportedScaleReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Sensor Multilevel")
 		}
 
 	case SilenceAlarm:
@@ -2280,7 +2362,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return silencealarm.ParseSensorAlarmSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Silence Alarm")
 		}
 
 	case SimpleAvControl:
@@ -2296,7 +2378,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return simpleavcontrol.ParseSimpleAvControlSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Simple Av Control")
 		}
 
 	case SwitchAll:
@@ -2312,7 +2394,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return switchall.ParseSwitchAllSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Switch All")
 		}
 
 	case SwitchBinary:
@@ -2324,7 +2406,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return switchbinary.ParseSwitchBinarySet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Switch Binary")
 		}
 
 	case SwitchMultilevel:
@@ -2340,7 +2422,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return switchmultilevel.ParseSwitchMultilevelStopLevelChange(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Switch Multilevel")
 		}
 
 	case SwitchMultilevelV2:
@@ -2356,7 +2438,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return switchmultilevelv2.ParseSwitchMultilevelStopLevelChange(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Switch Multilevel")
 		}
 
 	case SwitchMultilevelV3:
@@ -2376,7 +2458,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x07:
 			return switchmultilevelv3.ParseSwitchMultilevelSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Switch Multilevel")
 		}
 
 	case SwitchToggleBinary:
@@ -2388,7 +2470,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x03:
 			return switchtogglebinary.ParseSwitchToggleBinaryReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Switch Toggle Binary")
 		}
 
 	case SwitchToggleMultilevel:
@@ -2404,7 +2486,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return switchtogglemultilevel.ParseSwitchToggleMultilevelStopLevelChange(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Switch Toggle Multilevel")
 		}
 
 	case TariffConfig:
@@ -2416,7 +2498,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return tariffconfig.ParseTariffTblSupplierSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Tariff Config")
 		}
 
 	case TariffTblMonitor:
@@ -2434,7 +2516,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return tarifftblmonitor.ParseTariffTblSupplierReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Tariff Tbl Monitor")
 		}
 
 	case ThermostatFanMode:
@@ -2450,7 +2532,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return thermostatfanmode.ParseThermostatFanModeSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Thermostat Fan Mode")
 		}
 
 	case ThermostatFanModeV2:
@@ -2466,7 +2548,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return thermostatfanmodev2.ParseThermostatFanModeSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Thermostat Fan Mode")
 		}
 
 	case ThermostatFanModeV3:
@@ -2482,7 +2564,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return thermostatfanmodev3.ParseThermostatFanModeSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Thermostat Fan Mode")
 		}
 
 	case ThermostatFanModeV4:
@@ -2498,7 +2580,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return thermostatfanmodev4.ParseThermostatFanModeSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Thermostat Fan Mode")
 		}
 
 	case ThermostatFanState:
@@ -2508,7 +2590,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x03:
 			return thermostatfanstate.ParseThermostatFanStateReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Thermostat Fan State")
 		}
 
 	case ThermostatHeating:
@@ -2538,7 +2620,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x11:
 			return thermostatheating.ParseThermostatHeatingTimedOffSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Thermostat Heating")
 		}
 
 	case ThermostatMode:
@@ -2554,7 +2636,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return thermostatmode.ParseThermostatModeSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Thermostat Mode")
 		}
 
 	case ThermostatModeV2:
@@ -2570,7 +2652,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return thermostatmodev2.ParseThermostatModeSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Thermostat Mode")
 		}
 
 	case ThermostatModeV3:
@@ -2586,7 +2668,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return thermostatmodev3.ParseThermostatModeSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Thermostat Mode")
 		}
 
 	case ThermostatOperatingState:
@@ -2596,7 +2678,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x03:
 			return thermostatoperatingstate.ParseThermostatOperatingStateReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Thermostat Operating State")
 		}
 
 	case ThermostatOperatingStateV2:
@@ -2614,7 +2696,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x06:
 			return thermostatoperatingstatev2.ParseThermostatOperatingStateLoggingReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Thermostat Operating State")
 		}
 
 	case ThermostatSetback:
@@ -2626,7 +2708,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return thermostatsetback.ParseThermostatSetbackSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Thermostat Setback")
 		}
 
 	case ThermostatSetpoint:
@@ -2642,7 +2724,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return thermostatsetpoint.ParseThermostatSetpointSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Thermostat Setpoint")
 		}
 
 	case ThermostatSetpointV2:
@@ -2658,7 +2740,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return thermostatsetpointv2.ParseThermostatSetpointSupportedReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Thermostat Setpoint")
 		}
 
 	case ThermostatSetpointV3:
@@ -2678,7 +2760,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x0A:
 			return thermostatsetpointv3.ParseThermostatSetpointCapabilitiesReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Thermostat Setpoint")
 		}
 
 	case TimeParameters:
@@ -2690,7 +2772,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return timeparameters.ParseTimeParametersSet(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Time Parameters")
 		}
 
 	case Time:
@@ -2704,7 +2786,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return time.ParseTimeReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Time")
 		}
 
 	case TimeV2:
@@ -2724,7 +2806,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return timev2.ParseTimeReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Time")
 		}
 
 	case UserCode:
@@ -2740,7 +2822,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x05:
 			return usercode.ParseUsersNumberReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class User Code")
 		}
 
 	case Version:
@@ -2754,7 +2836,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x12:
 			return version.ParseVersionReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Version")
 		}
 
 	case VersionV2:
@@ -2768,7 +2850,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x12:
 			return versionv2.ParseVersionReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Version")
 		}
 
 	case WakeUp:
@@ -2784,7 +2866,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x07:
 			return wakeup.ParseWakeUpNotification(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Wake Up")
 		}
 
 	case WakeUpV2:
@@ -2804,7 +2886,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x07:
 			return wakeupv2.ParseWakeUpNotification(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Wake Up")
 		}
 
 	case ZensorNet:
@@ -2816,7 +2898,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return zensornet.ParseBindRequest(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Zensor Net")
 		}
 
 	case ApplicationCapability:
@@ -2824,7 +2906,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return applicationcapability.ParseCommandCommandClassNotSupported(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Application Capability")
 		}
 
 	case ColorControl:
@@ -2844,7 +2926,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x07:
 			return colorcontrol.ParseStopStateChange(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Color Control")
 		}
 
 	case ColorControlV2:
@@ -2864,7 +2946,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x07:
 			return colorcontrolv2.ParseStopStateChange(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Color Control")
 		}
 
 	case Schedule:
@@ -2888,7 +2970,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x09:
 			return schedule.ParseScheduleStateReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Schedule")
 		}
 
 	case NetworkManagementPrimary:
@@ -2898,7 +2980,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return networkmanagementprimary.ParseControllerChangeStatus(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Network Management Primary")
 		}
 
 	case AssociationGrpInfo:
@@ -2916,7 +2998,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x06:
 			return associationgrpinfo.ParseAssociationGroupCommandListReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Association Group Info")
 		}
 
 	case DeviceResetLocally:
@@ -2924,7 +3006,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x01:
 			return deviceresetlocally.ParseDeviceResetLocallyNotification(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Device Reset Locally")
 		}
 
 	case CentralScene:
@@ -2936,7 +3018,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x03:
 			return centralscene.ParseCentralSceneNotification(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Central Scene")
 		}
 
 	case Antitheft:
@@ -2948,7 +3030,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x03:
 			return antitheft.ParseAntitheftReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Anti-theft")
 		}
 
 	case AntitheftV2:
@@ -2960,7 +3042,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x03:
 			return antitheftv2.ParseAntitheftReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Anti-theft")
 		}
 
 	case ZwaveplusInfo:
@@ -2970,7 +3052,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return zwaveplusinfo.ParseZwaveplusInfoReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Z-Wave+ Info")
 		}
 
 	case ZwaveplusInfoV2:
@@ -2980,7 +3062,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x02:
 			return zwaveplusinfov2.ParseZwaveplusInfoReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Z-Wave+ Info")
 		}
 
 	case Appliance:
@@ -3000,7 +3082,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x07:
 			return appliance.ParseApplianceReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Appliance")
 		}
 
 	case Dmx:
@@ -3018,7 +3100,7 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x06:
 			return dmx.ParseDmxData40(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class DMX")
 		}
 
 	case BarrierOperator:
@@ -3040,8 +3122,10 @@ func Parse(payload []byte) (interface{}, error) {
 		case 0x08:
 			return barrieroperator.ParseBarrierOperatorSignalReport(payload), nil
 		default:
-			return nil, errors.New("Unknown command")
+			return nil, errors.New("Unknown command in command class Command Class Barrier Operator")
 		}
 
+	default:
+		return nil, errors.New("Unknown command class")
 	}
 }
