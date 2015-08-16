@@ -3,19 +3,23 @@
 
 package switchbinary
 
+import "errors"
+
 // <no value>
 
 type SwitchBinaryReport struct {
 	Value byte
 }
 
-func ParseSwitchBinaryReport(payload []byte) SwitchBinaryReport {
-	val := SwitchBinaryReport{}
-
+func (cmd *SwitchBinaryReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Value = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Value = payload[i]
 	i++
 
-	return val
+	return nil
 }

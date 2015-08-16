@@ -3,6 +3,8 @@
 
 package switchmultilevelv3
 
+import "errors"
+
 // <no value>
 
 type SwitchMultilevelStartLevelChange struct {
@@ -21,31 +23,45 @@ type SwitchMultilevelStartLevelChange struct {
 	StepSize byte
 }
 
-func ParseSwitchMultilevelStartLevelChange(payload []byte) SwitchMultilevelStartLevelChange {
-	val := SwitchMultilevelStartLevelChange{}
-
+func (cmd *SwitchMultilevelStartLevelChange) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.IncDec = (payload[i] & 0x18) << 3
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties1.UpDown = (payload[i] & 0xC0) << 6
+	cmd.Properties1.IncDec = (payload[i] & 0x18) << 3
+
+	cmd.Properties1.UpDown = (payload[i] & 0xC0) << 6
 
 	if payload[i]&0x20 == 0x20 {
-		val.Properties1.IgnoreStartLevel = true
+		cmd.Properties1.IgnoreStartLevel = true
 	} else {
-		val.Properties1.IgnoreStartLevel = false
+		cmd.Properties1.IgnoreStartLevel = false
 	}
 
 	i += 1
 
-	val.StartLevel = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartLevel = payload[i]
 	i++
 
-	val.DimmingDuration = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DimmingDuration = payload[i]
 	i++
 
-	val.StepSize = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StepSize = payload[i]
 	i++
 
-	return val
+	return nil
 }

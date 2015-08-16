@@ -8,8 +8,7 @@ package schedule
 type ScheduleSupportedGet struct {
 }
 
-func ParseScheduleSupportedGet(payload []byte) ScheduleSupportedGet {
-	val := ScheduleSupportedGet{}
+func (cmd *ScheduleSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

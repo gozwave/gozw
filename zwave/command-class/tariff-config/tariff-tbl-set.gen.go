@@ -3,7 +3,10 @@
 
 package tariffconfig
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -17,20 +20,30 @@ type TariffTblSet struct {
 	TariffValue uint32
 }
 
-func ParseTariffTblSet(payload []byte) TariffTblSet {
-	val := TariffTblSet{}
-
+func (cmd *TariffTblSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.RateParameterSetId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RateParameterSetId = payload[i]
 	i++
 
-	val.Properties1.TariffPrecision = (payload[i] & 0xE0) << 5
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.TariffPrecision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.TariffValue = binary.BigEndian.Uint32(payload[i : i+4])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.TariffValue = binary.BigEndian.Uint32(payload[i : i+4])
 	i += 4
 
-	return val
+	return nil
 }

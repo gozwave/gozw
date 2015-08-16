@@ -3,7 +3,10 @@
 
 package wakeup
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -13,16 +16,22 @@ type WakeUpIntervalSet struct {
 	Nodeid byte
 }
 
-func ParseWakeUpIntervalSet(payload []byte) WakeUpIntervalSet {
-	val := WakeUpIntervalSet{}
-
+func (cmd *WakeUpIntervalSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Seconds = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Seconds = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.Nodeid = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Nodeid = payload[i]
 	i++
 
-	return val
+	return nil
 }

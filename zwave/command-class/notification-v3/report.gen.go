@@ -3,6 +3,8 @@
 
 package notificationv3
 
+import "errors"
+
 // <no value>
 
 type NotificationReport struct {
@@ -29,44 +31,78 @@ type NotificationReport struct {
 	SequenceNumber byte
 }
 
-func ParseNotificationReport(payload []byte) NotificationReport {
-	val := NotificationReport{}
-
+func (cmd *NotificationReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.V1AlarmType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.V1AlarmType = payload[i]
 	i++
 
-	val.V1AlarmLevel = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.V1AlarmLevel = payload[i]
 	i++
 
-	val.ZensorNetSourceNodeId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZensorNetSourceNodeId = payload[i]
 	i++
 
-	val.NotificationStatus = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NotificationStatus = payload[i]
 	i++
 
-	val.NotificationType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NotificationType = payload[i]
 	i++
 
-	val.Event = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Event = payload[i]
 	i++
 
-	val.Properties1.EventParametersLength = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.EventParametersLength = (payload[i] & 0x1F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.Sequence = true
+		cmd.Properties1.Sequence = true
 	} else {
-		val.Properties1.Sequence = false
+		cmd.Properties1.Sequence = false
 	}
 
 	i += 1
 
-	val.EventParameter = payload[i : i+6]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.EventParameter = payload[i : i+6]
 	i += 6
 
-	val.SequenceNumber = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SequenceNumber = payload[i]
 	i++
 
-	return val
+	return nil
 }

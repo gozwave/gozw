@@ -3,18 +3,22 @@
 
 package proprietary
 
+import "errors"
+
 // <no value>
 
 type ProprietarySet struct {
 	Data []byte
 }
 
-func ParseProprietarySet(payload []byte) ProprietarySet {
-	val := ProprietarySet{}
-
+func (cmd *ProprietarySet) UnmarshalBinary(payload []byte) error {
 	i := 2
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	val.Data = payload[i:]
 
-	return val
+	return nil
 }

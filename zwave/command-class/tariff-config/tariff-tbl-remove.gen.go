@@ -3,6 +3,8 @@
 
 package tariffconfig
 
+import "errors"
+
 // <no value>
 
 type TariffTblRemove struct {
@@ -13,17 +15,23 @@ type TariffTblRemove struct {
 	RateParameterSetId []byte
 }
 
-func ParseTariffTblRemove(payload []byte) TariffTblRemove {
-	val := TariffTblRemove{}
-
+func (cmd *TariffTblRemove) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.RateParameterSetIds = (payload[i] & 0x3F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.RateParameterSetIds = (payload[i] & 0x3F)
 
 	i += 1
 
-	val.RateParameterSetId = payload[i : i+0]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RateParameterSetId = payload[i : i+0]
 	i += 0
 
-	return val
+	return nil
 }

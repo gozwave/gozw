@@ -8,8 +8,7 @@ package timev2
 type TimeGet struct {
 }
 
-func ParseTimeGet(payload []byte) TimeGet {
-	val := TimeGet{}
+func (cmd *TimeGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

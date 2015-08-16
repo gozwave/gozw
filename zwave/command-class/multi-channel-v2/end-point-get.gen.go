@@ -8,8 +8,7 @@ package multichannelv2
 type MultiChannelEndPointGet struct {
 }
 
-func ParseMultiChannelEndPointGet(payload []byte) MultiChannelEndPointGet {
-	val := MultiChannelEndPointGet{}
+func (cmd *MultiChannelEndPointGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

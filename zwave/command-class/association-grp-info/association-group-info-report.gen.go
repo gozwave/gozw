@@ -3,6 +3,8 @@
 
 package associationgrpinfo
 
+import "errors"
+
 // <no value>
 
 type AssociationGroupInfoReport struct {
@@ -15,26 +17,28 @@ type AssociationGroupInfoReport struct {
 	}
 }
 
-func ParseAssociationGroupInfoReport(payload []byte) AssociationGroupInfoReport {
-	val := AssociationGroupInfoReport{}
-
+func (cmd *AssociationGroupInfoReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.GroupCount = (payload[i] & 0x3F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.GroupCount = (payload[i] & 0x3F)
 
 	if payload[i]&0x40 == 0x40 {
-		val.Properties1.DynamicInfo = true
+		cmd.Properties1.DynamicInfo = true
 	} else {
-		val.Properties1.DynamicInfo = false
+		cmd.Properties1.DynamicInfo = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.ListMode = true
+		cmd.Properties1.ListMode = true
 	} else {
-		val.Properties1.ListMode = false
+		cmd.Properties1.ListMode = false
 	}
 
 	i += 1
 
-	return val
+	return nil
 }

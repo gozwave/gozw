@@ -3,19 +3,23 @@
 
 package hrvcontrol
 
+import "errors"
+
 // <no value>
 
 type HrvControlBypassReport struct {
 	Bypass byte
 }
 
-func ParseHrvControlBypassReport(payload []byte) HrvControlBypassReport {
-	val := HrvControlBypassReport{}
-
+func (cmd *HrvControlBypassReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Bypass = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Bypass = payload[i]
 	i++
 
-	return val
+	return nil
 }

@@ -8,8 +8,7 @@ package avcontentdirectorymd
 type AvContentBrowseMdByLetterReport struct {
 }
 
-func ParseAvContentBrowseMdByLetterReport(payload []byte) AvContentBrowseMdByLetterReport {
-	val := AvContentBrowseMdByLetterReport{}
+func (cmd *AvContentBrowseMdByLetterReport) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

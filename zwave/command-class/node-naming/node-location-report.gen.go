@@ -3,6 +3,8 @@
 
 package nodenaming
 
+import "errors"
+
 // <no value>
 
 type NodeNamingNodeLocationReport struct {
@@ -13,18 +15,24 @@ type NodeNamingNodeLocationReport struct {
 	NodeLocationChar string
 }
 
-func ParseNodeNamingNodeLocationReport(payload []byte) NodeNamingNodeLocationReport {
-	val := NodeNamingNodeLocationReport{}
-
+func (cmd *NodeNamingNodeLocationReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Level.CharPresentation = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Level.CharPresentation = (payload[i] & 0x07)
 
 	i += 1
 
-	val.NodeLocationChar = string(payload[i : i+16])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NodeLocationChar = string(payload[i : i+16])
 
 	i += 16
 
-	return val
+	return nil
 }

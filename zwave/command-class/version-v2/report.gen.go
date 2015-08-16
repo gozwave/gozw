@@ -3,6 +3,8 @@
 
 package versionv2
 
+import "errors"
+
 // <no value>
 
 type VersionReport struct {
@@ -21,31 +23,57 @@ type VersionReport struct {
 	NumberOfFirmwareTargets byte
 }
 
-func ParseVersionReport(payload []byte) VersionReport {
-	val := VersionReport{}
-
+func (cmd *VersionReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ZWaveLibraryType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZWaveLibraryType = payload[i]
 	i++
 
-	val.ZWaveProtocolVersion = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZWaveProtocolVersion = payload[i]
 	i++
 
-	val.ZWaveProtocolSubVersion = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZWaveProtocolSubVersion = payload[i]
 	i++
 
-	val.Firmware0Version = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Firmware0Version = payload[i]
 	i++
 
-	val.Firmware0SubVersion = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Firmware0SubVersion = payload[i]
 	i++
 
-	val.HardwareVersion = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.HardwareVersion = payload[i]
 	i++
 
-	val.NumberOfFirmwareTargets = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumberOfFirmwareTargets = payload[i]
 	i++
 
-	return val
+	return nil
 }

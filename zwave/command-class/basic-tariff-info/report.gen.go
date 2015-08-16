@@ -3,7 +3,10 @@
 
 package basictariffinfo
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -33,43 +36,73 @@ type BasicTariffInfoReport struct {
 	E2RateConsumptionRegister uint32
 }
 
-func ParseBasicTariffInfoReport(payload []byte) BasicTariffInfoReport {
-	val := BasicTariffInfoReport{}
-
+func (cmd *BasicTariffInfoReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.TotalNoImportRates = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.TotalNoImportRates = (payload[i] & 0x0F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.Dual = true
+		cmd.Properties1.Dual = true
 	} else {
-		val.Properties1.Dual = false
+		cmd.Properties1.Dual = false
 	}
 
 	i += 1
 
-	val.Properties2.E1CurrentRateInUse = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties2.E1CurrentRateInUse = (payload[i] & 0x0F)
 
 	i += 1
 
-	val.E1RateConsumptionRegister = binary.BigEndian.Uint32(payload[i : i+4])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.E1RateConsumptionRegister = binary.BigEndian.Uint32(payload[i : i+4])
 	i += 4
 
-	val.E1TimeForNextRateHours = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.E1TimeForNextRateHours = payload[i]
 	i++
 
-	val.E1TimeForNextRateMinutes = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.E1TimeForNextRateMinutes = payload[i]
 	i++
 
-	val.E1TimeForNextRateSeconds = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.E1TimeForNextRateSeconds = payload[i]
 	i++
 
-	val.Properties3.E2CurrentRateInUse = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties3.E2CurrentRateInUse = (payload[i] & 0x0F)
 
 	i += 1
 
-	val.E2RateConsumptionRegister = binary.BigEndian.Uint32(payload[i : i+4])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.E2RateConsumptionRegister = binary.BigEndian.Uint32(payload[i : i+4])
 	i += 4
 
-	return val
+	return nil
 }

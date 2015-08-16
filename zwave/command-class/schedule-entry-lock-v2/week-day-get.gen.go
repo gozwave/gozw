@@ -3,6 +3,8 @@
 
 package scheduleentrylockv2
 
+import "errors"
+
 // <no value>
 
 type ScheduleEntryLockWeekDayGet struct {
@@ -11,16 +13,22 @@ type ScheduleEntryLockWeekDayGet struct {
 	ScheduleSlotId byte
 }
 
-func ParseScheduleEntryLockWeekDayGet(payload []byte) ScheduleEntryLockWeekDayGet {
-	val := ScheduleEntryLockWeekDayGet{}
-
+func (cmd *ScheduleEntryLockWeekDayGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.UserIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.UserIdentifier = payload[i]
 	i++
 
-	val.ScheduleSlotId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ScheduleSlotId = payload[i]
 	i++
 
-	return val
+	return nil
 }

@@ -8,8 +8,7 @@ package wakeupv2
 type WakeUpNoMoreInformation struct {
 }
 
-func ParseWakeUpNoMoreInformation(payload []byte) WakeUpNoMoreInformation {
-	val := WakeUpNoMoreInformation{}
+func (cmd *WakeUpNoMoreInformation) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

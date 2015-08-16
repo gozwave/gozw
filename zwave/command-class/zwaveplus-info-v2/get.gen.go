@@ -8,8 +8,7 @@ package zwaveplusinfov2
 type ZwaveplusInfoGet struct {
 }
 
-func ParseZwaveplusInfoGet(payload []byte) ZwaveplusInfoGet {
-	val := ZwaveplusInfoGet{}
+func (cmd *ZwaveplusInfoGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

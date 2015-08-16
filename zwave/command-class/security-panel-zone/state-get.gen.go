@@ -3,19 +3,23 @@
 
 package securitypanelzone
 
+import "errors"
+
 // <no value>
 
 type SecurityPanelZoneStateGet struct {
 	ZoneNumber byte
 }
 
-func ParseSecurityPanelZoneStateGet(payload []byte) SecurityPanelZoneStateGet {
-	val := SecurityPanelZoneStateGet{}
-
+func (cmd *SecurityPanelZoneStateGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ZoneNumber = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZoneNumber = payload[i]
 	i++
 
-	return val
+	return nil
 }

@@ -8,8 +8,7 @@ package wakeupv2
 type WakeUpIntervalCapabilitiesGet struct {
 }
 
-func ParseWakeUpIntervalCapabilitiesGet(payload []byte) WakeUpIntervalCapabilitiesGet {
-	val := WakeUpIntervalCapabilitiesGet{}
+func (cmd *WakeUpIntervalCapabilitiesGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

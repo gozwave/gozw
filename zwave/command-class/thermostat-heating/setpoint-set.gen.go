@@ -3,6 +3,8 @@
 
 package thermostatheating
 
+import "errors"
+
 // <no value>
 
 type ThermostatHeatingSetpointSet struct {
@@ -19,24 +21,34 @@ type ThermostatHeatingSetpointSet struct {
 	Value []byte
 }
 
-func ParseThermostatHeatingSetpointSet(payload []byte) ThermostatHeatingSetpointSet {
-	val := ThermostatHeatingSetpointSet{}
-
+func (cmd *ThermostatHeatingSetpointSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SetpointNr = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SetpointNr = payload[i]
 	i++
 
-	val.Properties1.Size = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties1.Scale = (payload[i] & 0x18) << 3
+	cmd.Properties1.Size = (payload[i] & 0x07)
 
-	val.Properties1.Precision = (payload[i] & 0xE0) << 5
+	cmd.Properties1.Scale = (payload[i] & 0x18) << 3
+
+	cmd.Properties1.Precision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.Value = payload[i : i+1]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Value = payload[i : i+1]
 	i += 1
 
-	return val
+	return nil
 }

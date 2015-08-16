@@ -3,6 +3,8 @@
 
 package energyproduction
 
+import "errors"
+
 // <no value>
 
 type EnergyProductionReport struct {
@@ -19,24 +21,34 @@ type EnergyProductionReport struct {
 	Value []byte
 }
 
-func ParseEnergyProductionReport(payload []byte) EnergyProductionReport {
-	val := EnergyProductionReport{}
-
+func (cmd *EnergyProductionReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ParameterNumber = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ParameterNumber = payload[i]
 	i++
 
-	val.Level.Size = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Level.Scale = (payload[i] & 0x18) << 3
+	cmd.Level.Size = (payload[i] & 0x07)
 
-	val.Level.Precision = (payload[i] & 0xE0) << 5
+	cmd.Level.Scale = (payload[i] & 0x18) << 3
+
+	cmd.Level.Precision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.Value = payload[i : i+1]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Value = payload[i : i+1]
 	i += 1
 
-	return val
+	return nil
 }

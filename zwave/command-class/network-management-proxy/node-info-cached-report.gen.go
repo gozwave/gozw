@@ -3,6 +3,8 @@
 
 package networkmanagementproxy
 
+import "errors"
+
 // <no value>
 
 type NodeInfoCachedReport struct {
@@ -39,50 +41,84 @@ type NodeInfoCachedReport struct {
 	SecurityScheme0CommandClass []byte
 }
 
-func ParseNodeInfoCachedReport(payload []byte) NodeInfoCachedReport {
-	val := NodeInfoCachedReport{}
-
+func (cmd *NodeInfoCachedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SeqNo = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SeqNo = payload[i]
 	i++
 
-	val.Properties1.Age = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties1.Status = (payload[i] & 0xF0) << 4
+	cmd.Properties1.Age = (payload[i] & 0x0F)
+
+	cmd.Properties1.Status = (payload[i] & 0xF0) << 4
 
 	i += 1
 
-	val.Properties2.Capability = (payload[i] & 0x7F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties2.Capability = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties2.Listening = true
+		cmd.Properties2.Listening = true
 	} else {
-		val.Properties2.Listening = false
+		cmd.Properties2.Listening = false
 	}
 
 	i += 1
 
-	val.Properties3.Security = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties3.Sensor = (payload[i] & 0x70) << 4
+	cmd.Properties3.Security = (payload[i] & 0x0F)
+
+	cmd.Properties3.Sensor = (payload[i] & 0x70) << 4
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties3.Opt = true
+		cmd.Properties3.Opt = true
 	} else {
-		val.Properties3.Opt = false
+		cmd.Properties3.Opt = false
 	}
 
 	i += 1
 
-	val.BasicDeviceClass = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.BasicDeviceClass = payload[i]
 	i++
 
-	val.GenericDeviceClass = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GenericDeviceClass = payload[i]
 	i++
 
-	val.SpecificDeviceClass = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SpecificDeviceClass = payload[i]
 	i++
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	{
 		markerIndex := i
@@ -91,9 +127,17 @@ func ParseNodeInfoCachedReport(payload []byte) NodeInfoCachedReport {
 		val.NonSecureCommandClass = payload[i:markerIndex]
 	}
 
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
 	i += 1 // skipping MARKER
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	val.SecurityScheme0CommandClass = payload[i:]
 
-	return val
+	return nil
 }

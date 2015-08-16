@@ -3,6 +3,8 @@
 
 package groupingname
 
+import "errors"
+
 // <no value>
 
 type GroupingNameReport struct {
@@ -15,21 +17,31 @@ type GroupingNameReport struct {
 	GroupingName string
 }
 
-func ParseGroupingNameReport(payload []byte) GroupingNameReport {
-	val := GroupingNameReport{}
-
+func (cmd *GroupingNameReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.GroupingIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GroupingIdentifier = payload[i]
 	i++
 
-	val.Properties1.CharPresentation = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.CharPresentation = (payload[i] & 0x07)
 
 	i += 1
 
-	val.GroupingName = string(payload[i : i+16])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GroupingName = string(payload[i : i+16])
 
 	i += 16
 
-	return val
+	return nil
 }

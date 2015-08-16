@@ -3,6 +3,8 @@
 
 package thermostatheating
 
+import "errors"
+
 // <no value>
 
 type ThermostatHeatingTimedOffSet struct {
@@ -11,16 +13,22 @@ type ThermostatHeatingTimedOffSet struct {
 	Hours byte
 }
 
-func ParseThermostatHeatingTimedOffSet(payload []byte) ThermostatHeatingTimedOffSet {
-	val := ThermostatHeatingTimedOffSet{}
-
+func (cmd *ThermostatHeatingTimedOffSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Minutes = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Minutes = payload[i]
 	i++
 
-	val.Hours = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Hours = payload[i]
 	i++
 
-	return val
+	return nil
 }

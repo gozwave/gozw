@@ -3,19 +3,23 @@
 
 package thermostatheating
 
+import "errors"
+
 // <no value>
 
 type ThermostatHeatingRelayStatusReport struct {
 	RelayStatus byte
 }
 
-func ParseThermostatHeatingRelayStatusReport(payload []byte) ThermostatHeatingRelayStatusReport {
-	val := ThermostatHeatingRelayStatusReport{}
-
+func (cmd *ThermostatHeatingRelayStatusReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.RelayStatus = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RelayStatus = payload[i]
 	i++
 
-	return val
+	return nil
 }

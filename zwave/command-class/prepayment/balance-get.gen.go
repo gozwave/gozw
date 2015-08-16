@@ -3,6 +3,8 @@
 
 package prepayment
 
+import "errors"
+
 // <no value>
 
 type PrepaymentBalanceGet struct {
@@ -11,14 +13,16 @@ type PrepaymentBalanceGet struct {
 	}
 }
 
-func ParsePrepaymentBalanceGet(payload []byte) PrepaymentBalanceGet {
-	val := PrepaymentBalanceGet{}
-
+func (cmd *PrepaymentBalanceGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.BalanceType = (payload[i] & 0xC0) << 6
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.BalanceType = (payload[i] & 0xC0) << 6
 
 	i += 1
 
-	return val
+	return nil
 }

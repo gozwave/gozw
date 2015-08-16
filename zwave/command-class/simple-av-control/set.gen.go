@@ -3,7 +3,10 @@
 
 package simpleavcontrol
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -17,20 +20,30 @@ type SimpleAvControlSet struct {
 	ItemId uint16
 }
 
-func ParseSimpleAvControlSet(payload []byte) SimpleAvControlSet {
-	val := SimpleAvControlSet{}
-
+func (cmd *SimpleAvControlSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SequenceNumber = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SequenceNumber = payload[i]
 	i++
 
-	val.Properties1.KeyAttributes = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.KeyAttributes = (payload[i] & 0x07)
 
 	i += 1
 
-	val.ItemId = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ItemId = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	return val
+	return nil
 }

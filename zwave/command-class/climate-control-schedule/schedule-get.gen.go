@@ -3,6 +3,8 @@
 
 package climatecontrolschedule
 
+import "errors"
+
 // <no value>
 
 type ScheduleGet struct {
@@ -11,14 +13,16 @@ type ScheduleGet struct {
 	}
 }
 
-func ParseScheduleGet(payload []byte) ScheduleGet {
-	val := ScheduleGet{}
-
+func (cmd *ScheduleGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.Weekday = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.Weekday = (payload[i] & 0x07)
 
 	i += 1
 
-	return val
+	return nil
 }

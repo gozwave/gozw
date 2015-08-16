@@ -3,6 +3,8 @@
 
 package barrieroperator
 
+import "errors"
+
 // <no value>
 
 type BarrierOperatorSignalSet struct {
@@ -11,16 +13,22 @@ type BarrierOperatorSignalSet struct {
 	SubsystemState byte
 }
 
-func ParseBarrierOperatorSignalSet(payload []byte) BarrierOperatorSignalSet {
-	val := BarrierOperatorSignalSet{}
-
+func (cmd *BarrierOperatorSignalSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SubsystemType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SubsystemType = payload[i]
 	i++
 
-	val.SubsystemState = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SubsystemState = payload[i]
 	i++
 
-	return val
+	return nil
 }

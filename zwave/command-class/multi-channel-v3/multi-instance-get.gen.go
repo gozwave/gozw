@@ -3,19 +3,23 @@
 
 package multichannelv3
 
+import "errors"
+
 // <no value>
 
 type MultiInstanceGet struct {
 	CommandClass byte
 }
 
-func ParseMultiInstanceGet(payload []byte) MultiInstanceGet {
-	val := MultiInstanceGet{}
-
+func (cmd *MultiInstanceGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.CommandClass = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CommandClass = payload[i]
 	i++
 
-	return val
+	return nil
 }

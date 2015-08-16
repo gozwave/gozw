@@ -3,6 +3,8 @@
 
 package appliance
 
+import "errors"
+
 // <no value>
 
 type ApplianceTypeReport struct {
@@ -13,17 +15,23 @@ type ApplianceTypeReport struct {
 	ApplianceModeSupportedBitmask byte
 }
 
-func ParseApplianceTypeReport(payload []byte) ApplianceTypeReport {
-	val := ApplianceTypeReport{}
-
+func (cmd *ApplianceTypeReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.ApplianceType = (payload[i] & 0x3F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.ApplianceType = (payload[i] & 0x3F)
 
 	i += 1
 
-	val.ApplianceModeSupportedBitmask = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ApplianceModeSupportedBitmask = payload[i]
 	i++
 
-	return val
+	return nil
 }

@@ -3,6 +3,8 @@
 
 package networkmanagementinclusion
 
+import "errors"
+
 // <no value>
 
 type NodeNeighborUpdateStatus struct {
@@ -11,16 +13,22 @@ type NodeNeighborUpdateStatus struct {
 	Status byte
 }
 
-func ParseNodeNeighborUpdateStatus(payload []byte) NodeNeighborUpdateStatus {
-	val := NodeNeighborUpdateStatus{}
-
+func (cmd *NodeNeighborUpdateStatus) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SeqNo = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SeqNo = payload[i]
 	i++
 
-	val.Status = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Status = payload[i]
 	i++
 
-	return val
+	return nil
 }

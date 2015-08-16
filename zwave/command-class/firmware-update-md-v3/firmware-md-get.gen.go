@@ -8,8 +8,7 @@ package firmwareupdatemdv3
 type FirmwareMdGet struct {
 }
 
-func ParseFirmwareMdGet(payload []byte) FirmwareMdGet {
-	val := FirmwareMdGet{}
+func (cmd *FirmwareMdGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

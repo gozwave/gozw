@@ -3,19 +3,23 @@
 
 package chimneyfan
 
+import "errors"
+
 // <no value>
 
 type ChimneyFanStateSet struct {
 	State byte
 }
 
-func ParseChimneyFanStateSet(payload []byte) ChimneyFanStateSet {
-	val := ChimneyFanStateSet{}
-
+func (cmd *ChimneyFanStateSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.State = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.State = payload[i]
 	i++
 
-	return val
+	return nil
 }

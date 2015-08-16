@@ -3,20 +3,24 @@
 
 package security
 
+import "errors"
+
 // <no value>
 
 type SecurityNonceReport struct {
 	NonceByte []byte
 }
 
-func ParseSecurityNonceReport(payload []byte) SecurityNonceReport {
-	val := SecurityNonceReport{}
-
+func (cmd *SecurityNonceReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.NonceByte = payload[i : i+8]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NonceByte = payload[i : i+8]
 
 	i += 8
 
-	return val
+	return nil
 }

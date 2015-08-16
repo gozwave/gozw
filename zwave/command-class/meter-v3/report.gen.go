@@ -3,7 +3,10 @@
 
 package meterv3
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -31,39 +34,57 @@ type MeterReport struct {
 	PreviousMeterValue []byte
 }
 
-func ParseMeterReport(payload []byte) MeterReport {
-	val := MeterReport{}
-
+func (cmd *MeterReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.MeterType = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties1.RateType = (payload[i] & 0x60) << 5
+	cmd.Properties1.MeterType = (payload[i] & 0x1F)
+
+	cmd.Properties1.RateType = (payload[i] & 0x60) << 5
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.Scale2 = true
+		cmd.Properties1.Scale2 = true
 	} else {
-		val.Properties1.Scale2 = false
+		cmd.Properties1.Scale2 = false
 	}
 
 	i += 1
 
-	val.Properties2.Size = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties2.Scale = (payload[i] & 0x18) << 3
+	cmd.Properties2.Size = (payload[i] & 0x07)
 
-	val.Properties2.Precision = (payload[i] & 0xE0) << 5
+	cmd.Properties2.Scale = (payload[i] & 0x18) << 3
+
+	cmd.Properties2.Precision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.MeterValue = payload[i : i+1]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MeterValue = payload[i : i+1]
 	i += 1
 
-	val.DeltaTime = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DeltaTime = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.PreviousMeterValue = payload[i : i+1]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.PreviousMeterValue = payload[i : i+1]
 	i += 1
 
-	return val
+	return nil
 }

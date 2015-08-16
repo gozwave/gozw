@@ -8,8 +8,7 @@ package switchtogglebinary
 type SwitchToggleBinarySet struct {
 }
 
-func ParseSwitchToggleBinarySet(payload []byte) SwitchToggleBinarySet {
-	val := SwitchToggleBinarySet{}
+func (cmd *SwitchToggleBinarySet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

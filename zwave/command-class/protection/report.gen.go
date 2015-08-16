@@ -3,19 +3,23 @@
 
 package protection
 
+import "errors"
+
 // <no value>
 
 type ProtectionReport struct {
 	ProtectionState byte
 }
 
-func ParseProtectionReport(payload []byte) ProtectionReport {
-	val := ProtectionReport{}
-
+func (cmd *ProtectionReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ProtectionState = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ProtectionState = payload[i]
 	i++
 
-	return val
+	return nil
 }

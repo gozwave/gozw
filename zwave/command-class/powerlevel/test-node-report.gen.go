@@ -3,7 +3,10 @@
 
 package powerlevel
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -15,19 +18,29 @@ type PowerlevelTestNodeReport struct {
 	TestFrameCount uint16
 }
 
-func ParsePowerlevelTestNodeReport(payload []byte) PowerlevelTestNodeReport {
-	val := PowerlevelTestNodeReport{}
-
+func (cmd *PowerlevelTestNodeReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.TestNodeid = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.TestNodeid = payload[i]
 	i++
 
-	val.StatusOfOperation = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StatusOfOperation = payload[i]
 	i++
 
-	val.TestFrameCount = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.TestFrameCount = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	return val
+	return nil
 }

@@ -3,7 +3,10 @@
 
 package tarifftblmonitor
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -37,47 +40,89 @@ type TariffTblSupplierReport struct {
 	SupplierCharacter []byte
 }
 
-func ParseTariffTblSupplierReport(payload []byte) TariffTblSupplierReport {
-	val := TariffTblSupplierReport{}
-
+func (cmd *TariffTblSupplierReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Year = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Year = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.Month = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Month = payload[i]
 	i++
 
-	val.Day = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Day = payload[i]
 	i++
 
-	val.HourLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.HourLocalTime = payload[i]
 	i++
 
-	val.MinuteLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MinuteLocalTime = payload[i]
 	i++
 
-	val.SecondLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SecondLocalTime = payload[i]
 	i++
 
-	val.Currency = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Currency = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.Properties1.StandingChargePeriod = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties1.StandingChargePrecision = (payload[i] & 0xE0) << 5
+	cmd.Properties1.StandingChargePeriod = (payload[i] & 0x1F)
+
+	cmd.Properties1.StandingChargePrecision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.StandingChargeValue = binary.BigEndian.Uint32(payload[i : i+4])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StandingChargeValue = binary.BigEndian.Uint32(payload[i : i+4])
 	i += 4
 
-	val.Properties2.NumberOfSupplierCharacters = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties2.NumberOfSupplierCharacters = (payload[i] & 0x1F)
 
 	i += 1
 
-	val.SupplierCharacter = payload[i : i+9]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SupplierCharacter = payload[i : i+9]
 	i += 9
 
-	return val
+	return nil
 }

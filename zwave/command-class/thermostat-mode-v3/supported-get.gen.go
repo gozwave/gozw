@@ -8,8 +8,7 @@ package thermostatmodev3
 type ThermostatModeSupportedGet struct {
 }
 
-func ParseThermostatModeSupportedGet(payload []byte) ThermostatModeSupportedGet {
-	val := ThermostatModeSupportedGet{}
+func (cmd *ThermostatModeSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

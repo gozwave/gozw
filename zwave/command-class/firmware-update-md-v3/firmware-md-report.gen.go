@@ -3,7 +3,10 @@
 
 package firmwareupdatemdv3
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -21,28 +24,50 @@ type FirmwareMdReport struct {
 	MaxFragmentSize uint16
 }
 
-func ParseFirmwareMdReport(payload []byte) FirmwareMdReport {
-	val := FirmwareMdReport{}
-
+func (cmd *FirmwareMdReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ManufacturerId = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ManufacturerId = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.Firmware0Id = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Firmware0Id = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.Firmware0Checksum = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Firmware0Checksum = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.FirmwareUpgradable = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.FirmwareUpgradable = payload[i]
 	i++
 
-	val.NumberOfFirmwareTargets = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumberOfFirmwareTargets = payload[i]
 	i++
 
-	val.MaxFragmentSize = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MaxFragmentSize = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	return val
+	return nil
 }

@@ -3,6 +3,8 @@
 
 package chimneyfan
 
+import "errors"
+
 // <no value>
 
 type ChimneyFanStopTempReport struct {
@@ -17,21 +19,27 @@ type ChimneyFanStopTempReport struct {
 	Value []byte
 }
 
-func ParseChimneyFanStopTempReport(payload []byte) ChimneyFanStopTempReport {
-	val := ChimneyFanStopTempReport{}
-
+func (cmd *ChimneyFanStopTempReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.Size = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties1.Scale = (payload[i] & 0x18) << 3
+	cmd.Properties1.Size = (payload[i] & 0x07)
 
-	val.Properties1.Precision = (payload[i] & 0xE0) << 5
+	cmd.Properties1.Scale = (payload[i] & 0x18) << 3
+
+	cmd.Properties1.Precision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.Value = payload[i : i+0]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Value = payload[i : i+0]
 	i += 0
 
-	return val
+	return nil
 }

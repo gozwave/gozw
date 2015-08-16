@@ -3,6 +3,8 @@
 
 package schedule
 
+import "errors"
+
 // <no value>
 
 type ScheduleSupportedReport struct {
@@ -25,42 +27,56 @@ type ScheduleSupportedReport struct {
 	}
 }
 
-func ParseScheduleSupportedReport(payload []byte) ScheduleSupportedReport {
-	val := ScheduleSupportedReport{}
-
+func (cmd *ScheduleSupportedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.NumberOfSupportedScheduleId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumberOfSupportedScheduleId = payload[i]
 	i++
 
-	val.Properties1.StartTimeSupport = (payload[i] & 0x3F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.StartTimeSupport = (payload[i] & 0x3F)
 
 	if payload[i]&0x40 == 0x40 {
-		val.Properties1.FallbackSupport = true
+		cmd.Properties1.FallbackSupport = true
 	} else {
-		val.Properties1.FallbackSupport = false
+		cmd.Properties1.FallbackSupport = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.SupportEnabledisable = true
+		cmd.Properties1.SupportEnabledisable = true
 	} else {
-		val.Properties1.SupportEnabledisable = false
+		cmd.Properties1.SupportEnabledisable = false
 	}
 
 	i += 1
 
-	val.NumberOfSupportedCc = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumberOfSupportedCc = payload[i]
 	i++
 
-	val.Properties3.SupportedOverrideTypes = (payload[i] & 0x7F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties3.SupportedOverrideTypes = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties3.OverrideSupport = true
+		cmd.Properties3.OverrideSupport = true
 	} else {
-		val.Properties3.OverrideSupport = false
+		cmd.Properties3.OverrideSupport = false
 	}
 
 	i += 1
 
-	return val
+	return nil
 }

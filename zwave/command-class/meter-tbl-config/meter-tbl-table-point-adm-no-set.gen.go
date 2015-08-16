@@ -3,6 +3,8 @@
 
 package metertblconfig
 
+import "errors"
+
 // <no value>
 
 type MeterTblTablePointAdmNoSet struct {
@@ -13,17 +15,23 @@ type MeterTblTablePointAdmNoSet struct {
 	MeterPointAdmNumberCharacter []byte
 }
 
-func ParseMeterTblTablePointAdmNoSet(payload []byte) MeterTblTablePointAdmNoSet {
-	val := MeterTblTablePointAdmNoSet{}
-
+func (cmd *MeterTblTablePointAdmNoSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.NumberOfCharacters = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.NumberOfCharacters = (payload[i] & 0x1F)
 
 	i += 1
 
-	val.MeterPointAdmNumberCharacter = payload[i : i+0]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MeterPointAdmNumberCharacter = payload[i : i+0]
 	i += 0
 
-	return val
+	return nil
 }

@@ -3,18 +3,22 @@
 
 package security
 
+import "errors"
+
 // <no value>
 
 type NetworkKeySet struct {
 	NetworkKeyByte []byte
 }
 
-func ParseNetworkKeySet(payload []byte) NetworkKeySet {
-	val := NetworkKeySet{}
-
+func (cmd *NetworkKeySet) UnmarshalBinary(payload []byte) error {
 	i := 2
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	val.NetworkKeyByte = payload[i:]
 
-	return val
+	return nil
 }

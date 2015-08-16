@@ -3,6 +3,8 @@
 
 package prepayment
 
+import "errors"
+
 // <no value>
 
 type PrepaymentSupportedReport struct {
@@ -11,14 +13,16 @@ type PrepaymentSupportedReport struct {
 	}
 }
 
-func ParsePrepaymentSupportedReport(payload []byte) PrepaymentSupportedReport {
-	val := PrepaymentSupportedReport{}
-
+func (cmd *PrepaymentSupportedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.TypesSupported = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.TypesSupported = (payload[i] & 0x0F)
 
 	i += 1
 
-	return val
+	return nil
 }

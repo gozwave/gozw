@@ -8,8 +8,7 @@ package metertblpush
 type MeterTblPushConfigurationGet struct {
 }
 
-func ParseMeterTblPushConfigurationGet(payload []byte) MeterTblPushConfigurationGet {
-	val := MeterTblPushConfigurationGet{}
+func (cmd *MeterTblPushConfigurationGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

@@ -3,6 +3,8 @@
 
 package networkmanagementinclusion
 
+import "errors"
+
 // <no value>
 
 type NodeAdd struct {
@@ -13,19 +15,33 @@ type NodeAdd struct {
 	TxOptions byte
 }
 
-func ParseNodeAdd(payload []byte) NodeAdd {
-	val := NodeAdd{}
-
+func (cmd *NodeAdd) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SeqNo = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SeqNo = payload[i]
 	i++
 
-	val.Mode = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Mode = payload[i]
 	i++
 
-	val.TxOptions = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.TxOptions = payload[i]
 	i++
 
-	return val
+	return nil
 }

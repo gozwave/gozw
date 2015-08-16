@@ -3,19 +3,23 @@
 
 package chimneyfan
 
+import "errors"
+
 // <no value>
 
 type ChimneyFanSpeedSet struct {
 	Speed byte
 }
 
-func ParseChimneyFanSpeedSet(payload []byte) ChimneyFanSpeedSet {
-	val := ChimneyFanSpeedSet{}
-
+func (cmd *ChimneyFanSpeedSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Speed = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Speed = payload[i]
 	i++
 
-	return val
+	return nil
 }

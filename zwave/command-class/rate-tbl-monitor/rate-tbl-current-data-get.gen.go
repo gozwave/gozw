@@ -3,7 +3,10 @@
 
 package ratetblmonitor
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -13,16 +16,22 @@ type RateTblCurrentDataGet struct {
 	DatasetRequested uint32
 }
 
-func ParseRateTblCurrentDataGet(payload []byte) RateTblCurrentDataGet {
-	val := RateTblCurrentDataGet{}
-
+func (cmd *RateTblCurrentDataGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.RateParameterSetId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RateParameterSetId = payload[i]
 	i++
 
-	val.DatasetRequested = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DatasetRequested = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	return val
+	return nil
 }

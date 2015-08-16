@@ -3,6 +3,8 @@
 
 package securitypanelzone
 
+import "errors"
+
 // <no value>
 
 type SecurityPanelZoneSupportedReport struct {
@@ -13,20 +15,22 @@ type SecurityPanelZoneSupportedReport struct {
 	}
 }
 
-func ParseSecurityPanelZoneSupportedReport(payload []byte) SecurityPanelZoneSupportedReport {
-	val := SecurityPanelZoneSupportedReport{}
-
+func (cmd *SecurityPanelZoneSupportedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Parameters1.ZonesSupported = (payload[i] & 0x7F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Parameters1.ZonesSupported = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Parameters1.Zm = true
+		cmd.Parameters1.Zm = true
 	} else {
-		val.Parameters1.Zm = false
+		cmd.Parameters1.Zm = false
 	}
 
 	i += 1
 
-	return val
+	return nil
 }

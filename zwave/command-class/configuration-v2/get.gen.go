@@ -3,19 +3,23 @@
 
 package configurationv2
 
+import "errors"
+
 // <no value>
 
 type ConfigurationGet struct {
 	ParameterNumber byte
 }
 
-func ParseConfigurationGet(payload []byte) ConfigurationGet {
-	val := ConfigurationGet{}
-
+func (cmd *ConfigurationGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ParameterNumber = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ParameterNumber = payload[i]
 	i++
 
-	return val
+	return nil
 }

@@ -3,7 +3,10 @@
 
 package climatecontrolschedule
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -31,41 +34,79 @@ type ScheduleReport struct {
 	Switchpoint8 uint32
 }
 
-func ParseScheduleReport(payload []byte) ScheduleReport {
-	val := ScheduleReport{}
-
+func (cmd *ScheduleReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.Weekday = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.Weekday = (payload[i] & 0x07)
 
 	i += 1
 
-	val.Switchpoint0 = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Switchpoint0 = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.Switchpoint1 = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Switchpoint1 = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.Switchpoint2 = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Switchpoint2 = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.Switchpoint3 = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Switchpoint3 = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.Switchpoint4 = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Switchpoint4 = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.Switchpoint5 = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Switchpoint5 = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.Switchpoint6 = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Switchpoint6 = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.Switchpoint7 = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Switchpoint7 = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.Switchpoint8 = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Switchpoint8 = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	return val
+	return nil
 }

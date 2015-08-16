@@ -3,6 +3,8 @@
 
 package meterv3
 
+import "errors"
+
 // <no value>
 
 type MeterSupportedReport struct {
@@ -15,23 +17,29 @@ type MeterSupportedReport struct {
 	ScaleSupported byte
 }
 
-func ParseMeterSupportedReport(payload []byte) MeterSupportedReport {
-	val := MeterSupportedReport{}
-
+func (cmd *MeterSupportedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.MeterType = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.MeterType = (payload[i] & 0x1F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.MeterReset = true
+		cmd.Properties1.MeterReset = true
 	} else {
-		val.Properties1.MeterReset = false
+		cmd.Properties1.MeterReset = false
 	}
 
 	i += 1
 
-	val.ScaleSupported = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ScaleSupported = payload[i]
 	i++
 
-	return val
+	return nil
 }

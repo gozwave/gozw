@@ -3,19 +3,23 @@
 
 package groupingname
 
+import "errors"
+
 // <no value>
 
 type GroupingNameGet struct {
 	GroupingIdentifier byte
 }
 
-func ParseGroupingNameGet(payload []byte) GroupingNameGet {
-	val := GroupingNameGet{}
-
+func (cmd *GroupingNameGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.GroupingIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GroupingIdentifier = payload[i]
 	i++
 
-	return val
+	return nil
 }

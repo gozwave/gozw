@@ -8,8 +8,7 @@ package ratetblmonitor
 type RateTblActiveRateGet struct {
 }
 
-func ParseRateTblActiveRateGet(payload []byte) RateTblActiveRateGet {
-	val := RateTblActiveRateGet{}
+func (cmd *RateTblActiveRateGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

@@ -3,7 +3,10 @@
 
 package firmwareupdatemdv2
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -15,19 +18,29 @@ type FirmwareUpdateMdRequestGet struct {
 	Checksum uint16
 }
 
-func ParseFirmwareUpdateMdRequestGet(payload []byte) FirmwareUpdateMdRequestGet {
-	val := FirmwareUpdateMdRequestGet{}
-
+func (cmd *FirmwareUpdateMdRequestGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ManufacturerId = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ManufacturerId = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.FirmwareId = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.FirmwareId = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.Checksum = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Checksum = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	return val
+	return nil
 }

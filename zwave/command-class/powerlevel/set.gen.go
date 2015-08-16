@@ -3,6 +3,8 @@
 
 package powerlevel
 
+import "errors"
+
 // <no value>
 
 type PowerlevelSet struct {
@@ -11,16 +13,22 @@ type PowerlevelSet struct {
 	Timeout byte
 }
 
-func ParsePowerlevelSet(payload []byte) PowerlevelSet {
-	val := PowerlevelSet{}
-
+func (cmd *PowerlevelSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.PowerLevel = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.PowerLevel = payload[i]
 	i++
 
-	val.Timeout = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Timeout = payload[i]
 	i++
 
-	return val
+	return nil
 }

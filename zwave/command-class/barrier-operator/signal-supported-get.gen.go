@@ -8,8 +8,7 @@ package barrieroperator
 type BarrierOperatorSignalSupportedGet struct {
 }
 
-func ParseBarrierOperatorSignalSupportedGet(payload []byte) BarrierOperatorSignalSupportedGet {
-	val := BarrierOperatorSignalSupportedGet{}
+func (cmd *BarrierOperatorSignalSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

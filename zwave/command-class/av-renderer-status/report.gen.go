@@ -8,8 +8,7 @@ package avrendererstatus
 type AvRendererStatusReport struct {
 }
 
-func ParseAvRendererStatusReport(payload []byte) AvRendererStatusReport {
-	val := AvRendererStatusReport{}
+func (cmd *AvRendererStatusReport) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

@@ -3,19 +3,23 @@
 
 package battery
 
+import "errors"
+
 // <no value>
 
 type BatteryReport struct {
 	BatteryLevel byte
 }
 
-func ParseBatteryReport(payload []byte) BatteryReport {
-	val := BatteryReport{}
-
+func (cmd *BatteryReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.BatteryLevel = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.BatteryLevel = payload[i]
 	i++
 
-	return val
+	return nil
 }

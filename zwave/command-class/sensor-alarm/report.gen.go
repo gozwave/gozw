@@ -3,7 +3,10 @@
 
 package sensoralarm
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -17,22 +20,36 @@ type SensorAlarmReport struct {
 	Seconds uint16
 }
 
-func ParseSensorAlarmReport(payload []byte) SensorAlarmReport {
-	val := SensorAlarmReport{}
-
+func (cmd *SensorAlarmReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SourceNodeId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SourceNodeId = payload[i]
 	i++
 
-	val.SensorType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SensorType = payload[i]
 	i++
 
-	val.SensorState = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SensorState = payload[i]
 	i++
 
-	val.Seconds = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Seconds = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	return val
+	return nil
 }

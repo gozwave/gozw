@@ -8,8 +8,7 @@ package metertblmonitor
 type MeterTblTableCapabilityGet struct {
 }
 
-func ParseMeterTblTableCapabilityGet(payload []byte) MeterTblTableCapabilityGet {
-	val := MeterTblTableCapabilityGet{}
+func (cmd *MeterTblTableCapabilityGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

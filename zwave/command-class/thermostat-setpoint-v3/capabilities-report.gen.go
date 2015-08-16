@@ -3,6 +3,8 @@
 
 package thermostatsetpointv3
 
+import "errors"
+
 // <no value>
 
 type ThermostatSetpointCapabilitiesReport struct {
@@ -31,36 +33,54 @@ type ThermostatSetpointCapabilitiesReport struct {
 	Maxvalue []byte
 }
 
-func ParseThermostatSetpointCapabilitiesReport(payload []byte) ThermostatSetpointCapabilitiesReport {
-	val := ThermostatSetpointCapabilitiesReport{}
-
+func (cmd *ThermostatSetpointCapabilitiesReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.SetpointType = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.SetpointType = (payload[i] & 0x0F)
 
 	i += 1
 
-	val.Properties2.Size = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties2.Scale = (payload[i] & 0x18) << 3
+	cmd.Properties2.Size = (payload[i] & 0x07)
 
-	val.Properties2.Precision = (payload[i] & 0xE0) << 5
+	cmd.Properties2.Scale = (payload[i] & 0x18) << 3
 
-	i += 1
-
-	val.MinValue = payload[i : i+1]
-	i += 1
-
-	val.Properties3.Size = (payload[i] & 0x07)
-
-	val.Properties3.Scale = (payload[i] & 0x18) << 3
-
-	val.Properties3.Precision = (payload[i] & 0xE0) << 5
+	cmd.Properties2.Precision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.Maxvalue = payload[i : i+3]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MinValue = payload[i : i+1]
+	i += 1
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties3.Size = (payload[i] & 0x07)
+
+	cmd.Properties3.Scale = (payload[i] & 0x18) << 3
+
+	cmd.Properties3.Precision = (payload[i] & 0xE0) << 5
+
+	i += 1
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Maxvalue = payload[i : i+3]
 	i += 3
 
-	return val
+	return nil
 }

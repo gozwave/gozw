@@ -3,6 +3,8 @@
 
 package screenmdv2
 
+import "errors"
+
 // <no value>
 
 type ScreenMdReport struct {
@@ -19,30 +21,36 @@ type ScreenMdReport struct {
 	}
 }
 
-func ParseScreenMdReport(payload []byte) ScreenMdReport {
-	val := ScreenMdReport{}
-
+func (cmd *ScreenMdReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.CharPresentation = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties1.ScreenSettings = (payload[i] & 0x38) << 3
+	cmd.Properties1.CharPresentation = (payload[i] & 0x07)
+
+	cmd.Properties1.ScreenSettings = (payload[i] & 0x38) << 3
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.MoreData = true
+		cmd.Properties1.MoreData = true
 	} else {
-		val.Properties1.MoreData = false
+		cmd.Properties1.MoreData = false
 	}
 
 	i += 1
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	if payload[i]&0x01 == 0x01 {
-		val.Properties2.ScreenTimeout = true
+		cmd.Properties2.ScreenTimeout = true
 	} else {
-		val.Properties2.ScreenTimeout = false
+		cmd.Properties2.ScreenTimeout = false
 	}
 
 	i += 1
 
-	return val
+	return nil
 }

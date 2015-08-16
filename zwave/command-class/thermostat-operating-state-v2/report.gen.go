@@ -3,6 +3,8 @@
 
 package thermostatoperatingstatev2
 
+import "errors"
+
 // <no value>
 
 type ThermostatOperatingStateReport struct {
@@ -11,14 +13,16 @@ type ThermostatOperatingStateReport struct {
 	}
 }
 
-func ParseThermostatOperatingStateReport(payload []byte) ThermostatOperatingStateReport {
-	val := ThermostatOperatingStateReport{}
-
+func (cmd *ThermostatOperatingStateReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.OperatingState = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.OperatingState = (payload[i] & 0x0F)
 
 	i += 1
 
-	return val
+	return nil
 }

@@ -3,6 +3,8 @@
 
 package clock
 
+import "errors"
+
 // <no value>
 
 type ClockSet struct {
@@ -15,19 +17,25 @@ type ClockSet struct {
 	Minute byte
 }
 
-func ParseClockSet(payload []byte) ClockSet {
-	val := ClockSet{}
-
+func (cmd *ClockSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Level.Hour = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Level.Weekday = (payload[i] & 0xE0) << 5
+	cmd.Level.Hour = (payload[i] & 0x1F)
+
+	cmd.Level.Weekday = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.Minute = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Minute = payload[i]
 	i++
 
-	return val
+	return nil
 }

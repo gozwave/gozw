@@ -3,7 +3,10 @@
 
 package dcpconfig
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -55,77 +58,163 @@ type DcpListSet struct {
 	RandomizationInterval byte
 }
 
-func ParseDcpListSet(payload []byte) DcpListSet {
-	val := DcpListSet{}
-
+func (cmd *DcpListSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Year = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Year = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.Month = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Month = payload[i]
 	i++
 
-	val.Day = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Day = payload[i]
 	i++
 
-	val.HourLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.HourLocalTime = payload[i]
 	i++
 
-	val.MinuteLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MinuteLocalTime = payload[i]
 	i++
 
-	val.SecondLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SecondLocalTime = payload[i]
 	i++
 
-	val.DcpRateId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DcpRateId = payload[i]
 	i++
 
-	val.Properties1.NumberOfDc = (payload[i] & 0x03)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.NumberOfDc = (payload[i] & 0x03)
 
 	i += 1
 
-	val.StartYear = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartYear = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.StartMonth = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartMonth = payload[i]
 	i++
 
-	val.StartDay = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartDay = payload[i]
 	i++
 
-	val.StartHourLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartHourLocalTime = payload[i]
 	i++
 
-	val.StartMinuteLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartMinuteLocalTime = payload[i]
 	i++
 
-	val.StartSecondLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartSecondLocalTime = payload[i]
 	i++
 
-	val.DurationHourTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DurationHourTime = payload[i]
 	i++
 
-	val.DurationMinuteTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DurationMinuteTime = payload[i]
 	i++
 
-	val.DurationSecondTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DurationSecondTime = payload[i]
 	i++
 
-	val.EventPriority = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.EventPriority = payload[i]
 	i++
 
-	val.LoadShedding = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.LoadShedding = payload[i]
 	i++
 
-	val.StartAssociationGroup = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartAssociationGroup = payload[i]
 	i++
 
-	val.StopAssociationGroup = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopAssociationGroup = payload[i]
 	i++
 
-	val.RandomizationInterval = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RandomizationInterval = payload[i]
 	i++
 
-	return val
+	return nil
 }

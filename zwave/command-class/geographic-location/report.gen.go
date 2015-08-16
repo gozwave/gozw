@@ -3,6 +3,8 @@
 
 package geographiclocation
 
+import "errors"
+
 // <no value>
 
 type GeographicLocationReport struct {
@@ -23,36 +25,50 @@ type GeographicLocationReport struct {
 	}
 }
 
-func ParseGeographicLocationReport(payload []byte) GeographicLocationReport {
-	val := GeographicLocationReport{}
-
+func (cmd *GeographicLocationReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.LongitudeDegrees = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.LongitudeDegrees = payload[i]
 	i++
 
-	val.Level.LongitudeMinutes = (payload[i] & 0x7F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Level.LongitudeMinutes = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Level.LongSign = true
+		cmd.Level.LongSign = true
 	} else {
-		val.Level.LongSign = false
+		cmd.Level.LongSign = false
 	}
 
 	i += 1
 
-	val.LatitudeDegrees = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.LatitudeDegrees = payload[i]
 	i++
 
-	val.Level2.LatitudeMinutes = (payload[i] & 0x7F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Level2.LatitudeMinutes = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Level2.LatSign = true
+		cmd.Level2.LatSign = true
 	} else {
-		val.Level2.LatSign = false
+		cmd.Level2.LatSign = false
 	}
 
 	i += 1
 
-	return val
+	return nil
 }

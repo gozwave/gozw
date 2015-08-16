@@ -3,19 +3,23 @@
 
 package barrieroperator
 
+import "errors"
+
 // <no value>
 
 type BarrierOperatorSignalGet struct {
 	SubsystemType byte
 }
 
-func ParseBarrierOperatorSignalGet(payload []byte) BarrierOperatorSignalGet {
-	val := BarrierOperatorSignalGet{}
-
+func (cmd *BarrierOperatorSignalGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SubsystemType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SubsystemType = payload[i]
 	i++
 
-	return val
+	return nil
 }

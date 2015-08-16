@@ -8,8 +8,7 @@ package hrvstatus
 type HrvStatusSupportedGet struct {
 }
 
-func ParseHrvStatusSupportedGet(payload []byte) HrvStatusSupportedGet {
-	val := HrvStatusSupportedGet{}
+func (cmd *HrvStatusSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

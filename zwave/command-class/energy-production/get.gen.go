@@ -3,19 +3,23 @@
 
 package energyproduction
 
+import "errors"
+
 // <no value>
 
 type EnergyProductionGet struct {
 	ParameterNumber byte
 }
 
-func ParseEnergyProductionGet(payload []byte) EnergyProductionGet {
-	val := EnergyProductionGet{}
-
+func (cmd *EnergyProductionGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ParameterNumber = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ParameterNumber = payload[i]
 	i++
 
-	return val
+	return nil
 }

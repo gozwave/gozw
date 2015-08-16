@@ -3,19 +3,23 @@
 
 package switchtogglemultilevel
 
+import "errors"
+
 // <no value>
 
 type SwitchToggleMultilevelReport struct {
 	Value byte
 }
 
-func ParseSwitchToggleMultilevelReport(payload []byte) SwitchToggleMultilevelReport {
-	val := SwitchToggleMultilevelReport{}
-
+func (cmd *SwitchToggleMultilevelReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Value = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Value = payload[i]
 	i++
 
-	return val
+	return nil
 }

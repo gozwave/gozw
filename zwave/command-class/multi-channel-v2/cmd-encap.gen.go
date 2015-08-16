@@ -3,6 +3,8 @@
 
 package multichannelv2
 
+import "errors"
+
 // <no value>
 
 type MultiChannelCmdEncap struct {
@@ -23,32 +25,50 @@ type MultiChannelCmdEncap struct {
 	Parameter []byte
 }
 
-func ParseMultiChannelCmdEncap(payload []byte) MultiChannelCmdEncap {
-	val := MultiChannelCmdEncap{}
-
+func (cmd *MultiChannelCmdEncap) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.SourceEndPoint = (payload[i] & 0x7F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.SourceEndPoint = (payload[i] & 0x7F)
 
 	i += 1
 
-	val.Properties2.DestinationEndPoint = (payload[i] & 0x7F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties2.DestinationEndPoint = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties2.BitAddress = true
+		cmd.Properties2.BitAddress = true
 	} else {
-		val.Properties2.BitAddress = false
+		cmd.Properties2.BitAddress = false
 	}
 
 	i += 1
 
-	val.CommandClass = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CommandClass = payload[i]
 	i++
 
-	val.Command = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Command = payload[i]
 	i++
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	val.Parameter = payload[i:]
 
-	return val
+	return nil
 }

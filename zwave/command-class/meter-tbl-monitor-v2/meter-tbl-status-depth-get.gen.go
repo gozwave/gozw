@@ -3,19 +3,23 @@
 
 package metertblmonitorv2
 
+import "errors"
+
 // <no value>
 
 type MeterTblStatusDepthGet struct {
 	StatusEventLogDepth byte
 }
 
-func ParseMeterTblStatusDepthGet(payload []byte) MeterTblStatusDepthGet {
-	val := MeterTblStatusDepthGet{}
-
+func (cmd *MeterTblStatusDepthGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.StatusEventLogDepth = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StatusEventLogDepth = payload[i]
 	i++
 
-	return val
+	return nil
 }

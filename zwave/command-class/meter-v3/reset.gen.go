@@ -8,8 +8,7 @@ package meterv3
 type MeterReset struct {
 }
 
-func ParseMeterReset(payload []byte) MeterReset {
-	val := MeterReset{}
+func (cmd *MeterReset) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

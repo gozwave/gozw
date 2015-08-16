@@ -3,6 +3,8 @@
 
 package scheduleentrylockv2
 
+import "errors"
+
 // <no value>
 
 type ScheduleEntryLockWeekDayReport struct {
@@ -21,31 +23,57 @@ type ScheduleEntryLockWeekDayReport struct {
 	StopMinute byte
 }
 
-func ParseScheduleEntryLockWeekDayReport(payload []byte) ScheduleEntryLockWeekDayReport {
-	val := ScheduleEntryLockWeekDayReport{}
-
+func (cmd *ScheduleEntryLockWeekDayReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.UserIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.UserIdentifier = payload[i]
 	i++
 
-	val.ScheduleSlotId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ScheduleSlotId = payload[i]
 	i++
 
-	val.DayOfWeek = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DayOfWeek = payload[i]
 	i++
 
-	val.StartHour = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartHour = payload[i]
 	i++
 
-	val.StartMinute = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartMinute = payload[i]
 	i++
 
-	val.StopHour = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopHour = payload[i]
 	i++
 
-	val.StopMinute = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopMinute = payload[i]
 	i++
 
-	return val
+	return nil
 }

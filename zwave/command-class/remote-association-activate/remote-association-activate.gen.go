@@ -3,19 +3,23 @@
 
 package remoteassociationactivate
 
+import "errors"
+
 // <no value>
 
 type RemoteAssociationActivate struct {
 	GroupingIdentifier byte
 }
 
-func ParseRemoteAssociationActivate(payload []byte) RemoteAssociationActivate {
-	val := RemoteAssociationActivate{}
-
+func (cmd *RemoteAssociationActivate) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.GroupingIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GroupingIdentifier = payload[i]
 	i++
 
-	return val
+	return nil
 }

@@ -8,8 +8,7 @@ package associationv2
 type AssociationSpecificGroupGet struct {
 }
 
-func ParseAssociationSpecificGroupGet(payload []byte) AssociationSpecificGroupGet {
-	val := AssociationSpecificGroupGet{}
+func (cmd *AssociationSpecificGroupGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

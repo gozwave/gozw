@@ -8,8 +8,7 @@ package sensormultilevelv5
 type SensorMultilevelSupportedGetSensor struct {
 }
 
-func ParseSensorMultilevelSupportedGetSensor(payload []byte) SensorMultilevelSupportedGetSensor {
-	val := SensorMultilevelSupportedGetSensor{}
+func (cmd *SensorMultilevelSupportedGetSensor) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

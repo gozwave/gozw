@@ -3,6 +3,8 @@
 
 package multichannelassociationv2
 
+import "errors"
+
 // <no value>
 
 type MultiChannelAssociationRemove struct {
@@ -11,13 +13,19 @@ type MultiChannelAssociationRemove struct {
 	NodeId []byte
 }
 
-func ParseMultiChannelAssociationRemove(payload []byte) MultiChannelAssociationRemove {
-	val := MultiChannelAssociationRemove{}
-
+func (cmd *MultiChannelAssociationRemove) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.GroupingIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GroupingIdentifier = payload[i]
 	i++
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	{
 		markerIndex := i
@@ -26,7 +34,11 @@ func ParseMultiChannelAssociationRemove(payload []byte) MultiChannelAssociationR
 		val.NodeId = payload[i:markerIndex]
 	}
 
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
 	i += 1 // skipping MARKER
 
-	return val
+	return nil
 }

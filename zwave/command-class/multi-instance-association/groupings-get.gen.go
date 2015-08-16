@@ -8,8 +8,7 @@ package multiinstanceassociation
 type MultiInstanceAssociationGroupingsGet struct {
 }
 
-func ParseMultiInstanceAssociationGroupingsGet(payload []byte) MultiInstanceAssociationGroupingsGet {
-	val := MultiInstanceAssociationGroupingsGet{}
+func (cmd *MultiInstanceAssociationGroupingsGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

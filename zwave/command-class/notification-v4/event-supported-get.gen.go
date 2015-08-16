@@ -3,19 +3,23 @@
 
 package notificationv4
 
+import "errors"
+
 // <no value>
 
 type EventSupportedGet struct {
 	NotificationType byte
 }
 
-func ParseEventSupportedGet(payload []byte) EventSupportedGet {
-	val := EventSupportedGet{}
-
+func (cmd *EventSupportedGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.NotificationType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NotificationType = payload[i]
 	i++
 
-	return val
+	return nil
 }

@@ -8,8 +8,7 @@ package switchtogglemultilevel
 type SwitchToggleMultilevelGet struct {
 }
 
-func ParseSwitchToggleMultilevelGet(payload []byte) SwitchToggleMultilevelGet {
-	val := SwitchToggleMultilevelGet{}
+func (cmd *SwitchToggleMultilevelGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

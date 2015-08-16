@@ -8,8 +8,7 @@ package chimneyfan
 type ChimneyFanStopTempGet struct {
 }
 
-func ParseChimneyFanStopTempGet(payload []byte) ChimneyFanStopTempGet {
-	val := ChimneyFanStopTempGet{}
+func (cmd *ChimneyFanStopTempGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

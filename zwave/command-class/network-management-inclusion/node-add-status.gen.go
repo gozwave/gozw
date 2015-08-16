@@ -3,6 +3,8 @@
 
 package networkmanagementinclusion
 
+import "errors"
+
 // <no value>
 
 type NodeAddStatus struct {
@@ -35,53 +37,95 @@ type NodeAddStatus struct {
 	CommandClass []byte
 }
 
-func ParseNodeAddStatus(payload []byte) NodeAddStatus {
-	val := NodeAddStatus{}
-
+func (cmd *NodeAddStatus) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SeqNo = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SeqNo = payload[i]
 	i++
 
-	val.Status = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Status = payload[i]
 	i++
 
-	val.NewNodeId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NewNodeId = payload[i]
 	i++
 
-	val.NodeInfoLength = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NodeInfoLength = payload[i]
 	i++
 
-	val.Properties1.Capability = (payload[i] & 0x7F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.Capability = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.Listening = true
+		cmd.Properties1.Listening = true
 	} else {
-		val.Properties1.Listening = false
+		cmd.Properties1.Listening = false
 	}
 
 	i += 1
 
-	val.Properties2.Security = (payload[i] & 0x7F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties2.Security = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties2.Opt = true
+		cmd.Properties2.Opt = true
 	} else {
-		val.Properties2.Opt = false
+		cmd.Properties2.Opt = false
 	}
 
 	i += 1
 
-	val.BasicDeviceClass = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.BasicDeviceClass = payload[i]
 	i++
 
-	val.GenericDeviceClass = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GenericDeviceClass = payload[i]
 	i++
 
-	val.SpecificDeviceClass = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SpecificDeviceClass = payload[i]
 	i++
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	val.CommandClass = payload[i:]
 
-	return val
+	return nil
 }

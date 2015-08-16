@@ -3,6 +3,8 @@
 
 package applicationstatus
 
+import "errors"
+
 // <no value>
 
 type ApplicationBusy struct {
@@ -11,16 +13,22 @@ type ApplicationBusy struct {
 	WaitTime byte
 }
 
-func ParseApplicationBusy(payload []byte) ApplicationBusy {
-	val := ApplicationBusy{}
-
+func (cmd *ApplicationBusy) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Status = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Status = payload[i]
 	i++
 
-	val.WaitTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.WaitTime = payload[i]
 	i++
 
-	return val
+	return nil
 }

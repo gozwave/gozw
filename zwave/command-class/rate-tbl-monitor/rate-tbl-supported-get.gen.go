@@ -8,8 +8,7 @@ package ratetblmonitor
 type RateTblSupportedGet struct {
 }
 
-func ParseRateTblSupportedGet(payload []byte) RateTblSupportedGet {
-	val := RateTblSupportedGet{}
+func (cmd *RateTblSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

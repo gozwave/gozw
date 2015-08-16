@@ -8,8 +8,7 @@ package security
 type NetworkKeyVerify struct {
 }
 
-func ParseNetworkKeyVerify(payload []byte) NetworkKeyVerify {
-	val := NetworkKeyVerify{}
+func (cmd *NetworkKeyVerify) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

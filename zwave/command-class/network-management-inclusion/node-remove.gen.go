@@ -3,6 +3,8 @@
 
 package networkmanagementinclusion
 
+import "errors"
+
 // <no value>
 
 type NodeRemove struct {
@@ -11,16 +13,26 @@ type NodeRemove struct {
 	Mode byte
 }
 
-func ParseNodeRemove(payload []byte) NodeRemove {
-	val := NodeRemove{}
-
+func (cmd *NodeRemove) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SeqNo = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SeqNo = payload[i]
 	i++
 
-	val.Mode = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Mode = payload[i]
 	i++
 
-	return val
+	return nil
 }

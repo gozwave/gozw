@@ -3,7 +3,10 @@
 
 package colorcontrol
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -11,13 +14,15 @@ type CapabilityReport struct {
 	CapabilityMask uint16
 }
 
-func ParseCapabilityReport(payload []byte) CapabilityReport {
-	val := CapabilityReport{}
-
+func (cmd *CapabilityReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.CapabilityMask = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CapabilityMask = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	return val
+	return nil
 }

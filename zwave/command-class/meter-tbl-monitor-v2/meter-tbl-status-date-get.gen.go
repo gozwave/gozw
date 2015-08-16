@@ -3,7 +3,10 @@
 
 package metertblmonitorv2
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -35,49 +38,99 @@ type MeterTblStatusDateGet struct {
 	StopSecondLocalTime byte
 }
 
-func ParseMeterTblStatusDateGet(payload []byte) MeterTblStatusDateGet {
-	val := MeterTblStatusDateGet{}
-
+func (cmd *MeterTblStatusDateGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.MaximumReports = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MaximumReports = payload[i]
 	i++
 
-	val.StartYear = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartYear = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.StartMonth = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartMonth = payload[i]
 	i++
 
-	val.StartDay = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartDay = payload[i]
 	i++
 
-	val.StartHourLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartHourLocalTime = payload[i]
 	i++
 
-	val.StartMinuteLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartMinuteLocalTime = payload[i]
 	i++
 
-	val.StartSecondLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartSecondLocalTime = payload[i]
 	i++
 
-	val.StopYear = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopYear = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.StopMonth = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopMonth = payload[i]
 	i++
 
-	val.StopDay = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopDay = payload[i]
 	i++
 
-	val.StopHourLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopHourLocalTime = payload[i]
 	i++
 
-	val.StopMinuteLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopMinuteLocalTime = payload[i]
 	i++
 
-	val.StopSecondLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopSecondLocalTime = payload[i]
 	i++
 
-	return val
+	return nil
 }

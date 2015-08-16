@@ -3,6 +3,8 @@
 
 package networkmanagementproxy
 
+import "errors"
+
 // <no value>
 
 type NodeListReport struct {
@@ -15,22 +17,36 @@ type NodeListReport struct {
 	NodeListData byte
 }
 
-func ParseNodeListReport(payload []byte) NodeListReport {
-	val := NodeListReport{}
-
+func (cmd *NodeListReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SeqNo = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SeqNo = payload[i]
 	i++
 
-	val.Status = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Status = payload[i]
 	i++
 
-	val.NodeListControllerId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NodeListControllerId = payload[i]
 	i++
 
-	val.NodeListData = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NodeListData = payload[i]
 	i++
 
-	return val
+	return nil
 }

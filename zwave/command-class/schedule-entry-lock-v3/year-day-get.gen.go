@@ -3,6 +3,8 @@
 
 package scheduleentrylockv3
 
+import "errors"
+
 // <no value>
 
 type ScheduleEntryLockYearDayGet struct {
@@ -11,16 +13,22 @@ type ScheduleEntryLockYearDayGet struct {
 	ScheduleSlotId byte
 }
 
-func ParseScheduleEntryLockYearDayGet(payload []byte) ScheduleEntryLockYearDayGet {
-	val := ScheduleEntryLockYearDayGet{}
-
+func (cmd *ScheduleEntryLockYearDayGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.UserIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.UserIdentifier = payload[i]
 	i++
 
-	val.ScheduleSlotId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ScheduleSlotId = payload[i]
 	i++
 
-	return val
+	return nil
 }

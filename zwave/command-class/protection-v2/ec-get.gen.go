@@ -8,8 +8,7 @@ package protectionv2
 type ProtectionEcGet struct {
 }
 
-func ParseProtectionEcGet(payload []byte) ProtectionEcGet {
-	val := ProtectionEcGet{}
+func (cmd *ProtectionEcGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

@@ -3,19 +3,23 @@
 
 package multichannelassociationv2
 
+import "errors"
+
 // <no value>
 
 type MultiChannelAssociationGroupingsReport struct {
 	SupportedGroupings byte
 }
 
-func ParseMultiChannelAssociationGroupingsReport(payload []byte) MultiChannelAssociationGroupingsReport {
-	val := MultiChannelAssociationGroupingsReport{}
-
+func (cmd *MultiChannelAssociationGroupingsReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SupportedGroupings = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SupportedGroupings = payload[i]
 	i++
 
-	return val
+	return nil
 }

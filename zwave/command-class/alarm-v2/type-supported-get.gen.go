@@ -8,8 +8,7 @@ package alarmv2
 type AlarmTypeSupportedGet struct {
 }
 
-func ParseAlarmTypeSupportedGet(payload []byte) AlarmTypeSupportedGet {
-	val := AlarmTypeSupportedGet{}
+func (cmd *AlarmTypeSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

@@ -3,19 +3,23 @@
 
 package simpleavcontrol
 
+import "errors"
+
 // <no value>
 
 type SimpleAvControlSupportedGet struct {
 	ReportNo byte
 }
 
-func ParseSimpleAvControlSupportedGet(payload []byte) SimpleAvControlSupportedGet {
-	val := SimpleAvControlSupportedGet{}
-
+func (cmd *SimpleAvControlSupportedGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ReportNo = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ReportNo = payload[i]
 	i++
 
-	return val
+	return nil
 }

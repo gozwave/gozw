@@ -3,7 +3,10 @@
 
 package manufacturerspecific
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -15,19 +18,29 @@ type ManufacturerSpecificReport struct {
 	ProductId uint16
 }
 
-func ParseManufacturerSpecificReport(payload []byte) ManufacturerSpecificReport {
-	val := ManufacturerSpecificReport{}
-
+func (cmd *ManufacturerSpecificReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ManufacturerId = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ManufacturerId = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.ProductTypeId = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ProductTypeId = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.ProductId = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ProductId = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	return val
+	return nil
 }

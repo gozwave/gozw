@@ -3,6 +3,8 @@
 
 package security
 
+import "errors"
+
 // <no value>
 
 type SecurityMessageEncapsulationNonceGet struct {
@@ -27,45 +29,71 @@ type SecurityMessageEncapsulationNonceGet struct {
 	MessageAuthenticationCodeByte []byte
 }
 
-func ParseSecurityMessageEncapsulationNonceGet(payload []byte) SecurityMessageEncapsulationNonceGet {
-	val := SecurityMessageEncapsulationNonceGet{}
-
+func (cmd *SecurityMessageEncapsulationNonceGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.InitializationVectorByte = payload[i : i+8]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.InitializationVectorByte = payload[i : i+8]
 
 	i += 8
 
-	val.Properties1.SequenceCounter = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.SequenceCounter = (payload[i] & 0x0F)
 
 	if payload[i]&0x10 == 0x10 {
-		val.Properties1.Sequenced = true
+		cmd.Properties1.Sequenced = true
 	} else {
-		val.Properties1.Sequenced = false
+		cmd.Properties1.Sequenced = false
 	}
 
 	if payload[i]&0x20 == 0x20 {
-		val.Properties1.SecondFrame = true
+		cmd.Properties1.SecondFrame = true
 	} else {
-		val.Properties1.SecondFrame = false
+		cmd.Properties1.SecondFrame = false
 	}
 
 	i += 1
 
-	val.CommandClassIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CommandClassIdentifier = payload[i]
 	i++
 
-	val.CommandIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CommandIdentifier = payload[i]
 	i++
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	val.CommandByte = payload[i:]
 
-	val.ReceiversNonceIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ReceiversNonceIdentifier = payload[i]
 	i++
 
-	val.MessageAuthenticationCodeByte = payload[i : i+8]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MessageAuthenticationCodeByte = payload[i : i+8]
 
 	i += 8
 
-	return val
+	return nil
 }

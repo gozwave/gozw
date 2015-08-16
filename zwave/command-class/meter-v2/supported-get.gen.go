@@ -8,8 +8,7 @@ package meterv2
 type MeterSupportedGet struct {
 }
 
-func ParseMeterSupportedGet(payload []byte) MeterSupportedGet {
-	val := MeterSupportedGet{}
+func (cmd *MeterSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

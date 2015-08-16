@@ -3,6 +3,8 @@
 
 package zwaveplusinfo
 
+import "errors"
+
 // <no value>
 
 type ZwaveplusInfoReport struct {
@@ -13,19 +15,29 @@ type ZwaveplusInfoReport struct {
 	NodeType byte
 }
 
-func ParseZwaveplusInfoReport(payload []byte) ZwaveplusInfoReport {
-	val := ZwaveplusInfoReport{}
-
+func (cmd *ZwaveplusInfoReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ZWaveVersion = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZWaveVersion = payload[i]
 	i++
 
-	val.RoleType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RoleType = payload[i]
 	i++
 
-	val.NodeType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NodeType = payload[i]
 	i++
 
-	return val
+	return nil
 }

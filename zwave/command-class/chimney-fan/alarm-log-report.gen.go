@@ -3,6 +3,8 @@
 
 package chimneyfan
 
+import "errors"
+
 // <no value>
 
 type ChimneyFanAlarmLogReport struct {
@@ -57,140 +59,158 @@ type ChimneyFanAlarmLogReport struct {
 	}
 }
 
-func ParseChimneyFanAlarmLogReport(payload []byte) ChimneyFanAlarmLogReport {
-	val := ChimneyFanAlarmLogReport{}
-
+func (cmd *ChimneyFanAlarmLogReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
 	if payload[i]&0x02 == 0x02 {
-		val.AlarmEvent1.ExternalAlarm1 = true
+		cmd.AlarmEvent1.ExternalAlarm1 = true
 	} else {
-		val.AlarmEvent1.ExternalAlarm1 = false
+		cmd.AlarmEvent1.ExternalAlarm1 = false
 	}
 
 	if payload[i]&0x04 == 0x04 {
-		val.AlarmEvent1.SensorError1 = true
+		cmd.AlarmEvent1.SensorError1 = true
 	} else {
-		val.AlarmEvent1.SensorError1 = false
+		cmd.AlarmEvent1.SensorError1 = false
 	}
 
 	if payload[i]&0x08 == 0x08 {
-		val.AlarmEvent1.AlarmTemperatureExceeded1 = true
+		cmd.AlarmEvent1.AlarmTemperatureExceeded1 = true
 	} else {
-		val.AlarmEvent1.AlarmTemperatureExceeded1 = false
+		cmd.AlarmEvent1.AlarmTemperatureExceeded1 = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.AlarmEvent1.AlarmStillActive1 = true
+		cmd.AlarmEvent1.AlarmStillActive1 = true
 	} else {
-		val.AlarmEvent1.AlarmStillActive1 = false
+		cmd.AlarmEvent1.AlarmStillActive1 = false
 	}
 
 	i += 1
 
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
 	if payload[i]&0x02 == 0x02 {
-		val.AlarmEvent2.ExternalAlarm2 = true
+		cmd.AlarmEvent2.ExternalAlarm2 = true
 	} else {
-		val.AlarmEvent2.ExternalAlarm2 = false
+		cmd.AlarmEvent2.ExternalAlarm2 = false
 	}
 
 	if payload[i]&0x04 == 0x04 {
-		val.AlarmEvent2.SensorError2 = true
+		cmd.AlarmEvent2.SensorError2 = true
 	} else {
-		val.AlarmEvent2.SensorError2 = false
+		cmd.AlarmEvent2.SensorError2 = false
 	}
 
 	if payload[i]&0x08 == 0x08 {
-		val.AlarmEvent2.AlarmTemperatureExceeded2 = true
+		cmd.AlarmEvent2.AlarmTemperatureExceeded2 = true
 	} else {
-		val.AlarmEvent2.AlarmTemperatureExceeded2 = false
+		cmd.AlarmEvent2.AlarmTemperatureExceeded2 = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.AlarmEvent2.AlarmStillActive2 = true
+		cmd.AlarmEvent2.AlarmStillActive2 = true
 	} else {
-		val.AlarmEvent2.AlarmStillActive2 = false
+		cmd.AlarmEvent2.AlarmStillActive2 = false
 	}
 
 	i += 1
 
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
 	if payload[i]&0x02 == 0x02 {
-		val.AlarmEvent3.ExternalAlarm3 = true
+		cmd.AlarmEvent3.ExternalAlarm3 = true
 	} else {
-		val.AlarmEvent3.ExternalAlarm3 = false
+		cmd.AlarmEvent3.ExternalAlarm3 = false
 	}
 
 	if payload[i]&0x04 == 0x04 {
-		val.AlarmEvent3.SensorError3 = true
+		cmd.AlarmEvent3.SensorError3 = true
 	} else {
-		val.AlarmEvent3.SensorError3 = false
+		cmd.AlarmEvent3.SensorError3 = false
 	}
 
 	if payload[i]&0x08 == 0x08 {
-		val.AlarmEvent3.AlarmTemperatureExceeded3 = true
+		cmd.AlarmEvent3.AlarmTemperatureExceeded3 = true
 	} else {
-		val.AlarmEvent3.AlarmTemperatureExceeded3 = false
+		cmd.AlarmEvent3.AlarmTemperatureExceeded3 = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.AlarmEvent3.AlarmStillActive3 = true
+		cmd.AlarmEvent3.AlarmStillActive3 = true
 	} else {
-		val.AlarmEvent3.AlarmStillActive3 = false
+		cmd.AlarmEvent3.AlarmStillActive3 = false
 	}
 
 	i += 1
 
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
 	if payload[i]&0x02 == 0x02 {
-		val.AlarmEvent4.ExternalAlarm4 = true
+		cmd.AlarmEvent4.ExternalAlarm4 = true
 	} else {
-		val.AlarmEvent4.ExternalAlarm4 = false
+		cmd.AlarmEvent4.ExternalAlarm4 = false
 	}
 
 	if payload[i]&0x04 == 0x04 {
-		val.AlarmEvent4.SensorError4 = true
+		cmd.AlarmEvent4.SensorError4 = true
 	} else {
-		val.AlarmEvent4.SensorError4 = false
+		cmd.AlarmEvent4.SensorError4 = false
 	}
 
 	if payload[i]&0x08 == 0x08 {
-		val.AlarmEvent4.AlarmTemperatureExceeded4 = true
+		cmd.AlarmEvent4.AlarmTemperatureExceeded4 = true
 	} else {
-		val.AlarmEvent4.AlarmTemperatureExceeded4 = false
+		cmd.AlarmEvent4.AlarmTemperatureExceeded4 = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.AlarmEvent4.AlarmStillActive4 = true
+		cmd.AlarmEvent4.AlarmStillActive4 = true
 	} else {
-		val.AlarmEvent4.AlarmStillActive4 = false
+		cmd.AlarmEvent4.AlarmStillActive4 = false
 	}
 
 	i += 1
 
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
 	if payload[i]&0x02 == 0x02 {
-		val.AlarmEvent5.ExternalAlarm5 = true
+		cmd.AlarmEvent5.ExternalAlarm5 = true
 	} else {
-		val.AlarmEvent5.ExternalAlarm5 = false
+		cmd.AlarmEvent5.ExternalAlarm5 = false
 	}
 
 	if payload[i]&0x04 == 0x04 {
-		val.AlarmEvent5.SensorError5 = true
+		cmd.AlarmEvent5.SensorError5 = true
 	} else {
-		val.AlarmEvent5.SensorError5 = false
+		cmd.AlarmEvent5.SensorError5 = false
 	}
 
 	if payload[i]&0x08 == 0x08 {
-		val.AlarmEvent5.AlarmTemperatureExceeded5 = true
+		cmd.AlarmEvent5.AlarmTemperatureExceeded5 = true
 	} else {
-		val.AlarmEvent5.AlarmTemperatureExceeded5 = false
+		cmd.AlarmEvent5.AlarmTemperatureExceeded5 = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.AlarmEvent5.AlarmStillActive5 = true
+		cmd.AlarmEvent5.AlarmStillActive5 = true
 	} else {
-		val.AlarmEvent5.AlarmStillActive5 = false
+		cmd.AlarmEvent5.AlarmStillActive5 = false
 	}
 
 	i += 1
 
-	return val
+	return nil
 }

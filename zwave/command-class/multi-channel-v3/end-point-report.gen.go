@@ -3,6 +3,8 @@
 
 package multichannelv3
 
+import "errors"
+
 // <no value>
 
 type MultiChannelEndPointReport struct {
@@ -17,28 +19,34 @@ type MultiChannelEndPointReport struct {
 	}
 }
 
-func ParseMultiChannelEndPointReport(payload []byte) MultiChannelEndPointReport {
-	val := MultiChannelEndPointReport{}
-
+func (cmd *MultiChannelEndPointReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
 	if payload[i]&0x40 == 0x40 {
-		val.Properties1.Identical = true
+		cmd.Properties1.Identical = true
 	} else {
-		val.Properties1.Identical = false
+		cmd.Properties1.Identical = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.Dynamic = true
+		cmd.Properties1.Dynamic = true
 	} else {
-		val.Properties1.Dynamic = false
+		cmd.Properties1.Dynamic = false
 	}
 
 	i += 1
 
-	val.Properties2.EndPoints = (payload[i] & 0x7F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties2.EndPoints = (payload[i] & 0x7F)
 
 	i += 1
 
-	return val
+	return nil
 }

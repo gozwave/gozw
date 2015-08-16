@@ -3,6 +3,8 @@
 
 package associationcommandconfiguration
 
+import "errors"
+
 // <no value>
 
 type CommandConfigurationReport struct {
@@ -25,37 +27,63 @@ type CommandConfigurationReport struct {
 	CommandByte []byte
 }
 
-func ParseCommandConfigurationReport(payload []byte) CommandConfigurationReport {
-	val := CommandConfigurationReport{}
-
+func (cmd *CommandConfigurationReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.GroupingIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GroupingIdentifier = payload[i]
 	i++
 
-	val.NodeId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NodeId = payload[i]
 	i++
 
-	val.Properties1.ReportsToFollow = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.ReportsToFollow = (payload[i] & 0x0F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.First = true
+		cmd.Properties1.First = true
 	} else {
-		val.Properties1.First = false
+		cmd.Properties1.First = false
 	}
 
 	i += 1
 
-	val.CommandLength = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CommandLength = payload[i]
 	i++
 
-	val.CommandClassIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CommandClassIdentifier = payload[i]
 	i++
 
-	val.CommandIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CommandIdentifier = payload[i]
 	i++
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	val.CommandByte = payload[i:]
 
-	return val
+	return nil
 }

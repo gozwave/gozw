@@ -8,8 +8,7 @@ package notificationv3
 type NotificationSupportedGet struct {
 }
 
-func ParseNotificationSupportedGet(payload []byte) NotificationSupportedGet {
-	val := NotificationSupportedGet{}
+func (cmd *NotificationSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

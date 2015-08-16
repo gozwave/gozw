@@ -3,19 +3,23 @@
 
 package scheduleentrylockv3
 
+import "errors"
+
 // <no value>
 
 type ScheduleEntryLockEnableAllSet struct {
 	Enabled byte
 }
 
-func ParseScheduleEntryLockEnableAllSet(payload []byte) ScheduleEntryLockEnableAllSet {
-	val := ScheduleEntryLockEnableAllSet{}
-
+func (cmd *ScheduleEntryLockEnableAllSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Enabled = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Enabled = payload[i]
 	i++
 
-	return val
+	return nil
 }

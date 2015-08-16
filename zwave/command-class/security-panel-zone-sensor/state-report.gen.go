@@ -3,6 +3,8 @@
 
 package securitypanelzonesensor
 
+import "errors"
+
 // <no value>
 
 type SecurityPanelZoneSensorStateReport struct {
@@ -17,25 +19,43 @@ type SecurityPanelZoneSensorStateReport struct {
 	EventParameters byte
 }
 
-func ParseSecurityPanelZoneSensorStateReport(payload []byte) SecurityPanelZoneSensorStateReport {
-	val := SecurityPanelZoneSensorStateReport{}
-
+func (cmd *SecurityPanelZoneSensorStateReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ZoneNumber = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZoneNumber = payload[i]
 	i++
 
-	val.SensorNumber = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SensorNumber = payload[i]
 	i++
 
-	val.ZwaveAlarmType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZwaveAlarmType = payload[i]
 	i++
 
-	val.ZwaveAlarmEvent = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZwaveAlarmEvent = payload[i]
 	i++
 
-	val.EventParameters = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.EventParameters = payload[i]
 	i++
 
-	return val
+	return nil
 }

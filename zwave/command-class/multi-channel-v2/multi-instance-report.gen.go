@@ -3,6 +3,8 @@
 
 package multichannelv2
 
+import "errors"
+
 // <no value>
 
 type MultiInstanceReport struct {
@@ -13,17 +15,23 @@ type MultiInstanceReport struct {
 	}
 }
 
-func ParseMultiInstanceReport(payload []byte) MultiInstanceReport {
-	val := MultiInstanceReport{}
-
+func (cmd *MultiInstanceReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.CommandClass = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CommandClass = payload[i]
 	i++
 
-	val.Properties1.Instances = (payload[i] & 0x7F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.Instances = (payload[i] & 0x7F)
 
 	i += 1
 
-	return val
+	return nil
 }

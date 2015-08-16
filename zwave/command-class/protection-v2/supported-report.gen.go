@@ -3,7 +3,10 @@
 
 package protectionv2
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -19,30 +22,40 @@ type ProtectionSupportedReport struct {
 	RfProtectionState uint16
 }
 
-func ParseProtectionSupportedReport(payload []byte) ProtectionSupportedReport {
-	val := ProtectionSupportedReport{}
-
+func (cmd *ProtectionSupportedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
 	if payload[i]&0x01 == 0x01 {
-		val.Level.Timeout = true
+		cmd.Level.Timeout = true
 	} else {
-		val.Level.Timeout = false
+		cmd.Level.Timeout = false
 	}
 
 	if payload[i]&0x02 == 0x02 {
-		val.Level.ExclusiveControl = true
+		cmd.Level.ExclusiveControl = true
 	} else {
-		val.Level.ExclusiveControl = false
+		cmd.Level.ExclusiveControl = false
 	}
 
 	i += 1
 
-	val.LocalProtectionState = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.LocalProtectionState = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.RfProtectionState = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RfProtectionState = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	return val
+	return nil
 }

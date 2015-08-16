@@ -3,19 +3,23 @@
 
 package climatecontrolschedule
 
+import "errors"
+
 // <no value>
 
 type ScheduleChangedReport struct {
 	Changecounter byte
 }
 
-func ParseScheduleChangedReport(payload []byte) ScheduleChangedReport {
-	val := ScheduleChangedReport{}
-
+func (cmd *ScheduleChangedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Changecounter = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Changecounter = payload[i]
 	i++
 
-	return val
+	return nil
 }

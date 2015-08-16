@@ -3,19 +3,23 @@
 
 package scenecontrollerconf
 
+import "errors"
+
 // <no value>
 
 type SceneControllerConfGet struct {
 	GroupId byte
 }
 
-func ParseSceneControllerConfGet(payload []byte) SceneControllerConfGet {
-	val := SceneControllerConfGet{}
-
+func (cmd *SceneControllerConfGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.GroupId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GroupId = payload[i]
 	i++
 
-	return val
+	return nil
 }

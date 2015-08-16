@@ -3,19 +3,23 @@
 
 package tarifftblmonitor
 
+import "errors"
+
 // <no value>
 
 type TariffTblGet struct {
 	RateParameterSetId byte
 }
 
-func ParseTariffTblGet(payload []byte) TariffTblGet {
-	val := TariffTblGet{}
-
+func (cmd *TariffTblGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.RateParameterSetId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RateParameterSetId = payload[i]
 	i++
 
-	return val
+	return nil
 }

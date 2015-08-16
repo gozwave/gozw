@@ -8,8 +8,7 @@ package sensorconfiguration
 type SensorTriggerLevelGet struct {
 }
 
-func ParseSensorTriggerLevelGet(payload []byte) SensorTriggerLevelGet {
-	val := SensorTriggerLevelGet{}
+func (cmd *SensorTriggerLevelGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

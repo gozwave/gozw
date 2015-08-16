@@ -3,6 +3,8 @@
 
 package sceneactuatorconf
 
+import "errors"
+
 // <no value>
 
 type SceneActuatorConfReport struct {
@@ -13,19 +15,29 @@ type SceneActuatorConfReport struct {
 	DimmingDuration byte
 }
 
-func ParseSceneActuatorConfReport(payload []byte) SceneActuatorConfReport {
-	val := SceneActuatorConfReport{}
-
+func (cmd *SceneActuatorConfReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SceneId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SceneId = payload[i]
 	i++
 
-	val.Level = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Level = payload[i]
 	i++
 
-	val.DimmingDuration = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DimmingDuration = payload[i]
 	i++
 
-	return val
+	return nil
 }

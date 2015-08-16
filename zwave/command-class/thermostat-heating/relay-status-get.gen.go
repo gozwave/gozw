@@ -8,8 +8,7 @@ package thermostatheating
 type ThermostatHeatingRelayStatusGet struct {
 }
 
-func ParseThermostatHeatingRelayStatusGet(payload []byte) ThermostatHeatingRelayStatusGet {
-	val := ThermostatHeatingRelayStatusGet{}
+func (cmd *ThermostatHeatingRelayStatusGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

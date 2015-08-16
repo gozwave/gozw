@@ -8,8 +8,7 @@ package switchall
 type SwitchAllOn struct {
 }
 
-func ParseSwitchAllOn(payload []byte) SwitchAllOn {
-	val := SwitchAllOn{}
+func (cmd *SwitchAllOn) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

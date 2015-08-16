@@ -3,6 +3,8 @@
 
 package thermostatsetpointv3
 
+import "errors"
+
 // <no value>
 
 type ThermostatSetpointCapabilitiesGet struct {
@@ -11,14 +13,16 @@ type ThermostatSetpointCapabilitiesGet struct {
 	}
 }
 
-func ParseThermostatSetpointCapabilitiesGet(payload []byte) ThermostatSetpointCapabilitiesGet {
-	val := ThermostatSetpointCapabilitiesGet{}
-
+func (cmd *ThermostatSetpointCapabilitiesGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.SetpointType = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.SetpointType = (payload[i] & 0x0F)
 
 	i += 1
 
-	return val
+	return nil
 }

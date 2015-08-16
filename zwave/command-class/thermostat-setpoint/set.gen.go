@@ -3,6 +3,8 @@
 
 package thermostatsetpoint
 
+import "errors"
+
 // <no value>
 
 type ThermostatSetpointSet struct {
@@ -21,25 +23,35 @@ type ThermostatSetpointSet struct {
 	Value []byte
 }
 
-func ParseThermostatSetpointSet(payload []byte) ThermostatSetpointSet {
-	val := ThermostatSetpointSet{}
-
+func (cmd *ThermostatSetpointSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Level.SetpointType = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Level.SetpointType = (payload[i] & 0x0F)
 
 	i += 1
 
-	val.Level2.Size = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Level2.Scale = (payload[i] & 0x18) << 3
+	cmd.Level2.Size = (payload[i] & 0x07)
 
-	val.Level2.Precision = (payload[i] & 0xE0) << 5
+	cmd.Level2.Scale = (payload[i] & 0x18) << 3
+
+	cmd.Level2.Precision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.Value = payload[i : i+1]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Value = payload[i : i+1]
 	i += 1
 
-	return val
+	return nil
 }

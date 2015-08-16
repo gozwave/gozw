@@ -3,6 +3,8 @@
 
 package security
 
+import "errors"
+
 // <no value>
 
 type SecurityCommandsSupportedReport struct {
@@ -13,13 +15,19 @@ type SecurityCommandsSupportedReport struct {
 	CommandClassControl []byte
 }
 
-func ParseSecurityCommandsSupportedReport(payload []byte) SecurityCommandsSupportedReport {
-	val := SecurityCommandsSupportedReport{}
-
+func (cmd *SecurityCommandsSupportedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ReportsToFollow = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ReportsToFollow = payload[i]
 	i++
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	{
 		markerIndex := i
@@ -28,9 +36,17 @@ func ParseSecurityCommandsSupportedReport(payload []byte) SecurityCommandsSuppor
 		val.CommandClassSupport = payload[i:markerIndex]
 	}
 
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
 	i += 1 // skipping MARKER
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	val.CommandClassControl = payload[i:]
 
-	return val
+	return nil
 }

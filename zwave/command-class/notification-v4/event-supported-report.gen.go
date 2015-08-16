@@ -3,6 +3,8 @@
 
 package notificationv4
 
+import "errors"
+
 // <no value>
 
 type EventSupportedReport struct {
@@ -15,20 +17,30 @@ type EventSupportedReport struct {
 	BitMask byte
 }
 
-func ParseEventSupportedReport(payload []byte) EventSupportedReport {
-	val := EventSupportedReport{}
-
+func (cmd *EventSupportedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.NotificationType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NotificationType = payload[i]
 	i++
 
-	val.Properties1.NumberOfBitMasks = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.NumberOfBitMasks = (payload[i] & 0x1F)
 
 	i += 1
 
-	val.BitMask = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.BitMask = payload[i]
 	i++
 
-	return val
+	return nil
 }

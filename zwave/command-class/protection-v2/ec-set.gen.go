@@ -3,19 +3,23 @@
 
 package protectionv2
 
+import "errors"
+
 // <no value>
 
 type ProtectionEcSet struct {
 	NodeId byte
 }
 
-func ParseProtectionEcSet(payload []byte) ProtectionEcSet {
-	val := ProtectionEcSet{}
-
+func (cmd *ProtectionEcSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.NodeId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NodeId = payload[i]
 	i++
 
-	return val
+	return nil
 }

@@ -3,6 +3,8 @@
 
 package basicwindowcovering
 
+import "errors"
+
 // <no value>
 
 type BasicWindowCoveringStartLevelChange struct {
@@ -11,18 +13,20 @@ type BasicWindowCoveringStartLevelChange struct {
 	}
 }
 
-func ParseBasicWindowCoveringStartLevelChange(payload []byte) BasicWindowCoveringStartLevelChange {
-	val := BasicWindowCoveringStartLevelChange{}
-
+func (cmd *BasicWindowCoveringStartLevelChange) UnmarshalBinary(payload []byte) error {
 	i := 2
 
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
 	if payload[i]&0x40 == 0x40 {
-		val.Level.OpenClose = true
+		cmd.Level.OpenClose = true
 	} else {
-		val.Level.OpenClose = false
+		cmd.Level.OpenClose = false
 	}
 
 	i += 1
 
-	return val
+	return nil
 }

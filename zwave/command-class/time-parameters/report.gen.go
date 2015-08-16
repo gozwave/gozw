@@ -3,7 +3,10 @@
 
 package timeparameters
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -21,28 +24,50 @@ type TimeParametersReport struct {
 	SecondUtc byte
 }
 
-func ParseTimeParametersReport(payload []byte) TimeParametersReport {
-	val := TimeParametersReport{}
-
+func (cmd *TimeParametersReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Year = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Year = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.Month = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Month = payload[i]
 	i++
 
-	val.Day = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Day = payload[i]
 	i++
 
-	val.HourUtc = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.HourUtc = payload[i]
 	i++
 
-	val.MinuteUtc = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MinuteUtc = payload[i]
 	i++
 
-	val.SecondUtc = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SecondUtc = payload[i]
 	i++
 
-	return val
+	return nil
 }

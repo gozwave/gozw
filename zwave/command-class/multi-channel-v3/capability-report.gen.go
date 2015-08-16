@@ -3,6 +3,8 @@
 
 package multichannelv3
 
+import "errors"
+
 // <no value>
 
 type MultiChannelCapabilityReport struct {
@@ -19,28 +21,42 @@ type MultiChannelCapabilityReport struct {
 	CommandClass []byte
 }
 
-func ParseMultiChannelCapabilityReport(payload []byte) MultiChannelCapabilityReport {
-	val := MultiChannelCapabilityReport{}
-
+func (cmd *MultiChannelCapabilityReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.EndPoint = (payload[i] & 0x7F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.EndPoint = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.Dynamic = true
+		cmd.Properties1.Dynamic = true
 	} else {
-		val.Properties1.Dynamic = false
+		cmd.Properties1.Dynamic = false
 	}
 
 	i += 1
 
-	val.GenericDeviceClass = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GenericDeviceClass = payload[i]
 	i++
 
-	val.SpecificDeviceClass = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SpecificDeviceClass = payload[i]
 	i++
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	val.CommandClass = payload[i:]
 
-	return val
+	return nil
 }

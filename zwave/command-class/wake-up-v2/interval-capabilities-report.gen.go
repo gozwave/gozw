@@ -3,7 +3,10 @@
 
 package wakeupv2
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -17,22 +20,36 @@ type WakeUpIntervalCapabilitiesReport struct {
 	WakeUpIntervalStepSeconds uint32
 }
 
-func ParseWakeUpIntervalCapabilitiesReport(payload []byte) WakeUpIntervalCapabilitiesReport {
-	val := WakeUpIntervalCapabilitiesReport{}
-
+func (cmd *WakeUpIntervalCapabilitiesReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.MinimumWakeUpIntervalSeconds = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MinimumWakeUpIntervalSeconds = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.MaximumWakeUpIntervalSeconds = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MaximumWakeUpIntervalSeconds = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.DefaultWakeUpIntervalSeconds = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DefaultWakeUpIntervalSeconds = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.WakeUpIntervalStepSeconds = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.WakeUpIntervalStepSeconds = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	return val
+	return nil
 }

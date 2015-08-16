@@ -8,8 +8,7 @@ package thermostatsetpointv2
 type ThermostatSetpointSupportedGet struct {
 }
 
-func ParseThermostatSetpointSupportedGet(payload []byte) ThermostatSetpointSupportedGet {
-	val := ThermostatSetpointSupportedGet{}
+func (cmd *ThermostatSetpointSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

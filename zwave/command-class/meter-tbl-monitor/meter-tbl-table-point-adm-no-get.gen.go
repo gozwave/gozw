@@ -8,8 +8,7 @@ package metertblmonitor
 type MeterTblTablePointAdmNoGet struct {
 }
 
-func ParseMeterTblTablePointAdmNoGet(payload []byte) MeterTblTablePointAdmNoGet {
-	val := MeterTblTablePointAdmNoGet{}
+func (cmd *MeterTblTablePointAdmNoGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

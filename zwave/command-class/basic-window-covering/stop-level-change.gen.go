@@ -8,8 +8,7 @@ package basicwindowcovering
 type BasicWindowCoveringStopLevelChange struct {
 }
 
-func ParseBasicWindowCoveringStopLevelChange(payload []byte) BasicWindowCoveringStopLevelChange {
-	val := BasicWindowCoveringStopLevelChange{}
+func (cmd *BasicWindowCoveringStopLevelChange) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

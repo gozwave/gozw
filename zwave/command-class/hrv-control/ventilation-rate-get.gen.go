@@ -8,8 +8,7 @@ package hrvcontrol
 type HrvControlVentilationRateGet struct {
 }
 
-func ParseHrvControlVentilationRateGet(payload []byte) HrvControlVentilationRateGet {
-	val := HrvControlVentilationRateGet{}
+func (cmd *HrvControlVentilationRateGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

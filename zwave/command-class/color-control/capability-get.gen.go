@@ -8,8 +8,7 @@ package colorcontrol
 type CapabilityGet struct {
 }
 
-func ParseCapabilityGet(payload []byte) CapabilityGet {
-	val := CapabilityGet{}
+func (cmd *CapabilityGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

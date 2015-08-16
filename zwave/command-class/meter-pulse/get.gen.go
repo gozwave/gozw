@@ -8,8 +8,7 @@ package meterpulse
 type MeterPulseGet struct {
 }
 
-func ParseMeterPulseGet(payload []byte) MeterPulseGet {
-	val := MeterPulseGet{}
+func (cmd *MeterPulseGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

@@ -3,19 +3,23 @@
 
 package schedule
 
+import "errors"
+
 // <no value>
 
 type ScheduleRemove struct {
 	ScheduleId byte
 }
 
-func ParseScheduleRemove(payload []byte) ScheduleRemove {
-	val := ScheduleRemove{}
-
+func (cmd *ScheduleRemove) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ScheduleId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ScheduleId = payload[i]
 	i++
 
-	return val
+	return nil
 }

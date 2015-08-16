@@ -3,19 +3,23 @@
 
 package associationgrpinfo
 
+import "errors"
+
 // <no value>
 
 type AssociationGroupNameGet struct {
 	GroupingIdentifier byte
 }
 
-func ParseAssociationGroupNameGet(payload []byte) AssociationGroupNameGet {
-	val := AssociationGroupNameGet{}
-
+func (cmd *AssociationGroupNameGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.GroupingIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GroupingIdentifier = payload[i]
 	i++
 
-	return val
+	return nil
 }

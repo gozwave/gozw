@@ -3,6 +3,8 @@
 
 package simpleavcontrol
 
+import "errors"
+
 // <no value>
 
 type SimpleAvControlSupportedReport struct {
@@ -11,16 +13,22 @@ type SimpleAvControlSupportedReport struct {
 	BitMask byte
 }
 
-func ParseSimpleAvControlSupportedReport(payload []byte) SimpleAvControlSupportedReport {
-	val := SimpleAvControlSupportedReport{}
-
+func (cmd *SimpleAvControlSupportedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ReportNo = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ReportNo = payload[i]
 	i++
 
-	val.BitMask = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.BitMask = payload[i]
 	i++
 
-	return val
+	return nil
 }

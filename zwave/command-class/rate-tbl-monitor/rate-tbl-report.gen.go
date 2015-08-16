@@ -3,7 +3,10 @@
 
 package ratetblmonitor
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -45,55 +48,101 @@ type RateTblReport struct {
 	DcpRateId byte
 }
 
-func ParseRateTblReport(payload []byte) RateTblReport {
-	val := RateTblReport{}
-
+func (cmd *RateTblReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.RateParameterSetId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RateParameterSetId = payload[i]
 	i++
 
-	val.Properties1.NumberOfRateChar = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties1.RateType = (payload[i] & 0x60) << 5
+	cmd.Properties1.NumberOfRateChar = (payload[i] & 0x1F)
+
+	cmd.Properties1.RateType = (payload[i] & 0x60) << 5
 
 	i += 1
 
-	val.RateCharacter = payload[i : i+1]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RateCharacter = payload[i : i+1]
 	i += 1
 
-	val.StartHourLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartHourLocalTime = payload[i]
 	i++
 
-	val.StartMinuteLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartMinuteLocalTime = payload[i]
 	i++
 
-	val.DurationMinute = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DurationMinute = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.Properties2.ConsumptionScale = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties2.ConsumptionPrecision = (payload[i] & 0xE0) << 5
+	cmd.Properties2.ConsumptionScale = (payload[i] & 0x1F)
 
-	i += 1
-
-	val.MinConsumptionValue = binary.BigEndian.Uint32(payload[i : i+4])
-	i += 4
-
-	val.MaxConsumptionValue = binary.BigEndian.Uint32(payload[i : i+4])
-	i += 4
-
-	val.Properties3.MaxDemandScale = (payload[i] & 0x1F)
-
-	val.Properties3.MaxDemandPrecision = (payload[i] & 0xE0) << 5
+	cmd.Properties2.ConsumptionPrecision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.MaxDemandValue = binary.BigEndian.Uint32(payload[i : i+4])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MinConsumptionValue = binary.BigEndian.Uint32(payload[i : i+4])
 	i += 4
 
-	val.DcpRateId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MaxConsumptionValue = binary.BigEndian.Uint32(payload[i : i+4])
+	i += 4
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties3.MaxDemandScale = (payload[i] & 0x1F)
+
+	cmd.Properties3.MaxDemandPrecision = (payload[i] & 0xE0) << 5
+
+	i += 1
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MaxDemandValue = binary.BigEndian.Uint32(payload[i : i+4])
+	i += 4
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DcpRateId = payload[i]
 	i++
 
-	return val
+	return nil
 }

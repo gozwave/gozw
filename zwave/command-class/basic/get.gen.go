@@ -8,8 +8,7 @@ package basic
 type BasicGet struct {
 }
 
-func ParseBasicGet(payload []byte) BasicGet {
-	val := BasicGet{}
+func (cmd *BasicGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

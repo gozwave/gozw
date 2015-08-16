@@ -3,6 +3,8 @@
 
 package associationcommandconfiguration
 
+import "errors"
+
 // <no value>
 
 type CommandConfigurationSet struct {
@@ -19,27 +21,49 @@ type CommandConfigurationSet struct {
 	CommandByte []byte
 }
 
-func ParseCommandConfigurationSet(payload []byte) CommandConfigurationSet {
-	val := CommandConfigurationSet{}
-
+func (cmd *CommandConfigurationSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.GroupingIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GroupingIdentifier = payload[i]
 	i++
 
-	val.NodeId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NodeId = payload[i]
 	i++
 
-	val.CommandLength = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CommandLength = payload[i]
 	i++
 
-	val.CommandClassIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CommandClassIdentifier = payload[i]
 	i++
 
-	val.CommandIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CommandIdentifier = payload[i]
 	i++
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	val.CommandByte = payload[i:]
 
-	return val
+	return nil
 }

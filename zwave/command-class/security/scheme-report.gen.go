@@ -3,19 +3,23 @@
 
 package security
 
+import "errors"
+
 // <no value>
 
 type SecuritySchemeReport struct {
 	SupportedSecuritySchemes byte
 }
 
-func ParseSecuritySchemeReport(payload []byte) SecuritySchemeReport {
-	val := SecuritySchemeReport{}
-
+func (cmd *SecuritySchemeReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SupportedSecuritySchemes = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SupportedSecuritySchemes = payload[i]
 	i++
 
-	return val
+	return nil
 }

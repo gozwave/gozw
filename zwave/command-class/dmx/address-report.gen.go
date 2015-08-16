@@ -3,6 +3,8 @@
 
 package dmx
 
+import "errors"
+
 // <no value>
 
 type DmxAddressReport struct {
@@ -13,17 +15,23 @@ type DmxAddressReport struct {
 	ChannelId byte
 }
 
-func ParseDmxAddressReport(payload []byte) DmxAddressReport {
-	val := DmxAddressReport{}
-
+func (cmd *DmxAddressReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.PageId = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.PageId = (payload[i] & 0x0F)
 
 	i += 1
 
-	val.ChannelId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ChannelId = payload[i]
 	i++
 
-	return val
+	return nil
 }

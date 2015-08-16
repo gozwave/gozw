@@ -3,7 +3,10 @@
 
 package metertblmonitor
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -13,16 +16,22 @@ type MeterTblStatusReport struct {
 	CurrentOperatingStatus uint32
 }
 
-func ParseMeterTblStatusReport(payload []byte) MeterTblStatusReport {
-	val := MeterTblStatusReport{}
-
+func (cmd *MeterTblStatusReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ReportsToFollow = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ReportsToFollow = payload[i]
 	i++
 
-	val.CurrentOperatingStatus = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CurrentOperatingStatus = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	return val
+	return nil
 }

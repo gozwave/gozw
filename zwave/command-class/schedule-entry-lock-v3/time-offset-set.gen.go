@@ -3,6 +3,8 @@
 
 package scheduleentrylockv3
 
+import "errors"
+
 // <no value>
 
 type ScheduleEntryLockTimeOffsetSet struct {
@@ -21,33 +23,43 @@ type ScheduleEntryLockTimeOffsetSet struct {
 	}
 }
 
-func ParseScheduleEntryLockTimeOffsetSet(payload []byte) ScheduleEntryLockTimeOffsetSet {
-	val := ScheduleEntryLockTimeOffsetSet{}
-
+func (cmd *ScheduleEntryLockTimeOffsetSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Level.HourTzo = (payload[i] & 0x7F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Level.HourTzo = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Level.SignTzo = true
+		cmd.Level.SignTzo = true
 	} else {
-		val.Level.SignTzo = false
+		cmd.Level.SignTzo = false
 	}
 
 	i += 1
 
-	val.MinuteTzo = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MinuteTzo = payload[i]
 	i++
 
-	val.Level2.MinuteOffsetDst = (payload[i] & 0x7F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Level2.MinuteOffsetDst = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Level2.SignOffsetDst = true
+		cmd.Level2.SignOffsetDst = true
 	} else {
-		val.Level2.SignOffsetDst = false
+		cmd.Level2.SignOffsetDst = false
 	}
 
 	i += 1
 
-	return val
+	return nil
 }

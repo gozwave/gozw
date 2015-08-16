@@ -8,8 +8,7 @@ package zensornet
 type BindAccept struct {
 }
 
-func ParseBindAccept(payload []byte) BindAccept {
-	val := BindAccept{}
+func (cmd *BindAccept) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

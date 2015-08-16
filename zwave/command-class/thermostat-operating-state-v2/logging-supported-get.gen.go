@@ -8,8 +8,7 @@ package thermostatoperatingstatev2
 type ThermostatOperatingStateLoggingSupportedGet struct {
 }
 
-func ParseThermostatOperatingStateLoggingSupportedGet(payload []byte) ThermostatOperatingStateLoggingSupportedGet {
-	val := ThermostatOperatingStateLoggingSupportedGet{}
+func (cmd *ThermostatOperatingStateLoggingSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

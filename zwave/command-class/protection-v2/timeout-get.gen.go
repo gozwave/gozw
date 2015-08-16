@@ -8,8 +8,7 @@ package protectionv2
 type ProtectionTimeoutGet struct {
 }
 
-func ParseProtectionTimeoutGet(payload []byte) ProtectionTimeoutGet {
-	val := ProtectionTimeoutGet{}
+func (cmd *ProtectionTimeoutGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

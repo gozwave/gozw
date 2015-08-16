@@ -3,19 +3,23 @@
 
 package sceneactuatorconf
 
+import "errors"
+
 // <no value>
 
 type SceneActuatorConfGet struct {
 	SceneId byte
 }
 
-func ParseSceneActuatorConfGet(payload []byte) SceneActuatorConfGet {
-	val := SceneActuatorConfGet{}
-
+func (cmd *SceneActuatorConfGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SceneId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SceneId = payload[i]
 	i++
 
-	return val
+	return nil
 }

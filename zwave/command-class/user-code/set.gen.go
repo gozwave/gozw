@@ -3,6 +3,8 @@
 
 package usercode
 
+import "errors"
+
 // <no value>
 
 type UserCodeSet struct {
@@ -13,20 +15,30 @@ type UserCodeSet struct {
 	UserCode string
 }
 
-func ParseUserCodeSet(payload []byte) UserCodeSet {
-	val := UserCodeSet{}
-
+func (cmd *UserCodeSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.UserIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.UserIdentifier = payload[i]
 	i++
 
-	val.UserIdStatus = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.UserIdStatus = payload[i]
 	i++
 
-	val.UserCode = string(payload[i : i+10])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.UserCode = string(payload[i : i+10])
 
 	i += 10
 
-	return val
+	return nil
 }

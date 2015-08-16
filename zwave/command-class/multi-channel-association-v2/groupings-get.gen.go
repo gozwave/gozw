@@ -8,8 +8,7 @@ package multichannelassociationv2
 type MultiChannelAssociationGroupingsGet struct {
 }
 
-func ParseMultiChannelAssociationGroupingsGet(payload []byte) MultiChannelAssociationGroupingsGet {
-	val := MultiChannelAssociationGroupingsGet{}
+func (cmd *MultiChannelAssociationGroupingsGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

@@ -3,6 +3,8 @@
 
 package scheduleentrylockv2
 
+import "errors"
+
 // <no value>
 
 type ScheduleEntryLockYearDayReport struct {
@@ -31,46 +33,92 @@ type ScheduleEntryLockYearDayReport struct {
 	StopMinute byte
 }
 
-func ParseScheduleEntryLockYearDayReport(payload []byte) ScheduleEntryLockYearDayReport {
-	val := ScheduleEntryLockYearDayReport{}
-
+func (cmd *ScheduleEntryLockYearDayReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.UserIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.UserIdentifier = payload[i]
 	i++
 
-	val.ScheduleSlotId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ScheduleSlotId = payload[i]
 	i++
 
-	val.StartYear = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartYear = payload[i]
 	i++
 
-	val.StartMonth = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartMonth = payload[i]
 	i++
 
-	val.StartDay = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartDay = payload[i]
 	i++
 
-	val.StartHour = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartHour = payload[i]
 	i++
 
-	val.StartMinute = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartMinute = payload[i]
 	i++
 
-	val.StopYear = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopYear = payload[i]
 	i++
 
-	val.StopMonth = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopMonth = payload[i]
 	i++
 
-	val.StopDay = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopDay = payload[i]
 	i++
 
-	val.StopHour = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopHour = payload[i]
 	i++
 
-	val.StopMinute = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopMinute = payload[i]
 	i++
 
-	return val
+	return nil
 }

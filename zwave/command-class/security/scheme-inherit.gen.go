@@ -3,19 +3,23 @@
 
 package security
 
+import "errors"
+
 // <no value>
 
 type SecuritySchemeInherit struct {
 	SupportedSecuritySchemes byte
 }
 
-func ParseSecuritySchemeInherit(payload []byte) SecuritySchemeInherit {
-	val := SecuritySchemeInherit{}
-
+func (cmd *SecuritySchemeInherit) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SupportedSecuritySchemes = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SupportedSecuritySchemes = payload[i]
 	i++
 
-	return val
+	return nil
 }

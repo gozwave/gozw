@@ -3,7 +3,10 @@
 
 package antitheft
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -17,22 +20,36 @@ type AntitheftReport struct {
 	AntiTheftHintByte []byte
 }
 
-func ParseAntitheftReport(payload []byte) AntitheftReport {
-	val := AntitheftReport{}
-
+func (cmd *AntitheftReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.AntiTheftProtectionStatus = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.AntiTheftProtectionStatus = payload[i]
 	i++
 
-	val.ManufacturerId = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ManufacturerId = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.AntiTheftHintNumberBytes = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.AntiTheftHintNumberBytes = payload[i]
 	i++
 
-	val.AntiTheftHintByte = payload[i : i+2]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.AntiTheftHintByte = payload[i : i+2]
 	i += 2
 
-	return val
+	return nil
 }

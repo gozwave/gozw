@@ -3,6 +3,8 @@
 
 package thermostatfanmodev4
 
+import "errors"
+
 // <no value>
 
 type ThermostatFanModeReport struct {
@@ -13,20 +15,22 @@ type ThermostatFanModeReport struct {
 	}
 }
 
-func ParseThermostatFanModeReport(payload []byte) ThermostatFanModeReport {
-	val := ThermostatFanModeReport{}
-
+func (cmd *ThermostatFanModeReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.FanMode = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.FanMode = (payload[i] & 0x0F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.Off = true
+		cmd.Properties1.Off = true
 	} else {
-		val.Properties1.Off = false
+		cmd.Properties1.Off = false
 	}
 
 	i += 1
 
-	return val
+	return nil
 }

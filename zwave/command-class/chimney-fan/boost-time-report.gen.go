@@ -3,19 +3,23 @@
 
 package chimneyfan
 
+import "errors"
+
 // <no value>
 
 type ChimneyFanBoostTimeReport struct {
 	Time byte
 }
 
-func ParseChimneyFanBoostTimeReport(payload []byte) ChimneyFanBoostTimeReport {
-	val := ChimneyFanBoostTimeReport{}
-
+func (cmd *ChimneyFanBoostTimeReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Time = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Time = payload[i]
 	i++
 
-	return val
+	return nil
 }

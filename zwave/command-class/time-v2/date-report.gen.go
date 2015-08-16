@@ -3,7 +3,10 @@
 
 package timev2
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -15,19 +18,29 @@ type DateReport struct {
 	Day byte
 }
 
-func ParseDateReport(payload []byte) DateReport {
-	val := DateReport{}
-
+func (cmd *DateReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Year = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Year = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.Month = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Month = payload[i]
 	i++
 
-	val.Day = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Day = payload[i]
 	i++
 
-	return val
+	return nil
 }

@@ -3,6 +3,8 @@
 
 package networkmanagementinclusion
 
+import "errors"
+
 // <no value>
 
 type ReturnRouteDelete struct {
@@ -11,16 +13,22 @@ type ReturnRouteDelete struct {
 	NodeId byte
 }
 
-func ParseReturnRouteDelete(payload []byte) ReturnRouteDelete {
-	val := ReturnRouteDelete{}
-
+func (cmd *ReturnRouteDelete) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SeqNo = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SeqNo = payload[i]
 	i++
 
-	val.NodeId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NodeId = payload[i]
 	i++
 
-	return val
+	return nil
 }

@@ -8,8 +8,7 @@ package mtpwindowcovering
 type MoveToPositionGet struct {
 }
 
-func ParseMoveToPositionGet(payload []byte) MoveToPositionGet {
-	val := MoveToPositionGet{}
+func (cmd *MoveToPositionGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

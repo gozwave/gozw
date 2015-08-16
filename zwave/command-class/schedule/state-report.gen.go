@@ -3,6 +3,8 @@
 
 package schedule
 
+import "errors"
+
 // <no value>
 
 type ScheduleStateReport struct {
@@ -27,35 +29,49 @@ type ScheduleStateReport struct {
 	}
 }
 
-func ParseScheduleStateReport(payload []byte) ScheduleStateReport {
-	val := ScheduleStateReport{}
-
+func (cmd *ScheduleStateReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.NumberOfSupportedScheduleId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumberOfSupportedScheduleId = payload[i]
 	i++
 
-	val.Properties1.ReportsToFollow = (payload[i] & 0xFE) << 1
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.ReportsToFollow = (payload[i] & 0xFE) << 1
 
 	if payload[i]&0x01 == 0x01 {
-		val.Properties1.Override = true
+		cmd.Properties1.Override = true
 	} else {
-		val.Properties1.Override = false
+		cmd.Properties1.Override = false
 	}
 
 	i += 1
 
-	val.Properties2.ActiveId1 = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties2.ActiveId2 = (payload[i] & 0xF0) << 4
+	cmd.Properties2.ActiveId1 = (payload[i] & 0x0F)
 
-	i += 1
-
-	val.Properties3.ActiveId3 = (payload[i] & 0x0F)
-
-	val.Properties3.ActiveIdN = (payload[i] & 0xF0) << 4
+	cmd.Properties2.ActiveId2 = (payload[i] & 0xF0) << 4
 
 	i += 1
 
-	return val
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties3.ActiveId3 = (payload[i] & 0x0F)
+
+	cmd.Properties3.ActiveIdN = (payload[i] & 0xF0) << 4
+
+	i += 1
+
+	return nil
 }

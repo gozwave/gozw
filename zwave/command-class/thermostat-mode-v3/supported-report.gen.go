@@ -3,19 +3,23 @@
 
 package thermostatmodev3
 
+import "errors"
+
 // <no value>
 
 type ThermostatModeSupportedReport struct {
 	BitMask byte
 }
 
-func ParseThermostatModeSupportedReport(payload []byte) ThermostatModeSupportedReport {
-	val := ThermostatModeSupportedReport{}
-
+func (cmd *ThermostatModeSupportedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.BitMask = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.BitMask = payload[i]
 	i++
 
-	return val
+	return nil
 }

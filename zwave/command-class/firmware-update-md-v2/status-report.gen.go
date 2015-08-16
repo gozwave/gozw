@@ -3,19 +3,23 @@
 
 package firmwareupdatemdv2
 
+import "errors"
+
 // <no value>
 
 type FirmwareUpdateMdStatusReport struct {
 	Status byte
 }
 
-func ParseFirmwareUpdateMdStatusReport(payload []byte) FirmwareUpdateMdStatusReport {
-	val := FirmwareUpdateMdStatusReport{}
-
+func (cmd *FirmwareUpdateMdStatusReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Status = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Status = payload[i]
 	i++
 
-	return val
+	return nil
 }

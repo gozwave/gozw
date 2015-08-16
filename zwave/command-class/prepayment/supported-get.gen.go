@@ -8,8 +8,7 @@ package prepayment
 type PrepaymentSupportedGet struct {
 }
 
-func ParsePrepaymentSupportedGet(payload []byte) PrepaymentSupportedGet {
-	val := PrepaymentSupportedGet{}
+func (cmd *PrepaymentSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

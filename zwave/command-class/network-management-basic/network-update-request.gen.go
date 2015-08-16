@@ -3,19 +3,23 @@
 
 package networkmanagementbasic
 
+import "errors"
+
 // <no value>
 
 type NetworkUpdateRequest struct {
 	SeqNo byte
 }
 
-func ParseNetworkUpdateRequest(payload []byte) NetworkUpdateRequest {
-	val := NetworkUpdateRequest{}
-
+func (cmd *NetworkUpdateRequest) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SeqNo = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SeqNo = payload[i]
 	i++
 
-	return val
+	return nil
 }

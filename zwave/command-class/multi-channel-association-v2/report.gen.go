@@ -3,6 +3,8 @@
 
 package multichannelassociationv2
 
+import "errors"
+
 // <no value>
 
 type MultiChannelAssociationReport struct {
@@ -15,19 +17,33 @@ type MultiChannelAssociationReport struct {
 	NodeId []byte
 }
 
-func ParseMultiChannelAssociationReport(payload []byte) MultiChannelAssociationReport {
-	val := MultiChannelAssociationReport{}
-
+func (cmd *MultiChannelAssociationReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.GroupingIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GroupingIdentifier = payload[i]
 	i++
 
-	val.MaxNodesSupported = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MaxNodesSupported = payload[i]
 	i++
 
-	val.ReportsToFollow = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ReportsToFollow = payload[i]
 	i++
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	{
 		markerIndex := i
@@ -36,7 +52,11 @@ func ParseMultiChannelAssociationReport(payload []byte) MultiChannelAssociationR
 		val.NodeId = payload[i:markerIndex]
 	}
 
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
 	i += 1 // skipping MARKER
 
-	return val
+	return nil
 }

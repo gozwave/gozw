@@ -3,6 +3,8 @@
 
 package chimneyfan
 
+import "errors"
+
 // <no value>
 
 type ChimneyFanStatusReport struct {
@@ -37,67 +39,85 @@ type ChimneyFanStatusReport struct {
 	Value []byte
 }
 
-func ParseChimneyFanStatusReport(payload []byte) ChimneyFanStatusReport {
-	val := ChimneyFanStatusReport{}
-
+func (cmd *ChimneyFanStatusReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.State = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.State = payload[i]
 	i++
 
-	val.Speed = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Speed = payload[i]
 	i++
 
-	val.AlarmStatus.NotUsed = (payload[i] & 0x30) << 4
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.AlarmStatus.NotUsed = (payload[i] & 0x30) << 4
 
 	if payload[i]&0x01 == 0x01 {
-		val.AlarmStatus.Service = true
+		cmd.AlarmStatus.Service = true
 	} else {
-		val.AlarmStatus.Service = false
+		cmd.AlarmStatus.Service = false
 	}
 
 	if payload[i]&0x02 == 0x02 {
-		val.AlarmStatus.ExternalAlarm = true
+		cmd.AlarmStatus.ExternalAlarm = true
 	} else {
-		val.AlarmStatus.ExternalAlarm = false
+		cmd.AlarmStatus.ExternalAlarm = false
 	}
 
 	if payload[i]&0x04 == 0x04 {
-		val.AlarmStatus.SensorError = true
+		cmd.AlarmStatus.SensorError = true
 	} else {
-		val.AlarmStatus.SensorError = false
+		cmd.AlarmStatus.SensorError = false
 	}
 
 	if payload[i]&0x08 == 0x08 {
-		val.AlarmStatus.AlarmTemperatureExceeded = true
+		cmd.AlarmStatus.AlarmTemperatureExceeded = true
 	} else {
-		val.AlarmStatus.AlarmTemperatureExceeded = false
+		cmd.AlarmStatus.AlarmTemperatureExceeded = false
 	}
 
 	if payload[i]&0x40 == 0x40 {
-		val.AlarmStatus.SpeedChangeEnable = true
+		cmd.AlarmStatus.SpeedChangeEnable = true
 	} else {
-		val.AlarmStatus.SpeedChangeEnable = false
+		cmd.AlarmStatus.SpeedChangeEnable = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.AlarmStatus.StartTemperatureExceeded = true
+		cmd.AlarmStatus.StartTemperatureExceeded = true
 	} else {
-		val.AlarmStatus.StartTemperatureExceeded = false
+		cmd.AlarmStatus.StartTemperatureExceeded = false
 	}
 
 	i += 1
 
-	val.Properties1.Size = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties1.Scale = (payload[i] & 0x18) << 3
+	cmd.Properties1.Size = (payload[i] & 0x07)
 
-	val.Properties1.Precision = (payload[i] & 0xE0) << 5
+	cmd.Properties1.Scale = (payload[i] & 0x18) << 3
+
+	cmd.Properties1.Precision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.Value = payload[i : i+3]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Value = payload[i : i+3]
 	i += 3
 
-	return val
+	return nil
 }

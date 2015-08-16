@@ -3,6 +3,8 @@
 
 package networkmanagementinclusion
 
+import "errors"
+
 // <no value>
 
 type ReturnRouteAssign struct {
@@ -13,19 +15,29 @@ type ReturnRouteAssign struct {
 	DestinationNodeId byte
 }
 
-func ParseReturnRouteAssign(payload []byte) ReturnRouteAssign {
-	val := ReturnRouteAssign{}
-
+func (cmd *ReturnRouteAssign) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SeqNo = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SeqNo = payload[i]
 	i++
 
-	val.SourceNodeId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SourceNodeId = payload[i]
 	i++
 
-	val.DestinationNodeId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DestinationNodeId = payload[i]
 	i++
 
-	return val
+	return nil
 }

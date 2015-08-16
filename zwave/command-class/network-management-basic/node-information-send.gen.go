@@ -3,6 +3,8 @@
 
 package networkmanagementbasic
 
+import "errors"
+
 // <no value>
 
 type NodeInformationSend struct {
@@ -13,19 +15,33 @@ type NodeInformationSend struct {
 	TxOptions byte
 }
 
-func ParseNodeInformationSend(payload []byte) NodeInformationSend {
-	val := NodeInformationSend{}
-
+func (cmd *NodeInformationSend) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SeqNo = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SeqNo = payload[i]
 	i++
 
-	val.DestinationNodeId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DestinationNodeId = payload[i]
 	i++
 
-	val.TxOptions = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.TxOptions = payload[i]
 	i++
 
-	return val
+	return nil
 }

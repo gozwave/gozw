@@ -3,6 +3,8 @@
 
 package schedule
 
+import "errors"
+
 // <no value>
 
 type ScheduleStateSet struct {
@@ -11,16 +13,22 @@ type ScheduleStateSet struct {
 	ScheduleState byte
 }
 
-func ParseScheduleStateSet(payload []byte) ScheduleStateSet {
-	val := ScheduleStateSet{}
-
+func (cmd *ScheduleStateSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ScheduleId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ScheduleId = payload[i]
 	i++
 
-	val.ScheduleState = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ScheduleState = payload[i]
 	i++
 
-	return val
+	return nil
 }

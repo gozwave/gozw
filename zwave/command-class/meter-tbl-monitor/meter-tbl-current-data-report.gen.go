@@ -3,7 +3,10 @@
 
 package metertblmonitor
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -29,38 +32,72 @@ type MeterTblCurrentDataReport struct {
 	SecondLocalTime byte
 }
 
-func ParseMeterTblCurrentDataReport(payload []byte) MeterTblCurrentDataReport {
-	val := MeterTblCurrentDataReport{}
-
+func (cmd *MeterTblCurrentDataReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ReportsToFollow = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ReportsToFollow = payload[i]
 	i++
 
-	val.Properties1.RateType = (payload[i] & 0x03)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.RateType = (payload[i] & 0x03)
 
 	i += 1
 
-	val.Dataset = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Dataset = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.Year = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Year = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.Month = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Month = payload[i]
 	i++
 
-	val.Day = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Day = payload[i]
 	i++
 
-	val.HourLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.HourLocalTime = payload[i]
 	i++
 
-	val.MinuteLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MinuteLocalTime = payload[i]
 	i++
 
-	val.SecondLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SecondLocalTime = payload[i]
 	i++
 
-	return val
+	return nil
 }

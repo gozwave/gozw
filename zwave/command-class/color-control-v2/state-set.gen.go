@@ -3,6 +3,8 @@
 
 package colorcontrolv2
 
+import "errors"
+
 // <no value>
 
 type StateSet struct {
@@ -13,17 +15,23 @@ type StateSet struct {
 	DimmingDuration byte
 }
 
-func ParseStateSet(payload []byte) StateSet {
-	val := StateSet{}
-
+func (cmd *StateSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.StateDataLength = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.StateDataLength = (payload[i] & 0x1F)
 
 	i += 1
 
-	val.DimmingDuration = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DimmingDuration = payload[i]
 	i++
 
-	return val
+	return nil
 }

@@ -8,8 +8,7 @@ package switchmultilevelv3
 type SwitchMultilevelSupportedGet struct {
 }
 
-func ParseSwitchMultilevelSupportedGet(payload []byte) SwitchMultilevelSupportedGet {
-	val := SwitchMultilevelSupportedGet{}
+func (cmd *SwitchMultilevelSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

@@ -3,19 +3,23 @@
 
 package indicator
 
+import "errors"
+
 // <no value>
 
 type IndicatorSet struct {
 	Value byte
 }
 
-func ParseIndicatorSet(payload []byte) IndicatorSet {
-	val := IndicatorSet{}
-
+func (cmd *IndicatorSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Value = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Value = payload[i]
 	i++
 
-	return val
+	return nil
 }

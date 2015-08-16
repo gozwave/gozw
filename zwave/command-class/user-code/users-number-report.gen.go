@@ -3,19 +3,23 @@
 
 package usercode
 
+import "errors"
+
 // <no value>
 
 type UsersNumberReport struct {
 	SupportedUsers byte
 }
 
-func ParseUsersNumberReport(payload []byte) UsersNumberReport {
-	val := UsersNumberReport{}
-
+func (cmd *UsersNumberReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SupportedUsers = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SupportedUsers = payload[i]
 	i++
 
-	return val
+	return nil
 }

@@ -3,6 +3,8 @@
 
 package multiinstance
 
+import "errors"
+
 // <no value>
 
 type MultiInstanceCmdEncap struct {
@@ -15,21 +17,35 @@ type MultiInstanceCmdEncap struct {
 	Parameter []byte
 }
 
-func ParseMultiInstanceCmdEncap(payload []byte) MultiInstanceCmdEncap {
-	val := MultiInstanceCmdEncap{}
-
+func (cmd *MultiInstanceCmdEncap) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Instance = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Instance = payload[i]
 	i++
 
-	val.CommandClass = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CommandClass = payload[i]
 	i++
 
-	val.Command = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Command = payload[i]
 	i++
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	val.Parameter = payload[i:]
 
-	return val
+	return nil
 }

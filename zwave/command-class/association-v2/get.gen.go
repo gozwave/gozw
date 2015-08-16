@@ -3,19 +3,23 @@
 
 package associationv2
 
+import "errors"
+
 // <no value>
 
 type AssociationGet struct {
 	GroupingIdentifier byte
 }
 
-func ParseAssociationGet(payload []byte) AssociationGet {
-	val := AssociationGet{}
-
+func (cmd *AssociationGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.GroupingIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GroupingIdentifier = payload[i]
 	i++
 
-	return val
+	return nil
 }

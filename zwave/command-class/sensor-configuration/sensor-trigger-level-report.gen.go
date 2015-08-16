@@ -3,6 +3,8 @@
 
 package sensorconfiguration
 
+import "errors"
+
 // <no value>
 
 type SensorTriggerLevelReport struct {
@@ -19,24 +21,34 @@ type SensorTriggerLevelReport struct {
 	TriggerValue []byte
 }
 
-func ParseSensorTriggerLevelReport(payload []byte) SensorTriggerLevelReport {
-	val := SensorTriggerLevelReport{}
-
+func (cmd *SensorTriggerLevelReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SensorType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SensorType = payload[i]
 	i++
 
-	val.Properties1.Size = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties1.Scale = (payload[i] & 0x18) << 3
+	cmd.Properties1.Size = (payload[i] & 0x07)
 
-	val.Properties1.Precision = (payload[i] & 0xE0) << 5
+	cmd.Properties1.Scale = (payload[i] & 0x18) << 3
+
+	cmd.Properties1.Precision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.TriggerValue = payload[i : i+1]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.TriggerValue = payload[i : i+1]
 	i += 1
 
-	return val
+	return nil
 }

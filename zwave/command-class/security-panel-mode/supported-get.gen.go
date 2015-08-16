@@ -8,8 +8,7 @@ package securitypanelmode
 type SecurityPanelModeSupportedGet struct {
 }
 
-func ParseSecurityPanelModeSupportedGet(payload []byte) SecurityPanelModeSupportedGet {
-	val := SecurityPanelModeSupportedGet{}
+func (cmd *SecurityPanelModeSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

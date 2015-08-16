@@ -3,6 +3,8 @@
 
 package associationv2
 
+import "errors"
+
 // <no value>
 
 type AssociationRemove struct {
@@ -11,15 +13,21 @@ type AssociationRemove struct {
 	NodeId []byte
 }
 
-func ParseAssociationRemove(payload []byte) AssociationRemove {
-	val := AssociationRemove{}
-
+func (cmd *AssociationRemove) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.GroupingIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GroupingIdentifier = payload[i]
 	i++
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	val.NodeId = payload[i:]
 
-	return val
+	return nil
 }

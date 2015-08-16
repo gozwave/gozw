@@ -3,19 +3,23 @@
 
 package usercode
 
+import "errors"
+
 // <no value>
 
 type UserCodeGet struct {
 	UserIdentifier byte
 }
 
-func ParseUserCodeGet(payload []byte) UserCodeGet {
-	val := UserCodeGet{}
-
+func (cmd *UserCodeGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.UserIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.UserIdentifier = payload[i]
 	i++
 
-	return val
+	return nil
 }

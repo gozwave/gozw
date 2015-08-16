@@ -8,8 +8,7 @@ package metertblmonitor
 type MeterTblStatusSupportedGet struct {
 }
 
-func ParseMeterTblStatusSupportedGet(payload []byte) MeterTblStatusSupportedGet {
-	val := MeterTblStatusSupportedGet{}
+func (cmd *MeterTblStatusSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

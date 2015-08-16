@@ -8,8 +8,7 @@ package powerlevel
 type PowerlevelTestNodeGet struct {
 }
 
-func ParsePowerlevelTestNodeGet(payload []byte) PowerlevelTestNodeGet {
-	val := PowerlevelTestNodeGet{}
+func (cmd *PowerlevelTestNodeGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

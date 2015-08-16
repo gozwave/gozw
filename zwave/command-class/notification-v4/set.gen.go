@@ -3,6 +3,8 @@
 
 package notificationv4
 
+import "errors"
+
 // <no value>
 
 type NotificationSet struct {
@@ -11,16 +13,22 @@ type NotificationSet struct {
 	NotificationStatus byte
 }
 
-func ParseNotificationSet(payload []byte) NotificationSet {
-	val := NotificationSet{}
-
+func (cmd *NotificationSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.NotificationType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NotificationType = payload[i]
 	i++
 
-	val.NotificationStatus = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NotificationStatus = payload[i]
 	i++
 
-	return val
+	return nil
 }

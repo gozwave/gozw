@@ -3,6 +3,8 @@
 
 package versionv2
 
+import "errors"
+
 // <no value>
 
 type VersionCommandClassReport struct {
@@ -11,16 +13,22 @@ type VersionCommandClassReport struct {
 	CommandClassVersion byte
 }
 
-func ParseVersionCommandClassReport(payload []byte) VersionCommandClassReport {
-	val := VersionCommandClassReport{}
-
+func (cmd *VersionCommandClassReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.RequestedCommandClass = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RequestedCommandClass = payload[i]
 	i++
 
-	val.CommandClassVersion = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CommandClassVersion = payload[i]
 	i++
 
-	return val
+	return nil
 }

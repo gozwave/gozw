@@ -3,19 +3,23 @@
 
 package colorcontrolv2
 
+import "errors"
+
 // <no value>
 
 type StateGet struct {
 	CapabilityId byte
 }
 
-func ParseStateGet(payload []byte) StateGet {
-	val := StateGet{}
-
+func (cmd *StateGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.CapabilityId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CapabilityId = payload[i]
 	i++
 
-	return val
+	return nil
 }

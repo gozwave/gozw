@@ -3,7 +3,10 @@
 
 package metertblmonitorv2
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -25,29 +28,47 @@ type MeterTblReport struct {
 	DataHistorySupported uint32
 }
 
-func ParseMeterTblReport(payload []byte) MeterTblReport {
-	val := MeterTblReport{}
-
+func (cmd *MeterTblReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.MeterType = (payload[i] & 0x3F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties1.RateType = (payload[i] & 0xC0) << 6
+	cmd.Properties1.MeterType = (payload[i] & 0x3F)
+
+	cmd.Properties1.RateType = (payload[i] & 0xC0) << 6
 
 	i += 1
 
-	val.Properties2.PayMeter = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties2.PayMeter = (payload[i] & 0x0F)
 
 	i += 1
 
-	val.DatasetSupported = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DatasetSupported = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.DatasetHistorySupported = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DatasetHistorySupported = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.DataHistorySupported = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DataHistorySupported = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	return val
+	return nil
 }

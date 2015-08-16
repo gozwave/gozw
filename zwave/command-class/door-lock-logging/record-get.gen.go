@@ -3,19 +3,23 @@
 
 package doorlocklogging
 
+import "errors"
+
 // <no value>
 
 type RecordGet struct {
 	RecordNumber byte
 }
 
-func ParseRecordGet(payload []byte) RecordGet {
-	val := RecordGet{}
-
+func (cmd *RecordGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.RecordNumber = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RecordNumber = payload[i]
 	i++
 
-	return val
+	return nil
 }

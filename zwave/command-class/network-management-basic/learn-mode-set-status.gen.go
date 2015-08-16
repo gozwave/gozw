@@ -3,6 +3,8 @@
 
 package networkmanagementbasic
 
+import "errors"
+
 // <no value>
 
 type LearnModeSetStatus struct {
@@ -13,19 +15,33 @@ type LearnModeSetStatus struct {
 	NewNodeId byte
 }
 
-func ParseLearnModeSetStatus(payload []byte) LearnModeSetStatus {
-	val := LearnModeSetStatus{}
-
+func (cmd *LearnModeSetStatus) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SeqNo = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SeqNo = payload[i]
 	i++
 
-	val.Status = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Status = payload[i]
 	i++
 
-	val.NewNodeId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NewNodeId = payload[i]
 	i++
 
-	return val
+	return nil
 }

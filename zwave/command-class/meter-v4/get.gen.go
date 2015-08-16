@@ -3,6 +3,8 @@
 
 package meterv4
 
+import "errors"
+
 // <no value>
 
 type MeterGet struct {
@@ -15,19 +17,25 @@ type MeterGet struct {
 	Scale2 byte
 }
 
-func ParseMeterGet(payload []byte) MeterGet {
-	val := MeterGet{}
-
+func (cmd *MeterGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.Scale = (payload[i] & 0x38) << 3
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties1.RateType = (payload[i] & 0xC0) << 6
+	cmd.Properties1.Scale = (payload[i] & 0x38) << 3
+
+	cmd.Properties1.RateType = (payload[i] & 0xC0) << 6
 
 	i += 1
 
-	val.Scale2 = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Scale2 = payload[i]
 	i++
 
-	return val
+	return nil
 }

@@ -8,8 +8,7 @@ package climatecontrolschedule
 type ScheduleChangedGet struct {
 }
 
-func ParseScheduleChangedGet(payload []byte) ScheduleChangedGet {
-	val := ScheduleChangedGet{}
+func (cmd *ScheduleChangedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

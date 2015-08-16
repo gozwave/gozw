@@ -8,8 +8,7 @@ package thermostatsetback
 type ThermostatSetbackGet struct {
 }
 
-func ParseThermostatSetbackGet(payload []byte) ThermostatSetbackGet {
-	val := ThermostatSetbackGet{}
+func (cmd *ThermostatSetbackGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

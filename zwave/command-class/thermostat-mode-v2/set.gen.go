@@ -3,6 +3,8 @@
 
 package thermostatmodev2
 
+import "errors"
+
 // <no value>
 
 type ThermostatModeSet struct {
@@ -11,14 +13,16 @@ type ThermostatModeSet struct {
 	}
 }
 
-func ParseThermostatModeSet(payload []byte) ThermostatModeSet {
-	val := ThermostatModeSet{}
-
+func (cmd *ThermostatModeSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Level.Mode = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Level.Mode = (payload[i] & 0x1F)
 
 	i += 1
 
-	return val
+	return nil
 }

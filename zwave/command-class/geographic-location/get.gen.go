@@ -8,8 +8,7 @@ package geographiclocation
 type GeographicLocationGet struct {
 }
 
-func ParseGeographicLocationGet(payload []byte) GeographicLocationGet {
-	val := GeographicLocationGet{}
+func (cmd *GeographicLocationGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

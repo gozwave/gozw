@@ -3,6 +3,8 @@
 
 package sensormultilevelv5
 
+import "errors"
+
 // <no value>
 
 type SensorMultilevelSupportedScaleReport struct {
@@ -13,17 +15,23 @@ type SensorMultilevelSupportedScaleReport struct {
 	}
 }
 
-func ParseSensorMultilevelSupportedScaleReport(payload []byte) SensorMultilevelSupportedScaleReport {
-	val := SensorMultilevelSupportedScaleReport{}
-
+func (cmd *SensorMultilevelSupportedScaleReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SensorType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SensorType = payload[i]
 	i++
 
-	val.Properties1.ScaleBitMask = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.ScaleBitMask = (payload[i] & 0x0F)
 
 	i += 1
 
-	return val
+	return nil
 }

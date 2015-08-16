@@ -8,8 +8,7 @@ package usercode
 type UsersNumberGet struct {
 }
 
-func ParseUsersNumberGet(payload []byte) UsersNumberGet {
-	val := UsersNumberGet{}
+func (cmd *UsersNumberGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

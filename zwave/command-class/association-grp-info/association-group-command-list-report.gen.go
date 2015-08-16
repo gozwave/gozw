@@ -3,6 +3,8 @@
 
 package associationgrpinfo
 
+import "errors"
+
 // <no value>
 
 type AssociationGroupCommandListReport struct {
@@ -13,19 +15,29 @@ type AssociationGroupCommandListReport struct {
 	Command []byte
 }
 
-func ParseAssociationGroupCommandListReport(payload []byte) AssociationGroupCommandListReport {
-	val := AssociationGroupCommandListReport{}
-
+func (cmd *AssociationGroupCommandListReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.GroupingIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GroupingIdentifier = payload[i]
 	i++
 
-	val.ListLength = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ListLength = payload[i]
 	i++
 
-	val.Command = payload[i : i+1]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Command = payload[i : i+1]
 	i += 1
 
-	return val
+	return nil
 }

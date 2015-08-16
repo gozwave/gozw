@@ -3,19 +3,23 @@
 
 package basic
 
+import "errors"
+
 // <no value>
 
 type BasicSet struct {
 	Value byte
 }
 
-func ParseBasicSet(payload []byte) BasicSet {
-	val := BasicSet{}
-
+func (cmd *BasicSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Value = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Value = payload[i]
 	i++
 
-	return val
+	return nil
 }

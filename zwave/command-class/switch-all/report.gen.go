@@ -3,19 +3,23 @@
 
 package switchall
 
+import "errors"
+
 // <no value>
 
 type SwitchAllReport struct {
 	Mode byte
 }
 
-func ParseSwitchAllReport(payload []byte) SwitchAllReport {
-	val := SwitchAllReport{}
-
+func (cmd *SwitchAllReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Mode = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Mode = payload[i]
 	i++
 
-	return val
+	return nil
 }

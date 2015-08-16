@@ -3,6 +3,8 @@
 
 package thermostatmodev3
 
+import "errors"
+
 // <no value>
 
 type ThermostatModeReport struct {
@@ -15,19 +17,25 @@ type ThermostatModeReport struct {
 	ManufacturerData []byte
 }
 
-func ParseThermostatModeReport(payload []byte) ThermostatModeReport {
-	val := ThermostatModeReport{}
-
+func (cmd *ThermostatModeReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Level.NoOfManufacturerDataFields = (payload[i] & 0xE0) << 5
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Level.Mode = (payload[i] & 0x1F)
+	cmd.Level.NoOfManufacturerDataFields = (payload[i] & 0xE0) << 5
+
+	cmd.Level.Mode = (payload[i] & 0x1F)
 
 	i += 1
 
-	val.ManufacturerData = payload[i : i+0]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ManufacturerData = payload[i : i+0]
 	i += 0
 
-	return val
+	return nil
 }

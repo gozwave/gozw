@@ -8,8 +8,7 @@ package hail
 type Hail struct {
 }
 
-func ParseHail(payload []byte) Hail {
-	val := Hail{}
+func (cmd *Hail) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

@@ -3,6 +3,8 @@
 
 package alarmv2
 
+import "errors"
+
 // <no value>
 
 type AlarmTypeSupportedReport struct {
@@ -15,23 +17,29 @@ type AlarmTypeSupportedReport struct {
 	BitMask byte
 }
 
-func ParseAlarmTypeSupportedReport(payload []byte) AlarmTypeSupportedReport {
-	val := AlarmTypeSupportedReport{}
-
+func (cmd *AlarmTypeSupportedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.NumberOfBitMasks = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.NumberOfBitMasks = (payload[i] & 0x1F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.V1Alarm = true
+		cmd.Properties1.V1Alarm = true
 	} else {
-		val.Properties1.V1Alarm = false
+		cmd.Properties1.V1Alarm = false
 	}
 
 	i += 1
 
-	val.BitMask = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.BitMask = payload[i]
 	i++
 
-	return val
+	return nil
 }

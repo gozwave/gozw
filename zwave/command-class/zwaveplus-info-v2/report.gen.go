@@ -3,7 +3,10 @@
 
 package zwaveplusinfov2
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -19,25 +22,43 @@ type ZwaveplusInfoReport struct {
 	UserIconType uint16
 }
 
-func ParseZwaveplusInfoReport(payload []byte) ZwaveplusInfoReport {
-	val := ZwaveplusInfoReport{}
-
+func (cmd *ZwaveplusInfoReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ZWaveVersion = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZWaveVersion = payload[i]
 	i++
 
-	val.RoleType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RoleType = payload[i]
 	i++
 
-	val.NodeType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NodeType = payload[i]
 	i++
 
-	val.InstallerIconType = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.InstallerIconType = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.UserIconType = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.UserIconType = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	return val
+	return nil
 }

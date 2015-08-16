@@ -3,6 +3,8 @@
 
 package configurationv2
 
+import "errors"
+
 // <no value>
 
 type ConfigurationReport struct {
@@ -15,20 +17,30 @@ type ConfigurationReport struct {
 	ConfigurationValue []byte
 }
 
-func ParseConfigurationReport(payload []byte) ConfigurationReport {
-	val := ConfigurationReport{}
-
+func (cmd *ConfigurationReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ParameterNumber = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ParameterNumber = payload[i]
 	i++
 
-	val.Level.Size = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Level.Size = (payload[i] & 0x07)
 
 	i += 1
 
-	val.ConfigurationValue = payload[i : i+1]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ConfigurationValue = payload[i : i+1]
 	i += 1
 
-	return val
+	return nil
 }

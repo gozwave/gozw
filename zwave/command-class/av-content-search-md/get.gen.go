@@ -8,8 +8,7 @@ package avcontentsearchmd
 type AvContentSearchMdGet struct {
 }
 
-func ParseAvContentSearchMdGet(payload []byte) AvContentSearchMdGet {
-	val := AvContentSearchMdGet{}
+func (cmd *AvContentSearchMdGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

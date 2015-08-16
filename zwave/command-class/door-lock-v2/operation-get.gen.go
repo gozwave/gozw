@@ -8,8 +8,7 @@ package doorlockv2
 type DoorLockOperationGet struct {
 }
 
-func ParseDoorLockOperationGet(payload []byte) DoorLockOperationGet {
-	val := DoorLockOperationGet{}
+func (cmd *DoorLockOperationGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

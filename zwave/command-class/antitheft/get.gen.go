@@ -8,8 +8,7 @@ package antitheft
 type AntitheftGet struct {
 }
 
-func ParseAntitheftGet(payload []byte) AntitheftGet {
-	val := AntitheftGet{}
+func (cmd *AntitheftGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

@@ -8,8 +8,7 @@ package scheduleentrylockv3
 type ScheduleEntryLockTimeOffsetGet struct {
 }
 
-func ParseScheduleEntryLockTimeOffsetGet(payload []byte) ScheduleEntryLockTimeOffsetGet {
-	val := ScheduleEntryLockTimeOffsetGet{}
+func (cmd *ScheduleEntryLockTimeOffsetGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

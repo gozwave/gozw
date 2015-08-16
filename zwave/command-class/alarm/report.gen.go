@@ -3,6 +3,8 @@
 
 package alarm
 
+import "errors"
+
 // <no value>
 
 type AlarmReport struct {
@@ -11,16 +13,22 @@ type AlarmReport struct {
 	AlarmLevel byte
 }
 
-func ParseAlarmReport(payload []byte) AlarmReport {
-	val := AlarmReport{}
-
+func (cmd *AlarmReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.AlarmType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.AlarmType = payload[i]
 	i++
 
-	val.AlarmLevel = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.AlarmLevel = payload[i]
 	i++
 
-	return val
+	return nil
 }

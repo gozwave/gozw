@@ -3,6 +3,8 @@
 
 package applicationcapability
 
+import "errors"
+
 // <no value>
 
 type CommandCommandClassNotSupported struct {
@@ -15,24 +17,34 @@ type CommandCommandClassNotSupported struct {
 	OffendingCommand byte
 }
 
-func ParseCommandCommandClassNotSupported(payload []byte) CommandCommandClassNotSupported {
-	val := CommandCommandClassNotSupported{}
-
+func (cmd *CommandCommandClassNotSupported) UnmarshalBinary(payload []byte) error {
 	i := 2
 
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.Dynamic = true
+		cmd.Properties1.Dynamic = true
 	} else {
-		val.Properties1.Dynamic = false
+		cmd.Properties1.Dynamic = false
 	}
 
 	i += 1
 
-	val.OffendingCommandClass = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.OffendingCommandClass = payload[i]
 	i++
 
-	val.OffendingCommand = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.OffendingCommand = payload[i]
 	i++
 
-	return val
+	return nil
 }

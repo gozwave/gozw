@@ -3,6 +3,8 @@
 
 package scheduleentrylockv2
 
+import "errors"
+
 // <no value>
 
 type ScheduleEntryTypeSupportedReport struct {
@@ -11,16 +13,22 @@ type ScheduleEntryTypeSupportedReport struct {
 	NumberOfSlotsYearDay byte
 }
 
-func ParseScheduleEntryTypeSupportedReport(payload []byte) ScheduleEntryTypeSupportedReport {
-	val := ScheduleEntryTypeSupportedReport{}
-
+func (cmd *ScheduleEntryTypeSupportedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.NumberOfSlotsWeekDay = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumberOfSlotsWeekDay = payload[i]
 	i++
 
-	val.NumberOfSlotsYearDay = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumberOfSlotsYearDay = payload[i]
 	i++
 
-	return val
+	return nil
 }

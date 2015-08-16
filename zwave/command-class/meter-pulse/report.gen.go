@@ -3,7 +3,10 @@
 
 package meterpulse
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -11,13 +14,15 @@ type MeterPulseReport struct {
 	PulseCount uint32
 }
 
-func ParseMeterPulseReport(payload []byte) MeterPulseReport {
-	val := MeterPulseReport{}
-
+func (cmd *MeterPulseReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.PulseCount = binary.BigEndian.Uint32(payload[i : i+4])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.PulseCount = binary.BigEndian.Uint32(payload[i : i+4])
 	i += 4
 
-	return val
+	return nil
 }

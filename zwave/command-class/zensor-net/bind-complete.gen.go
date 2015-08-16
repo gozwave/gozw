@@ -8,8 +8,7 @@ package zensornet
 type BindComplete struct {
 }
 
-func ParseBindComplete(payload []byte) BindComplete {
-	val := BindComplete{}
+func (cmd *BindComplete) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

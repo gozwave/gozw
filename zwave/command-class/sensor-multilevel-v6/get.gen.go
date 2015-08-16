@@ -3,6 +3,8 @@
 
 package sensormultilevelv6
 
+import "errors"
+
 // <no value>
 
 type SensorMultilevelGet struct {
@@ -13,17 +15,23 @@ type SensorMultilevelGet struct {
 	}
 }
 
-func ParseSensorMultilevelGet(payload []byte) SensorMultilevelGet {
-	val := SensorMultilevelGet{}
-
+func (cmd *SensorMultilevelGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SensorType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SensorType = payload[i]
 	i++
 
-	val.Properties1.Scale = (payload[i] & 0x18) << 3
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.Scale = (payload[i] & 0x18) << 3
 
 	i += 1
 
-	return val
+	return nil
 }

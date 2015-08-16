@@ -3,6 +3,8 @@
 
 package dcpconfig
 
+import "errors"
+
 // <no value>
 
 type DcpListSupportedReport struct {
@@ -11,16 +13,22 @@ type DcpListSupportedReport struct {
 	FreeDcpListEntries byte
 }
 
-func ParseDcpListSupportedReport(payload []byte) DcpListSupportedReport {
-	val := DcpListSupportedReport{}
-
+func (cmd *DcpListSupportedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.DcpListSize = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DcpListSize = payload[i]
 	i++
 
-	val.FreeDcpListEntries = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.FreeDcpListEntries = payload[i]
 	i++
 
-	return val
+	return nil
 }

@@ -3,6 +3,8 @@
 
 package manufacturerspecificv2
 
+import "errors"
+
 // <no value>
 
 type DeviceSpecificReport struct {
@@ -19,22 +21,32 @@ type DeviceSpecificReport struct {
 	DeviceIdData []byte
 }
 
-func ParseDeviceSpecificReport(payload []byte) DeviceSpecificReport {
-	val := DeviceSpecificReport{}
-
+func (cmd *DeviceSpecificReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.DeviceIdType = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.DeviceIdType = (payload[i] & 0x07)
 
 	i += 1
 
-	val.Properties2.DeviceIdDataLengthIndicator = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties2.DeviceIdDataFormat = (payload[i] & 0xE0) << 5
+	cmd.Properties2.DeviceIdDataLengthIndicator = (payload[i] & 0x1F)
+
+	cmd.Properties2.DeviceIdDataFormat = (payload[i] & 0xE0) << 5
 
 	i += 1
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	val.DeviceIdData = payload[i:]
 
-	return val
+	return nil
 }

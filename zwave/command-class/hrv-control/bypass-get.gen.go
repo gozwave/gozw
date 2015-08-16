@@ -8,8 +8,7 @@ package hrvcontrol
 type HrvControlBypassGet struct {
 }
 
-func ParseHrvControlBypassGet(payload []byte) HrvControlBypassGet {
-	val := HrvControlBypassGet{}
+func (cmd *HrvControlBypassGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

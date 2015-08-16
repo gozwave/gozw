@@ -3,6 +3,8 @@
 
 package hrvcontrol
 
+import "errors"
+
 // <no value>
 
 type HrvControlModeReport struct {
@@ -11,14 +13,16 @@ type HrvControlModeReport struct {
 	}
 }
 
-func ParseHrvControlModeReport(payload []byte) HrvControlModeReport {
-	val := HrvControlModeReport{}
-
+func (cmd *HrvControlModeReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.Mode = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.Mode = (payload[i] & 0x1F)
 
 	i += 1
 
-	return val
+	return nil
 }

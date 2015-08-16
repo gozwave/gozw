@@ -8,8 +8,7 @@ package timeparameters
 type TimeParametersGet struct {
 }
 
-func ParseTimeParametersGet(payload []byte) TimeParametersGet {
-	val := TimeParametersGet{}
+func (cmd *TimeParametersGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

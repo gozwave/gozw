@@ -8,8 +8,7 @@ package associationcommandconfiguration
 type CommandRecordsSupportedGet struct {
 }
 
-func ParseCommandRecordsSupportedGet(payload []byte) CommandRecordsSupportedGet {
-	val := CommandRecordsSupportedGet{}
+func (cmd *CommandRecordsSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

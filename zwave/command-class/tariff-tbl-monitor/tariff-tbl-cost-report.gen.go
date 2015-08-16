@@ -3,7 +3,10 @@
 
 package tarifftblmonitor
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -43,57 +46,115 @@ type TariffTblCostReport struct {
 	CostValue uint32
 }
 
-func ParseTariffTblCostReport(payload []byte) TariffTblCostReport {
-	val := TariffTblCostReport{}
-
+func (cmd *TariffTblCostReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.RateParameterSetId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RateParameterSetId = payload[i]
 	i++
 
-	val.Properties1.RateType = (payload[i] & 0x03)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.RateType = (payload[i] & 0x03)
 
 	i += 1
 
-	val.StartYear = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartYear = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.StartMonth = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartMonth = payload[i]
 	i++
 
-	val.StartDay = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartDay = payload[i]
 	i++
 
-	val.StartHourLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartHourLocalTime = payload[i]
 	i++
 
-	val.StartMinuteLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartMinuteLocalTime = payload[i]
 	i++
 
-	val.StopYear = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopYear = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.StopMonth = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopMonth = payload[i]
 	i++
 
-	val.StopDay = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopDay = payload[i]
 	i++
 
-	val.StopHourLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopHourLocalTime = payload[i]
 	i++
 
-	val.StopMinuteLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopMinuteLocalTime = payload[i]
 	i++
 
-	val.Currency = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Currency = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.Properties2.CostPrecision = (payload[i] & 0xE0) << 5
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties2.CostPrecision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.CostValue = binary.BigEndian.Uint32(payload[i : i+4])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CostValue = binary.BigEndian.Uint32(payload[i : i+4])
 	i += 4
 
-	return val
+	return nil
 }

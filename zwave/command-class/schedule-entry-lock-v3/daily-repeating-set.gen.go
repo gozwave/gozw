@@ -3,6 +3,8 @@
 
 package scheduleentrylockv3
 
+import "errors"
+
 // <no value>
 
 type ScheduleEntryLockDailyRepeatingSet struct {
@@ -23,34 +25,64 @@ type ScheduleEntryLockDailyRepeatingSet struct {
 	DurationMinute byte
 }
 
-func ParseScheduleEntryLockDailyRepeatingSet(payload []byte) ScheduleEntryLockDailyRepeatingSet {
-	val := ScheduleEntryLockDailyRepeatingSet{}
-
+func (cmd *ScheduleEntryLockDailyRepeatingSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SetAction = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SetAction = payload[i]
 	i++
 
-	val.UserIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.UserIdentifier = payload[i]
 	i++
 
-	val.ScheduleSlotId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ScheduleSlotId = payload[i]
 	i++
 
-	val.WeekDayBitmask = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.WeekDayBitmask = payload[i]
 	i++
 
-	val.StartHour = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartHour = payload[i]
 	i++
 
-	val.StartMinute = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartMinute = payload[i]
 	i++
 
-	val.DurationHour = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DurationHour = payload[i]
 	i++
 
-	val.DurationMinute = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DurationMinute = payload[i]
 	i++
 
-	return val
+	return nil
 }

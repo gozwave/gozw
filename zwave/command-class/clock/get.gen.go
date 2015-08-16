@@ -8,8 +8,7 @@ package clock
 type ClockGet struct {
 }
 
-func ParseClockGet(payload []byte) ClockGet {
-	val := ClockGet{}
+func (cmd *ClockGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

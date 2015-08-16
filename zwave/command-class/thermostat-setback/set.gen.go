@@ -3,6 +3,8 @@
 
 package thermostatsetback
 
+import "errors"
+
 // <no value>
 
 type ThermostatSetbackSet struct {
@@ -13,17 +15,23 @@ type ThermostatSetbackSet struct {
 	SetbackState byte
 }
 
-func ParseThermostatSetbackSet(payload []byte) ThermostatSetbackSet {
-	val := ThermostatSetbackSet{}
-
+func (cmd *ThermostatSetbackSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.SetbackType = (payload[i] & 0x03)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.SetbackType = (payload[i] & 0x03)
 
 	i += 1
 
-	val.SetbackState = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SetbackState = payload[i]
 	i++
 
-	return val
+	return nil
 }

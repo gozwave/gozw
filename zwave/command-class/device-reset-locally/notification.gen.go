@@ -8,8 +8,7 @@ package deviceresetlocally
 type DeviceResetLocallyNotification struct {
 }
 
-func ParseDeviceResetLocallyNotification(payload []byte) DeviceResetLocallyNotification {
-	val := DeviceResetLocallyNotification{}
+func (cmd *DeviceResetLocallyNotification) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

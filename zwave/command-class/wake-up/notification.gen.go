@@ -8,8 +8,7 @@ package wakeup
 type WakeUpNotification struct {
 }
 
-func ParseWakeUpNotification(payload []byte) WakeUpNotification {
-	val := WakeUpNotification{}
+func (cmd *WakeUpNotification) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

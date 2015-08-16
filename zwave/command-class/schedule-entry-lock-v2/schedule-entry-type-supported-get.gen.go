@@ -8,8 +8,7 @@ package scheduleentrylockv2
 type ScheduleEntryTypeSupportedGet struct {
 }
 
-func ParseScheduleEntryTypeSupportedGet(payload []byte) ScheduleEntryTypeSupportedGet {
-	val := ScheduleEntryTypeSupportedGet{}
+func (cmd *ScheduleEntryTypeSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

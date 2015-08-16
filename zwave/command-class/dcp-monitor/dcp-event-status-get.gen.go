@@ -3,7 +3,10 @@
 
 package dcpmonitor
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -21,28 +24,50 @@ type DcpEventStatusGet struct {
 	SecondLocalTime byte
 }
 
-func ParseDcpEventStatusGet(payload []byte) DcpEventStatusGet {
-	val := DcpEventStatusGet{}
-
+func (cmd *DcpEventStatusGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Year = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Year = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.Month = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Month = payload[i]
 	i++
 
-	val.Day = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Day = payload[i]
 	i++
 
-	val.HourLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.HourLocalTime = payload[i]
 	i++
 
-	val.MinuteLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MinuteLocalTime = payload[i]
 	i++
 
-	val.SecondLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SecondLocalTime = payload[i]
 	i++
 
-	return val
+	return nil
 }

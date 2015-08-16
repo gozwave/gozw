@@ -3,19 +3,23 @@
 
 package networkmanagementbasic
 
+import "errors"
+
 // <no value>
 
 type DefaultSet struct {
 	SeqNo byte
 }
 
-func ParseDefaultSet(payload []byte) DefaultSet {
-	val := DefaultSet{}
-
+func (cmd *DefaultSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SeqNo = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SeqNo = payload[i]
 	i++
 
-	return val
+	return nil
 }

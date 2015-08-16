@@ -3,6 +3,8 @@
 
 package dmx
 
+import "errors"
+
 // <no value>
 
 type DmxData40 struct {
@@ -17,23 +19,33 @@ type DmxData40 struct {
 	DmxChannel []byte
 }
 
-func ParseDmxData40(payload []byte) DmxData40 {
-	val := DmxData40{}
-
+func (cmd *DmxData40) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Source = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Source = payload[i]
 	i++
 
-	val.Properties1.Page = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties1.SequenceNo = (payload[i] & 0x30) << 4
+	cmd.Properties1.Page = (payload[i] & 0x0F)
+
+	cmd.Properties1.SequenceNo = (payload[i] & 0x30) << 4
 
 	i += 1
 
-	val.DmxChannel = payload[i : i+40]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DmxChannel = payload[i : i+40]
 
 	i += 40
 
-	return val
+	return nil
 }

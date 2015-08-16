@@ -8,8 +8,7 @@ package manufacturerspecific
 type ManufacturerSpecificGet struct {
 }
 
-func ParseManufacturerSpecificGet(payload []byte) ManufacturerSpecificGet {
-	val := ManufacturerSpecificGet{}
+func (cmd *ManufacturerSpecificGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

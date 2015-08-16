@@ -3,19 +3,23 @@
 
 package lock
 
+import "errors"
+
 // <no value>
 
 type LockSet struct {
 	LockState byte
 }
 
-func ParseLockSet(payload []byte) LockSet {
-	val := LockSet{}
-
+func (cmd *LockSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.LockState = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.LockState = payload[i]
 	i++
 
-	return val
+	return nil
 }

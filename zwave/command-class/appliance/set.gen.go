@@ -3,6 +3,8 @@
 
 package appliance
 
+import "errors"
+
 // <no value>
 
 type ApplianceSet struct {
@@ -17,22 +19,32 @@ type ApplianceSet struct {
 	ManufacturerData []byte
 }
 
-func ParseApplianceSet(payload []byte) ApplianceSet {
-	val := ApplianceSet{}
-
+func (cmd *ApplianceSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.NoOfManufacturerDataFields = (payload[i] & 0xF0) << 4
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties1.ApplianceMode = (payload[i] & 0x0F)
+	cmd.Properties1.NoOfManufacturerDataFields = (payload[i] & 0xF0) << 4
+
+	cmd.Properties1.ApplianceMode = (payload[i] & 0x0F)
 
 	i += 1
 
-	val.ApplianceProgram = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ApplianceProgram = payload[i]
 	i++
 
-	val.ManufacturerData = payload[i : i+0]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ManufacturerData = payload[i : i+0]
 	i += 0
 
-	return val
+	return nil
 }

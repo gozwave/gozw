@@ -3,19 +3,23 @@
 
 package sensorbinaryv2
 
+import "errors"
+
 // <no value>
 
 type SensorBinaryGet struct {
 	SensorType byte
 }
 
-func ParseSensorBinaryGet(payload []byte) SensorBinaryGet {
-	val := SensorBinaryGet{}
-
+func (cmd *SensorBinaryGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SensorType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SensorType = payload[i]
 	i++
 
-	return val
+	return nil
 }

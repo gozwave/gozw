@@ -8,8 +8,7 @@ package indicator
 type IndicatorGet struct {
 }
 
-func ParseIndicatorGet(payload []byte) IndicatorGet {
-	val := IndicatorGet{}
+func (cmd *IndicatorGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

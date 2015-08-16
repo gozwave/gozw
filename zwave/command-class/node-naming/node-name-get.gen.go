@@ -8,8 +8,7 @@ package nodenaming
 type NodeNamingNodeNameGet struct {
 }
 
-func ParseNodeNamingNodeNameGet(payload []byte) NodeNamingNodeNameGet {
-	val := NodeNamingNodeNameGet{}
+func (cmd *NodeNamingNodeNameGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

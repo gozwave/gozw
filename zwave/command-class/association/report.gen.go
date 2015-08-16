@@ -3,6 +3,8 @@
 
 package association
 
+import "errors"
+
 // <no value>
 
 type AssociationReport struct {
@@ -15,21 +17,35 @@ type AssociationReport struct {
 	Nodeid []byte
 }
 
-func ParseAssociationReport(payload []byte) AssociationReport {
-	val := AssociationReport{}
-
+func (cmd *AssociationReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.GroupingIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GroupingIdentifier = payload[i]
 	i++
 
-	val.MaxNodesSupported = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MaxNodesSupported = payload[i]
 	i++
 
-	val.ReportsToFollow = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ReportsToFollow = payload[i]
 	i++
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	val.Nodeid = payload[i:]
 
-	return val
+	return nil
 }

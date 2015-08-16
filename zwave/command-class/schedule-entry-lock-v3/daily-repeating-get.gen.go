@@ -3,6 +3,8 @@
 
 package scheduleentrylockv3
 
+import "errors"
+
 // <no value>
 
 type ScheduleEntryLockDailyRepeatingGet struct {
@@ -11,16 +13,22 @@ type ScheduleEntryLockDailyRepeatingGet struct {
 	ScheduleSlotId byte
 }
 
-func ParseScheduleEntryLockDailyRepeatingGet(payload []byte) ScheduleEntryLockDailyRepeatingGet {
-	val := ScheduleEntryLockDailyRepeatingGet{}
-
+func (cmd *ScheduleEntryLockDailyRepeatingGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.UserIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.UserIdentifier = payload[i]
 	i++
 
-	val.ScheduleSlotId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ScheduleSlotId = payload[i]
 	i++
 
-	return val
+	return nil
 }

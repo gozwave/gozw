@@ -3,7 +3,10 @@
 
 package antitheft
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -23,32 +26,50 @@ type AntitheftSet struct {
 	AntiTheftHintByte []byte
 }
 
-func ParseAntitheftSet(payload []byte) AntitheftSet {
-	val := AntitheftSet{}
-
+func (cmd *AntitheftSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.NumberOfMagicCodeBytes = (payload[i] & 0x7F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.NumberOfMagicCodeBytes = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.Enable = true
+		cmd.Properties1.Enable = true
 	} else {
-		val.Properties1.Enable = false
+		cmd.Properties1.Enable = false
 	}
 
 	i += 1
 
-	val.MagicCode = payload[i : i+0]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MagicCode = payload[i : i+0]
 	i += 0
 
-	val.ManufacturerId = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ManufacturerId = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.AntiTheftHintNumberBytes = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.AntiTheftHintNumberBytes = payload[i]
 	i++
 
-	val.AntiTheftHintByte = payload[i : i+3]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.AntiTheftHintByte = payload[i : i+3]
 	i += 3
 
-	return val
+	return nil
 }

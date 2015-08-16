@@ -3,19 +3,23 @@
 
 package doorlockv2
 
+import "errors"
+
 // <no value>
 
 type DoorLockOperationSet struct {
 	DoorLockMode byte
 }
 
-func ParseDoorLockOperationSet(payload []byte) DoorLockOperationSet {
-	val := DoorLockOperationSet{}
-
+func (cmd *DoorLockOperationSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.DoorLockMode = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DoorLockMode = payload[i]
 	i++
 
-	return val
+	return nil
 }

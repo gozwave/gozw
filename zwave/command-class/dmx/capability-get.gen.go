@@ -3,19 +3,23 @@
 
 package dmx
 
+import "errors"
+
 // <no value>
 
 type DmxCapabilityGet struct {
 	ChannelId byte
 }
 
-func ParseDmxCapabilityGet(payload []byte) DmxCapabilityGet {
-	val := DmxCapabilityGet{}
-
+func (cmd *DmxCapabilityGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ChannelId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ChannelId = payload[i]
 	i++
 
-	return val
+	return nil
 }

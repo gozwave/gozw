@@ -3,6 +3,8 @@
 
 package centralscene
 
+import "errors"
+
 // <no value>
 
 type CentralSceneNotification struct {
@@ -15,20 +17,30 @@ type CentralSceneNotification struct {
 	SceneNumber byte
 }
 
-func ParseCentralSceneNotification(payload []byte) CentralSceneNotification {
-	val := CentralSceneNotification{}
-
+func (cmd *CentralSceneNotification) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SequenceNumber = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SequenceNumber = payload[i]
 	i++
 
-	val.Properties1.KeyAttributes = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.KeyAttributes = (payload[i] & 0x07)
 
 	i += 1
 
-	val.SceneNumber = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SceneNumber = payload[i]
 	i++
 
-	return val
+	return nil
 }

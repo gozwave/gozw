@@ -3,19 +3,23 @@
 
 package hrvcontrol
 
+import "errors"
+
 // <no value>
 
 type HrvControlVentilationRateReport struct {
 	VentilationRate byte
 }
 
-func ParseHrvControlVentilationRateReport(payload []byte) HrvControlVentilationRateReport {
-	val := HrvControlVentilationRateReport{}
-
+func (cmd *HrvControlVentilationRateReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.VentilationRate = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.VentilationRate = payload[i]
 	i++
 
-	return val
+	return nil
 }

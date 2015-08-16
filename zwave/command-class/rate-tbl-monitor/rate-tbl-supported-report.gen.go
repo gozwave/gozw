@@ -3,7 +3,10 @@
 
 package ratetblmonitor
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -13,16 +16,22 @@ type RateTblSupportedReport struct {
 	ParameterSetSupportedBitMask uint16
 }
 
-func ParseRateTblSupportedReport(payload []byte) RateTblSupportedReport {
-	val := RateTblSupportedReport{}
-
+func (cmd *RateTblSupportedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.RatesSupported = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RatesSupported = payload[i]
 	i++
 
-	val.ParameterSetSupportedBitMask = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ParameterSetSupportedBitMask = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	return val
+	return nil
 }

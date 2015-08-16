@@ -8,8 +8,7 @@ package version
 type VersionGet struct {
 }
 
-func ParseVersionGet(payload []byte) VersionGet {
-	val := VersionGet{}
+func (cmd *VersionGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

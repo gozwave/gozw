@@ -3,19 +3,23 @@
 
 package ratetblmonitor
 
+import "errors"
+
 // <no value>
 
 type RateTblActiveRateReport struct {
 	RateParameterSetId byte
 }
 
-func ParseRateTblActiveRateReport(payload []byte) RateTblActiveRateReport {
-	val := RateTblActiveRateReport{}
-
+func (cmd *RateTblActiveRateReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.RateParameterSetId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RateParameterSetId = payload[i]
 	i++
 
-	return val
+	return nil
 }

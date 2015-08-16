@@ -8,8 +8,7 @@ package tarifftblmonitor
 type TariffTblSupplierGet struct {
 }
 
-func ParseTariffTblSupplierGet(payload []byte) TariffTblSupplierGet {
-	val := TariffTblSupplierGet{}
+func (cmd *TariffTblSupplierGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

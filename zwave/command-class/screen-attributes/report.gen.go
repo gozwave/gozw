@@ -3,6 +3,8 @@
 
 package screenattributes
 
+import "errors"
+
 // <no value>
 
 type ScreenAttributesReport struct {
@@ -17,23 +19,37 @@ type ScreenAttributesReport struct {
 	NumericalPresentationOfACharacter byte
 }
 
-func ParseScreenAttributesReport(payload []byte) ScreenAttributesReport {
-	val := ScreenAttributesReport{}
-
+func (cmd *ScreenAttributesReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.NumberOfLines = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.NumberOfLines = (payload[i] & 0x1F)
 
 	i += 1
 
-	val.NumberOfCharactersPerLine = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumberOfCharactersPerLine = payload[i]
 	i++
 
-	val.SizeOfLineBuffer = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SizeOfLineBuffer = payload[i]
 	i++
 
-	val.NumericalPresentationOfACharacter = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumericalPresentationOfACharacter = payload[i]
 	i++
 
-	return val
+	return nil
 }

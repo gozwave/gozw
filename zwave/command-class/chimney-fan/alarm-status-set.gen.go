@@ -3,6 +3,8 @@
 
 package chimneyfan
 
+import "errors"
+
 // <no value>
 
 type ChimneyFanAlarmStatusSet struct {
@@ -19,38 +21,40 @@ type ChimneyFanAlarmStatusSet struct {
 	}
 }
 
-func ParseChimneyFanAlarmStatusSet(payload []byte) ChimneyFanAlarmStatusSet {
-	val := ChimneyFanAlarmStatusSet{}
-
+func (cmd *ChimneyFanAlarmStatusSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Message.NotUsed2 = (payload[i] & 0xF0) << 4
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Message.NotUsed2 = (payload[i] & 0xF0) << 4
 
 	if payload[i]&0x01 == 0x01 {
-		val.Message.NotUsed1 = true
+		cmd.Message.NotUsed1 = true
 	} else {
-		val.Message.NotUsed1 = false
+		cmd.Message.NotUsed1 = false
 	}
 
 	if payload[i]&0x02 == 0x02 {
-		val.Message.AcknowledgeExternalAlarm = true
+		cmd.Message.AcknowledgeExternalAlarm = true
 	} else {
-		val.Message.AcknowledgeExternalAlarm = false
+		cmd.Message.AcknowledgeExternalAlarm = false
 	}
 
 	if payload[i]&0x04 == 0x04 {
-		val.Message.AcknowledgeSensorError = true
+		cmd.Message.AcknowledgeSensorError = true
 	} else {
-		val.Message.AcknowledgeSensorError = false
+		cmd.Message.AcknowledgeSensorError = false
 	}
 
 	if payload[i]&0x08 == 0x08 {
-		val.Message.AcknowledgeAlarmTemperatureExceeded = true
+		cmd.Message.AcknowledgeAlarmTemperatureExceeded = true
 	} else {
-		val.Message.AcknowledgeAlarmTemperatureExceeded = false
+		cmd.Message.AcknowledgeAlarmTemperatureExceeded = false
 	}
 
 	i += 1
 
-	return val
+	return nil
 }

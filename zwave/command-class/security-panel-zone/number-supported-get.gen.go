@@ -8,8 +8,7 @@ package securitypanelzone
 type SecurityPanelZoneNumberSupportedGet struct {
 }
 
-func ParseSecurityPanelZoneNumberSupportedGet(payload []byte) SecurityPanelZoneNumberSupportedGet {
-	val := SecurityPanelZoneNumberSupportedGet{}
+func (cmd *SecurityPanelZoneNumberSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

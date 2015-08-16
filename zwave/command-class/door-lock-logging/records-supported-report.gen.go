@@ -3,19 +3,23 @@
 
 package doorlocklogging
 
+import "errors"
+
 // <no value>
 
 type DoorLockLoggingRecordsSupportedReport struct {
 	MaxRecordsStored byte
 }
 
-func ParseDoorLockLoggingRecordsSupportedReport(payload []byte) DoorLockLoggingRecordsSupportedReport {
-	val := DoorLockLoggingRecordsSupportedReport{}
-
+func (cmd *DoorLockLoggingRecordsSupportedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.MaxRecordsStored = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MaxRecordsStored = payload[i]
 	i++
 
-	return val
+	return nil
 }

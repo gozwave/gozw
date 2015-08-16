@@ -3,19 +3,23 @@
 
 package centralscene
 
+import "errors"
+
 // <no value>
 
 type CentralSceneSupportedReport struct {
 	SupportedScenes byte
 }
 
-func ParseCentralSceneSupportedReport(payload []byte) CentralSceneSupportedReport {
-	val := CentralSceneSupportedReport{}
-
+func (cmd *CentralSceneSupportedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SupportedScenes = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SupportedScenes = payload[i]
 	i++
 
-	return val
+	return nil
 }

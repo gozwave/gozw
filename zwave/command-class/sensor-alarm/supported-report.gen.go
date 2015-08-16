@@ -3,6 +3,8 @@
 
 package sensoralarm
 
+import "errors"
+
 // <no value>
 
 type SensorAlarmSupportedReport struct {
@@ -11,16 +13,22 @@ type SensorAlarmSupportedReport struct {
 	BitMask []byte
 }
 
-func ParseSensorAlarmSupportedReport(payload []byte) SensorAlarmSupportedReport {
-	val := SensorAlarmSupportedReport{}
-
+func (cmd *SensorAlarmSupportedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.NumberOfBitMasks = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumberOfBitMasks = payload[i]
 	i++
 
-	val.BitMask = payload[i : i+0]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.BitMask = payload[i : i+0]
 	i += 0
 
-	return val
+	return nil
 }

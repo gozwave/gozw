@@ -8,8 +8,7 @@ package doorlocklogging
 type DoorLockLoggingRecordsSupportedGet struct {
 }
 
-func ParseDoorLockLoggingRecordsSupportedGet(payload []byte) DoorLockLoggingRecordsSupportedGet {
-	val := DoorLockLoggingRecordsSupportedGet{}
+func (cmd *DoorLockLoggingRecordsSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

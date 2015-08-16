@@ -3,6 +3,8 @@
 
 package multiinstance
 
+import "errors"
+
 // <no value>
 
 type MultiInstanceReport struct {
@@ -11,16 +13,22 @@ type MultiInstanceReport struct {
 	Instances byte
 }
 
-func ParseMultiInstanceReport(payload []byte) MultiInstanceReport {
-	val := MultiInstanceReport{}
-
+func (cmd *MultiInstanceReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.CommandClass = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CommandClass = payload[i]
 	i++
 
-	val.Instances = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Instances = payload[i]
 	i++
 
-	return val
+	return nil
 }

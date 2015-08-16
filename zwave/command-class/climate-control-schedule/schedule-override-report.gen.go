@@ -3,6 +3,8 @@
 
 package climatecontrolschedule
 
+import "errors"
+
 // <no value>
 
 type ScheduleOverrideReport struct {
@@ -13,17 +15,23 @@ type ScheduleOverrideReport struct {
 	OverrideState byte
 }
 
-func ParseScheduleOverrideReport(payload []byte) ScheduleOverrideReport {
-	val := ScheduleOverrideReport{}
-
+func (cmd *ScheduleOverrideReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.OverrideType = (payload[i] & 0x03)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.OverrideType = (payload[i] & 0x03)
 
 	i += 1
 
-	val.OverrideState = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.OverrideState = payload[i]
 	i++
 
-	return val
+	return nil
 }

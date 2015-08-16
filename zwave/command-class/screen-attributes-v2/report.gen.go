@@ -3,6 +3,8 @@
 
 package screenattributesv2
 
+import "errors"
+
 // <no value>
 
 type ScreenAttributesReport struct {
@@ -21,32 +23,50 @@ type ScreenAttributesReport struct {
 	ScreenTimeout byte
 }
 
-func ParseScreenAttributesReport(payload []byte) ScreenAttributesReport {
-	val := ScreenAttributesReport{}
-
+func (cmd *ScreenAttributesReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.NumberOfLines = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.NumberOfLines = (payload[i] & 0x1F)
 
 	if payload[i]&0x20 == 0x20 {
-		val.Properties1.EscapeSequence = true
+		cmd.Properties1.EscapeSequence = true
 	} else {
-		val.Properties1.EscapeSequence = false
+		cmd.Properties1.EscapeSequence = false
 	}
 
 	i += 1
 
-	val.NumberOfCharactersPerLine = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumberOfCharactersPerLine = payload[i]
 	i++
 
-	val.SizeOfLineBuffer = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SizeOfLineBuffer = payload[i]
 	i++
 
-	val.NumericalPresentationOfACharacter = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumericalPresentationOfACharacter = payload[i]
 	i++
 
-	val.ScreenTimeout = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ScreenTimeout = payload[i]
 	i++
 
-	return val
+	return nil
 }

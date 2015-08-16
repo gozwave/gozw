@@ -3,6 +3,8 @@
 
 package screenmdv2
 
+import "errors"
+
 // <no value>
 
 type ScreenMdGet struct {
@@ -11,16 +13,22 @@ type ScreenMdGet struct {
 	NodeId byte
 }
 
-func ParseScreenMdGet(payload []byte) ScreenMdGet {
-	val := ScreenMdGet{}
-
+func (cmd *ScreenMdGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.NumberOfReports = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumberOfReports = payload[i]
 	i++
 
-	val.NodeId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NodeId = payload[i]
 	i++
 
-	return val
+	return nil
 }

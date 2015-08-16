@@ -3,6 +3,8 @@
 
 package time
 
+import "errors"
+
 // <no value>
 
 type TimeReport struct {
@@ -17,26 +19,36 @@ type TimeReport struct {
 	SecondLocalTime byte
 }
 
-func ParseTimeReport(payload []byte) TimeReport {
-	val := TimeReport{}
-
+func (cmd *TimeReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.HourLocalTime.HourLocalTime = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.HourLocalTime.HourLocalTime = (payload[i] & 0x1F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.HourLocalTime.RtcFailure = true
+		cmd.HourLocalTime.RtcFailure = true
 	} else {
-		val.HourLocalTime.RtcFailure = false
+		cmd.HourLocalTime.RtcFailure = false
 	}
 
 	i += 1
 
-	val.MinuteLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MinuteLocalTime = payload[i]
 	i++
 
-	val.SecondLocalTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SecondLocalTime = payload[i]
 	i++
 
-	return val
+	return nil
 }

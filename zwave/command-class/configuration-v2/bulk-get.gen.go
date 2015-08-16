@@ -3,7 +3,10 @@
 
 package configurationv2
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -13,16 +16,22 @@ type ConfigurationBulkGet struct {
 	NumberOfParameters byte
 }
 
-func ParseConfigurationBulkGet(payload []byte) ConfigurationBulkGet {
-	val := ConfigurationBulkGet{}
-
+func (cmd *ConfigurationBulkGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ParameterOffset = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ParameterOffset = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.NumberOfParameters = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumberOfParameters = payload[i]
 	i++
 
-	return val
+	return nil
 }

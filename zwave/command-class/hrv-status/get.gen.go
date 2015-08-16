@@ -3,19 +3,23 @@
 
 package hrvstatus
 
+import "errors"
+
 // <no value>
 
 type HrvStatusGet struct {
 	StatusParameter byte
 }
 
-func ParseHrvStatusGet(payload []byte) HrvStatusGet {
-	val := HrvStatusGet{}
-
+func (cmd *HrvStatusGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.StatusParameter = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StatusParameter = payload[i]
 	i++
 
-	return val
+	return nil
 }

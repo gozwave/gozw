@@ -8,8 +8,7 @@ package dmx
 type DmxAddressGet struct {
 }
 
-func ParseDmxAddressGet(payload []byte) DmxAddressGet {
-	val := DmxAddressGet{}
+func (cmd *DmxAddressGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

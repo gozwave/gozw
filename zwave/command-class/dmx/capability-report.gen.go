@@ -3,7 +3,10 @@
 
 package dmx
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -17,22 +20,36 @@ type DmxCapabilityReport struct {
 	MaxChannels byte
 }
 
-func ParseDmxCapabilityReport(payload []byte) DmxCapabilityReport {
-	val := DmxCapabilityReport{}
-
+func (cmd *DmxCapabilityReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ChannelId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ChannelId = payload[i]
 	i++
 
-	val.PropertyId = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.PropertyId = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.DeviceChannels = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DeviceChannels = payload[i]
 	i++
 
-	val.MaxChannels = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MaxChannels = payload[i]
 	i++
 
-	return val
+	return nil
 }

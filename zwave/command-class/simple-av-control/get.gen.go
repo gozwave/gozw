@@ -8,8 +8,7 @@ package simpleavcontrol
 type SimpleAvControlGet struct {
 }
 
-func ParseSimpleAvControlGet(payload []byte) SimpleAvControlGet {
-	val := SimpleAvControlGet{}
+func (cmd *SimpleAvControlGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

@@ -3,7 +3,10 @@
 
 package securitypanelmode
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -11,13 +14,15 @@ type SecurityPanelModeSupportedReport struct {
 	SupportedModeBitMask uint16
 }
 
-func ParseSecurityPanelModeSupportedReport(payload []byte) SecurityPanelModeSupportedReport {
-	val := SecurityPanelModeSupportedReport{}
-
+func (cmd *SecurityPanelModeSupportedReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SupportedModeBitMask = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SupportedModeBitMask = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	return val
+	return nil
 }

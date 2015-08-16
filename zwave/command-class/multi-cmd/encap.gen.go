@@ -3,19 +3,23 @@
 
 package multicmd
 
+import "errors"
+
 // <no value>
 
 type MultiCmdEncap struct {
 	NumberOfCommands byte
 }
 
-func ParseMultiCmdEncap(payload []byte) MultiCmdEncap {
-	val := MultiCmdEncap{}
-
+func (cmd *MultiCmdEncap) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.NumberOfCommands = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumberOfCommands = payload[i]
 	i++
 
-	return val
+	return nil
 }

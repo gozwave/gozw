@@ -8,8 +8,7 @@ package centralscene
 type CentralSceneSupportedGet struct {
 }
 
-func ParseCentralSceneSupportedGet(payload []byte) CentralSceneSupportedGet {
-	val := CentralSceneSupportedGet{}
+func (cmd *CentralSceneSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

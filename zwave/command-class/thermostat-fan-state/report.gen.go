@@ -3,6 +3,8 @@
 
 package thermostatfanstate
 
+import "errors"
+
 // <no value>
 
 type ThermostatFanStateReport struct {
@@ -11,14 +13,16 @@ type ThermostatFanStateReport struct {
 	}
 }
 
-func ParseThermostatFanStateReport(payload []byte) ThermostatFanStateReport {
-	val := ThermostatFanStateReport{}
-
+func (cmd *ThermostatFanStateReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Level.FanOperatingState = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Level.FanOperatingState = (payload[i] & 0x0F)
 
 	i += 1
 
-	return val
+	return nil
 }

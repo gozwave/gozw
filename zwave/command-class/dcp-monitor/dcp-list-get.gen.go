@@ -8,8 +8,7 @@ package dcpmonitor
 type DcpListGet struct {
 }
 
-func ParseDcpListGet(payload []byte) DcpListGet {
-	val := DcpListGet{}
+func (cmd *DcpListGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

@@ -3,6 +3,8 @@
 
 package version
 
+import "errors"
+
 // <no value>
 
 type VersionReport struct {
@@ -17,25 +19,43 @@ type VersionReport struct {
 	ApplicationSubVersion byte
 }
 
-func ParseVersionReport(payload []byte) VersionReport {
-	val := VersionReport{}
-
+func (cmd *VersionReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ZWaveLibraryType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZWaveLibraryType = payload[i]
 	i++
 
-	val.ZWaveProtocolVersion = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZWaveProtocolVersion = payload[i]
 	i++
 
-	val.ZWaveProtocolSubVersion = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZWaveProtocolSubVersion = payload[i]
 	i++
 
-	val.ApplicationVersion = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ApplicationVersion = payload[i]
 	i++
 
-	val.ApplicationSubVersion = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ApplicationSubVersion = payload[i]
 	i++
 
-	return val
+	return nil
 }

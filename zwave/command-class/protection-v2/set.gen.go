@@ -3,6 +3,8 @@
 
 package protectionv2
 
+import "errors"
+
 // <no value>
 
 type ProtectionSet struct {
@@ -15,18 +17,24 @@ type ProtectionSet struct {
 	}
 }
 
-func ParseProtectionSet(payload []byte) ProtectionSet {
-	val := ProtectionSet{}
-
+func (cmd *ProtectionSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Level.LocalProtectionState = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Level.LocalProtectionState = (payload[i] & 0x0F)
 
 	i += 1
 
-	val.Level2.RfProtectionState = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Level2.RfProtectionState = (payload[i] & 0x0F)
 
 	i += 1
 
-	return val
+	return nil
 }

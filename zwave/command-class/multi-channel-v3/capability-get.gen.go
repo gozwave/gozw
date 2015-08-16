@@ -3,6 +3,8 @@
 
 package multichannelv3
 
+import "errors"
+
 // <no value>
 
 type MultiChannelCapabilityGet struct {
@@ -11,14 +13,16 @@ type MultiChannelCapabilityGet struct {
 	}
 }
 
-func ParseMultiChannelCapabilityGet(payload []byte) MultiChannelCapabilityGet {
-	val := MultiChannelCapabilityGet{}
-
+func (cmd *MultiChannelCapabilityGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.EndPoint = (payload[i] & 0x7F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.EndPoint = (payload[i] & 0x7F)
 
 	i += 1
 
-	return val
+	return nil
 }

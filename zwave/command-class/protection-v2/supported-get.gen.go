@@ -8,8 +8,7 @@ package protectionv2
 type ProtectionSupportedGet struct {
 }
 
-func ParseProtectionSupportedGet(payload []byte) ProtectionSupportedGet {
-	val := ProtectionSupportedGet{}
+func (cmd *ProtectionSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

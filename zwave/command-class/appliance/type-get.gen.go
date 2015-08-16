@@ -8,8 +8,7 @@ package appliance
 type ApplianceTypeGet struct {
 }
 
-func ParseApplianceTypeGet(payload []byte) ApplianceTypeGet {
-	val := ApplianceTypeGet{}
+func (cmd *ApplianceTypeGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

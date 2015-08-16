@@ -3,7 +3,10 @@
 
 package configurationv2
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -23,35 +26,49 @@ type ConfigurationBulkReport struct {
 	}
 }
 
-func ParseConfigurationBulkReport(payload []byte) ConfigurationBulkReport {
-	val := ConfigurationBulkReport{}
-
+func (cmd *ConfigurationBulkReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ParameterOffset = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ParameterOffset = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.NumberOfParameters = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumberOfParameters = payload[i]
 	i++
 
-	val.ReportsToFollow = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ReportsToFollow = payload[i]
 	i++
 
-	val.Properties1.Size = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.Size = (payload[i] & 0x07)
 
 	if payload[i]&0x40 == 0x40 {
-		val.Properties1.Handshake = true
+		cmd.Properties1.Handshake = true
 	} else {
-		val.Properties1.Handshake = false
+		cmd.Properties1.Handshake = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.Default = true
+		cmd.Properties1.Default = true
 	} else {
-		val.Properties1.Default = false
+		cmd.Properties1.Default = false
 	}
 
 	i += 1
 
-	return val
+	return nil
 }

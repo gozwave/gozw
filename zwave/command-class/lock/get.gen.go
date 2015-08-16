@@ -8,8 +8,7 @@ package lock
 type LockGet struct {
 }
 
-func ParseLockGet(payload []byte) LockGet {
-	val := LockGet{}
+func (cmd *LockGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

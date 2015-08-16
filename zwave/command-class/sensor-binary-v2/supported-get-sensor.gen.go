@@ -8,8 +8,7 @@ package sensorbinaryv2
 type SensorBinarySupportedGetSensor struct {
 }
 
-func ParseSensorBinarySupportedGetSensor(payload []byte) SensorBinarySupportedGetSensor {
-	val := SensorBinarySupportedGetSensor{}
+func (cmd *SensorBinarySupportedGetSensor) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

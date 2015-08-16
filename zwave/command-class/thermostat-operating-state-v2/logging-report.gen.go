@@ -3,19 +3,23 @@
 
 package thermostatoperatingstatev2
 
+import "errors"
+
 // <no value>
 
 type ThermostatOperatingStateLoggingReport struct {
 	ReportsToFollow byte
 }
 
-func ParseThermostatOperatingStateLoggingReport(payload []byte) ThermostatOperatingStateLoggingReport {
-	val := ThermostatOperatingStateLoggingReport{}
-
+func (cmd *ThermostatOperatingStateLoggingReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ReportsToFollow = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ReportsToFollow = payload[i]
 	i++
 
-	return val
+	return nil
 }

@@ -3,19 +3,23 @@
 
 package sensorbinaryv2
 
+import "errors"
+
 // <no value>
 
 type SensorBinarySupportedSensorReport struct {
 	BitMask byte
 }
 
-func ParseSensorBinarySupportedSensorReport(payload []byte) SensorBinarySupportedSensorReport {
-	val := SensorBinarySupportedSensorReport{}
-
+func (cmd *SensorBinarySupportedSensorReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.BitMask = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.BitMask = payload[i]
 	i++
 
-	return val
+	return nil
 }

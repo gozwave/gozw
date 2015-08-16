@@ -3,18 +3,22 @@
 
 package proprietary
 
+import "errors"
+
 // <no value>
 
 type ProprietaryReport struct {
 	Data []byte
 }
 
-func ParseProprietaryReport(payload []byte) ProprietaryReport {
-	val := ProprietaryReport{}
-
+func (cmd *ProprietaryReport) UnmarshalBinary(payload []byte) error {
 	i := 2
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
 	val.Data = payload[i:]
 
-	return val
+	return nil
 }

@@ -3,6 +3,8 @@
 
 package networkmanagementproxy
 
+import "errors"
+
 // <no value>
 
 type NodeInfoCachedGet struct {
@@ -15,20 +17,30 @@ type NodeInfoCachedGet struct {
 	NodeId byte
 }
 
-func ParseNodeInfoCachedGet(payload []byte) NodeInfoCachedGet {
-	val := NodeInfoCachedGet{}
-
+func (cmd *NodeInfoCachedGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SeqNo = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SeqNo = payload[i]
 	i++
 
-	val.Properties1.MaxAge = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.MaxAge = (payload[i] & 0x0F)
 
 	i += 1
 
-	val.NodeId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NodeId = payload[i]
 	i++
 
-	return val
+	return nil
 }

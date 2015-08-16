@@ -8,8 +8,7 @@ package timev2
 type TimeOffsetGet struct {
 }
 
-func ParseTimeOffsetGet(payload []byte) TimeOffsetGet {
-	val := TimeOffsetGet{}
+func (cmd *TimeOffsetGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

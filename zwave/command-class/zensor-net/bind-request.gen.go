@@ -8,8 +8,7 @@ package zensornet
 type BindRequest struct {
 }
 
-func ParseBindRequest(payload []byte) BindRequest {
-	val := BindRequest{}
+func (cmd *BindRequest) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

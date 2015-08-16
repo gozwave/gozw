@@ -3,6 +3,8 @@
 
 package alarmv2
 
+import "errors"
+
 // <no value>
 
 type AlarmReport struct {
@@ -23,34 +25,64 @@ type AlarmReport struct {
 	EventParameter []byte
 }
 
-func ParseAlarmReport(payload []byte) AlarmReport {
-	val := AlarmReport{}
-
+func (cmd *AlarmReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.AlarmType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.AlarmType = payload[i]
 	i++
 
-	val.AlarmLevel = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.AlarmLevel = payload[i]
 	i++
 
-	val.ZensorNetSourceNodeId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZensorNetSourceNodeId = payload[i]
 	i++
 
-	val.ZwaveAlarmStatus = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZwaveAlarmStatus = payload[i]
 	i++
 
-	val.ZwaveAlarmType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZwaveAlarmType = payload[i]
 	i++
 
-	val.ZwaveAlarmEvent = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZwaveAlarmEvent = payload[i]
 	i++
 
-	val.NumberOfEventParameters = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumberOfEventParameters = payload[i]
 	i++
 
-	val.EventParameter = payload[i : i+6]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.EventParameter = payload[i : i+6]
 	i += 6
 
-	return val
+	return nil
 }

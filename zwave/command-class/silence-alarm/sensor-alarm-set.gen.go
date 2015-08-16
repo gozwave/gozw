@@ -3,7 +3,10 @@
 
 package silencealarm
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -17,22 +20,36 @@ type SensorAlarmSet struct {
 	BitMask []byte
 }
 
-func ParseSensorAlarmSet(payload []byte) SensorAlarmSet {
-	val := SensorAlarmSet{}
-
+func (cmd *SensorAlarmSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Mode = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Mode = payload[i]
 	i++
 
-	val.Seconds = binary.BigEndian.Uint16(payload[i : i+2])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Seconds = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.NumberOfBitMasks = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumberOfBitMasks = payload[i]
 	i++
 
-	val.BitMask = payload[i : i+2]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.BitMask = payload[i : i+2]
 	i += 2
 
-	return val
+	return nil
 }

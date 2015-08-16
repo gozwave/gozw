@@ -3,19 +3,23 @@
 
 package thermostatheating
 
+import "errors"
+
 // <no value>
 
 type ThermostatHeatingSetpointGet struct {
 	SetpointNr byte
 }
 
-func ParseThermostatHeatingSetpointGet(payload []byte) ThermostatHeatingSetpointGet {
-	val := ThermostatHeatingSetpointGet{}
-
+func (cmd *ThermostatHeatingSetpointGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SetpointNr = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SetpointNr = payload[i]
 	i++
 
-	return val
+	return nil
 }

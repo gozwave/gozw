@@ -8,8 +8,7 @@ package basictariffinfo
 type BasicTariffInfoGet struct {
 }
 
-func ParseBasicTariffInfoGet(payload []byte) BasicTariffInfoGet {
-	val := BasicTariffInfoGet{}
+func (cmd *BasicTariffInfoGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

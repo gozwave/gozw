@@ -3,6 +3,8 @@
 
 package associationgrpinfo
 
+import "errors"
+
 // <no value>
 
 type AssociationGroupCommandListGet struct {
@@ -13,21 +15,27 @@ type AssociationGroupCommandListGet struct {
 	GroupingIdentifier byte
 }
 
-func ParseAssociationGroupCommandListGet(payload []byte) AssociationGroupCommandListGet {
-	val := AssociationGroupCommandListGet{}
-
+func (cmd *AssociationGroupCommandListGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.AllowCache = true
+		cmd.Properties1.AllowCache = true
 	} else {
-		val.Properties1.AllowCache = false
+		cmd.Properties1.AllowCache = false
 	}
 
 	i += 1
 
-	val.GroupingIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.GroupingIdentifier = payload[i]
 	i++
 
-	return val
+	return nil
 }

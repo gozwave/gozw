@@ -3,7 +3,10 @@
 
 package metertblpush
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -27,38 +30,64 @@ type MeterTblPushConfigurationReport struct {
 	PushNodeId byte
 }
 
-func ParseMeterTblPushConfigurationReport(payload []byte) MeterTblPushConfigurationReport {
-	val := MeterTblPushConfigurationReport{}
-
+func (cmd *MeterTblPushConfigurationReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.OperatingStatusPushMode = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.OperatingStatusPushMode = (payload[i] & 0x0F)
 
 	if payload[i]&0x10 == 0x10 {
-		val.Properties1.Ps = true
+		cmd.Properties1.Ps = true
 	} else {
-		val.Properties1.Ps = false
+		cmd.Properties1.Ps = false
 	}
 
 	i += 1
 
-	val.PushDataset = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.PushDataset = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.IntervalMonths = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.IntervalMonths = payload[i]
 	i++
 
-	val.IntervalDays = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.IntervalDays = payload[i]
 	i++
 
-	val.IntervalHours = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.IntervalHours = payload[i]
 	i++
 
-	val.IntervalMinutes = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.IntervalMinutes = payload[i]
 	i++
 
-	val.PushNodeId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.PushNodeId = payload[i]
 	i++
 
-	return val
+	return nil
 }

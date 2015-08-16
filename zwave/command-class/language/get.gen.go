@@ -8,8 +8,7 @@ package language
 type LanguageGet struct {
 }
 
-func ParseLanguageGet(payload []byte) LanguageGet {
-	val := LanguageGet{}
+func (cmd *LanguageGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

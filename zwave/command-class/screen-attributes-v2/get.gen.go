@@ -8,8 +8,7 @@ package screenattributesv2
 type ScreenAttributesGet struct {
 }
 
-func ParseScreenAttributesGet(payload []byte) ScreenAttributesGet {
-	val := ScreenAttributesGet{}
+func (cmd *ScreenAttributesGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

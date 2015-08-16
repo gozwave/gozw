@@ -3,6 +3,8 @@
 
 package doorlock
 
+import "errors"
+
 // <no value>
 
 type DoorLockConfigurationReport struct {
@@ -19,25 +21,39 @@ type DoorLockConfigurationReport struct {
 	LockTimeoutSeconds byte
 }
 
-func ParseDoorLockConfigurationReport(payload []byte) DoorLockConfigurationReport {
-	val := DoorLockConfigurationReport{}
-
+func (cmd *DoorLockConfigurationReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.OperationType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.OperationType = payload[i]
 	i++
 
-	val.Properties1.InsideDoorHandlesState = (payload[i] & 0x0F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties1.OutsideDoorHandlesState = (payload[i] & 0xF0) << 4
+	cmd.Properties1.InsideDoorHandlesState = (payload[i] & 0x0F)
+
+	cmd.Properties1.OutsideDoorHandlesState = (payload[i] & 0xF0) << 4
 
 	i += 1
 
-	val.LockTimeoutMinutes = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.LockTimeoutMinutes = payload[i]
 	i++
 
-	val.LockTimeoutSeconds = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.LockTimeoutSeconds = payload[i]
 	i++
 
-	return val
+	return nil
 }

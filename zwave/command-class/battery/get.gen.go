@@ -8,8 +8,7 @@ package battery
 type BatteryGet struct {
 }
 
-func ParseBatteryGet(payload []byte) BatteryGet {
-	val := BatteryGet{}
+func (cmd *BatteryGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

@@ -3,19 +3,23 @@
 
 package associationv2
 
+import "errors"
+
 // <no value>
 
 type AssociationGroupingsReport struct {
 	SupportedGroupings byte
 }
 
-func ParseAssociationGroupingsReport(payload []byte) AssociationGroupingsReport {
-	val := AssociationGroupingsReport{}
-
+func (cmd *AssociationGroupingsReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SupportedGroupings = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SupportedGroupings = payload[i]
 	i++
 
-	return val
+	return nil
 }

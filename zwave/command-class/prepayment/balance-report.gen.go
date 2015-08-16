@@ -3,7 +3,10 @@
 
 package prepayment
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 // <no value>
 
@@ -39,45 +42,79 @@ type PrepaymentBalanceReport struct {
 	DebtRecoveryPercentage byte
 }
 
-func ParsePrepaymentBalanceReport(payload []byte) PrepaymentBalanceReport {
-	val := PrepaymentBalanceReport{}
-
+func (cmd *PrepaymentBalanceReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.MeterType = (payload[i] & 0x3F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties1.BalanceType = (payload[i] & 0xC0) << 6
+	cmd.Properties1.MeterType = (payload[i] & 0x3F)
 
-	i += 1
-
-	val.Properties2.Scale = (payload[i] & 0x1F)
-
-	val.Properties2.BalancePrecision = (payload[i] & 0xE0) << 5
+	cmd.Properties1.BalanceType = (payload[i] & 0xC0) << 6
 
 	i += 1
 
-	val.BalanceValue = binary.BigEndian.Uint32(payload[i : i+4])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties2.Scale = (payload[i] & 0x1F)
+
+	cmd.Properties2.BalancePrecision = (payload[i] & 0xE0) << 5
+
+	i += 1
+
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.BalanceValue = binary.BigEndian.Uint32(payload[i : i+4])
 	i += 4
 
-	val.Properties3.DebtPrecision = (payload[i] & 0xE0) << 5
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties3.DebtPrecision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.Debt = binary.BigEndian.Uint32(payload[i : i+4])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Debt = binary.BigEndian.Uint32(payload[i : i+4])
 	i += 4
 
-	val.Properties4.EmerCreditPrecision = (payload[i] & 0xE0) << 5
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties4.EmerCreditPrecision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.EmerCredit = binary.BigEndian.Uint32(payload[i : i+4])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.EmerCredit = binary.BigEndian.Uint32(payload[i : i+4])
 	i += 4
 
-	val.Currency = binary.BigEndian.Uint32(payload[i : i+3])
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Currency = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.DebtRecoveryPercentage = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.DebtRecoveryPercentage = payload[i]
 	i++
 
-	return val
+	return nil
 }

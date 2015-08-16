@@ -8,8 +8,7 @@ package avcontentdirectorymd
 type AvMatchItemToRendererMdGet struct {
 }
 
-func ParseAvMatchItemToRendererMdGet(payload []byte) AvMatchItemToRendererMdGet {
-	val := AvMatchItemToRendererMdGet{}
+func (cmd *AvMatchItemToRendererMdGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

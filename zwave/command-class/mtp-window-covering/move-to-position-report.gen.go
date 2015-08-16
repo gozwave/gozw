@@ -3,19 +3,23 @@
 
 package mtpwindowcovering
 
+import "errors"
+
 // <no value>
 
 type MoveToPositionReport struct {
 	Value byte
 }
 
-func ParseMoveToPositionReport(payload []byte) MoveToPositionReport {
-	val := MoveToPositionReport{}
-
+func (cmd *MoveToPositionReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Value = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Value = payload[i]
 	i++
 
-	return val
+	return nil
 }

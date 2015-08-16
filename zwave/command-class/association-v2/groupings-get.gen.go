@@ -8,8 +8,7 @@ package associationv2
 type AssociationGroupingsGet struct {
 }
 
-func ParseAssociationGroupingsGet(payload []byte) AssociationGroupingsGet {
-	val := AssociationGroupingsGet{}
+func (cmd *AssociationGroupingsGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

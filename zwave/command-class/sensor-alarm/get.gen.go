@@ -3,19 +3,23 @@
 
 package sensoralarm
 
+import "errors"
+
 // <no value>
 
 type SensorAlarmGet struct {
 	SensorType byte
 }
 
-func ParseSensorAlarmGet(payload []byte) SensorAlarmGet {
-	val := SensorAlarmGet{}
-
+func (cmd *SensorAlarmGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SensorType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SensorType = payload[i]
 	i++
 
-	return val
+	return nil
 }

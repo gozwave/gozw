@@ -3,6 +3,8 @@
 
 package manufacturerspecificv2
 
+import "errors"
+
 // <no value>
 
 type DeviceSpecificGet struct {
@@ -11,14 +13,16 @@ type DeviceSpecificGet struct {
 	}
 }
 
-func ParseDeviceSpecificGet(payload []byte) DeviceSpecificGet {
-	val := DeviceSpecificGet{}
-
+func (cmd *DeviceSpecificGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.DeviceIdType = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.DeviceIdType = (payload[i] & 0x07)
 
 	i += 1
 
-	return val
+	return nil
 }

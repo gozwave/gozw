@@ -3,6 +3,8 @@
 
 package remoteassociation
 
+import "errors"
+
 // <no value>
 
 type RemoteAssociationConfigurationSet struct {
@@ -13,19 +15,29 @@ type RemoteAssociationConfigurationSet struct {
 	RemoteGroupingIdentifier byte
 }
 
-func ParseRemoteAssociationConfigurationSet(payload []byte) RemoteAssociationConfigurationSet {
-	val := RemoteAssociationConfigurationSet{}
-
+func (cmd *RemoteAssociationConfigurationSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.LocalGroupingIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.LocalGroupingIdentifier = payload[i]
 	i++
 
-	val.RemoteNodeid = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RemoteNodeid = payload[i]
 	i++
 
-	val.RemoteGroupingIdentifier = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.RemoteGroupingIdentifier = payload[i]
 	i++
 
-	return val
+	return nil
 }

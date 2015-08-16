@@ -3,6 +3,8 @@
 
 package firmwareupdatemdv2
 
+import "errors"
+
 // <no value>
 
 type FirmwareUpdateMdGet struct {
@@ -17,26 +19,36 @@ type FirmwareUpdateMdGet struct {
 	ReportNumber2 byte
 }
 
-func ParseFirmwareUpdateMdGet(payload []byte) FirmwareUpdateMdGet {
-	val := FirmwareUpdateMdGet{}
-
+func (cmd *FirmwareUpdateMdGet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.NumberOfReports = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.NumberOfReports = payload[i]
 	i++
 
-	val.Properties1.ReportNumber1 = (payload[i] & 0x7F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.ReportNumber1 = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.Zero = true
+		cmd.Properties1.Zero = true
 	} else {
-		val.Properties1.Zero = false
+		cmd.Properties1.Zero = false
 	}
 
 	i += 1
 
-	val.ReportNumber2 = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ReportNumber2 = payload[i]
 	i++
 
-	return val
+	return nil
 }

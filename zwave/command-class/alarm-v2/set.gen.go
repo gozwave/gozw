@@ -3,6 +3,8 @@
 
 package alarmv2
 
+import "errors"
+
 // <no value>
 
 type AlarmSet struct {
@@ -11,16 +13,22 @@ type AlarmSet struct {
 	ZwaveAlarmStatus byte
 }
 
-func ParseAlarmSet(payload []byte) AlarmSet {
-	val := AlarmSet{}
-
+func (cmd *AlarmSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.ZwaveAlarmType = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZwaveAlarmType = payload[i]
 	i++
 
-	val.ZwaveAlarmStatus = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.ZwaveAlarmStatus = payload[i]
 	i++
 
-	return val
+	return nil
 }

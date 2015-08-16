@@ -8,8 +8,7 @@ package avtaggingmd
 type AvTaggingMdReport struct {
 }
 
-func ParseAvTaggingMdReport(payload []byte) AvTaggingMdReport {
-	val := AvTaggingMdReport{}
+func (cmd *AvTaggingMdReport) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

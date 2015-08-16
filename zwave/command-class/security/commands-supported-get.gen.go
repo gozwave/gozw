@@ -8,8 +8,7 @@ package security
 type SecurityCommandsSupportedGet struct {
 }
 
-func ParseSecurityCommandsSupportedGet(payload []byte) SecurityCommandsSupportedGet {
-	val := SecurityCommandsSupportedGet{}
+func (cmd *SecurityCommandsSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

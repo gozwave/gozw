@@ -3,6 +3,8 @@
 
 package metertblmonitor
 
+import "errors"
+
 // <no value>
 
 type MeterTblTableIdReport struct {
@@ -13,17 +15,23 @@ type MeterTblTableIdReport struct {
 	MeterIdCharacter []byte
 }
 
-func ParseMeterTblTableIdReport(payload []byte) MeterTblTableIdReport {
-	val := MeterTblTableIdReport{}
-
+func (cmd *MeterTblTableIdReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.NumberOfCharacters = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.NumberOfCharacters = (payload[i] & 0x1F)
 
 	i += 1
 
-	val.MeterIdCharacter = payload[i : i+0]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MeterIdCharacter = payload[i : i+0]
 	i += 0
 
-	return val
+	return nil
 }

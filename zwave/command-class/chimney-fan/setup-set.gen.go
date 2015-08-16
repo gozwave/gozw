@@ -3,6 +3,8 @@
 
 package chimneyfan
 
+import "errors"
+
 // <no value>
 
 type ChimneyFanSetupSet struct {
@@ -45,55 +47,93 @@ type ChimneyFanSetupSet struct {
 	AlarmTemperatureValue []byte
 }
 
-func ParseChimneyFanSetupSet(payload []byte) ChimneyFanSetupSet {
-	val := ChimneyFanSetupSet{}
-
+func (cmd *ChimneyFanSetupSet) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Mode = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Mode = payload[i]
 	i++
 
-	val.BoostTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.BoostTime = payload[i]
 	i++
 
-	val.StopTime = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopTime = payload[i]
 	i++
 
-	val.MinSpeed = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.MinSpeed = payload[i]
 	i++
 
-	val.Properties1.Size1 = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties1.Scale1 = (payload[i] & 0x18) << 3
+	cmd.Properties1.Size1 = (payload[i] & 0x07)
 
-	val.Properties1.Precision1 = (payload[i] & 0xE0) << 5
+	cmd.Properties1.Scale1 = (payload[i] & 0x18) << 3
+
+	cmd.Properties1.Precision1 = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.StartTemperature = payload[i : i+4]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartTemperature = payload[i : i+4]
 	i += 4
 
-	val.Properties2.Size2 = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties2.Scale2 = (payload[i] & 0x18) << 3
+	cmd.Properties2.Size2 = (payload[i] & 0x07)
 
-	val.Properties2.Precision2 = (payload[i] & 0xE0) << 5
+	cmd.Properties2.Scale2 = (payload[i] & 0x18) << 3
+
+	cmd.Properties2.Precision2 = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.StopTemperature = payload[i : i+6]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StopTemperature = payload[i : i+6]
 	i += 6
 
-	val.Properties3.Size3 = (payload[i] & 0x07)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
 
-	val.Properties3.Scale3 = (payload[i] & 0x18) << 3
+	cmd.Properties3.Size3 = (payload[i] & 0x07)
 
-	val.Properties3.Precision3 = (payload[i] & 0xE0) << 5
+	cmd.Properties3.Scale3 = (payload[i] & 0x18) << 3
+
+	cmd.Properties3.Precision3 = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.AlarmTemperatureValue = payload[i : i+8]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.AlarmTemperatureValue = payload[i : i+8]
 	i += 8
 
-	return val
+	return nil
 }

@@ -3,19 +3,23 @@
 
 package multiinstanceassociation
 
+import "errors"
+
 // <no value>
 
 type MultiInstanceAssociationGroupingsReport struct {
 	SupportedGroupings byte
 }
 
-func ParseMultiInstanceAssociationGroupingsReport(payload []byte) MultiInstanceAssociationGroupingsReport {
-	val := MultiInstanceAssociationGroupingsReport{}
-
+func (cmd *MultiInstanceAssociationGroupingsReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.SupportedGroupings = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.SupportedGroupings = payload[i]
 	i++
 
-	return val
+	return nil
 }

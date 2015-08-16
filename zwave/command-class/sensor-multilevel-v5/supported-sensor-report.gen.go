@@ -3,19 +3,23 @@
 
 package sensormultilevelv5
 
+import "errors"
+
 // <no value>
 
 type SensorMultilevelSupportedSensorReport struct {
 	BitMask byte
 }
 
-func ParseSensorMultilevelSupportedSensorReport(payload []byte) SensorMultilevelSupportedSensorReport {
-	val := SensorMultilevelSupportedSensorReport{}
-
+func (cmd *SensorMultilevelSupportedSensorReport) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.BitMask = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.BitMask = payload[i]
 	i++
 
-	return val
+	return nil
 }

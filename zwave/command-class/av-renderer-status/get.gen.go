@@ -8,8 +8,7 @@ package avrendererstatus
 type AvRendererStatusGet struct {
 }
 
-func ParseAvRendererStatusGet(payload []byte) AvRendererStatusGet {
-	val := AvRendererStatusGet{}
+func (cmd *AvRendererStatusGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

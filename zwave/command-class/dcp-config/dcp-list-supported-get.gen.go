@@ -8,8 +8,7 @@ package dcpconfig
 type DcpListSupportedGet struct {
 }
 
-func ParseDcpListSupportedGet(payload []byte) DcpListSupportedGet {
-	val := DcpListSupportedGet{}
+func (cmd *DcpListSupportedGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

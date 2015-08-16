@@ -3,6 +3,8 @@
 
 package colorcontrolv2
 
+import "errors"
+
 // <no value>
 
 type StartCapabilityLevelChange struct {
@@ -21,38 +23,48 @@ type StartCapabilityLevelChange struct {
 	StartState byte
 }
 
-func ParseStartCapabilityLevelChange(payload []byte) StartCapabilityLevelChange {
-	val := StartCapabilityLevelChange{}
-
+func (cmd *StartCapabilityLevelChange) UnmarshalBinary(payload []byte) error {
 	i := 2
 
-	val.Properties1.Res1 = (payload[i] & 0x1F)
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.Properties1.Res1 = (payload[i] & 0x1F)
 
 	if payload[i]&0x20 == 0x20 {
-		val.Properties1.IgnoreStartState = true
+		cmd.Properties1.IgnoreStartState = true
 	} else {
-		val.Properties1.IgnoreStartState = false
+		cmd.Properties1.IgnoreStartState = false
 	}
 
 	if payload[i]&0x40 == 0x40 {
-		val.Properties1.Updown = true
+		cmd.Properties1.Updown = true
 	} else {
-		val.Properties1.Updown = false
+		cmd.Properties1.Updown = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.Properties1.Res2 = true
+		cmd.Properties1.Res2 = true
 	} else {
-		val.Properties1.Res2 = false
+		cmd.Properties1.Res2 = false
 	}
 
 	i += 1
 
-	val.CapabilityId = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.CapabilityId = payload[i]
 	i++
 
-	val.StartState = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartState = payload[i]
 	i++
 
-	return val
+	return nil
 }

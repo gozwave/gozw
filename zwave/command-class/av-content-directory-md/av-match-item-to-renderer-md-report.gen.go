@@ -8,8 +8,7 @@ package avcontentdirectorymd
 type AvMatchItemToRendererMdReport struct {
 }
 
-func ParseAvMatchItemToRendererMdReport(payload []byte) AvMatchItemToRendererMdReport {
-	val := AvMatchItemToRendererMdReport{}
+func (cmd *AvMatchItemToRendererMdReport) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }

@@ -3,6 +3,8 @@
 
 package switchtogglemultilevel
 
+import "errors"
+
 // <no value>
 
 type SwitchToggleMultilevelStartLevelChange struct {
@@ -15,27 +17,33 @@ type SwitchToggleMultilevelStartLevelChange struct {
 	StartLevel byte
 }
 
-func ParseSwitchToggleMultilevelStartLevelChange(payload []byte) SwitchToggleMultilevelStartLevelChange {
-	val := SwitchToggleMultilevelStartLevelChange{}
-
+func (cmd *SwitchToggleMultilevelStartLevelChange) UnmarshalBinary(payload []byte) error {
 	i := 2
 
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
 	if payload[i]&0x20 == 0x20 {
-		val.Level.IgnoreStartLevel = true
+		cmd.Level.IgnoreStartLevel = true
 	} else {
-		val.Level.IgnoreStartLevel = false
+		cmd.Level.IgnoreStartLevel = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.Level.RollOver = true
+		cmd.Level.RollOver = true
 	} else {
-		val.Level.RollOver = false
+		cmd.Level.RollOver = false
 	}
 
 	i += 1
 
-	val.StartLevel = payload[i]
+	if len(payload) <= i {
+		return errors.New("slice index out of bounds")
+	}
+
+	cmd.StartLevel = payload[i]
 	i++
 
-	return val
+	return nil
 }

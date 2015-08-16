@@ -8,8 +8,7 @@ package security
 type SecurityNonceGet struct {
 }
 
-func ParseSecurityNonceGet(payload []byte) SecurityNonceGet {
-	val := SecurityNonceGet{}
+func (cmd *SecurityNonceGet) UnmarshalBinary(payload []byte) error {
 
-	return val
+	return nil
 }
