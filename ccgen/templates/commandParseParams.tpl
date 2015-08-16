@@ -7,21 +7,21 @@
       val.{{ToGoName .Name}} = payload[i:i+{{(index .Variant 0).ParamOffset}}]
       i += {{(index .Variant 0).ParamOffset}}
     {{end}}
-  {{else if eq .Type "STRUCT_BYTE"}}
+  {{else if eq .Type "STRUCT_BYTE"}}{{$name := ToGoName .Name}}
     {{range $_, $subVal := .BitField}}
       {{if .IsNotReserved}}
-        val.{{ToGoName .FieldName}} = (payload[i]{{with .FieldMask}}&{{.}}{{end}}){{with .Shifter}}<<{{.}}{{end}}
+        val.{{$name}}.{{ToGoName .FieldName}} = (payload[i]{{with .FieldMask}}&{{.}}{{end}}){{with .Shifter}}<<{{.}}{{end}}
       {{end}}
     {{end}}
     {{range $_, $subVal := .FieldEnum}}
-      val.{{ToGoName .FieldName}} = (payload[i]{{with .FieldMask}}&{{.}}{{end}}){{with .Shifter}}<<{{.}}{{end}}
+      val.{{$name}}.{{ToGoName .FieldName}} = (payload[i]{{with .FieldMask}}&{{.}}{{end}}){{with .Shifter}}<<{{.}}{{end}}
     {{end}}
     {{range $_, $subVal := .BitFlag}}
       {{if .IsNotReserved}}
         if payload[i] & {{.FlagMask}} == {{.FlagMask}} {
-          val.{{ToGoName .FlagName}} = true
+          val.{{$name}}.{{ToGoName .FlagName}} = true
         } else {
-          val.{{ToGoName .FlagName}} = false
+          val.{{$name}}.{{ToGoName .FlagName}} = false
         }
       {{end}}
     {{end}}

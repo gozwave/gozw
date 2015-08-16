@@ -1,5 +1,6 @@
 {{if .IsNotReserved}}
   {{if eq .Type "STRUCT_BYTE"}}
+  {{ToGoName .Name}} struct {
     {{range $_, $subVal := .BitField}}
       {{if .IsNotReserved}}
         {{ToGoName .FieldName}} byte
@@ -15,6 +16,7 @@
         {{ToGoName .FieldName}} byte
       {{end}}
     {{end}}
+  }
   {{else}}
     {{ToGoName .Name}} {{.GetGoType}}
   {{end}}
