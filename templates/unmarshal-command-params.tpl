@@ -5,7 +5,7 @@
   }
   {{if eq .Type "VARIANT"}}
     {{if eq (index .Variant 0).ParamOffset 255}}
-      {{template "parseVariant.tpl" .}}
+      {{template "unmarshal-variant.tpl" .}}
     {{else}}
       cmd.{{ToGoName .Name}} = payload[i:i+{{(index .Variant 0).ParamOffset}}]
       i += {{(index .Variant 0).ParamOffset}}

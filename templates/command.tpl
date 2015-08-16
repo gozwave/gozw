@@ -8,12 +8,12 @@ package {{.CommandClass.GetPackageName}}
 {{$typeName := (ToGoName .Command.Name) "V" $version}}
 type {{$typeName}} struct {
   {{range $_, $param := .Command.Params}}
-    {{template "commandStruct.tpl" $param}}
+    {{template "command-struct-fields.tpl" $param}}
   {{end}}
 }
 
 func (cmd *{{$typeName}}) UnmarshalBinary(payload []byte) error {
-  {{template "commandParseParams.tpl" .Command.Params}}
+  {{template "unmarshal-command-params.tpl" .Command.Params}}
 
   return nil
 }
