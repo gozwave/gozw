@@ -39,6 +39,8 @@ func NewGenerator() (*Generator, error) {
 
 	gen.zwClasses = &zw
 
+	gen.fixVariants()
+
 	return gen, nil
 }
 
@@ -189,4 +191,23 @@ func (g *Generator) initTemplates() error {
 	g.tpl = tpl
 
 	return nil
+}
+
+func (g *Generator) fixVariants() {
+	for _, cc := range g.zwClasses.CommandClasses {
+		for _, cmd := range cc.Commands {
+			for i, param := range cmd.Params {
+
+				if param.Type == "VARIANT" {
+					if len(cmd.Params) > i+1 && cmd.Params[i+1].Type == "MARKER" {
+						param.Variant[0].StopAtMarker = true
+						param.Variant[0].MarkerValue = cmd.Params[i+1].Const[0].FlagMask
+					} else {
+						param.Variant[0].StopAtMarker = false
+					}
+				}
+
+			}
+		}
+	}
 }
