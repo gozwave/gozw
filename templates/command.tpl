@@ -12,7 +12,10 @@ type {{$typeName}} struct {
   {{end}}
 }
 
-func (cmd *{{$typeName}}) UnmarshalBinary(payload []byte) error {
+func (cmd *{{$typeName}}) UnmarshalBinary(data []byte) error {
+  // According to the docs, we must copy data if we wish to retain it after returning
+  payload := make([]byte, len(data))
+  copy(payload, data)
   {{template "unmarshal-command-params.tpl" .Command.Params}}
 
   return nil
