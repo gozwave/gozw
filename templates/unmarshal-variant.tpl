@@ -1,4 +1,4 @@
-{{$variant := (index .Variant 0)}}{{if $variant.StopAtMarker}}
+{{$variant := (index .Variant 0)}}{{if $variant.MarkerDelimited}}
 {
   markerIndex := i
   for ; markerIndex < len(payload) && payload[markerIndex] != {{$variant.MarkerValue}}; markerIndex++ {}
