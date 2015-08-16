@@ -28,10 +28,10 @@ func (cmd *MultiInstanceAssociationSet) UnmarshalBinary(payload []byte) error {
 	}
 
 	{
-		markerIndex := i
-		for ; markerIndex < len(payload) && payload[markerIndex] != 0x00; markerIndex++ {
+		fieldStart := i
+		for ; i < len(payload) && payload[i] != 0x00; i++ {
 		}
-		cmd.NodeId = payload[i:markerIndex]
+		cmd.NodeId = payload[fieldStart:i]
 	}
 
 	if len(payload) <= i {

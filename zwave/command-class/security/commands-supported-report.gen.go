@@ -30,10 +30,10 @@ func (cmd *SecurityCommandsSupportedReport) UnmarshalBinary(payload []byte) erro
 	}
 
 	{
-		markerIndex := i
-		for ; markerIndex < len(payload) && payload[markerIndex] != 0xEF; markerIndex++ {
+		fieldStart := i
+		for ; i < len(payload) && payload[i] != 0xEF; i++ {
 		}
-		cmd.CommandClassSupport = payload[i:markerIndex]
+		cmd.CommandClassSupport = payload[fieldStart:i]
 	}
 
 	if len(payload) <= i {

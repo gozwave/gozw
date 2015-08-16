@@ -52,7 +52,8 @@ func (cmd *FirmwareUpdateMdReport) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	cmd.Data = payload[i:]
+	cmd.Data = payload[i : len(payload)-2]
+	i += len(payload) - 2
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")

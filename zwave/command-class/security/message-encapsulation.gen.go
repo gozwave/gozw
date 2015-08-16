@@ -78,7 +78,8 @@ func (cmd *SecurityMessageEncapsulation) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	cmd.CommandByte = payload[i:]
+	cmd.CommandByte = payload[i : len(payload)-9]
+	i += len(payload) - 9
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")

@@ -121,10 +121,10 @@ func (cmd *NodeInfoCachedReport) UnmarshalBinary(payload []byte) error {
 	}
 
 	{
-		markerIndex := i
-		for ; markerIndex < len(payload) && payload[markerIndex] != 0xF1; markerIndex++ {
+		fieldStart := i
+		for ; i < len(payload) && payload[i] != 0xF1; i++ {
 		}
-		cmd.NonSecureCommandClass = payload[i:markerIndex]
+		cmd.NonSecureCommandClass = payload[fieldStart:i]
 	}
 
 	if len(payload) <= i {
