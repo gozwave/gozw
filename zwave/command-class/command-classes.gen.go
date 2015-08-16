@@ -4,6 +4,9 @@
 package commandclass
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/helioslabs/gozw/zwave/command-class/alarm"
 	"github.com/helioslabs/gozw/zwave/command-class/alarm-v2"
 	"github.com/helioslabs/gozw/zwave/command-class/antitheft"
@@ -170,6 +173,8 @@ const (
 	Clock                           CommandClassID = 0x81
 	Configuration                   CommandClassID = 0x70
 	ConfigurationV2                 CommandClassID = 0x70
+	ControllerReplication           CommandClassID = 0x21
+	Crc16Encap                      CommandClassID = 0x56
 	DcpConfig                       CommandClassID = 0x3A
 	DcpMonitor                      CommandClassID = 0x3B
 	DoorLockLogging                 CommandClassID = 0x4C
@@ -185,10 +190,13 @@ const (
 	HrvControl                      CommandClassID = 0x39
 	HrvStatus                       CommandClassID = 0x37
 	Indicator                       CommandClassID = 0x87
+	IpConfiguration                 CommandClassID = 0x9A
 	Language                        CommandClassID = 0x89
 	Lock                            CommandClassID = 0x76
+	ManufacturerProprietary         CommandClassID = 0x91
 	ManufacturerSpecific            CommandClassID = 0x72
 	ManufacturerSpecificV2          CommandClassID = 0x72
+	Mark                            CommandClassID = 0xEF
 	MeterPulse                      CommandClassID = 0x35
 	MeterTblConfig                  CommandClassID = 0x3C
 	MeterTblMonitor                 CommandClassID = 0x3D
@@ -199,13 +207,18 @@ const (
 	MeterV3                         CommandClassID = 0x32
 	MeterV4                         CommandClassID = 0x32
 	MtpWindowCovering               CommandClassID = 0x51
+	MultiChannelAssociationV2       CommandClassID = 0x8E
 	MultiChannelV2                  CommandClassID = 0x60
 	MultiChannelV3                  CommandClassID = 0x60
 	MultiCmd                        CommandClassID = 0x8F
+	MultiInstanceAssociation        CommandClassID = 0x8E
 	MultiInstance                   CommandClassID = 0x60
+	NetworkManagementProxy          CommandClassID = 0x52
 	NetworkManagementBasic          CommandClassID = 0x4D
 	NetworkManagementInclusion      CommandClassID = 0x34
+	NoOperation                     CommandClassID = 0x00
 	NodeNaming                      CommandClassID = 0x77
+	NonInteroperable                CommandClassID = 0xF0
 	Powerlevel                      CommandClassID = 0x73
 	PrepaymentEncapsulation         CommandClassID = 0x41
 	Prepayment                      CommandClassID = 0x3F
@@ -229,6 +242,7 @@ const (
 	SecurityPanelMode               CommandClassID = 0x24
 	SecurityPanelZoneSensor         CommandClassID = 0x2F
 	SecurityPanelZone               CommandClassID = 0x2E
+	Security                        CommandClassID = 0x98
 	SensorAlarm                     CommandClassID = 0x9C
 	SensorBinary                    CommandClassID = 0x30
 	SensorBinaryV2                  CommandClassID = 0x30
@@ -268,171 +282,528 @@ const (
 	TimeParameters                  CommandClassID = 0x8B
 	Time                            CommandClassID = 0x8A
 	TimeV2                          CommandClassID = 0x8A
+	TransportService                CommandClassID = 0x55
+	TransportServiceV2              CommandClassID = 0x55
 	UserCode                        CommandClassID = 0x63
 	Version                         CommandClassID = 0x86
 	VersionV2                       CommandClassID = 0x86
 	WakeUp                          CommandClassID = 0x84
 	WakeUpV2                        CommandClassID = 0x84
 	ZensorNet                       CommandClassID = 0x02
+	Zip6lowpan                      CommandClassID = 0x4F
+	Zip                             CommandClassID = 0x23
+	ZipV2                           CommandClassID = 0x23
+	ZwaveCmdClass                   CommandClassID = 0x01
 	ApplicationCapability           CommandClassID = 0x57
 	ColorControl                    CommandClassID = 0x33
 	ColorControlV2                  CommandClassID = 0x33
 	Schedule                        CommandClassID = 0x53
 	NetworkManagementPrimary        CommandClassID = 0x54
+	ZipNd                           CommandClassID = 0x58
 	AssociationGrpInfo              CommandClassID = 0x59
 	DeviceResetLocally              CommandClassID = 0x5A
 	CentralScene                    CommandClassID = 0x5B
+	IpAssociation                   CommandClassID = 0x5C
 	Antitheft                       CommandClassID = 0x5D
 	AntitheftV2                     CommandClassID = 0x5D
 	ZwaveplusInfo                   CommandClassID = 0x5E
 	ZwaveplusInfoV2                 CommandClassID = 0x5E
+	ZipGateway                      CommandClassID = 0x5F
+	ZipPortal                       CommandClassID = 0x61
 	Appliance                       CommandClassID = 0x64
 	Dmx                             CommandClassID = 0x65
 	BarrierOperator                 CommandClassID = 0x66
 )
 
-var CommandClassNames = map[CommandClassID]string{
+func (c CommandClassID) String() string {
+	switch c {
 
-	Alarm:                           "Command Class Alarm",
-	AlarmV2:                         "Command Class Alarm",
-	NotificationV3:                  "Command Class Notification",
-	NotificationV4:                  "Command Class Notification",
-	ApplicationStatus:               "Command Class Application Status",
-	AssociationCommandConfiguration: "Command Class Association Command Configuration",
-	Association:                     "Command Class Association",
-	AssociationV2:                   "Command Class Association",
-	AvContentDirectoryMd:            "Command Class Av Content Directory Md",
-	AvContentSearchMd:               "Command Class Av Content Search Md",
-	AvRendererStatus:                "Command Class Av Renderer Status",
-	AvTaggingMd:                     "Command Class Av Tagging Md",
-	BasicTariffInfo:                 "Command Class Basic Tariff Info",
-	BasicWindowCovering:             "Command Class Basic Window Covering",
-	Basic:                           "Command Class Basic",
-	Battery:                         "Command Class Battery",
-	ChimneyFan:                      "Command Class Chimney Fan",
-	ClimateControlSchedule:          "Command Class Climate Control Schedule",
-	Clock:                      "Command Class Clock",
-	Configuration:              "Command Class Configuration",
-	ConfigurationV2:            "Command Class Configuration",
-	DcpConfig:                  "Command Class Dcp Config",
-	DcpMonitor:                 "Command Class Dcp Monitor",
-	DoorLockLogging:            "Command Class Door Lock Logging",
-	DoorLock:                   "Command Class Door Lock",
-	DoorLockV2:                 "Command Class Door Lock",
-	EnergyProduction:           "Command Class Energy Production",
-	FirmwareUpdateMd:           "Command Class Firmware Update Md",
-	FirmwareUpdateMdV2:         "Command Class Firmware Update Md",
-	FirmwareUpdateMdV3:         "Command Class Firmware Update Md",
-	GeographicLocation:         "Command Class Geographic Location",
-	GroupingName:               "Command Class Grouping Name",
-	Hail:                       "Command Class Hail",
-	HrvControl:                 "Command Class Hrv Control",
-	HrvStatus:                  "Command Class Hrv Status",
-	Indicator:                  "Command Class Indicator",
-	Language:                   "Command Class Language",
-	Lock:                       "Command Class Lock",
-	ManufacturerSpecific:       "Command Class Manufacturer Specific",
-	ManufacturerSpecificV2:     "Command Class Manufacturer Specific",
-	MeterPulse:                 "Command Class Meter Pulse",
-	MeterTblConfig:             "Command Class Meter Tbl Config",
-	MeterTblMonitor:            "Command Class Meter Tbl Monitor",
-	MeterTblMonitorV2:          "Command Class Meter Tbl Monitor",
-	MeterTblPush:               "Command Class Meter Tbl Push",
-	Meter:                      "Command Class Meter",
-	MeterV2:                    "Command Class Meter",
-	MeterV3:                    "Command Class Meter",
-	MeterV4:                    "Command Class Meter",
-	MtpWindowCovering:          "Command Class Mtp Window Covering",
-	MultiChannelV2:             "Command Class Multi Channel",
-	MultiChannelV3:             "Command Class Multi Channel",
-	MultiCmd:                   "Command Class Multi Cmd",
-	MultiInstance:              "Command Class Multi Instance",
-	NetworkManagementBasic:     "Command Class Network Management Basic",
-	NetworkManagementInclusion: "Command Class Network Management Inclusion",
-	NodeNaming:                 "Command Class Node Naming",
-	Powerlevel:                 "Command Class Powerlevel",
-	PrepaymentEncapsulation:    "Command Class Prepayment Encapsulation",
-	Prepayment:                 "Command Class Prepayment",
-	Proprietary:                "Command Class Proprietary",
-	Protection:                 "Command Class Protection",
-	ProtectionV2:               "Command Class Protection",
-	RateTblConfig:              "Command Class Rate Tbl Config",
-	RateTblMonitor:             "Command Class Rate Tbl Monitor",
-	RemoteAssociationActivate:  "Command Class Remote Association Activate",
-	RemoteAssociation:          "Command Class Remote Association",
-	SceneActivation:            "Command Class Scene Activation",
-	SceneActuatorConf:          "Command Class Scene Actuator Conf",
-	SceneControllerConf:        "Command Class Scene Controller Conf",
-	ScheduleEntryLock:          "Command Class Schedule Entry Lock",
-	ScheduleEntryLockV2:        "Command Class Schedule Entry Lock",
-	ScheduleEntryLockV3:        "Command Class Schedule Entry Lock",
-	ScreenAttributes:           "Command Class Screen Attributes",
-	ScreenAttributesV2:         "Command Class Screen Attributes",
-	ScreenMd:                   "Command Class Screen Md",
-	ScreenMdV2:                 "Command Class Screen Md",
-	SecurityPanelMode:          "Command Class Security Panel Mode",
-	SecurityPanelZoneSensor:    "Command Class Security Panel Zone Sensor",
-	SecurityPanelZone:          "Command Class Security Panel Zone",
-	SensorAlarm:                "Command Class Sensor Alarm",
-	SensorBinary:               "Command Class Sensor Binary",
-	SensorBinaryV2:             "Command Class Sensor Binary",
-	SensorConfiguration:        "Command Class Sensor Configuration",
-	SensorMultilevel:           "Command Class Sensor Multilevel",
-	SensorMultilevelV2:         "Command Class Sensor Multilevel",
-	SensorMultilevelV3:         "Command Class Sensor Multilevel",
-	SensorMultilevelV4:         "Command Class Sensor Multilevel",
-	SensorMultilevelV5:         "Command Class Sensor Multilevel",
-	SensorMultilevelV6:         "Command Class Sensor Multilevel",
-	SilenceAlarm:               "Command Class Silence Alarm",
-	SimpleAvControl:            "Command Class Simple Av Control",
-	SwitchAll:                  "Command Class Switch All",
-	SwitchBinary:               "Command Class Switch Binary",
-	SwitchMultilevel:           "Command Class Switch Multilevel",
-	SwitchMultilevelV2:         "Command Class Switch Multilevel",
-	SwitchMultilevelV3:         "Command Class Switch Multilevel",
-	SwitchToggleBinary:         "Command Class Switch Toggle Binary",
-	SwitchToggleMultilevel:     "Command Class Switch Toggle Multilevel",
-	TariffConfig:               "Command Class Tariff Config",
-	TariffTblMonitor:           "Command Class Tariff Tbl Monitor",
-	ThermostatFanMode:          "Command Class Thermostat Fan Mode",
-	ThermostatFanModeV2:        "Command Class Thermostat Fan Mode",
-	ThermostatFanModeV3:        "Command Class Thermostat Fan Mode",
-	ThermostatFanModeV4:        "Command Class Thermostat Fan Mode",
-	ThermostatFanState:         "Command Class Thermostat Fan State",
-	ThermostatHeating:          "Command Class Thermostat Heating",
-	ThermostatMode:             "Command Class Thermostat Mode",
-	ThermostatModeV2:           "Command Class Thermostat Mode",
-	ThermostatModeV3:           "Command Class Thermostat Mode",
-	ThermostatOperatingState:   "Command Class Thermostat Operating State",
-	ThermostatOperatingStateV2: "Command Class Thermostat Operating State",
-	ThermostatSetback:          "Command Class Thermostat Setback",
-	ThermostatSetpoint:         "Command Class Thermostat Setpoint",
-	ThermostatSetpointV2:       "Command Class Thermostat Setpoint",
-	ThermostatSetpointV3:       "Command Class Thermostat Setpoint",
-	TimeParameters:             "Command Class Time Parameters",
-	Time:                       "Command Class Time",
-	TimeV2:                     "Command Class Time",
-	UserCode:                   "Command Class User Code",
-	Version:                    "Command Class Version",
-	VersionV2:                  "Command Class Version",
-	WakeUp:                     "Command Class Wake Up",
-	WakeUpV2:                   "Command Class Wake Up",
-	ZensorNet:                  "Command Class Zensor Net",
-	ApplicationCapability:      "Command Class Application Capability",
-	ColorControl:               "Command Class Color Control",
-	ColorControlV2:             "Command Class Color Control",
-	Schedule:                   "Command Class Schedule",
-	NetworkManagementPrimary:   "Command Class Network Management Primary",
-	AssociationGrpInfo:         "Command Class Association Group Info",
-	DeviceResetLocally:         "Command Class Device Reset Locally",
-	CentralScene:               "Command Class Central Scene",
-	Antitheft:                  "Command Class Anti-theft",
-	AntitheftV2:                "Command Class Anti-theft",
-	ZwaveplusInfo:              "Command Class Z-Wave+ Info",
-	ZwaveplusInfoV2:            "Command Class Z-Wave+ Info",
-	Appliance:                  "Command Class Appliance",
-	Dmx:                        "Command Class DMX",
-	BarrierOperator:            "Command Class Barrier Operator",
+	case Alarm:
+		return "Command Class Alarm"
+
+	case AlarmV2:
+		return "Command Class Alarm"
+
+	case NotificationV3:
+		return "Command Class Notification"
+
+	case NotificationV4:
+		return "Command Class Notification"
+
+	case ApplicationStatus:
+		return "Command Class Application Status"
+
+	case AssociationCommandConfiguration:
+		return "Command Class Association Command Configuration"
+
+	case Association:
+		return "Command Class Association"
+
+	case AssociationV2:
+		return "Command Class Association"
+
+	case AvContentDirectoryMd:
+		return "Command Class Av Content Directory Md"
+
+	case AvContentSearchMd:
+		return "Command Class Av Content Search Md"
+
+	case AvRendererStatus:
+		return "Command Class Av Renderer Status"
+
+	case AvTaggingMd:
+		return "Command Class Av Tagging Md"
+
+	case BasicTariffInfo:
+		return "Command Class Basic Tariff Info"
+
+	case BasicWindowCovering:
+		return "Command Class Basic Window Covering"
+
+	case Basic:
+		return "Command Class Basic"
+
+	case Battery:
+		return "Command Class Battery"
+
+	case ChimneyFan:
+		return "Command Class Chimney Fan"
+
+	case ClimateControlSchedule:
+		return "Command Class Climate Control Schedule"
+
+	case Clock:
+		return "Command Class Clock"
+
+	case Configuration:
+		return "Command Class Configuration"
+
+	case ConfigurationV2:
+		return "Command Class Configuration"
+
+	case ControllerReplication:
+		return "Command Class Controller Replication"
+
+	case Crc16Encap:
+		return "Command Class CRC16 Encap"
+
+	case DcpConfig:
+		return "Command Class Dcp Config"
+
+	case DcpMonitor:
+		return "Command Class Dcp Monitor"
+
+	case DoorLockLogging:
+		return "Command Class Door Lock Logging"
+
+	case DoorLock:
+		return "Command Class Door Lock"
+
+	case DoorLockV2:
+		return "Command Class Door Lock"
+
+	case EnergyProduction:
+		return "Command Class Energy Production"
+
+	case FirmwareUpdateMd:
+		return "Command Class Firmware Update Md"
+
+	case FirmwareUpdateMdV2:
+		return "Command Class Firmware Update Md"
+
+	case FirmwareUpdateMdV3:
+		return "Command Class Firmware Update Md"
+
+	case GeographicLocation:
+		return "Command Class Geographic Location"
+
+	case GroupingName:
+		return "Command Class Grouping Name"
+
+	case Hail:
+		return "Command Class Hail"
+
+	case HrvControl:
+		return "Command Class Hrv Control"
+
+	case HrvStatus:
+		return "Command Class Hrv Status"
+
+	case Indicator:
+		return "Command Class Indicator"
+
+	case IpConfiguration:
+		return "Command Class Ip Configuration"
+
+	case Language:
+		return "Command Class Language"
+
+	case Lock:
+		return "Command Class Lock"
+
+	case ManufacturerProprietary:
+		return "Command Class Manufacturer Proprietary"
+
+	case ManufacturerSpecific:
+		return "Command Class Manufacturer Specific"
+
+	case ManufacturerSpecificV2:
+		return "Command Class Manufacturer Specific"
+
+	case Mark:
+		return "Command Class Mark"
+
+	case MeterPulse:
+		return "Command Class Meter Pulse"
+
+	case MeterTblConfig:
+		return "Command Class Meter Tbl Config"
+
+	case MeterTblMonitor:
+		return "Command Class Meter Tbl Monitor"
+
+	case MeterTblMonitorV2:
+		return "Command Class Meter Tbl Monitor"
+
+	case MeterTblPush:
+		return "Command Class Meter Tbl Push"
+
+	case Meter:
+		return "Command Class Meter"
+
+	case MeterV2:
+		return "Command Class Meter"
+
+	case MeterV3:
+		return "Command Class Meter"
+
+	case MeterV4:
+		return "Command Class Meter"
+
+	case MtpWindowCovering:
+		return "Command Class Mtp Window Covering"
+
+	case MultiChannelAssociationV2:
+		return "Command Class Multi Channel Association"
+
+	case MultiChannelV2:
+		return "Command Class Multi Channel"
+
+	case MultiChannelV3:
+		return "Command Class Multi Channel"
+
+	case MultiCmd:
+		return "Command Class Multi Cmd"
+
+	case MultiInstanceAssociation:
+		return "Command Class Multi Instance Association"
+
+	case MultiInstance:
+		return "Command Class Multi Instance"
+
+	case NetworkManagementProxy:
+		return "Command Class Network Management Proxy"
+
+	case NetworkManagementBasic:
+		return "Command Class Network Management Basic"
+
+	case NetworkManagementInclusion:
+		return "Command Class Network Management Inclusion"
+
+	case NoOperation:
+		return "NOP"
+
+	case NodeNaming:
+		return "Command Class Node Naming"
+
+	case NonInteroperable:
+		return "Command Class Non Interoperable"
+
+	case Powerlevel:
+		return "Command Class Powerlevel"
+
+	case PrepaymentEncapsulation:
+		return "Command Class Prepayment Encapsulation"
+
+	case Prepayment:
+		return "Command Class Prepayment"
+
+	case Proprietary:
+		return "Command Class Proprietary"
+
+	case Protection:
+		return "Command Class Protection"
+
+	case ProtectionV2:
+		return "Command Class Protection"
+
+	case RateTblConfig:
+		return "Command Class Rate Tbl Config"
+
+	case RateTblMonitor:
+		return "Command Class Rate Tbl Monitor"
+
+	case RemoteAssociationActivate:
+		return "Command Class Remote Association Activate"
+
+	case RemoteAssociation:
+		return "Command Class Remote Association"
+
+	case SceneActivation:
+		return "Command Class Scene Activation"
+
+	case SceneActuatorConf:
+		return "Command Class Scene Actuator Conf"
+
+	case SceneControllerConf:
+		return "Command Class Scene Controller Conf"
+
+	case ScheduleEntryLock:
+		return "Command Class Schedule Entry Lock"
+
+	case ScheduleEntryLockV2:
+		return "Command Class Schedule Entry Lock"
+
+	case ScheduleEntryLockV3:
+		return "Command Class Schedule Entry Lock"
+
+	case ScreenAttributes:
+		return "Command Class Screen Attributes"
+
+	case ScreenAttributesV2:
+		return "Command Class Screen Attributes"
+
+	case ScreenMd:
+		return "Command Class Screen Md"
+
+	case ScreenMdV2:
+		return "Command Class Screen Md"
+
+	case SecurityPanelMode:
+		return "Command Class Security Panel Mode"
+
+	case SecurityPanelZoneSensor:
+		return "Command Class Security Panel Zone Sensor"
+
+	case SecurityPanelZone:
+		return "Command Class Security Panel Zone"
+
+	case Security:
+		return "Command Class Security"
+
+	case SensorAlarm:
+		return "Command Class Sensor Alarm"
+
+	case SensorBinary:
+		return "Command Class Sensor Binary"
+
+	case SensorBinaryV2:
+		return "Command Class Sensor Binary"
+
+	case SensorConfiguration:
+		return "Command Class Sensor Configuration"
+
+	case SensorMultilevel:
+		return "Command Class Sensor Multilevel"
+
+	case SensorMultilevelV2:
+		return "Command Class Sensor Multilevel"
+
+	case SensorMultilevelV3:
+		return "Command Class Sensor Multilevel"
+
+	case SensorMultilevelV4:
+		return "Command Class Sensor Multilevel"
+
+	case SensorMultilevelV5:
+		return "Command Class Sensor Multilevel"
+
+	case SensorMultilevelV6:
+		return "Command Class Sensor Multilevel"
+
+	case SilenceAlarm:
+		return "Command Class Silence Alarm"
+
+	case SimpleAvControl:
+		return "Command Class Simple Av Control"
+
+	case SwitchAll:
+		return "Command Class Switch All"
+
+	case SwitchBinary:
+		return "Command Class Switch Binary"
+
+	case SwitchMultilevel:
+		return "Command Class Switch Multilevel"
+
+	case SwitchMultilevelV2:
+		return "Command Class Switch Multilevel"
+
+	case SwitchMultilevelV3:
+		return "Command Class Switch Multilevel"
+
+	case SwitchToggleBinary:
+		return "Command Class Switch Toggle Binary"
+
+	case SwitchToggleMultilevel:
+		return "Command Class Switch Toggle Multilevel"
+
+	case TariffConfig:
+		return "Command Class Tariff Config"
+
+	case TariffTblMonitor:
+		return "Command Class Tariff Tbl Monitor"
+
+	case ThermostatFanMode:
+		return "Command Class Thermostat Fan Mode"
+
+	case ThermostatFanModeV2:
+		return "Command Class Thermostat Fan Mode"
+
+	case ThermostatFanModeV3:
+		return "Command Class Thermostat Fan Mode"
+
+	case ThermostatFanModeV4:
+		return "Command Class Thermostat Fan Mode"
+
+	case ThermostatFanState:
+		return "Command Class Thermostat Fan State"
+
+	case ThermostatHeating:
+		return "Command Class Thermostat Heating"
+
+	case ThermostatMode:
+		return "Command Class Thermostat Mode"
+
+	case ThermostatModeV2:
+		return "Command Class Thermostat Mode"
+
+	case ThermostatModeV3:
+		return "Command Class Thermostat Mode"
+
+	case ThermostatOperatingState:
+		return "Command Class Thermostat Operating State"
+
+	case ThermostatOperatingStateV2:
+		return "Command Class Thermostat Operating State"
+
+	case ThermostatSetback:
+		return "Command Class Thermostat Setback"
+
+	case ThermostatSetpoint:
+		return "Command Class Thermostat Setpoint"
+
+	case ThermostatSetpointV2:
+		return "Command Class Thermostat Setpoint"
+
+	case ThermostatSetpointV3:
+		return "Command Class Thermostat Setpoint"
+
+	case TimeParameters:
+		return "Command Class Time Parameters"
+
+	case Time:
+		return "Command Class Time"
+
+	case TimeV2:
+		return "Command Class Time"
+
+	case TransportService:
+		return "Command Class Transport Service"
+
+	case TransportServiceV2:
+		return "Command Class Transport Service"
+
+	case UserCode:
+		return "Command Class User Code"
+
+	case Version:
+		return "Command Class Version"
+
+	case VersionV2:
+		return "Command Class Version"
+
+	case WakeUp:
+		return "Command Class Wake Up"
+
+	case WakeUpV2:
+		return "Command Class Wake Up"
+
+	case ZensorNet:
+		return "Command Class Zensor Net"
+
+	case Zip6lowpan:
+		return "Command Class Z/IP 6lowpan"
+
+	case Zip:
+		return "Command Class Z/IP"
+
+	case ZipV2:
+		return "Command Class Z/IP"
+
+	case ZwaveCmdClass:
+		return "Z-Wave protocol Command Class"
+
+	case ApplicationCapability:
+		return "Command Class Application Capability"
+
+	case ColorControl:
+		return "Command Class Color Control"
+
+	case ColorControlV2:
+		return "Command Class Color Control"
+
+	case Schedule:
+		return "Command Class Schedule"
+
+	case NetworkManagementPrimary:
+		return "Command Class Network Management Primary"
+
+	case ZipNd:
+		return "Command Class Z/IP-ND"
+
+	case AssociationGrpInfo:
+		return "Command Class Association Group Info"
+
+	case DeviceResetLocally:
+		return "Command Class Device Reset Locally"
+
+	case CentralScene:
+		return "Command Class Central Scene"
+
+	case IpAssociation:
+		return "Command Class Ip Association"
+
+	case Antitheft:
+		return "Command Class Anti-theft"
+
+	case AntitheftV2:
+		return "Command Class Anti-theft"
+
+	case ZwaveplusInfo:
+		return "Command Class Z-Wave+ Info"
+
+	case ZwaveplusInfoV2:
+		return "Command Class Z-Wave+ Info"
+
+	case ZipGateway:
+		return "Command Class Z/IP Gateway"
+
+	case ZipPortal:
+		return "Command Class Z/IP Portal"
+
+	case Appliance:
+		return "Command Class Appliance"
+
+	case Dmx:
+		return "Command Class DMX"
+
+	case BarrierOperator:
+		return "Command Class Barrier Operator"
+
+	default:
+		return "Unknown" + fmt.Sprintf(" (0x%X)", c)
+	}
 }
 
 func Parse(payload []byte) (interface{}, error) {
@@ -441,2235 +812,2235 @@ func Parse(payload []byte) (interface{}, error) {
 	case Alarm:
 		switch payload[1] {
 		case 0x04:
-			return alarm.ParseAlarmGet(payload)
+			return alarm.ParseAlarmGet(payload), nil
 		case 0x05:
-			return alarm.ParseAlarmReport(payload)
+			return alarm.ParseAlarmReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case AlarmV2:
 		switch payload[1] {
 		case 0x04:
-			return alarmv2.ParseAlarmGet(payload)
+			return alarmv2.ParseAlarmGet(payload), nil
 		case 0x05:
-			return alarmv2.ParseAlarmReport(payload)
+			return alarmv2.ParseAlarmReport(payload), nil
 		case 0x06:
-			return alarmv2.ParseAlarmSet(payload)
+			return alarmv2.ParseAlarmSet(payload), nil
 		case 0x07:
-			return alarmv2.ParseAlarmTypeSupportedGet(payload)
+			return alarmv2.ParseAlarmTypeSupportedGet(payload), nil
 		case 0x08:
-			return alarmv2.ParseAlarmTypeSupportedReport(payload)
+			return alarmv2.ParseAlarmTypeSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case NotificationV3:
 		switch payload[1] {
 		case 0x04:
-			return notificationv3.ParseNotificationGet(payload)
+			return notificationv3.ParseNotificationGet(payload), nil
 		case 0x05:
-			return notificationv3.ParseNotificationReport(payload)
+			return notificationv3.ParseNotificationReport(payload), nil
 		case 0x06:
-			return notificationv3.ParseNotificationSet(payload)
+			return notificationv3.ParseNotificationSet(payload), nil
 		case 0x07:
-			return notificationv3.ParseNotificationSupportedGet(payload)
+			return notificationv3.ParseNotificationSupportedGet(payload), nil
 		case 0x08:
-			return notificationv3.ParseNotificationSupportedReport(payload)
+			return notificationv3.ParseNotificationSupportedReport(payload), nil
 		case 0x01:
-			return notificationv3.ParseEventSupportedGet(payload)
+			return notificationv3.ParseEventSupportedGet(payload), nil
 		case 0x02:
-			return notificationv3.ParseEventSupportedReport(payload)
+			return notificationv3.ParseEventSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case NotificationV4:
 		switch payload[1] {
 		case 0x04:
-			return notificationv4.ParseNotificationGet(payload)
+			return notificationv4.ParseNotificationGet(payload), nil
 		case 0x05:
-			return notificationv4.ParseNotificationReport(payload)
+			return notificationv4.ParseNotificationReport(payload), nil
 		case 0x06:
-			return notificationv4.ParseNotificationSet(payload)
+			return notificationv4.ParseNotificationSet(payload), nil
 		case 0x07:
-			return notificationv4.ParseNotificationSupportedGet(payload)
+			return notificationv4.ParseNotificationSupportedGet(payload), nil
 		case 0x08:
-			return notificationv4.ParseNotificationSupportedReport(payload)
+			return notificationv4.ParseNotificationSupportedReport(payload), nil
 		case 0x01:
-			return notificationv4.ParseEventSupportedGet(payload)
+			return notificationv4.ParseEventSupportedGet(payload), nil
 		case 0x02:
-			return notificationv4.ParseEventSupportedReport(payload)
+			return notificationv4.ParseEventSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ApplicationStatus:
 		switch payload[1] {
 		case 0x01:
-			return applicationstatus.ParseApplicationBusy(payload)
+			return applicationstatus.ParseApplicationBusy(payload), nil
 		case 0x02:
-			return applicationstatus.ParseApplicationRejectedRequest(payload)
+			return applicationstatus.ParseApplicationRejectedRequest(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case AssociationCommandConfiguration:
 		switch payload[1] {
 		case 0x04:
-			return associationcommandconfiguration.ParseCommandConfigurationGet(payload)
+			return associationcommandconfiguration.ParseCommandConfigurationGet(payload), nil
 		case 0x05:
-			return associationcommandconfiguration.ParseCommandConfigurationReport(payload)
+			return associationcommandconfiguration.ParseCommandConfigurationReport(payload), nil
 		case 0x03:
-			return associationcommandconfiguration.ParseCommandConfigurationSet(payload)
+			return associationcommandconfiguration.ParseCommandConfigurationSet(payload), nil
 		case 0x01:
-			return associationcommandconfiguration.ParseCommandRecordsSupportedGet(payload)
+			return associationcommandconfiguration.ParseCommandRecordsSupportedGet(payload), nil
 		case 0x02:
-			return associationcommandconfiguration.ParseCommandRecordsSupportedReport(payload)
+			return associationcommandconfiguration.ParseCommandRecordsSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Association:
 		switch payload[1] {
 		case 0x02:
-			return association.ParseAssociationGet(payload)
+			return association.ParseAssociationGet(payload), nil
 		case 0x05:
-			return association.ParseAssociationGroupingsGet(payload)
+			return association.ParseAssociationGroupingsGet(payload), nil
 		case 0x06:
-			return association.ParseAssociationGroupingsReport(payload)
+			return association.ParseAssociationGroupingsReport(payload), nil
 		case 0x04:
-			return association.ParseAssociationRemove(payload)
+			return association.ParseAssociationRemove(payload), nil
 		case 0x03:
-			return association.ParseAssociationReport(payload)
+			return association.ParseAssociationReport(payload), nil
 		case 0x01:
-			return association.ParseAssociationSet(payload)
+			return association.ParseAssociationSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case AssociationV2:
 		switch payload[1] {
 		case 0x02:
-			return associationv2.ParseAssociationGet(payload)
+			return associationv2.ParseAssociationGet(payload), nil
 		case 0x05:
-			return associationv2.ParseAssociationGroupingsGet(payload)
+			return associationv2.ParseAssociationGroupingsGet(payload), nil
 		case 0x06:
-			return associationv2.ParseAssociationGroupingsReport(payload)
+			return associationv2.ParseAssociationGroupingsReport(payload), nil
 		case 0x04:
-			return associationv2.ParseAssociationRemove(payload)
+			return associationv2.ParseAssociationRemove(payload), nil
 		case 0x03:
-			return associationv2.ParseAssociationReport(payload)
+			return associationv2.ParseAssociationReport(payload), nil
 		case 0x01:
-			return associationv2.ParseAssociationSet(payload)
+			return associationv2.ParseAssociationSet(payload), nil
 		case 0x0B:
-			return associationv2.ParseAssociationSpecificGroupGet(payload)
+			return associationv2.ParseAssociationSpecificGroupGet(payload), nil
 		case 0x0C:
-			return associationv2.ParseAssociationSpecificGroupReport(payload)
+			return associationv2.ParseAssociationSpecificGroupReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case AvContentDirectoryMd:
 		switch payload[1] {
 		case 0x03:
-			return avcontentdirectorymd.ParseAvContentBrowseMdByLetterGet(payload)
+			return avcontentdirectorymd.ParseAvContentBrowseMdByLetterGet(payload), nil
 		case 0x04:
-			return avcontentdirectorymd.ParseAvContentBrowseMdByLetterReport(payload)
+			return avcontentdirectorymd.ParseAvContentBrowseMdByLetterReport(payload), nil
 		case 0x05:
-			return avcontentdirectorymd.ParseAvContentBrowseMdChildCountGet(payload)
+			return avcontentdirectorymd.ParseAvContentBrowseMdChildCountGet(payload), nil
 		case 0x06:
-			return avcontentdirectorymd.ParseAvContentBrowseMdChildCountReport(payload)
+			return avcontentdirectorymd.ParseAvContentBrowseMdChildCountReport(payload), nil
 		case 0x01:
-			return avcontentdirectorymd.ParseAvContentBrowseMdGet(payload)
+			return avcontentdirectorymd.ParseAvContentBrowseMdGet(payload), nil
 		case 0x02:
-			return avcontentdirectorymd.ParseAvContentBrowseMdReport(payload)
+			return avcontentdirectorymd.ParseAvContentBrowseMdReport(payload), nil
 		case 0x07:
-			return avcontentdirectorymd.ParseAvMatchItemToRendererMdGet(payload)
+			return avcontentdirectorymd.ParseAvMatchItemToRendererMdGet(payload), nil
 		case 0x08:
-			return avcontentdirectorymd.ParseAvMatchItemToRendererMdReport(payload)
+			return avcontentdirectorymd.ParseAvMatchItemToRendererMdReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case AvContentSearchMd:
 		switch payload[1] {
 		case 0x01:
-			return avcontentsearchmd.ParseAvContentSearchMdGet(payload)
+			return avcontentsearchmd.ParseAvContentSearchMdGet(payload), nil
 		case 0x02:
-			return avcontentsearchmd.ParseAvContentSearchMdReport(payload)
+			return avcontentsearchmd.ParseAvContentSearchMdReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case AvRendererStatus:
 		switch payload[1] {
 		case 0x01:
-			return avrendererstatus.ParseAvRendererStatusGet(payload)
+			return avrendererstatus.ParseAvRendererStatusGet(payload), nil
 		case 0x02:
-			return avrendererstatus.ParseAvRendererStatusReport(payload)
+			return avrendererstatus.ParseAvRendererStatusReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case AvTaggingMd:
 		switch payload[1] {
 		case 0x01:
-			return avtaggingmd.ParseAvTaggingMdGet(payload)
+			return avtaggingmd.ParseAvTaggingMdGet(payload), nil
 		case 0x02:
-			return avtaggingmd.ParseAvTaggingMdReport(payload)
+			return avtaggingmd.ParseAvTaggingMdReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case BasicTariffInfo:
 		switch payload[1] {
 		case 0x01:
-			return basictariffinfo.ParseBasicTariffInfoGet(payload)
+			return basictariffinfo.ParseBasicTariffInfoGet(payload), nil
 		case 0x02:
-			return basictariffinfo.ParseBasicTariffInfoReport(payload)
+			return basictariffinfo.ParseBasicTariffInfoReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case BasicWindowCovering:
 		switch payload[1] {
 		case 0x01:
-			return basicwindowcovering.ParseBasicWindowCoveringStartLevelChange(payload)
+			return basicwindowcovering.ParseBasicWindowCoveringStartLevelChange(payload), nil
 		case 0x02:
-			return basicwindowcovering.ParseBasicWindowCoveringStopLevelChange(payload)
+			return basicwindowcovering.ParseBasicWindowCoveringStopLevelChange(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Basic:
 		switch payload[1] {
 		case 0x02:
-			return basic.ParseBasicGet(payload)
+			return basic.ParseBasicGet(payload), nil
 		case 0x03:
-			return basic.ParseBasicReport(payload)
+			return basic.ParseBasicReport(payload), nil
 		case 0x01:
-			return basic.ParseBasicSet(payload)
+			return basic.ParseBasicSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Battery:
 		switch payload[1] {
 		case 0x02:
-			return battery.ParseBatteryGet(payload)
+			return battery.ParseBatteryGet(payload), nil
 		case 0x03:
-			return battery.ParseBatteryReport(payload)
+			return battery.ParseBatteryReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ChimneyFan:
 		switch payload[1] {
 		case 0x20:
-			return chimneyfan.ParseChimneyFanAlarmLogGet(payload)
+			return chimneyfan.ParseChimneyFanAlarmLogGet(payload), nil
 		case 0x21:
-			return chimneyfan.ParseChimneyFanAlarmLogReport(payload)
+			return chimneyfan.ParseChimneyFanAlarmLogReport(payload), nil
 		case 0x1F:
-			return chimneyfan.ParseChimneyFanAlarmLogSet(payload)
+			return chimneyfan.ParseChimneyFanAlarmLogSet(payload), nil
 		case 0x23:
-			return chimneyfan.ParseChimneyFanAlarmStatusGet(payload)
+			return chimneyfan.ParseChimneyFanAlarmStatusGet(payload), nil
 		case 0x24:
-			return chimneyfan.ParseChimneyFanAlarmStatusReport(payload)
+			return chimneyfan.ParseChimneyFanAlarmStatusReport(payload), nil
 		case 0x22:
-			return chimneyfan.ParseChimneyFanAlarmStatusSet(payload)
+			return chimneyfan.ParseChimneyFanAlarmStatusSet(payload), nil
 		case 0x0E:
-			return chimneyfan.ParseChimneyFanAlarmTempGet(payload)
+			return chimneyfan.ParseChimneyFanAlarmTempGet(payload), nil
 		case 0x0F:
-			return chimneyfan.ParseChimneyFanAlarmTempReport(payload)
+			return chimneyfan.ParseChimneyFanAlarmTempReport(payload), nil
 		case 0x0D:
-			return chimneyfan.ParseChimneyFanAlarmTempSet(payload)
+			return chimneyfan.ParseChimneyFanAlarmTempSet(payload), nil
 		case 0x11:
-			return chimneyfan.ParseChimneyFanBoostTimeGet(payload)
+			return chimneyfan.ParseChimneyFanBoostTimeGet(payload), nil
 		case 0x12:
-			return chimneyfan.ParseChimneyFanBoostTimeReport(payload)
+			return chimneyfan.ParseChimneyFanBoostTimeReport(payload), nil
 		case 0x10:
-			return chimneyfan.ParseChimneyFanBoostTimeSet(payload)
+			return chimneyfan.ParseChimneyFanBoostTimeSet(payload), nil
 		case 0x28:
-			return chimneyfan.ParseChimneyFanDefaultSet(payload)
+			return chimneyfan.ParseChimneyFanDefaultSet(payload), nil
 		case 0x26:
-			return chimneyfan.ParseChimneyFanMinSpeedGet(payload)
+			return chimneyfan.ParseChimneyFanMinSpeedGet(payload), nil
 		case 0x27:
-			return chimneyfan.ParseChimneyFanMinSpeedReport(payload)
+			return chimneyfan.ParseChimneyFanMinSpeedReport(payload), nil
 		case 0x25:
-			return chimneyfan.ParseChimneyFanMinSpeedSet(payload)
+			return chimneyfan.ParseChimneyFanMinSpeedSet(payload), nil
 		case 0x17:
-			return chimneyfan.ParseChimneyFanModeGet(payload)
+			return chimneyfan.ParseChimneyFanModeGet(payload), nil
 		case 0x18:
-			return chimneyfan.ParseChimneyFanModeReport(payload)
+			return chimneyfan.ParseChimneyFanModeReport(payload), nil
 		case 0x16:
-			return chimneyfan.ParseChimneyFanModeSet(payload)
+			return chimneyfan.ParseChimneyFanModeSet(payload), nil
 		case 0x1A:
-			return chimneyfan.ParseChimneyFanSetupGet(payload)
+			return chimneyfan.ParseChimneyFanSetupGet(payload), nil
 		case 0x1B:
-			return chimneyfan.ParseChimneyFanSetupReport(payload)
+			return chimneyfan.ParseChimneyFanSetupReport(payload), nil
 		case 0x19:
-			return chimneyfan.ParseChimneyFanSetupSet(payload)
+			return chimneyfan.ParseChimneyFanSetupSet(payload), nil
 		case 0x05:
-			return chimneyfan.ParseChimneyFanSpeedGet(payload)
+			return chimneyfan.ParseChimneyFanSpeedGet(payload), nil
 		case 0x06:
-			return chimneyfan.ParseChimneyFanSpeedReport(payload)
+			return chimneyfan.ParseChimneyFanSpeedReport(payload), nil
 		case 0x04:
-			return chimneyfan.ParseChimneyFanSpeedSet(payload)
+			return chimneyfan.ParseChimneyFanSpeedSet(payload), nil
 		case 0x08:
-			return chimneyfan.ParseChimneyFanStartTempGet(payload)
+			return chimneyfan.ParseChimneyFanStartTempGet(payload), nil
 		case 0x09:
-			return chimneyfan.ParseChimneyFanStartTempReport(payload)
+			return chimneyfan.ParseChimneyFanStartTempReport(payload), nil
 		case 0x07:
-			return chimneyfan.ParseChimneyFanStartTempSet(payload)
+			return chimneyfan.ParseChimneyFanStartTempSet(payload), nil
 		case 0x02:
-			return chimneyfan.ParseChimneyFanStateGet(payload)
+			return chimneyfan.ParseChimneyFanStateGet(payload), nil
 		case 0x03:
-			return chimneyfan.ParseChimneyFanStateReport(payload)
+			return chimneyfan.ParseChimneyFanStateReport(payload), nil
 		case 0x01:
-			return chimneyfan.ParseChimneyFanStateSet(payload)
+			return chimneyfan.ParseChimneyFanStateSet(payload), nil
 		case 0x1D:
-			return chimneyfan.ParseChimneyFanStatusGet(payload)
+			return chimneyfan.ParseChimneyFanStatusGet(payload), nil
 		case 0x1E:
-			return chimneyfan.ParseChimneyFanStatusReport(payload)
+			return chimneyfan.ParseChimneyFanStatusReport(payload), nil
 		case 0x0B:
-			return chimneyfan.ParseChimneyFanStopTempGet(payload)
+			return chimneyfan.ParseChimneyFanStopTempGet(payload), nil
 		case 0x0C:
-			return chimneyfan.ParseChimneyFanStopTempReport(payload)
+			return chimneyfan.ParseChimneyFanStopTempReport(payload), nil
 		case 0x0A:
-			return chimneyfan.ParseChimneyFanStopTempSet(payload)
+			return chimneyfan.ParseChimneyFanStopTempSet(payload), nil
 		case 0x14:
-			return chimneyfan.ParseChimneyFanStopTimeGet(payload)
+			return chimneyfan.ParseChimneyFanStopTimeGet(payload), nil
 		case 0x15:
-			return chimneyfan.ParseChimneyFanStopTimeReport(payload)
+			return chimneyfan.ParseChimneyFanStopTimeReport(payload), nil
 		case 0x13:
-			return chimneyfan.ParseChimneyFanStopTimeSet(payload)
+			return chimneyfan.ParseChimneyFanStopTimeSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ClimateControlSchedule:
 		switch payload[1] {
 		case 0x04:
-			return climatecontrolschedule.ParseScheduleChangedGet(payload)
+			return climatecontrolschedule.ParseScheduleChangedGet(payload), nil
 		case 0x05:
-			return climatecontrolschedule.ParseScheduleChangedReport(payload)
+			return climatecontrolschedule.ParseScheduleChangedReport(payload), nil
 		case 0x02:
-			return climatecontrolschedule.ParseScheduleGet(payload)
+			return climatecontrolschedule.ParseScheduleGet(payload), nil
 		case 0x07:
-			return climatecontrolschedule.ParseScheduleOverrideGet(payload)
+			return climatecontrolschedule.ParseScheduleOverrideGet(payload), nil
 		case 0x08:
-			return climatecontrolschedule.ParseScheduleOverrideReport(payload)
+			return climatecontrolschedule.ParseScheduleOverrideReport(payload), nil
 		case 0x06:
-			return climatecontrolschedule.ParseScheduleOverrideSet(payload)
+			return climatecontrolschedule.ParseScheduleOverrideSet(payload), nil
 		case 0x03:
-			return climatecontrolschedule.ParseScheduleReport(payload)
+			return climatecontrolschedule.ParseScheduleReport(payload), nil
 		case 0x01:
-			return climatecontrolschedule.ParseScheduleSet(payload)
+			return climatecontrolschedule.ParseScheduleSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Clock:
 		switch payload[1] {
 		case 0x05:
-			return clock.ParseClockGet(payload)
+			return clock.ParseClockGet(payload), nil
 		case 0x06:
-			return clock.ParseClockReport(payload)
+			return clock.ParseClockReport(payload), nil
 		case 0x04:
-			return clock.ParseClockSet(payload)
+			return clock.ParseClockSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Configuration:
 		switch payload[1] {
 		case 0x05:
-			return configuration.ParseConfigurationGet(payload)
+			return configuration.ParseConfigurationGet(payload), nil
 		case 0x06:
-			return configuration.ParseConfigurationReport(payload)
+			return configuration.ParseConfigurationReport(payload), nil
 		case 0x04:
-			return configuration.ParseConfigurationSet(payload)
+			return configuration.ParseConfigurationSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ConfigurationV2:
 		switch payload[1] {
 		case 0x08:
-			return configurationv2.ParseConfigurationBulkGet(payload)
+			return configurationv2.ParseConfigurationBulkGet(payload), nil
 		case 0x09:
-			return configurationv2.ParseConfigurationBulkReport(payload)
+			return configurationv2.ParseConfigurationBulkReport(payload), nil
 		case 0x07:
-			return configurationv2.ParseConfigurationBulkSet(payload)
+			return configurationv2.ParseConfigurationBulkSet(payload), nil
 		case 0x05:
-			return configurationv2.ParseConfigurationGet(payload)
+			return configurationv2.ParseConfigurationGet(payload), nil
 		case 0x06:
-			return configurationv2.ParseConfigurationReport(payload)
+			return configurationv2.ParseConfigurationReport(payload), nil
 		case 0x04:
-			return configurationv2.ParseConfigurationSet(payload)
+			return configurationv2.ParseConfigurationSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case DcpConfig:
 		switch payload[1] {
 		case 0x04:
-			return dcpconfig.ParseDcpListRemove(payload)
+			return dcpconfig.ParseDcpListRemove(payload), nil
 		case 0x03:
-			return dcpconfig.ParseDcpListSet(payload)
+			return dcpconfig.ParseDcpListSet(payload), nil
 		case 0x01:
-			return dcpconfig.ParseDcpListSupportedGet(payload)
+			return dcpconfig.ParseDcpListSupportedGet(payload), nil
 		case 0x02:
-			return dcpconfig.ParseDcpListSupportedReport(payload)
+			return dcpconfig.ParseDcpListSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case DcpMonitor:
 		switch payload[1] {
 		case 0x03:
-			return dcpmonitor.ParseDcpEventStatusGet(payload)
+			return dcpmonitor.ParseDcpEventStatusGet(payload), nil
 		case 0x04:
-			return dcpmonitor.ParseDcpEventStatusReport(payload)
+			return dcpmonitor.ParseDcpEventStatusReport(payload), nil
 		case 0x01:
-			return dcpmonitor.ParseDcpListGet(payload)
+			return dcpmonitor.ParseDcpListGet(payload), nil
 		case 0x02:
-			return dcpmonitor.ParseDcpListReport(payload)
+			return dcpmonitor.ParseDcpListReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case DoorLockLogging:
 		switch payload[1] {
 		case 0x01:
-			return doorlocklogging.ParseDoorLockLoggingRecordsSupportedGet(payload)
+			return doorlocklogging.ParseDoorLockLoggingRecordsSupportedGet(payload), nil
 		case 0x02:
-			return doorlocklogging.ParseDoorLockLoggingRecordsSupportedReport(payload)
+			return doorlocklogging.ParseDoorLockLoggingRecordsSupportedReport(payload), nil
 		case 0x03:
-			return doorlocklogging.ParseRecordGet(payload)
+			return doorlocklogging.ParseRecordGet(payload), nil
 		case 0x04:
-			return doorlocklogging.ParseRecordReport(payload)
+			return doorlocklogging.ParseRecordReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case DoorLock:
 		switch payload[1] {
 		case 0x05:
-			return doorlock.ParseDoorLockConfigurationGet(payload)
+			return doorlock.ParseDoorLockConfigurationGet(payload), nil
 		case 0x06:
-			return doorlock.ParseDoorLockConfigurationReport(payload)
+			return doorlock.ParseDoorLockConfigurationReport(payload), nil
 		case 0x04:
-			return doorlock.ParseDoorLockConfigurationSet(payload)
+			return doorlock.ParseDoorLockConfigurationSet(payload), nil
 		case 0x02:
-			return doorlock.ParseDoorLockOperationGet(payload)
+			return doorlock.ParseDoorLockOperationGet(payload), nil
 		case 0x03:
-			return doorlock.ParseDoorLockOperationReport(payload)
+			return doorlock.ParseDoorLockOperationReport(payload), nil
 		case 0x01:
-			return doorlock.ParseDoorLockOperationSet(payload)
+			return doorlock.ParseDoorLockOperationSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case DoorLockV2:
 		switch payload[1] {
 		case 0x05:
-			return doorlockv2.ParseDoorLockConfigurationGet(payload)
+			return doorlockv2.ParseDoorLockConfigurationGet(payload), nil
 		case 0x06:
-			return doorlockv2.ParseDoorLockConfigurationReport(payload)
+			return doorlockv2.ParseDoorLockConfigurationReport(payload), nil
 		case 0x04:
-			return doorlockv2.ParseDoorLockConfigurationSet(payload)
+			return doorlockv2.ParseDoorLockConfigurationSet(payload), nil
 		case 0x02:
-			return doorlockv2.ParseDoorLockOperationGet(payload)
+			return doorlockv2.ParseDoorLockOperationGet(payload), nil
 		case 0x03:
-			return doorlockv2.ParseDoorLockOperationReport(payload)
+			return doorlockv2.ParseDoorLockOperationReport(payload), nil
 		case 0x01:
-			return doorlockv2.ParseDoorLockOperationSet(payload)
+			return doorlockv2.ParseDoorLockOperationSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case EnergyProduction:
 		switch payload[1] {
 		case 0x02:
-			return energyproduction.ParseEnergyProductionGet(payload)
+			return energyproduction.ParseEnergyProductionGet(payload), nil
 		case 0x03:
-			return energyproduction.ParseEnergyProductionReport(payload)
+			return energyproduction.ParseEnergyProductionReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case FirmwareUpdateMd:
 		switch payload[1] {
 		case 0x01:
-			return firmwareupdatemd.ParseFirmwareMdGet(payload)
+			return firmwareupdatemd.ParseFirmwareMdGet(payload), nil
 		case 0x02:
-			return firmwareupdatemd.ParseFirmwareMdReport(payload)
+			return firmwareupdatemd.ParseFirmwareMdReport(payload), nil
 		case 0x05:
-			return firmwareupdatemd.ParseFirmwareUpdateMdGet(payload)
+			return firmwareupdatemd.ParseFirmwareUpdateMdGet(payload), nil
 		case 0x06:
-			return firmwareupdatemd.ParseFirmwareUpdateMdReport(payload)
+			return firmwareupdatemd.ParseFirmwareUpdateMdReport(payload), nil
 		case 0x03:
-			return firmwareupdatemd.ParseFirmwareUpdateMdRequestGet(payload)
+			return firmwareupdatemd.ParseFirmwareUpdateMdRequestGet(payload), nil
 		case 0x04:
-			return firmwareupdatemd.ParseFirmwareUpdateMdRequestReport(payload)
+			return firmwareupdatemd.ParseFirmwareUpdateMdRequestReport(payload), nil
 		case 0x07:
-			return firmwareupdatemd.ParseFirmwareUpdateMdStatusReport(payload)
+			return firmwareupdatemd.ParseFirmwareUpdateMdStatusReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case FirmwareUpdateMdV2:
 		switch payload[1] {
 		case 0x01:
-			return firmwareupdatemdv2.ParseFirmwareMdGet(payload)
+			return firmwareupdatemdv2.ParseFirmwareMdGet(payload), nil
 		case 0x02:
-			return firmwareupdatemdv2.ParseFirmwareMdReport(payload)
+			return firmwareupdatemdv2.ParseFirmwareMdReport(payload), nil
 		case 0x05:
-			return firmwareupdatemdv2.ParseFirmwareUpdateMdGet(payload)
+			return firmwareupdatemdv2.ParseFirmwareUpdateMdGet(payload), nil
 		case 0x06:
-			return firmwareupdatemdv2.ParseFirmwareUpdateMdReport(payload)
+			return firmwareupdatemdv2.ParseFirmwareUpdateMdReport(payload), nil
 		case 0x03:
-			return firmwareupdatemdv2.ParseFirmwareUpdateMdRequestGet(payload)
+			return firmwareupdatemdv2.ParseFirmwareUpdateMdRequestGet(payload), nil
 		case 0x04:
-			return firmwareupdatemdv2.ParseFirmwareUpdateMdRequestReport(payload)
+			return firmwareupdatemdv2.ParseFirmwareUpdateMdRequestReport(payload), nil
 		case 0x07:
-			return firmwareupdatemdv2.ParseFirmwareUpdateMdStatusReport(payload)
+			return firmwareupdatemdv2.ParseFirmwareUpdateMdStatusReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case FirmwareUpdateMdV3:
 		switch payload[1] {
 		case 0x01:
-			return firmwareupdatemdv3.ParseFirmwareMdGet(payload)
+			return firmwareupdatemdv3.ParseFirmwareMdGet(payload), nil
 		case 0x02:
-			return firmwareupdatemdv3.ParseFirmwareMdReport(payload)
+			return firmwareupdatemdv3.ParseFirmwareMdReport(payload), nil
 		case 0x05:
-			return firmwareupdatemdv3.ParseFirmwareUpdateMdGet(payload)
+			return firmwareupdatemdv3.ParseFirmwareUpdateMdGet(payload), nil
 		case 0x06:
-			return firmwareupdatemdv3.ParseFirmwareUpdateMdReport(payload)
+			return firmwareupdatemdv3.ParseFirmwareUpdateMdReport(payload), nil
 		case 0x03:
-			return firmwareupdatemdv3.ParseFirmwareUpdateMdRequestGet(payload)
+			return firmwareupdatemdv3.ParseFirmwareUpdateMdRequestGet(payload), nil
 		case 0x04:
-			return firmwareupdatemdv3.ParseFirmwareUpdateMdRequestReport(payload)
+			return firmwareupdatemdv3.ParseFirmwareUpdateMdRequestReport(payload), nil
 		case 0x07:
-			return firmwareupdatemdv3.ParseFirmwareUpdateMdStatusReport(payload)
+			return firmwareupdatemdv3.ParseFirmwareUpdateMdStatusReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case GeographicLocation:
 		switch payload[1] {
 		case 0x02:
-			return geographiclocation.ParseGeographicLocationGet(payload)
+			return geographiclocation.ParseGeographicLocationGet(payload), nil
 		case 0x03:
-			return geographiclocation.ParseGeographicLocationReport(payload)
+			return geographiclocation.ParseGeographicLocationReport(payload), nil
 		case 0x01:
-			return geographiclocation.ParseGeographicLocationSet(payload)
+			return geographiclocation.ParseGeographicLocationSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case GroupingName:
 		switch payload[1] {
 		case 0x02:
-			return groupingname.ParseGroupingNameGet(payload)
+			return groupingname.ParseGroupingNameGet(payload), nil
 		case 0x03:
-			return groupingname.ParseGroupingNameReport(payload)
+			return groupingname.ParseGroupingNameReport(payload), nil
 		case 0x01:
-			return groupingname.ParseGroupingNameSet(payload)
+			return groupingname.ParseGroupingNameSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Hail:
 		switch payload[1] {
 		case 0x01:
-			return hail.ParseHail(payload)
+			return hail.ParseHail(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case HrvControl:
 		switch payload[1] {
 		case 0x05:
-			return hrvcontrol.ParseHrvControlBypassGet(payload)
+			return hrvcontrol.ParseHrvControlBypassGet(payload), nil
 		case 0x06:
-			return hrvcontrol.ParseHrvControlBypassReport(payload)
+			return hrvcontrol.ParseHrvControlBypassReport(payload), nil
 		case 0x04:
-			return hrvcontrol.ParseHrvControlBypassSet(payload)
+			return hrvcontrol.ParseHrvControlBypassSet(payload), nil
 		case 0x02:
-			return hrvcontrol.ParseHrvControlModeGet(payload)
+			return hrvcontrol.ParseHrvControlModeGet(payload), nil
 		case 0x03:
-			return hrvcontrol.ParseHrvControlModeReport(payload)
+			return hrvcontrol.ParseHrvControlModeReport(payload), nil
 		case 0x01:
-			return hrvcontrol.ParseHrvControlModeSet(payload)
+			return hrvcontrol.ParseHrvControlModeSet(payload), nil
 		case 0x0A:
-			return hrvcontrol.ParseHrvControlModeSupportedGet(payload)
+			return hrvcontrol.ParseHrvControlModeSupportedGet(payload), nil
 		case 0x0B:
-			return hrvcontrol.ParseHrvControlModeSupportedReport(payload)
+			return hrvcontrol.ParseHrvControlModeSupportedReport(payload), nil
 		case 0x08:
-			return hrvcontrol.ParseHrvControlVentilationRateGet(payload)
+			return hrvcontrol.ParseHrvControlVentilationRateGet(payload), nil
 		case 0x09:
-			return hrvcontrol.ParseHrvControlVentilationRateReport(payload)
+			return hrvcontrol.ParseHrvControlVentilationRateReport(payload), nil
 		case 0x07:
-			return hrvcontrol.ParseHrvControlVentilationRateSet(payload)
+			return hrvcontrol.ParseHrvControlVentilationRateSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case HrvStatus:
 		switch payload[1] {
 		case 0x01:
-			return hrvstatus.ParseHrvStatusGet(payload)
+			return hrvstatus.ParseHrvStatusGet(payload), nil
 		case 0x02:
-			return hrvstatus.ParseHrvStatusReport(payload)
+			return hrvstatus.ParseHrvStatusReport(payload), nil
 		case 0x03:
-			return hrvstatus.ParseHrvStatusSupportedGet(payload)
+			return hrvstatus.ParseHrvStatusSupportedGet(payload), nil
 		case 0x04:
-			return hrvstatus.ParseHrvStatusSupportedReport(payload)
+			return hrvstatus.ParseHrvStatusSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Indicator:
 		switch payload[1] {
 		case 0x02:
-			return indicator.ParseIndicatorGet(payload)
+			return indicator.ParseIndicatorGet(payload), nil
 		case 0x03:
-			return indicator.ParseIndicatorReport(payload)
+			return indicator.ParseIndicatorReport(payload), nil
 		case 0x01:
-			return indicator.ParseIndicatorSet(payload)
+			return indicator.ParseIndicatorSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Language:
 		switch payload[1] {
 		case 0x02:
-			return language.ParseLanguageGet(payload)
+			return language.ParseLanguageGet(payload), nil
 		case 0x03:
-			return language.ParseLanguageReport(payload)
+			return language.ParseLanguageReport(payload), nil
 		case 0x01:
-			return language.ParseLanguageSet(payload)
+			return language.ParseLanguageSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Lock:
 		switch payload[1] {
 		case 0x02:
-			return lock.ParseLockGet(payload)
+			return lock.ParseLockGet(payload), nil
 		case 0x03:
-			return lock.ParseLockReport(payload)
+			return lock.ParseLockReport(payload), nil
 		case 0x01:
-			return lock.ParseLockSet(payload)
+			return lock.ParseLockSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ManufacturerSpecific:
 		switch payload[1] {
 		case 0x04:
-			return manufacturerspecific.ParseManufacturerSpecificGet(payload)
+			return manufacturerspecific.ParseManufacturerSpecificGet(payload), nil
 		case 0x05:
-			return manufacturerspecific.ParseManufacturerSpecificReport(payload)
+			return manufacturerspecific.ParseManufacturerSpecificReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ManufacturerSpecificV2:
 		switch payload[1] {
 		case 0x04:
-			return manufacturerspecificv2.ParseManufacturerSpecificGet(payload)
+			return manufacturerspecificv2.ParseManufacturerSpecificGet(payload), nil
 		case 0x05:
-			return manufacturerspecificv2.ParseManufacturerSpecificReport(payload)
+			return manufacturerspecificv2.ParseManufacturerSpecificReport(payload), nil
 		case 0x06:
-			return manufacturerspecificv2.ParseDeviceSpecificGet(payload)
+			return manufacturerspecificv2.ParseDeviceSpecificGet(payload), nil
 		case 0x07:
-			return manufacturerspecificv2.ParseDeviceSpecificReport(payload)
+			return manufacturerspecificv2.ParseDeviceSpecificReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case MeterPulse:
 		switch payload[1] {
 		case 0x04:
-			return meterpulse.ParseMeterPulseGet(payload)
+			return meterpulse.ParseMeterPulseGet(payload), nil
 		case 0x05:
-			return meterpulse.ParseMeterPulseReport(payload)
+			return meterpulse.ParseMeterPulseReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case MeterTblConfig:
 		switch payload[1] {
 		case 0x01:
-			return metertblconfig.ParseMeterTblTablePointAdmNoSet(payload)
+			return metertblconfig.ParseMeterTblTablePointAdmNoSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case MeterTblMonitor:
 		switch payload[1] {
 		case 0x0B:
-			return metertblmonitor.ParseMeterTblStatusReport(payload)
+			return metertblmonitor.ParseMeterTblStatusReport(payload), nil
 		case 0x0A:
-			return metertblmonitor.ParseMeterTblStatusDateGet(payload)
+			return metertblmonitor.ParseMeterTblStatusDateGet(payload), nil
 		case 0x09:
-			return metertblmonitor.ParseMeterTblStatusDepthGet(payload)
+			return metertblmonitor.ParseMeterTblStatusDepthGet(payload), nil
 		case 0x07:
-			return metertblmonitor.ParseMeterTblStatusSupportedGet(payload)
+			return metertblmonitor.ParseMeterTblStatusSupportedGet(payload), nil
 		case 0x08:
-			return metertblmonitor.ParseMeterTblStatusSupportedReport(payload)
+			return metertblmonitor.ParseMeterTblStatusSupportedReport(payload), nil
 		case 0x0C:
-			return metertblmonitor.ParseMeterTblCurrentDataGet(payload)
+			return metertblmonitor.ParseMeterTblCurrentDataGet(payload), nil
 		case 0x0D:
-			return metertblmonitor.ParseMeterTblCurrentDataReport(payload)
+			return metertblmonitor.ParseMeterTblCurrentDataReport(payload), nil
 		case 0x0E:
-			return metertblmonitor.ParseMeterTblHistoricalDataGet(payload)
+			return metertblmonitor.ParseMeterTblHistoricalDataGet(payload), nil
 		case 0x0F:
-			return metertblmonitor.ParseMeterTblHistoricalDataReport(payload)
+			return metertblmonitor.ParseMeterTblHistoricalDataReport(payload), nil
 		case 0x06:
-			return metertblmonitor.ParseMeterTblReport(payload)
+			return metertblmonitor.ParseMeterTblReport(payload), nil
 		case 0x05:
-			return metertblmonitor.ParseMeterTblTableCapabilityGet(payload)
+			return metertblmonitor.ParseMeterTblTableCapabilityGet(payload), nil
 		case 0x03:
-			return metertblmonitor.ParseMeterTblTableIdGet(payload)
+			return metertblmonitor.ParseMeterTblTableIdGet(payload), nil
 		case 0x04:
-			return metertblmonitor.ParseMeterTblTableIdReport(payload)
+			return metertblmonitor.ParseMeterTblTableIdReport(payload), nil
 		case 0x01:
-			return metertblmonitor.ParseMeterTblTablePointAdmNoGet(payload)
+			return metertblmonitor.ParseMeterTblTablePointAdmNoGet(payload), nil
 		case 0x02:
-			return metertblmonitor.ParseMeterTblTablePointAdmNoReport(payload)
+			return metertblmonitor.ParseMeterTblTablePointAdmNoReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case MeterTblMonitorV2:
 		switch payload[1] {
 		case 0x0B:
-			return metertblmonitorv2.ParseMeterTblStatusReport(payload)
+			return metertblmonitorv2.ParseMeterTblStatusReport(payload), nil
 		case 0x0A:
-			return metertblmonitorv2.ParseMeterTblStatusDateGet(payload)
+			return metertblmonitorv2.ParseMeterTblStatusDateGet(payload), nil
 		case 0x09:
-			return metertblmonitorv2.ParseMeterTblStatusDepthGet(payload)
+			return metertblmonitorv2.ParseMeterTblStatusDepthGet(payload), nil
 		case 0x07:
-			return metertblmonitorv2.ParseMeterTblStatusSupportedGet(payload)
+			return metertblmonitorv2.ParseMeterTblStatusSupportedGet(payload), nil
 		case 0x08:
-			return metertblmonitorv2.ParseMeterTblStatusSupportedReport(payload)
+			return metertblmonitorv2.ParseMeterTblStatusSupportedReport(payload), nil
 		case 0x0C:
-			return metertblmonitorv2.ParseMeterTblCurrentDataGet(payload)
+			return metertblmonitorv2.ParseMeterTblCurrentDataGet(payload), nil
 		case 0x0D:
-			return metertblmonitorv2.ParseMeterTblCurrentDataReport(payload)
+			return metertblmonitorv2.ParseMeterTblCurrentDataReport(payload), nil
 		case 0x0E:
-			return metertblmonitorv2.ParseMeterTblHistoricalDataGet(payload)
+			return metertblmonitorv2.ParseMeterTblHistoricalDataGet(payload), nil
 		case 0x0F:
-			return metertblmonitorv2.ParseMeterTblHistoricalDataReport(payload)
+			return metertblmonitorv2.ParseMeterTblHistoricalDataReport(payload), nil
 		case 0x06:
-			return metertblmonitorv2.ParseMeterTblReport(payload)
+			return metertblmonitorv2.ParseMeterTblReport(payload), nil
 		case 0x05:
-			return metertblmonitorv2.ParseMeterTblTableCapabilityGet(payload)
+			return metertblmonitorv2.ParseMeterTblTableCapabilityGet(payload), nil
 		case 0x03:
-			return metertblmonitorv2.ParseMeterTblTableIdGet(payload)
+			return metertblmonitorv2.ParseMeterTblTableIdGet(payload), nil
 		case 0x04:
-			return metertblmonitorv2.ParseMeterTblTableIdReport(payload)
+			return metertblmonitorv2.ParseMeterTblTableIdReport(payload), nil
 		case 0x01:
-			return metertblmonitorv2.ParseMeterTblTablePointAdmNoGet(payload)
+			return metertblmonitorv2.ParseMeterTblTablePointAdmNoGet(payload), nil
 		case 0x02:
-			return metertblmonitorv2.ParseMeterTblTablePointAdmNoReport(payload)
+			return metertblmonitorv2.ParseMeterTblTablePointAdmNoReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case MeterTblPush:
 		switch payload[1] {
 		case 0x02:
-			return metertblpush.ParseMeterTblPushConfigurationGet(payload)
+			return metertblpush.ParseMeterTblPushConfigurationGet(payload), nil
 		case 0x03:
-			return metertblpush.ParseMeterTblPushConfigurationReport(payload)
+			return metertblpush.ParseMeterTblPushConfigurationReport(payload), nil
 		case 0x01:
-			return metertblpush.ParseMeterTblPushConfigurationSet(payload)
+			return metertblpush.ParseMeterTblPushConfigurationSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Meter:
 		switch payload[1] {
 		case 0x01:
-			return meter.ParseMeterGet(payload)
+			return meter.ParseMeterGet(payload), nil
 		case 0x02:
-			return meter.ParseMeterReport(payload)
+			return meter.ParseMeterReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case MeterV2:
 		switch payload[1] {
 		case 0x01:
-			return meterv2.ParseMeterGet(payload)
+			return meterv2.ParseMeterGet(payload), nil
 		case 0x02:
-			return meterv2.ParseMeterReport(payload)
+			return meterv2.ParseMeterReport(payload), nil
 		case 0x05:
-			return meterv2.ParseMeterReset(payload)
+			return meterv2.ParseMeterReset(payload), nil
 		case 0x03:
-			return meterv2.ParseMeterSupportedGet(payload)
+			return meterv2.ParseMeterSupportedGet(payload), nil
 		case 0x04:
-			return meterv2.ParseMeterSupportedReport(payload)
+			return meterv2.ParseMeterSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case MeterV3:
 		switch payload[1] {
 		case 0x01:
-			return meterv3.ParseMeterGet(payload)
+			return meterv3.ParseMeterGet(payload), nil
 		case 0x02:
-			return meterv3.ParseMeterReport(payload)
+			return meterv3.ParseMeterReport(payload), nil
 		case 0x05:
-			return meterv3.ParseMeterReset(payload)
+			return meterv3.ParseMeterReset(payload), nil
 		case 0x03:
-			return meterv3.ParseMeterSupportedGet(payload)
+			return meterv3.ParseMeterSupportedGet(payload), nil
 		case 0x04:
-			return meterv3.ParseMeterSupportedReport(payload)
+			return meterv3.ParseMeterSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case MeterV4:
 		switch payload[1] {
 		case 0x01:
-			return meterv4.ParseMeterGet(payload)
+			return meterv4.ParseMeterGet(payload), nil
 		case 0x02:
-			return meterv4.ParseMeterReport(payload)
+			return meterv4.ParseMeterReport(payload), nil
 		case 0x05:
-			return meterv4.ParseMeterReset(payload)
+			return meterv4.ParseMeterReset(payload), nil
 		case 0x03:
-			return meterv4.ParseMeterSupportedGet(payload)
+			return meterv4.ParseMeterSupportedGet(payload), nil
 		case 0x04:
-			return meterv4.ParseMeterSupportedReport(payload)
+			return meterv4.ParseMeterSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case MtpWindowCovering:
 		switch payload[1] {
 		case 0x02:
-			return mtpwindowcovering.ParseMoveToPositionGet(payload)
+			return mtpwindowcovering.ParseMoveToPositionGet(payload), nil
 		case 0x03:
-			return mtpwindowcovering.ParseMoveToPositionReport(payload)
+			return mtpwindowcovering.ParseMoveToPositionReport(payload), nil
 		case 0x01:
-			return mtpwindowcovering.ParseMoveToPositionSet(payload)
+			return mtpwindowcovering.ParseMoveToPositionSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case MultiChannelV2:
 		switch payload[1] {
 		case 0x09:
-			return multichannelv2.ParseMultiChannelCapabilityGet(payload)
+			return multichannelv2.ParseMultiChannelCapabilityGet(payload), nil
 		case 0x0A:
-			return multichannelv2.ParseMultiChannelCapabilityReport(payload)
+			return multichannelv2.ParseMultiChannelCapabilityReport(payload), nil
 		case 0x0D:
-			return multichannelv2.ParseMultiChannelCmdEncap(payload)
+			return multichannelv2.ParseMultiChannelCmdEncap(payload), nil
 		case 0x0B:
-			return multichannelv2.ParseMultiChannelEndPointFind(payload)
+			return multichannelv2.ParseMultiChannelEndPointFind(payload), nil
 		case 0x0C:
-			return multichannelv2.ParseMultiChannelEndPointFindReport(payload)
+			return multichannelv2.ParseMultiChannelEndPointFindReport(payload), nil
 		case 0x07:
-			return multichannelv2.ParseMultiChannelEndPointGet(payload)
+			return multichannelv2.ParseMultiChannelEndPointGet(payload), nil
 		case 0x08:
-			return multichannelv2.ParseMultiChannelEndPointReport(payload)
+			return multichannelv2.ParseMultiChannelEndPointReport(payload), nil
 		case 0x06:
-			return multichannelv2.ParseMultiInstanceCmdEncap(payload)
+			return multichannelv2.ParseMultiInstanceCmdEncap(payload), nil
 		case 0x04:
-			return multichannelv2.ParseMultiInstanceGet(payload)
+			return multichannelv2.ParseMultiInstanceGet(payload), nil
 		case 0x05:
-			return multichannelv2.ParseMultiInstanceReport(payload)
+			return multichannelv2.ParseMultiInstanceReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case MultiChannelV3:
 		switch payload[1] {
 		case 0x09:
-			return multichannelv3.ParseMultiChannelCapabilityGet(payload)
+			return multichannelv3.ParseMultiChannelCapabilityGet(payload), nil
 		case 0x0A:
-			return multichannelv3.ParseMultiChannelCapabilityReport(payload)
+			return multichannelv3.ParseMultiChannelCapabilityReport(payload), nil
 		case 0x0D:
-			return multichannelv3.ParseMultiChannelCmdEncap(payload)
+			return multichannelv3.ParseMultiChannelCmdEncap(payload), nil
 		case 0x0B:
-			return multichannelv3.ParseMultiChannelEndPointFind(payload)
+			return multichannelv3.ParseMultiChannelEndPointFind(payload), nil
 		case 0x0C:
-			return multichannelv3.ParseMultiChannelEndPointFindReport(payload)
+			return multichannelv3.ParseMultiChannelEndPointFindReport(payload), nil
 		case 0x07:
-			return multichannelv3.ParseMultiChannelEndPointGet(payload)
+			return multichannelv3.ParseMultiChannelEndPointGet(payload), nil
 		case 0x08:
-			return multichannelv3.ParseMultiChannelEndPointReport(payload)
+			return multichannelv3.ParseMultiChannelEndPointReport(payload), nil
 		case 0x06:
-			return multichannelv3.ParseMultiInstanceCmdEncap(payload)
+			return multichannelv3.ParseMultiInstanceCmdEncap(payload), nil
 		case 0x04:
-			return multichannelv3.ParseMultiInstanceGet(payload)
+			return multichannelv3.ParseMultiInstanceGet(payload), nil
 		case 0x05:
-			return multichannelv3.ParseMultiInstanceReport(payload)
+			return multichannelv3.ParseMultiInstanceReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case MultiCmd:
 		switch payload[1] {
 		case 0x01:
-			return multicmd.ParseMultiCmdEncap(payload)
+			return multicmd.ParseMultiCmdEncap(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case MultiInstance:
 		switch payload[1] {
 		case 0x06:
-			return multiinstance.ParseMultiInstanceCmdEncap(payload)
+			return multiinstance.ParseMultiInstanceCmdEncap(payload), nil
 		case 0x04:
-			return multiinstance.ParseMultiInstanceGet(payload)
+			return multiinstance.ParseMultiInstanceGet(payload), nil
 		case 0x05:
-			return multiinstance.ParseMultiInstanceReport(payload)
+			return multiinstance.ParseMultiInstanceReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case NetworkManagementBasic:
 		switch payload[1] {
 		case 0x01:
-			return networkmanagementbasic.ParseLearnModeSet(payload)
+			return networkmanagementbasic.ParseLearnModeSet(payload), nil
 		case 0x02:
-			return networkmanagementbasic.ParseLearnModeSetStatus(payload)
+			return networkmanagementbasic.ParseLearnModeSetStatus(payload), nil
 		case 0x05:
-			return networkmanagementbasic.ParseNodeInformationSend(payload)
+			return networkmanagementbasic.ParseNodeInformationSend(payload), nil
 		case 0x03:
-			return networkmanagementbasic.ParseNetworkUpdateRequest(payload)
+			return networkmanagementbasic.ParseNetworkUpdateRequest(payload), nil
 		case 0x04:
-			return networkmanagementbasic.ParseNetworkUpdateRequestStatus(payload)
+			return networkmanagementbasic.ParseNetworkUpdateRequestStatus(payload), nil
 		case 0x06:
-			return networkmanagementbasic.ParseDefaultSet(payload)
+			return networkmanagementbasic.ParseDefaultSet(payload), nil
 		case 0x07:
-			return networkmanagementbasic.ParseDefaultSetComplete(payload)
+			return networkmanagementbasic.ParseDefaultSetComplete(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case NetworkManagementInclusion:
 		switch payload[1] {
 		case 0x07:
-			return networkmanagementinclusion.ParseFailedNodeRemove(payload)
+			return networkmanagementinclusion.ParseFailedNodeRemove(payload), nil
 		case 0x08:
-			return networkmanagementinclusion.ParseFailedNodeRemoveStatus(payload)
+			return networkmanagementinclusion.ParseFailedNodeRemoveStatus(payload), nil
 		case 0x01:
-			return networkmanagementinclusion.ParseNodeAdd(payload)
+			return networkmanagementinclusion.ParseNodeAdd(payload), nil
 		case 0x02:
-			return networkmanagementinclusion.ParseNodeAddStatus(payload)
+			return networkmanagementinclusion.ParseNodeAddStatus(payload), nil
 		case 0x03:
-			return networkmanagementinclusion.ParseNodeRemove(payload)
+			return networkmanagementinclusion.ParseNodeRemove(payload), nil
 		case 0x04:
-			return networkmanagementinclusion.ParseNodeRemoveStatus(payload)
+			return networkmanagementinclusion.ParseNodeRemoveStatus(payload), nil
 		case 0x09:
-			return networkmanagementinclusion.ParseFailedNodeReplace(payload)
+			return networkmanagementinclusion.ParseFailedNodeReplace(payload), nil
 		case 0x0A:
-			return networkmanagementinclusion.ParseFailedNodeReplaceStatus(payload)
+			return networkmanagementinclusion.ParseFailedNodeReplaceStatus(payload), nil
 		case 0x0B:
-			return networkmanagementinclusion.ParseNodeNeighborUpdateRequest(payload)
+			return networkmanagementinclusion.ParseNodeNeighborUpdateRequest(payload), nil
 		case 0x0C:
-			return networkmanagementinclusion.ParseNodeNeighborUpdateStatus(payload)
+			return networkmanagementinclusion.ParseNodeNeighborUpdateStatus(payload), nil
 		case 0x0D:
-			return networkmanagementinclusion.ParseReturnRouteAssign(payload)
+			return networkmanagementinclusion.ParseReturnRouteAssign(payload), nil
 		case 0x0E:
-			return networkmanagementinclusion.ParseReturnRouteAssignComplete(payload)
+			return networkmanagementinclusion.ParseReturnRouteAssignComplete(payload), nil
 		case 0x0F:
-			return networkmanagementinclusion.ParseReturnRouteDelete(payload)
+			return networkmanagementinclusion.ParseReturnRouteDelete(payload), nil
 		case 0x10:
-			return networkmanagementinclusion.ParseReturnRouteDeleteComplete(payload)
+			return networkmanagementinclusion.ParseReturnRouteDeleteComplete(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case NodeNaming:
 		switch payload[1] {
 		case 0x06:
-			return nodenaming.ParseNodeNamingNodeLocationReport(payload)
+			return nodenaming.ParseNodeNamingNodeLocationReport(payload), nil
 		case 0x04:
-			return nodenaming.ParseNodeNamingNodeLocationSet(payload)
+			return nodenaming.ParseNodeNamingNodeLocationSet(payload), nil
 		case 0x05:
-			return nodenaming.ParseNodeNamingNodeLocationGet(payload)
+			return nodenaming.ParseNodeNamingNodeLocationGet(payload), nil
 		case 0x02:
-			return nodenaming.ParseNodeNamingNodeNameGet(payload)
+			return nodenaming.ParseNodeNamingNodeNameGet(payload), nil
 		case 0x03:
-			return nodenaming.ParseNodeNamingNodeNameReport(payload)
+			return nodenaming.ParseNodeNamingNodeNameReport(payload), nil
 		case 0x01:
-			return nodenaming.ParseNodeNamingNodeNameSet(payload)
+			return nodenaming.ParseNodeNamingNodeNameSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Powerlevel:
 		switch payload[1] {
 		case 0x02:
-			return powerlevel.ParsePowerlevelGet(payload)
+			return powerlevel.ParsePowerlevelGet(payload), nil
 		case 0x03:
-			return powerlevel.ParsePowerlevelReport(payload)
+			return powerlevel.ParsePowerlevelReport(payload), nil
 		case 0x01:
-			return powerlevel.ParsePowerlevelSet(payload)
+			return powerlevel.ParsePowerlevelSet(payload), nil
 		case 0x05:
-			return powerlevel.ParsePowerlevelTestNodeGet(payload)
+			return powerlevel.ParsePowerlevelTestNodeGet(payload), nil
 		case 0x06:
-			return powerlevel.ParsePowerlevelTestNodeReport(payload)
+			return powerlevel.ParsePowerlevelTestNodeReport(payload), nil
 		case 0x04:
-			return powerlevel.ParsePowerlevelTestNodeSet(payload)
+			return powerlevel.ParsePowerlevelTestNodeSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case PrepaymentEncapsulation:
 		switch payload[1] {
 		case 0x01:
-			return prepaymentencapsulation.ParseCmdEncapsulation(payload)
+			return prepaymentencapsulation.ParseCmdEncapsulation(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Prepayment:
 		switch payload[1] {
 		case 0x01:
-			return prepayment.ParsePrepaymentBalanceGet(payload)
+			return prepayment.ParsePrepaymentBalanceGet(payload), nil
 		case 0x02:
-			return prepayment.ParsePrepaymentBalanceReport(payload)
+			return prepayment.ParsePrepaymentBalanceReport(payload), nil
 		case 0x03:
-			return prepayment.ParsePrepaymentSupportedGet(payload)
+			return prepayment.ParsePrepaymentSupportedGet(payload), nil
 		case 0x04:
-			return prepayment.ParsePrepaymentSupportedReport(payload)
+			return prepayment.ParsePrepaymentSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Proprietary:
 		switch payload[1] {
 		case 0x02:
-			return proprietary.ParseProprietaryGet(payload)
+			return proprietary.ParseProprietaryGet(payload), nil
 		case 0x03:
-			return proprietary.ParseProprietaryReport(payload)
+			return proprietary.ParseProprietaryReport(payload), nil
 		case 0x01:
-			return proprietary.ParseProprietarySet(payload)
+			return proprietary.ParseProprietarySet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Protection:
 		switch payload[1] {
 		case 0x02:
-			return protection.ParseProtectionGet(payload)
+			return protection.ParseProtectionGet(payload), nil
 		case 0x03:
-			return protection.ParseProtectionReport(payload)
+			return protection.ParseProtectionReport(payload), nil
 		case 0x01:
-			return protection.ParseProtectionSet(payload)
+			return protection.ParseProtectionSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ProtectionV2:
 		switch payload[1] {
 		case 0x07:
-			return protectionv2.ParseProtectionEcGet(payload)
+			return protectionv2.ParseProtectionEcGet(payload), nil
 		case 0x08:
-			return protectionv2.ParseProtectionEcReport(payload)
+			return protectionv2.ParseProtectionEcReport(payload), nil
 		case 0x06:
-			return protectionv2.ParseProtectionEcSet(payload)
+			return protectionv2.ParseProtectionEcSet(payload), nil
 		case 0x02:
-			return protectionv2.ParseProtectionGet(payload)
+			return protectionv2.ParseProtectionGet(payload), nil
 		case 0x03:
-			return protectionv2.ParseProtectionReport(payload)
+			return protectionv2.ParseProtectionReport(payload), nil
 		case 0x01:
-			return protectionv2.ParseProtectionSet(payload)
+			return protectionv2.ParseProtectionSet(payload), nil
 		case 0x04:
-			return protectionv2.ParseProtectionSupportedGet(payload)
+			return protectionv2.ParseProtectionSupportedGet(payload), nil
 		case 0x05:
-			return protectionv2.ParseProtectionSupportedReport(payload)
+			return protectionv2.ParseProtectionSupportedReport(payload), nil
 		case 0x0A:
-			return protectionv2.ParseProtectionTimeoutGet(payload)
+			return protectionv2.ParseProtectionTimeoutGet(payload), nil
 		case 0x0B:
-			return protectionv2.ParseProtectionTimeoutReport(payload)
+			return protectionv2.ParseProtectionTimeoutReport(payload), nil
 		case 0x09:
-			return protectionv2.ParseProtectionTimeoutSet(payload)
+			return protectionv2.ParseProtectionTimeoutSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case RateTblConfig:
 		switch payload[1] {
 		case 0x02:
-			return ratetblconfig.ParseRateTblRemove(payload)
+			return ratetblconfig.ParseRateTblRemove(payload), nil
 		case 0x01:
-			return ratetblconfig.ParseRateTblSet(payload)
+			return ratetblconfig.ParseRateTblSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case RateTblMonitor:
 		switch payload[1] {
 		case 0x05:
-			return ratetblmonitor.ParseRateTblActiveRateGet(payload)
+			return ratetblmonitor.ParseRateTblActiveRateGet(payload), nil
 		case 0x06:
-			return ratetblmonitor.ParseRateTblActiveRateReport(payload)
+			return ratetblmonitor.ParseRateTblActiveRateReport(payload), nil
 		case 0x07:
-			return ratetblmonitor.ParseRateTblCurrentDataGet(payload)
+			return ratetblmonitor.ParseRateTblCurrentDataGet(payload), nil
 		case 0x08:
-			return ratetblmonitor.ParseRateTblCurrentDataReport(payload)
+			return ratetblmonitor.ParseRateTblCurrentDataReport(payload), nil
 		case 0x03:
-			return ratetblmonitor.ParseRateTblGet(payload)
+			return ratetblmonitor.ParseRateTblGet(payload), nil
 		case 0x09:
-			return ratetblmonitor.ParseRateTblHistoricalDataGet(payload)
+			return ratetblmonitor.ParseRateTblHistoricalDataGet(payload), nil
 		case 0x0A:
-			return ratetblmonitor.ParseRateTblHistoricalDataReport(payload)
+			return ratetblmonitor.ParseRateTblHistoricalDataReport(payload), nil
 		case 0x04:
-			return ratetblmonitor.ParseRateTblReport(payload)
+			return ratetblmonitor.ParseRateTblReport(payload), nil
 		case 0x01:
-			return ratetblmonitor.ParseRateTblSupportedGet(payload)
+			return ratetblmonitor.ParseRateTblSupportedGet(payload), nil
 		case 0x02:
-			return ratetblmonitor.ParseRateTblSupportedReport(payload)
+			return ratetblmonitor.ParseRateTblSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case RemoteAssociationActivate:
 		switch payload[1] {
 		case 0x01:
-			return remoteassociationactivate.ParseRemoteAssociationActivate(payload)
+			return remoteassociationactivate.ParseRemoteAssociationActivate(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case RemoteAssociation:
 		switch payload[1] {
 		case 0x02:
-			return remoteassociation.ParseRemoteAssociationConfigurationGet(payload)
+			return remoteassociation.ParseRemoteAssociationConfigurationGet(payload), nil
 		case 0x03:
-			return remoteassociation.ParseRemoteAssociationConfigurationReport(payload)
+			return remoteassociation.ParseRemoteAssociationConfigurationReport(payload), nil
 		case 0x01:
-			return remoteassociation.ParseRemoteAssociationConfigurationSet(payload)
+			return remoteassociation.ParseRemoteAssociationConfigurationSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SceneActivation:
 		switch payload[1] {
 		case 0x01:
-			return sceneactivation.ParseSceneActivationSet(payload)
+			return sceneactivation.ParseSceneActivationSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SceneActuatorConf:
 		switch payload[1] {
 		case 0x02:
-			return sceneactuatorconf.ParseSceneActuatorConfGet(payload)
+			return sceneactuatorconf.ParseSceneActuatorConfGet(payload), nil
 		case 0x03:
-			return sceneactuatorconf.ParseSceneActuatorConfReport(payload)
+			return sceneactuatorconf.ParseSceneActuatorConfReport(payload), nil
 		case 0x01:
-			return sceneactuatorconf.ParseSceneActuatorConfSet(payload)
+			return sceneactuatorconf.ParseSceneActuatorConfSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SceneControllerConf:
 		switch payload[1] {
 		case 0x02:
-			return scenecontrollerconf.ParseSceneControllerConfGet(payload)
+			return scenecontrollerconf.ParseSceneControllerConfGet(payload), nil
 		case 0x03:
-			return scenecontrollerconf.ParseSceneControllerConfReport(payload)
+			return scenecontrollerconf.ParseSceneControllerConfReport(payload), nil
 		case 0x01:
-			return scenecontrollerconf.ParseSceneControllerConfSet(payload)
+			return scenecontrollerconf.ParseSceneControllerConfSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ScheduleEntryLock:
 		switch payload[1] {
 		case 0x02:
-			return scheduleentrylock.ParseScheduleEntryLockEnableAllSet(payload)
+			return scheduleentrylock.ParseScheduleEntryLockEnableAllSet(payload), nil
 		case 0x01:
-			return scheduleentrylock.ParseScheduleEntryLockEnableSet(payload)
+			return scheduleentrylock.ParseScheduleEntryLockEnableSet(payload), nil
 		case 0x04:
-			return scheduleentrylock.ParseScheduleEntryLockWeekDayGet(payload)
+			return scheduleentrylock.ParseScheduleEntryLockWeekDayGet(payload), nil
 		case 0x05:
-			return scheduleentrylock.ParseScheduleEntryLockWeekDayReport(payload)
+			return scheduleentrylock.ParseScheduleEntryLockWeekDayReport(payload), nil
 		case 0x03:
-			return scheduleentrylock.ParseScheduleEntryLockWeekDaySet(payload)
+			return scheduleentrylock.ParseScheduleEntryLockWeekDaySet(payload), nil
 		case 0x07:
-			return scheduleentrylock.ParseScheduleEntryLockYearDayGet(payload)
+			return scheduleentrylock.ParseScheduleEntryLockYearDayGet(payload), nil
 		case 0x08:
-			return scheduleentrylock.ParseScheduleEntryLockYearDayReport(payload)
+			return scheduleentrylock.ParseScheduleEntryLockYearDayReport(payload), nil
 		case 0x06:
-			return scheduleentrylock.ParseScheduleEntryLockYearDaySet(payload)
+			return scheduleentrylock.ParseScheduleEntryLockYearDaySet(payload), nil
 		case 0x09:
-			return scheduleentrylock.ParseScheduleEntryTypeSupportedGet(payload)
+			return scheduleentrylock.ParseScheduleEntryTypeSupportedGet(payload), nil
 		case 0x0A:
-			return scheduleentrylock.ParseScheduleEntryTypeSupportedReport(payload)
+			return scheduleentrylock.ParseScheduleEntryTypeSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ScheduleEntryLockV2:
 		switch payload[1] {
 		case 0x02:
-			return scheduleentrylockv2.ParseScheduleEntryLockEnableAllSet(payload)
+			return scheduleentrylockv2.ParseScheduleEntryLockEnableAllSet(payload), nil
 		case 0x01:
-			return scheduleentrylockv2.ParseScheduleEntryLockEnableSet(payload)
+			return scheduleentrylockv2.ParseScheduleEntryLockEnableSet(payload), nil
 		case 0x0B:
-			return scheduleentrylockv2.ParseScheduleEntryLockTimeOffsetGet(payload)
+			return scheduleentrylockv2.ParseScheduleEntryLockTimeOffsetGet(payload), nil
 		case 0x0C:
-			return scheduleentrylockv2.ParseScheduleEntryLockTimeOffsetReport(payload)
+			return scheduleentrylockv2.ParseScheduleEntryLockTimeOffsetReport(payload), nil
 		case 0x0D:
-			return scheduleentrylockv2.ParseScheduleEntryLockTimeOffsetSet(payload)
+			return scheduleentrylockv2.ParseScheduleEntryLockTimeOffsetSet(payload), nil
 		case 0x04:
-			return scheduleentrylockv2.ParseScheduleEntryLockWeekDayGet(payload)
+			return scheduleentrylockv2.ParseScheduleEntryLockWeekDayGet(payload), nil
 		case 0x05:
-			return scheduleentrylockv2.ParseScheduleEntryLockWeekDayReport(payload)
+			return scheduleentrylockv2.ParseScheduleEntryLockWeekDayReport(payload), nil
 		case 0x03:
-			return scheduleentrylockv2.ParseScheduleEntryLockWeekDaySet(payload)
+			return scheduleentrylockv2.ParseScheduleEntryLockWeekDaySet(payload), nil
 		case 0x07:
-			return scheduleentrylockv2.ParseScheduleEntryLockYearDayGet(payload)
+			return scheduleentrylockv2.ParseScheduleEntryLockYearDayGet(payload), nil
 		case 0x08:
-			return scheduleentrylockv2.ParseScheduleEntryLockYearDayReport(payload)
+			return scheduleentrylockv2.ParseScheduleEntryLockYearDayReport(payload), nil
 		case 0x06:
-			return scheduleentrylockv2.ParseScheduleEntryLockYearDaySet(payload)
+			return scheduleentrylockv2.ParseScheduleEntryLockYearDaySet(payload), nil
 		case 0x09:
-			return scheduleentrylockv2.ParseScheduleEntryTypeSupportedGet(payload)
+			return scheduleentrylockv2.ParseScheduleEntryTypeSupportedGet(payload), nil
 		case 0x0A:
-			return scheduleentrylockv2.ParseScheduleEntryTypeSupportedReport(payload)
+			return scheduleentrylockv2.ParseScheduleEntryTypeSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ScheduleEntryLockV3:
 		switch payload[1] {
 		case 0x02:
-			return scheduleentrylockv3.ParseScheduleEntryLockEnableAllSet(payload)
+			return scheduleentrylockv3.ParseScheduleEntryLockEnableAllSet(payload), nil
 		case 0x01:
-			return scheduleentrylockv3.ParseScheduleEntryLockEnableSet(payload)
+			return scheduleentrylockv3.ParseScheduleEntryLockEnableSet(payload), nil
 		case 0x0B:
-			return scheduleentrylockv3.ParseScheduleEntryLockTimeOffsetGet(payload)
+			return scheduleentrylockv3.ParseScheduleEntryLockTimeOffsetGet(payload), nil
 		case 0x0C:
-			return scheduleentrylockv3.ParseScheduleEntryLockTimeOffsetReport(payload)
+			return scheduleentrylockv3.ParseScheduleEntryLockTimeOffsetReport(payload), nil
 		case 0x0D:
-			return scheduleentrylockv3.ParseScheduleEntryLockTimeOffsetSet(payload)
+			return scheduleentrylockv3.ParseScheduleEntryLockTimeOffsetSet(payload), nil
 		case 0x04:
-			return scheduleentrylockv3.ParseScheduleEntryLockWeekDayGet(payload)
+			return scheduleentrylockv3.ParseScheduleEntryLockWeekDayGet(payload), nil
 		case 0x05:
-			return scheduleentrylockv3.ParseScheduleEntryLockWeekDayReport(payload)
+			return scheduleentrylockv3.ParseScheduleEntryLockWeekDayReport(payload), nil
 		case 0x03:
-			return scheduleentrylockv3.ParseScheduleEntryLockWeekDaySet(payload)
+			return scheduleentrylockv3.ParseScheduleEntryLockWeekDaySet(payload), nil
 		case 0x07:
-			return scheduleentrylockv3.ParseScheduleEntryLockYearDayGet(payload)
+			return scheduleentrylockv3.ParseScheduleEntryLockYearDayGet(payload), nil
 		case 0x08:
-			return scheduleentrylockv3.ParseScheduleEntryLockYearDayReport(payload)
+			return scheduleentrylockv3.ParseScheduleEntryLockYearDayReport(payload), nil
 		case 0x06:
-			return scheduleentrylockv3.ParseScheduleEntryLockYearDaySet(payload)
+			return scheduleentrylockv3.ParseScheduleEntryLockYearDaySet(payload), nil
 		case 0x09:
-			return scheduleentrylockv3.ParseScheduleEntryTypeSupportedGet(payload)
+			return scheduleentrylockv3.ParseScheduleEntryTypeSupportedGet(payload), nil
 		case 0x0A:
-			return scheduleentrylockv3.ParseScheduleEntryTypeSupportedReport(payload)
+			return scheduleentrylockv3.ParseScheduleEntryTypeSupportedReport(payload), nil
 		case 0x0E:
-			return scheduleentrylockv3.ParseScheduleEntryLockDailyRepeatingGet(payload)
+			return scheduleentrylockv3.ParseScheduleEntryLockDailyRepeatingGet(payload), nil
 		case 0x0F:
-			return scheduleentrylockv3.ParseScheduleEntryLockDailyRepeatingReport(payload)
+			return scheduleentrylockv3.ParseScheduleEntryLockDailyRepeatingReport(payload), nil
 		case 0x10:
-			return scheduleentrylockv3.ParseScheduleEntryLockDailyRepeatingSet(payload)
+			return scheduleentrylockv3.ParseScheduleEntryLockDailyRepeatingSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ScreenAttributes:
 		switch payload[1] {
 		case 0x01:
-			return screenattributes.ParseScreenAttributesGet(payload)
+			return screenattributes.ParseScreenAttributesGet(payload), nil
 		case 0x02:
-			return screenattributes.ParseScreenAttributesReport(payload)
+			return screenattributes.ParseScreenAttributesReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ScreenAttributesV2:
 		switch payload[1] {
 		case 0x01:
-			return screenattributesv2.ParseScreenAttributesGet(payload)
+			return screenattributesv2.ParseScreenAttributesGet(payload), nil
 		case 0x03:
-			return screenattributesv2.ParseScreenAttributesReport(payload)
+			return screenattributesv2.ParseScreenAttributesReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ScreenMd:
 		switch payload[1] {
 		case 0x01:
-			return screenmd.ParseScreenMdGet(payload)
+			return screenmd.ParseScreenMdGet(payload), nil
 		case 0x02:
-			return screenmd.ParseScreenMdReport(payload)
+			return screenmd.ParseScreenMdReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ScreenMdV2:
 		switch payload[1] {
 		case 0x01:
-			return screenmdv2.ParseScreenMdGet(payload)
+			return screenmdv2.ParseScreenMdGet(payload), nil
 		case 0x03:
-			return screenmdv2.ParseScreenMdReport(payload)
+			return screenmdv2.ParseScreenMdReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SecurityPanelMode:
 		switch payload[1] {
 		case 0x03:
-			return securitypanelmode.ParseSecurityPanelModeGet(payload)
+			return securitypanelmode.ParseSecurityPanelModeGet(payload), nil
 		case 0x04:
-			return securitypanelmode.ParseSecurityPanelModeReport(payload)
+			return securitypanelmode.ParseSecurityPanelModeReport(payload), nil
 		case 0x05:
-			return securitypanelmode.ParseSecurityPanelModeSet(payload)
+			return securitypanelmode.ParseSecurityPanelModeSet(payload), nil
 		case 0x01:
-			return securitypanelmode.ParseSecurityPanelModeSupportedGet(payload)
+			return securitypanelmode.ParseSecurityPanelModeSupportedGet(payload), nil
 		case 0x02:
-			return securitypanelmode.ParseSecurityPanelModeSupportedReport(payload)
+			return securitypanelmode.ParseSecurityPanelModeSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SecurityPanelZoneSensor:
 		switch payload[1] {
 		case 0x02:
-			return securitypanelzonesensor.ParseCommandClassSecurityPanelZoneSensorInstalledReport(payload)
+			return securitypanelzonesensor.ParseCommandClassSecurityPanelZoneSensorInstalledReport(payload), nil
 		case 0x03:
-			return securitypanelzonesensor.ParseSecurityPanelZoneSensorTypeGet(payload)
+			return securitypanelzonesensor.ParseSecurityPanelZoneSensorTypeGet(payload), nil
 		case 0x04:
-			return securitypanelzonesensor.ParseSecurityPanelZoneSensorTypeReport(payload)
+			return securitypanelzonesensor.ParseSecurityPanelZoneSensorTypeReport(payload), nil
 		case 0x01:
-			return securitypanelzonesensor.ParseSecurityPanelZoneSensorInstalledGet(payload)
+			return securitypanelzonesensor.ParseSecurityPanelZoneSensorInstalledGet(payload), nil
 		case 0x05:
-			return securitypanelzonesensor.ParseSecurityPanelZoneSensorStateGet(payload)
+			return securitypanelzonesensor.ParseSecurityPanelZoneSensorStateGet(payload), nil
 		case 0x06:
-			return securitypanelzonesensor.ParseSecurityPanelZoneSensorStateReport(payload)
+			return securitypanelzonesensor.ParseSecurityPanelZoneSensorStateReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SecurityPanelZone:
 		switch payload[1] {
 		case 0x01:
-			return securitypanelzone.ParseSecurityPanelZoneNumberSupportedGet(payload)
+			return securitypanelzone.ParseSecurityPanelZoneNumberSupportedGet(payload), nil
 		case 0x05:
-			return securitypanelzone.ParseSecurityPanelZoneStateGet(payload)
+			return securitypanelzone.ParseSecurityPanelZoneStateGet(payload), nil
 		case 0x06:
-			return securitypanelzone.ParseSecurityPanelZoneStateReport(payload)
+			return securitypanelzone.ParseSecurityPanelZoneStateReport(payload), nil
 		case 0x02:
-			return securitypanelzone.ParseSecurityPanelZoneSupportedReport(payload)
+			return securitypanelzone.ParseSecurityPanelZoneSupportedReport(payload), nil
 		case 0x03:
-			return securitypanelzone.ParseSecurityPanelZoneTypeGet(payload)
+			return securitypanelzone.ParseSecurityPanelZoneTypeGet(payload), nil
 		case 0x04:
-			return securitypanelzone.ParseSecurityPanelZoneTypeReport(payload)
+			return securitypanelzone.ParseSecurityPanelZoneTypeReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SensorAlarm:
 		switch payload[1] {
 		case 0x01:
-			return sensoralarm.ParseSensorAlarmGet(payload)
+			return sensoralarm.ParseSensorAlarmGet(payload), nil
 		case 0x02:
-			return sensoralarm.ParseSensorAlarmReport(payload)
+			return sensoralarm.ParseSensorAlarmReport(payload), nil
 		case 0x03:
-			return sensoralarm.ParseSensorAlarmSupportedGet(payload)
+			return sensoralarm.ParseSensorAlarmSupportedGet(payload), nil
 		case 0x04:
-			return sensoralarm.ParseSensorAlarmSupportedReport(payload)
+			return sensoralarm.ParseSensorAlarmSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SensorBinary:
 		switch payload[1] {
 		case 0x02:
-			return sensorbinary.ParseSensorBinaryGet(payload)
+			return sensorbinary.ParseSensorBinaryGet(payload), nil
 		case 0x03:
-			return sensorbinary.ParseSensorBinaryReport(payload)
+			return sensorbinary.ParseSensorBinaryReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SensorBinaryV2:
 		switch payload[1] {
 		case 0x02:
-			return sensorbinaryv2.ParseSensorBinaryGet(payload)
+			return sensorbinaryv2.ParseSensorBinaryGet(payload), nil
 		case 0x03:
-			return sensorbinaryv2.ParseSensorBinaryReport(payload)
+			return sensorbinaryv2.ParseSensorBinaryReport(payload), nil
 		case 0x01:
-			return sensorbinaryv2.ParseSensorBinarySupportedGetSensor(payload)
+			return sensorbinaryv2.ParseSensorBinarySupportedGetSensor(payload), nil
 		case 0x04:
-			return sensorbinaryv2.ParseSensorBinarySupportedSensorReport(payload)
+			return sensorbinaryv2.ParseSensorBinarySupportedSensorReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SensorConfiguration:
 		switch payload[1] {
 		case 0x02:
-			return sensorconfiguration.ParseSensorTriggerLevelGet(payload)
+			return sensorconfiguration.ParseSensorTriggerLevelGet(payload), nil
 		case 0x03:
-			return sensorconfiguration.ParseSensorTriggerLevelReport(payload)
+			return sensorconfiguration.ParseSensorTriggerLevelReport(payload), nil
 		case 0x01:
-			return sensorconfiguration.ParseSensorTriggerLevelSet(payload)
+			return sensorconfiguration.ParseSensorTriggerLevelSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SensorMultilevel:
 		switch payload[1] {
 		case 0x04:
-			return sensormultilevel.ParseSensorMultilevelGet(payload)
+			return sensormultilevel.ParseSensorMultilevelGet(payload), nil
 		case 0x05:
-			return sensormultilevel.ParseSensorMultilevelReport(payload)
+			return sensormultilevel.ParseSensorMultilevelReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SensorMultilevelV2:
 		switch payload[1] {
 		case 0x04:
-			return sensormultilevelv2.ParseSensorMultilevelGet(payload)
+			return sensormultilevelv2.ParseSensorMultilevelGet(payload), nil
 		case 0x05:
-			return sensormultilevelv2.ParseSensorMultilevelReport(payload)
+			return sensormultilevelv2.ParseSensorMultilevelReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SensorMultilevelV3:
 		switch payload[1] {
 		case 0x04:
-			return sensormultilevelv3.ParseSensorMultilevelGet(payload)
+			return sensormultilevelv3.ParseSensorMultilevelGet(payload), nil
 		case 0x05:
-			return sensormultilevelv3.ParseSensorMultilevelReport(payload)
+			return sensormultilevelv3.ParseSensorMultilevelReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SensorMultilevelV4:
 		switch payload[1] {
 		case 0x04:
-			return sensormultilevelv4.ParseSensorMultilevelGet(payload)
+			return sensormultilevelv4.ParseSensorMultilevelGet(payload), nil
 		case 0x05:
-			return sensormultilevelv4.ParseSensorMultilevelReport(payload)
+			return sensormultilevelv4.ParseSensorMultilevelReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SensorMultilevelV5:
 		switch payload[1] {
 		case 0x04:
-			return sensormultilevelv5.ParseSensorMultilevelGet(payload)
+			return sensormultilevelv5.ParseSensorMultilevelGet(payload), nil
 		case 0x05:
-			return sensormultilevelv5.ParseSensorMultilevelReport(payload)
+			return sensormultilevelv5.ParseSensorMultilevelReport(payload), nil
 		case 0x01:
-			return sensormultilevelv5.ParseSensorMultilevelSupportedGetSensor(payload)
+			return sensormultilevelv5.ParseSensorMultilevelSupportedGetSensor(payload), nil
 		case 0x02:
-			return sensormultilevelv5.ParseSensorMultilevelSupportedSensorReport(payload)
+			return sensormultilevelv5.ParseSensorMultilevelSupportedSensorReport(payload), nil
 		case 0x03:
-			return sensormultilevelv5.ParseSensorMultilevelSupportedGetScale(payload)
+			return sensormultilevelv5.ParseSensorMultilevelSupportedGetScale(payload), nil
 		case 0x06:
-			return sensormultilevelv5.ParseSensorMultilevelSupportedScaleReport(payload)
+			return sensormultilevelv5.ParseSensorMultilevelSupportedScaleReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SensorMultilevelV6:
 		switch payload[1] {
 		case 0x04:
-			return sensormultilevelv6.ParseSensorMultilevelGet(payload)
+			return sensormultilevelv6.ParseSensorMultilevelGet(payload), nil
 		case 0x05:
-			return sensormultilevelv6.ParseSensorMultilevelReport(payload)
+			return sensormultilevelv6.ParseSensorMultilevelReport(payload), nil
 		case 0x01:
-			return sensormultilevelv6.ParseSensorMultilevelSupportedGetSensor(payload)
+			return sensormultilevelv6.ParseSensorMultilevelSupportedGetSensor(payload), nil
 		case 0x02:
-			return sensormultilevelv6.ParseSensorMultilevelSupportedSensorReport(payload)
+			return sensormultilevelv6.ParseSensorMultilevelSupportedSensorReport(payload), nil
 		case 0x03:
-			return sensormultilevelv6.ParseSensorMultilevelSupportedGetScale(payload)
+			return sensormultilevelv6.ParseSensorMultilevelSupportedGetScale(payload), nil
 		case 0x06:
-			return sensormultilevelv6.ParseSensorMultilevelSupportedScaleReport(payload)
+			return sensormultilevelv6.ParseSensorMultilevelSupportedScaleReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SilenceAlarm:
 		switch payload[1] {
 		case 0x01:
-			return silencealarm.ParseSensorAlarmSet(payload)
+			return silencealarm.ParseSensorAlarmSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SimpleAvControl:
 		switch payload[1] {
 		case 0x02:
-			return simpleavcontrol.ParseSimpleAvControlGet(payload)
+			return simpleavcontrol.ParseSimpleAvControlGet(payload), nil
 		case 0x03:
-			return simpleavcontrol.ParseSimpleAvControlReport(payload)
+			return simpleavcontrol.ParseSimpleAvControlReport(payload), nil
 		case 0x01:
-			return simpleavcontrol.ParseSimpleAvControlSet(payload)
+			return simpleavcontrol.ParseSimpleAvControlSet(payload), nil
 		case 0x04:
-			return simpleavcontrol.ParseSimpleAvControlSupportedGet(payload)
+			return simpleavcontrol.ParseSimpleAvControlSupportedGet(payload), nil
 		case 0x05:
-			return simpleavcontrol.ParseSimpleAvControlSupportedReport(payload)
+			return simpleavcontrol.ParseSimpleAvControlSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SwitchAll:
 		switch payload[1] {
 		case 0x02:
-			return switchall.ParseSwitchAllGet(payload)
+			return switchall.ParseSwitchAllGet(payload), nil
 		case 0x05:
-			return switchall.ParseSwitchAllOff(payload)
+			return switchall.ParseSwitchAllOff(payload), nil
 		case 0x04:
-			return switchall.ParseSwitchAllOn(payload)
+			return switchall.ParseSwitchAllOn(payload), nil
 		case 0x03:
-			return switchall.ParseSwitchAllReport(payload)
+			return switchall.ParseSwitchAllReport(payload), nil
 		case 0x01:
-			return switchall.ParseSwitchAllSet(payload)
+			return switchall.ParseSwitchAllSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SwitchBinary:
 		switch payload[1] {
 		case 0x02:
-			return switchbinary.ParseSwitchBinaryGet(payload)
+			return switchbinary.ParseSwitchBinaryGet(payload), nil
 		case 0x03:
-			return switchbinary.ParseSwitchBinaryReport(payload)
+			return switchbinary.ParseSwitchBinaryReport(payload), nil
 		case 0x01:
-			return switchbinary.ParseSwitchBinarySet(payload)
+			return switchbinary.ParseSwitchBinarySet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SwitchMultilevel:
 		switch payload[1] {
 		case 0x02:
-			return switchmultilevel.ParseSwitchMultilevelGet(payload)
+			return switchmultilevel.ParseSwitchMultilevelGet(payload), nil
 		case 0x03:
-			return switchmultilevel.ParseSwitchMultilevelReport(payload)
+			return switchmultilevel.ParseSwitchMultilevelReport(payload), nil
 		case 0x01:
-			return switchmultilevel.ParseSwitchMultilevelSet(payload)
+			return switchmultilevel.ParseSwitchMultilevelSet(payload), nil
 		case 0x04:
-			return switchmultilevel.ParseSwitchMultilevelStartLevelChange(payload)
+			return switchmultilevel.ParseSwitchMultilevelStartLevelChange(payload), nil
 		case 0x05:
-			return switchmultilevel.ParseSwitchMultilevelStopLevelChange(payload)
+			return switchmultilevel.ParseSwitchMultilevelStopLevelChange(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SwitchMultilevelV2:
 		switch payload[1] {
 		case 0x02:
-			return switchmultilevelv2.ParseSwitchMultilevelGet(payload)
+			return switchmultilevelv2.ParseSwitchMultilevelGet(payload), nil
 		case 0x03:
-			return switchmultilevelv2.ParseSwitchMultilevelReport(payload)
+			return switchmultilevelv2.ParseSwitchMultilevelReport(payload), nil
 		case 0x01:
-			return switchmultilevelv2.ParseSwitchMultilevelSet(payload)
+			return switchmultilevelv2.ParseSwitchMultilevelSet(payload), nil
 		case 0x04:
-			return switchmultilevelv2.ParseSwitchMultilevelStartLevelChange(payload)
+			return switchmultilevelv2.ParseSwitchMultilevelStartLevelChange(payload), nil
 		case 0x05:
-			return switchmultilevelv2.ParseSwitchMultilevelStopLevelChange(payload)
+			return switchmultilevelv2.ParseSwitchMultilevelStopLevelChange(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SwitchMultilevelV3:
 		switch payload[1] {
 		case 0x02:
-			return switchmultilevelv3.ParseSwitchMultilevelGet(payload)
+			return switchmultilevelv3.ParseSwitchMultilevelGet(payload), nil
 		case 0x03:
-			return switchmultilevelv3.ParseSwitchMultilevelReport(payload)
+			return switchmultilevelv3.ParseSwitchMultilevelReport(payload), nil
 		case 0x01:
-			return switchmultilevelv3.ParseSwitchMultilevelSet(payload)
+			return switchmultilevelv3.ParseSwitchMultilevelSet(payload), nil
 		case 0x04:
-			return switchmultilevelv3.ParseSwitchMultilevelStartLevelChange(payload)
+			return switchmultilevelv3.ParseSwitchMultilevelStartLevelChange(payload), nil
 		case 0x05:
-			return switchmultilevelv3.ParseSwitchMultilevelStopLevelChange(payload)
+			return switchmultilevelv3.ParseSwitchMultilevelStopLevelChange(payload), nil
 		case 0x06:
-			return switchmultilevelv3.ParseSwitchMultilevelSupportedGet(payload)
+			return switchmultilevelv3.ParseSwitchMultilevelSupportedGet(payload), nil
 		case 0x07:
-			return switchmultilevelv3.ParseSwitchMultilevelSupportedReport(payload)
+			return switchmultilevelv3.ParseSwitchMultilevelSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SwitchToggleBinary:
 		switch payload[1] {
 		case 0x01:
-			return switchtogglebinary.ParseSwitchToggleBinarySet(payload)
+			return switchtogglebinary.ParseSwitchToggleBinarySet(payload), nil
 		case 0x02:
-			return switchtogglebinary.ParseSwitchToggleBinaryGet(payload)
+			return switchtogglebinary.ParseSwitchToggleBinaryGet(payload), nil
 		case 0x03:
-			return switchtogglebinary.ParseSwitchToggleBinaryReport(payload)
+			return switchtogglebinary.ParseSwitchToggleBinaryReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case SwitchToggleMultilevel:
 		switch payload[1] {
 		case 0x01:
-			return switchtogglemultilevel.ParseSwitchToggleMultilevelSet(payload)
+			return switchtogglemultilevel.ParseSwitchToggleMultilevelSet(payload), nil
 		case 0x02:
-			return switchtogglemultilevel.ParseSwitchToggleMultilevelGet(payload)
+			return switchtogglemultilevel.ParseSwitchToggleMultilevelGet(payload), nil
 		case 0x03:
-			return switchtogglemultilevel.ParseSwitchToggleMultilevelReport(payload)
+			return switchtogglemultilevel.ParseSwitchToggleMultilevelReport(payload), nil
 		case 0x04:
-			return switchtogglemultilevel.ParseSwitchToggleMultilevelStartLevelChange(payload)
+			return switchtogglemultilevel.ParseSwitchToggleMultilevelStartLevelChange(payload), nil
 		case 0x05:
-			return switchtogglemultilevel.ParseSwitchToggleMultilevelStopLevelChange(payload)
+			return switchtogglemultilevel.ParseSwitchToggleMultilevelStopLevelChange(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case TariffConfig:
 		switch payload[1] {
 		case 0x03:
-			return tariffconfig.ParseTariffTblRemove(payload)
+			return tariffconfig.ParseTariffTblRemove(payload), nil
 		case 0x02:
-			return tariffconfig.ParseTariffTblSet(payload)
+			return tariffconfig.ParseTariffTblSet(payload), nil
 		case 0x01:
-			return tariffconfig.ParseTariffTblSupplierSet(payload)
+			return tariffconfig.ParseTariffTblSupplierSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case TariffTblMonitor:
 		switch payload[1] {
 		case 0x05:
-			return tarifftblmonitor.ParseTariffTblCostGet(payload)
+			return tarifftblmonitor.ParseTariffTblCostGet(payload), nil
 		case 0x06:
-			return tarifftblmonitor.ParseTariffTblCostReport(payload)
+			return tarifftblmonitor.ParseTariffTblCostReport(payload), nil
 		case 0x03:
-			return tarifftblmonitor.ParseTariffTblGet(payload)
+			return tarifftblmonitor.ParseTariffTblGet(payload), nil
 		case 0x04:
-			return tarifftblmonitor.ParseTariffTblReport(payload)
+			return tarifftblmonitor.ParseTariffTblReport(payload), nil
 		case 0x01:
-			return tarifftblmonitor.ParseTariffTblSupplierGet(payload)
+			return tarifftblmonitor.ParseTariffTblSupplierGet(payload), nil
 		case 0x02:
-			return tarifftblmonitor.ParseTariffTblSupplierReport(payload)
+			return tarifftblmonitor.ParseTariffTblSupplierReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ThermostatFanMode:
 		switch payload[1] {
 		case 0x02:
-			return thermostatfanmode.ParseThermostatFanModeGet(payload)
+			return thermostatfanmode.ParseThermostatFanModeGet(payload), nil
 		case 0x03:
-			return thermostatfanmode.ParseThermostatFanModeReport(payload)
+			return thermostatfanmode.ParseThermostatFanModeReport(payload), nil
 		case 0x01:
-			return thermostatfanmode.ParseThermostatFanModeSet(payload)
+			return thermostatfanmode.ParseThermostatFanModeSet(payload), nil
 		case 0x04:
-			return thermostatfanmode.ParseThermostatFanModeSupportedGet(payload)
+			return thermostatfanmode.ParseThermostatFanModeSupportedGet(payload), nil
 		case 0x05:
-			return thermostatfanmode.ParseThermostatFanModeSupportedReport(payload)
+			return thermostatfanmode.ParseThermostatFanModeSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ThermostatFanModeV2:
 		switch payload[1] {
 		case 0x02:
-			return thermostatfanmodev2.ParseThermostatFanModeGet(payload)
+			return thermostatfanmodev2.ParseThermostatFanModeGet(payload), nil
 		case 0x03:
-			return thermostatfanmodev2.ParseThermostatFanModeReport(payload)
+			return thermostatfanmodev2.ParseThermostatFanModeReport(payload), nil
 		case 0x01:
-			return thermostatfanmodev2.ParseThermostatFanModeSet(payload)
+			return thermostatfanmodev2.ParseThermostatFanModeSet(payload), nil
 		case 0x04:
-			return thermostatfanmodev2.ParseThermostatFanModeSupportedGet(payload)
+			return thermostatfanmodev2.ParseThermostatFanModeSupportedGet(payload), nil
 		case 0x05:
-			return thermostatfanmodev2.ParseThermostatFanModeSupportedReport(payload)
+			return thermostatfanmodev2.ParseThermostatFanModeSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ThermostatFanModeV3:
 		switch payload[1] {
 		case 0x02:
-			return thermostatfanmodev3.ParseThermostatFanModeGet(payload)
+			return thermostatfanmodev3.ParseThermostatFanModeGet(payload), nil
 		case 0x03:
-			return thermostatfanmodev3.ParseThermostatFanModeReport(payload)
+			return thermostatfanmodev3.ParseThermostatFanModeReport(payload), nil
 		case 0x01:
-			return thermostatfanmodev3.ParseThermostatFanModeSet(payload)
+			return thermostatfanmodev3.ParseThermostatFanModeSet(payload), nil
 		case 0x04:
-			return thermostatfanmodev3.ParseThermostatFanModeSupportedGet(payload)
+			return thermostatfanmodev3.ParseThermostatFanModeSupportedGet(payload), nil
 		case 0x05:
-			return thermostatfanmodev3.ParseThermostatFanModeSupportedReport(payload)
+			return thermostatfanmodev3.ParseThermostatFanModeSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ThermostatFanModeV4:
 		switch payload[1] {
 		case 0x02:
-			return thermostatfanmodev4.ParseThermostatFanModeGet(payload)
+			return thermostatfanmodev4.ParseThermostatFanModeGet(payload), nil
 		case 0x03:
-			return thermostatfanmodev4.ParseThermostatFanModeReport(payload)
+			return thermostatfanmodev4.ParseThermostatFanModeReport(payload), nil
 		case 0x01:
-			return thermostatfanmodev4.ParseThermostatFanModeSet(payload)
+			return thermostatfanmodev4.ParseThermostatFanModeSet(payload), nil
 		case 0x04:
-			return thermostatfanmodev4.ParseThermostatFanModeSupportedGet(payload)
+			return thermostatfanmodev4.ParseThermostatFanModeSupportedGet(payload), nil
 		case 0x05:
-			return thermostatfanmodev4.ParseThermostatFanModeSupportedReport(payload)
+			return thermostatfanmodev4.ParseThermostatFanModeSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ThermostatFanState:
 		switch payload[1] {
 		case 0x02:
-			return thermostatfanstate.ParseThermostatFanStateGet(payload)
+			return thermostatfanstate.ParseThermostatFanStateGet(payload), nil
 		case 0x03:
-			return thermostatfanstate.ParseThermostatFanStateReport(payload)
+			return thermostatfanstate.ParseThermostatFanStateReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ThermostatHeating:
 		switch payload[1] {
 		case 0x0D:
-			return thermostatheating.ParseThermostatHeatingStatusReport(payload)
+			return thermostatheating.ParseThermostatHeatingStatusReport(payload), nil
 		case 0x02:
-			return thermostatheating.ParseThermostatHeatingModeGet(payload)
+			return thermostatheating.ParseThermostatHeatingModeGet(payload), nil
 		case 0x03:
-			return thermostatheating.ParseThermostatHeatingModeReport(payload)
+			return thermostatheating.ParseThermostatHeatingModeReport(payload), nil
 		case 0x01:
-			return thermostatheating.ParseThermostatHeatingModeSet(payload)
+			return thermostatheating.ParseThermostatHeatingModeSet(payload), nil
 		case 0x09:
-			return thermostatheating.ParseThermostatHeatingRelayStatusGet(payload)
+			return thermostatheating.ParseThermostatHeatingRelayStatusGet(payload), nil
 		case 0x0A:
-			return thermostatheating.ParseThermostatHeatingRelayStatusReport(payload)
+			return thermostatheating.ParseThermostatHeatingRelayStatusReport(payload), nil
 		case 0x05:
-			return thermostatheating.ParseThermostatHeatingSetpointGet(payload)
+			return thermostatheating.ParseThermostatHeatingSetpointGet(payload), nil
 		case 0x06:
-			return thermostatheating.ParseThermostatHeatingSetpointReport(payload)
+			return thermostatheating.ParseThermostatHeatingSetpointReport(payload), nil
 		case 0x04:
-			return thermostatheating.ParseThermostatHeatingSetpointSet(payload)
+			return thermostatheating.ParseThermostatHeatingSetpointSet(payload), nil
 		case 0x0C:
-			return thermostatheating.ParseThermostatHeatingStatusGet(payload)
+			return thermostatheating.ParseThermostatHeatingStatusGet(payload), nil
 		case 0x0B:
-			return thermostatheating.ParseThermostatHeatingStatusSet(payload)
+			return thermostatheating.ParseThermostatHeatingStatusSet(payload), nil
 		case 0x11:
-			return thermostatheating.ParseThermostatHeatingTimedOffSet(payload)
+			return thermostatheating.ParseThermostatHeatingTimedOffSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ThermostatMode:
 		switch payload[1] {
 		case 0x02:
-			return thermostatmode.ParseThermostatModeGet(payload)
+			return thermostatmode.ParseThermostatModeGet(payload), nil
 		case 0x03:
-			return thermostatmode.ParseThermostatModeReport(payload)
+			return thermostatmode.ParseThermostatModeReport(payload), nil
 		case 0x01:
-			return thermostatmode.ParseThermostatModeSet(payload)
+			return thermostatmode.ParseThermostatModeSet(payload), nil
 		case 0x04:
-			return thermostatmode.ParseThermostatModeSupportedGet(payload)
+			return thermostatmode.ParseThermostatModeSupportedGet(payload), nil
 		case 0x05:
-			return thermostatmode.ParseThermostatModeSupportedReport(payload)
+			return thermostatmode.ParseThermostatModeSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ThermostatModeV2:
 		switch payload[1] {
 		case 0x02:
-			return thermostatmodev2.ParseThermostatModeGet(payload)
+			return thermostatmodev2.ParseThermostatModeGet(payload), nil
 		case 0x03:
-			return thermostatmodev2.ParseThermostatModeReport(payload)
+			return thermostatmodev2.ParseThermostatModeReport(payload), nil
 		case 0x01:
-			return thermostatmodev2.ParseThermostatModeSet(payload)
+			return thermostatmodev2.ParseThermostatModeSet(payload), nil
 		case 0x04:
-			return thermostatmodev2.ParseThermostatModeSupportedGet(payload)
+			return thermostatmodev2.ParseThermostatModeSupportedGet(payload), nil
 		case 0x05:
-			return thermostatmodev2.ParseThermostatModeSupportedReport(payload)
+			return thermostatmodev2.ParseThermostatModeSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ThermostatModeV3:
 		switch payload[1] {
 		case 0x02:
-			return thermostatmodev3.ParseThermostatModeGet(payload)
+			return thermostatmodev3.ParseThermostatModeGet(payload), nil
 		case 0x03:
-			return thermostatmodev3.ParseThermostatModeReport(payload)
+			return thermostatmodev3.ParseThermostatModeReport(payload), nil
 		case 0x01:
-			return thermostatmodev3.ParseThermostatModeSet(payload)
+			return thermostatmodev3.ParseThermostatModeSet(payload), nil
 		case 0x04:
-			return thermostatmodev3.ParseThermostatModeSupportedGet(payload)
+			return thermostatmodev3.ParseThermostatModeSupportedGet(payload), nil
 		case 0x05:
-			return thermostatmodev3.ParseThermostatModeSupportedReport(payload)
+			return thermostatmodev3.ParseThermostatModeSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ThermostatOperatingState:
 		switch payload[1] {
 		case 0x02:
-			return thermostatoperatingstate.ParseThermostatOperatingStateGet(payload)
+			return thermostatoperatingstate.ParseThermostatOperatingStateGet(payload), nil
 		case 0x03:
-			return thermostatoperatingstate.ParseThermostatOperatingStateReport(payload)
+			return thermostatoperatingstate.ParseThermostatOperatingStateReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ThermostatOperatingStateV2:
 		switch payload[1] {
 		case 0x02:
-			return thermostatoperatingstatev2.ParseThermostatOperatingStateGet(payload)
+			return thermostatoperatingstatev2.ParseThermostatOperatingStateGet(payload), nil
 		case 0x03:
-			return thermostatoperatingstatev2.ParseThermostatOperatingStateReport(payload)
+			return thermostatoperatingstatev2.ParseThermostatOperatingStateReport(payload), nil
 		case 0x01:
-			return thermostatoperatingstatev2.ParseThermostatOperatingStateLoggingSupportedGet(payload)
+			return thermostatoperatingstatev2.ParseThermostatOperatingStateLoggingSupportedGet(payload), nil
 		case 0x04:
-			return thermostatoperatingstatev2.ParseThermostatOperatingLoggingSupportedReport(payload)
+			return thermostatoperatingstatev2.ParseThermostatOperatingLoggingSupportedReport(payload), nil
 		case 0x05:
-			return thermostatoperatingstatev2.ParseThermostatOperatingStateLoggingGet(payload)
+			return thermostatoperatingstatev2.ParseThermostatOperatingStateLoggingGet(payload), nil
 		case 0x06:
-			return thermostatoperatingstatev2.ParseThermostatOperatingStateLoggingReport(payload)
+			return thermostatoperatingstatev2.ParseThermostatOperatingStateLoggingReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ThermostatSetback:
 		switch payload[1] {
 		case 0x02:
-			return thermostatsetback.ParseThermostatSetbackGet(payload)
+			return thermostatsetback.ParseThermostatSetbackGet(payload), nil
 		case 0x03:
-			return thermostatsetback.ParseThermostatSetbackReport(payload)
+			return thermostatsetback.ParseThermostatSetbackReport(payload), nil
 		case 0x01:
-			return thermostatsetback.ParseThermostatSetbackSet(payload)
+			return thermostatsetback.ParseThermostatSetbackSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ThermostatSetpoint:
 		switch payload[1] {
 		case 0x02:
-			return thermostatsetpoint.ParseThermostatSetpointGet(payload)
+			return thermostatsetpoint.ParseThermostatSetpointGet(payload), nil
 		case 0x03:
-			return thermostatsetpoint.ParseThermostatSetpointReport(payload)
+			return thermostatsetpoint.ParseThermostatSetpointReport(payload), nil
 		case 0x01:
-			return thermostatsetpoint.ParseThermostatSetpointSet(payload)
+			return thermostatsetpoint.ParseThermostatSetpointSet(payload), nil
 		case 0x04:
-			return thermostatsetpoint.ParseThermostatSetpointSupportedGet(payload)
+			return thermostatsetpoint.ParseThermostatSetpointSupportedGet(payload), nil
 		case 0x05:
-			return thermostatsetpoint.ParseThermostatSetpointSupportedReport(payload)
+			return thermostatsetpoint.ParseThermostatSetpointSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ThermostatSetpointV2:
 		switch payload[1] {
 		case 0x02:
-			return thermostatsetpointv2.ParseThermostatSetpointGet(payload)
+			return thermostatsetpointv2.ParseThermostatSetpointGet(payload), nil
 		case 0x03:
-			return thermostatsetpointv2.ParseThermostatSetpointReport(payload)
+			return thermostatsetpointv2.ParseThermostatSetpointReport(payload), nil
 		case 0x01:
-			return thermostatsetpointv2.ParseThermostatSetpointSet(payload)
+			return thermostatsetpointv2.ParseThermostatSetpointSet(payload), nil
 		case 0x04:
-			return thermostatsetpointv2.ParseThermostatSetpointSupportedGet(payload)
+			return thermostatsetpointv2.ParseThermostatSetpointSupportedGet(payload), nil
 		case 0x05:
-			return thermostatsetpointv2.ParseThermostatSetpointSupportedReport(payload)
+			return thermostatsetpointv2.ParseThermostatSetpointSupportedReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ThermostatSetpointV3:
 		switch payload[1] {
 		case 0x02:
-			return thermostatsetpointv3.ParseThermostatSetpointGet(payload)
+			return thermostatsetpointv3.ParseThermostatSetpointGet(payload), nil
 		case 0x03:
-			return thermostatsetpointv3.ParseThermostatSetpointReport(payload)
+			return thermostatsetpointv3.ParseThermostatSetpointReport(payload), nil
 		case 0x01:
-			return thermostatsetpointv3.ParseThermostatSetpointSet(payload)
+			return thermostatsetpointv3.ParseThermostatSetpointSet(payload), nil
 		case 0x04:
-			return thermostatsetpointv3.ParseThermostatSetpointSupportedGet(payload)
+			return thermostatsetpointv3.ParseThermostatSetpointSupportedGet(payload), nil
 		case 0x05:
-			return thermostatsetpointv3.ParseThermostatSetpointSupportedReport(payload)
+			return thermostatsetpointv3.ParseThermostatSetpointSupportedReport(payload), nil
 		case 0x09:
-			return thermostatsetpointv3.ParseThermostatSetpointCapabilitiesGet(payload)
+			return thermostatsetpointv3.ParseThermostatSetpointCapabilitiesGet(payload), nil
 		case 0x0A:
-			return thermostatsetpointv3.ParseThermostatSetpointCapabilitiesReport(payload)
+			return thermostatsetpointv3.ParseThermostatSetpointCapabilitiesReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case TimeParameters:
 		switch payload[1] {
 		case 0x02:
-			return timeparameters.ParseTimeParametersGet(payload)
+			return timeparameters.ParseTimeParametersGet(payload), nil
 		case 0x03:
-			return timeparameters.ParseTimeParametersReport(payload)
+			return timeparameters.ParseTimeParametersReport(payload), nil
 		case 0x01:
-			return timeparameters.ParseTimeParametersSet(payload)
+			return timeparameters.ParseTimeParametersSet(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Time:
 		switch payload[1] {
 		case 0x03:
-			return time.ParseDateGet(payload)
+			return time.ParseDateGet(payload), nil
 		case 0x04:
-			return time.ParseDateReport(payload)
+			return time.ParseDateReport(payload), nil
 		case 0x01:
-			return time.ParseTimeGet(payload)
+			return time.ParseTimeGet(payload), nil
 		case 0x02:
-			return time.ParseTimeReport(payload)
+			return time.ParseTimeReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case TimeV2:
 		switch payload[1] {
 		case 0x03:
-			return timev2.ParseDateGet(payload)
+			return timev2.ParseDateGet(payload), nil
 		case 0x04:
-			return timev2.ParseDateReport(payload)
+			return timev2.ParseDateReport(payload), nil
 		case 0x01:
-			return timev2.ParseTimeGet(payload)
+			return timev2.ParseTimeGet(payload), nil
 		case 0x06:
-			return timev2.ParseTimeOffsetGet(payload)
+			return timev2.ParseTimeOffsetGet(payload), nil
 		case 0x07:
-			return timev2.ParseTimeOffsetReport(payload)
+			return timev2.ParseTimeOffsetReport(payload), nil
 		case 0x05:
-			return timev2.ParseTimeOffsetSet(payload)
+			return timev2.ParseTimeOffsetSet(payload), nil
 		case 0x02:
-			return timev2.ParseTimeReport(payload)
+			return timev2.ParseTimeReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case UserCode:
 		switch payload[1] {
 		case 0x02:
-			return usercode.ParseUserCodeGet(payload)
+			return usercode.ParseUserCodeGet(payload), nil
 		case 0x03:
-			return usercode.ParseUserCodeReport(payload)
+			return usercode.ParseUserCodeReport(payload), nil
 		case 0x01:
-			return usercode.ParseUserCodeSet(payload)
+			return usercode.ParseUserCodeSet(payload), nil
 		case 0x04:
-			return usercode.ParseUsersNumberGet(payload)
+			return usercode.ParseUsersNumberGet(payload), nil
 		case 0x05:
-			return usercode.ParseUsersNumberReport(payload)
+			return usercode.ParseUsersNumberReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Version:
 		switch payload[1] {
 		case 0x13:
-			return version.ParseVersionCommandClassGet(payload)
+			return version.ParseVersionCommandClassGet(payload), nil
 		case 0x14:
-			return version.ParseVersionCommandClassReport(payload)
+			return version.ParseVersionCommandClassReport(payload), nil
 		case 0x11:
-			return version.ParseVersionGet(payload)
+			return version.ParseVersionGet(payload), nil
 		case 0x12:
-			return version.ParseVersionReport(payload)
+			return version.ParseVersionReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case VersionV2:
 		switch payload[1] {
 		case 0x13:
-			return versionv2.ParseVersionCommandClassGet(payload)
+			return versionv2.ParseVersionCommandClassGet(payload), nil
 		case 0x14:
-			return versionv2.ParseVersionCommandClassReport(payload)
+			return versionv2.ParseVersionCommandClassReport(payload), nil
 		case 0x11:
-			return versionv2.ParseVersionGet(payload)
+			return versionv2.ParseVersionGet(payload), nil
 		case 0x12:
-			return versionv2.ParseVersionReport(payload)
+			return versionv2.ParseVersionReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case WakeUp:
 		switch payload[1] {
 		case 0x05:
-			return wakeup.ParseWakeUpIntervalGet(payload)
+			return wakeup.ParseWakeUpIntervalGet(payload), nil
 		case 0x06:
-			return wakeup.ParseWakeUpIntervalReport(payload)
+			return wakeup.ParseWakeUpIntervalReport(payload), nil
 		case 0x04:
-			return wakeup.ParseWakeUpIntervalSet(payload)
+			return wakeup.ParseWakeUpIntervalSet(payload), nil
 		case 0x08:
-			return wakeup.ParseWakeUpNoMoreInformation(payload)
+			return wakeup.ParseWakeUpNoMoreInformation(payload), nil
 		case 0x07:
-			return wakeup.ParseWakeUpNotification(payload)
+			return wakeup.ParseWakeUpNotification(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case WakeUpV2:
 		switch payload[1] {
 		case 0x09:
-			return wakeupv2.ParseWakeUpIntervalCapabilitiesGet(payload)
+			return wakeupv2.ParseWakeUpIntervalCapabilitiesGet(payload), nil
 		case 0x0A:
-			return wakeupv2.ParseWakeUpIntervalCapabilitiesReport(payload)
+			return wakeupv2.ParseWakeUpIntervalCapabilitiesReport(payload), nil
 		case 0x05:
-			return wakeupv2.ParseWakeUpIntervalGet(payload)
+			return wakeupv2.ParseWakeUpIntervalGet(payload), nil
 		case 0x06:
-			return wakeupv2.ParseWakeUpIntervalReport(payload)
+			return wakeupv2.ParseWakeUpIntervalReport(payload), nil
 		case 0x04:
-			return wakeupv2.ParseWakeUpIntervalSet(payload)
+			return wakeupv2.ParseWakeUpIntervalSet(payload), nil
 		case 0x08:
-			return wakeupv2.ParseWakeUpNoMoreInformation(payload)
+			return wakeupv2.ParseWakeUpNoMoreInformation(payload), nil
 		case 0x07:
-			return wakeupv2.ParseWakeUpNotification(payload)
+			return wakeupv2.ParseWakeUpNotification(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ZensorNet:
 		switch payload[1] {
 		case 0x02:
-			return zensornet.ParseBindAccept(payload)
+			return zensornet.ParseBindAccept(payload), nil
 		case 0x03:
-			return zensornet.ParseBindComplete(payload)
+			return zensornet.ParseBindComplete(payload), nil
 		case 0x01:
-			return zensornet.ParseBindRequest(payload)
+			return zensornet.ParseBindRequest(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ApplicationCapability:
 		switch payload[1] {
 		case 0x01:
-			return applicationcapability.ParseCommandCommandClassNotSupported(payload)
+			return applicationcapability.ParseCommandCommandClassNotSupported(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ColorControl:
 		switch payload[1] {
 		case 0x01:
-			return colorcontrol.ParseCapabilityGet(payload)
+			return colorcontrol.ParseCapabilityGet(payload), nil
 		case 0x02:
-			return colorcontrol.ParseCapabilityReport(payload)
+			return colorcontrol.ParseCapabilityReport(payload), nil
 		case 0x03:
-			return colorcontrol.ParseStateGet(payload)
+			return colorcontrol.ParseStateGet(payload), nil
 		case 0x04:
-			return colorcontrol.ParseStateReport(payload)
+			return colorcontrol.ParseStateReport(payload), nil
 		case 0x05:
-			return colorcontrol.ParseStateSet(payload)
+			return colorcontrol.ParseStateSet(payload), nil
 		case 0x06:
-			return colorcontrol.ParseStartCapabilityLevelChange(payload)
+			return colorcontrol.ParseStartCapabilityLevelChange(payload), nil
 		case 0x07:
-			return colorcontrol.ParseStopStateChange(payload)
+			return colorcontrol.ParseStopStateChange(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ColorControlV2:
 		switch payload[1] {
 		case 0x01:
-			return colorcontrolv2.ParseCapabilityGet(payload)
+			return colorcontrolv2.ParseCapabilityGet(payload), nil
 		case 0x02:
-			return colorcontrolv2.ParseCapabilityReport(payload)
+			return colorcontrolv2.ParseCapabilityReport(payload), nil
 		case 0x03:
-			return colorcontrolv2.ParseStateGet(payload)
+			return colorcontrolv2.ParseStateGet(payload), nil
 		case 0x04:
-			return colorcontrolv2.ParseStateReport(payload)
+			return colorcontrolv2.ParseStateReport(payload), nil
 		case 0x05:
-			return colorcontrolv2.ParseStateSet(payload)
+			return colorcontrolv2.ParseStateSet(payload), nil
 		case 0x06:
-			return colorcontrolv2.ParseStartCapabilityLevelChange(payload)
+			return colorcontrolv2.ParseStartCapabilityLevelChange(payload), nil
 		case 0x07:
-			return colorcontrolv2.ParseStopStateChange(payload)
+			return colorcontrolv2.ParseStopStateChange(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Schedule:
 		switch payload[1] {
 		case 0x01:
-			return schedule.ParseScheduleSupportedGet(payload)
+			return schedule.ParseScheduleSupportedGet(payload), nil
 		case 0x02:
-			return schedule.ParseScheduleSupportedReport(payload)
+			return schedule.ParseScheduleSupportedReport(payload), nil
 		case 0x03:
-			return schedule.ParseCommandScheduleSet(payload)
+			return schedule.ParseCommandScheduleSet(payload), nil
 		case 0x04:
-			return schedule.ParseCommandScheduleGet(payload)
+			return schedule.ParseCommandScheduleGet(payload), nil
 		case 0x05:
-			return schedule.ParseCommandScheduleReport(payload)
+			return schedule.ParseCommandScheduleReport(payload), nil
 		case 0x06:
-			return schedule.ParseScheduleRemove(payload)
+			return schedule.ParseScheduleRemove(payload), nil
 		case 0x07:
-			return schedule.ParseScheduleStateSet(payload)
+			return schedule.ParseScheduleStateSet(payload), nil
 		case 0x08:
-			return schedule.ParseScheduleStateGet(payload)
+			return schedule.ParseScheduleStateGet(payload), nil
 		case 0x09:
-			return schedule.ParseScheduleStateReport(payload)
+			return schedule.ParseScheduleStateReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case NetworkManagementPrimary:
 		switch payload[1] {
 		case 0x01:
-			return networkmanagementprimary.ParseControllerChange(payload)
+			return networkmanagementprimary.ParseControllerChange(payload), nil
 		case 0x02:
-			return networkmanagementprimary.ParseControllerChangeStatus(payload)
+			return networkmanagementprimary.ParseControllerChangeStatus(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case AssociationGrpInfo:
 		switch payload[1] {
 		case 0x01:
-			return associationgrpinfo.ParseAssociationGroupNameGet(payload)
+			return associationgrpinfo.ParseAssociationGroupNameGet(payload), nil
 		case 0x02:
-			return associationgrpinfo.ParseAssociationGroupNameReport(payload)
+			return associationgrpinfo.ParseAssociationGroupNameReport(payload), nil
 		case 0x03:
-			return associationgrpinfo.ParseAssociationGroupInfoGet(payload)
+			return associationgrpinfo.ParseAssociationGroupInfoGet(payload), nil
 		case 0x04:
-			return associationgrpinfo.ParseAssociationGroupInfoReport(payload)
+			return associationgrpinfo.ParseAssociationGroupInfoReport(payload), nil
 		case 0x05:
-			return associationgrpinfo.ParseAssociationGroupCommandListGet(payload)
+			return associationgrpinfo.ParseAssociationGroupCommandListGet(payload), nil
 		case 0x06:
-			return associationgrpinfo.ParseAssociationGroupCommandListReport(payload)
+			return associationgrpinfo.ParseAssociationGroupCommandListReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case DeviceResetLocally:
 		switch payload[1] {
 		case 0x01:
-			return deviceresetlocally.ParseDeviceResetLocallyNotification(payload)
+			return deviceresetlocally.ParseDeviceResetLocallyNotification(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case CentralScene:
 		switch payload[1] {
 		case 0x01:
-			return centralscene.ParseCentralSceneSupportedGet(payload)
+			return centralscene.ParseCentralSceneSupportedGet(payload), nil
 		case 0x02:
-			return centralscene.ParseCentralSceneSupportedReport(payload)
+			return centralscene.ParseCentralSceneSupportedReport(payload), nil
 		case 0x03:
-			return centralscene.ParseCentralSceneNotification(payload)
+			return centralscene.ParseCentralSceneNotification(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Antitheft:
 		switch payload[1] {
 		case 0x01:
-			return antitheft.ParseAntitheftSet(payload)
+			return antitheft.ParseAntitheftSet(payload), nil
 		case 0x02:
-			return antitheft.ParseAntitheftGet(payload)
+			return antitheft.ParseAntitheftGet(payload), nil
 		case 0x03:
-			return antitheft.ParseAntitheftReport(payload)
+			return antitheft.ParseAntitheftReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case AntitheftV2:
 		switch payload[1] {
 		case 0x01:
-			return antitheftv2.ParseAntitheftSet(payload)
+			return antitheftv2.ParseAntitheftSet(payload), nil
 		case 0x02:
-			return antitheftv2.ParseAntitheftGet(payload)
+			return antitheftv2.ParseAntitheftGet(payload), nil
 		case 0x03:
-			return antitheftv2.ParseAntitheftReport(payload)
+			return antitheftv2.ParseAntitheftReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ZwaveplusInfo:
 		switch payload[1] {
 		case 0x01:
-			return zwaveplusinfo.ParseZwaveplusInfoGet(payload)
+			return zwaveplusinfo.ParseZwaveplusInfoGet(payload), nil
 		case 0x02:
-			return zwaveplusinfo.ParseZwaveplusInfoReport(payload)
+			return zwaveplusinfo.ParseZwaveplusInfoReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case ZwaveplusInfoV2:
 		switch payload[1] {
 		case 0x01:
-			return zwaveplusinfov2.ParseZwaveplusInfoGet(payload)
+			return zwaveplusinfov2.ParseZwaveplusInfoGet(payload), nil
 		case 0x02:
-			return zwaveplusinfov2.ParseZwaveplusInfoReport(payload)
+			return zwaveplusinfov2.ParseZwaveplusInfoReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Appliance:
 		switch payload[1] {
 		case 0x01:
-			return appliance.ParseApplianceTypeGet(payload)
+			return appliance.ParseApplianceTypeGet(payload), nil
 		case 0x02:
-			return appliance.ParseApplianceTypeReport(payload)
+			return appliance.ParseApplianceTypeReport(payload), nil
 		case 0x03:
-			return appliance.ParseApplianceProgramSupportedGet(payload)
+			return appliance.ParseApplianceProgramSupportedGet(payload), nil
 		case 0x04:
-			return appliance.ParseApplianceProgramSupportedReport(payload)
+			return appliance.ParseApplianceProgramSupportedReport(payload), nil
 		case 0x05:
-			return appliance.ParseApplianceSet(payload)
+			return appliance.ParseApplianceSet(payload), nil
 		case 0x06:
-			return appliance.ParseApplianceGet(payload)
+			return appliance.ParseApplianceGet(payload), nil
 		case 0x07:
-			return appliance.ParseApplianceReport(payload)
+			return appliance.ParseApplianceReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case Dmx:
 		switch payload[1] {
 		case 0x01:
-			return dmx.ParseDmxAddressSet(payload)
+			return dmx.ParseDmxAddressSet(payload), nil
 		case 0x02:
-			return dmx.ParseDmxAddressGet(payload)
+			return dmx.ParseDmxAddressGet(payload), nil
 		case 0x03:
-			return dmx.ParseDmxAddressReport(payload)
+			return dmx.ParseDmxAddressReport(payload), nil
 		case 0x04:
-			return dmx.ParseDmxCapabilityGet(payload)
+			return dmx.ParseDmxCapabilityGet(payload), nil
 		case 0x05:
-			return dmx.ParseDmxCapabilityReport(payload)
+			return dmx.ParseDmxCapabilityReport(payload), nil
 		case 0x06:
-			return dmx.ParseDmxData40(payload)
+			return dmx.ParseDmxData40(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	case BarrierOperator:
 		switch payload[1] {
 		case 0x01:
-			return barrieroperator.ParseBarrierOperatorSet(payload)
+			return barrieroperator.ParseBarrierOperatorSet(payload), nil
 		case 0x02:
-			return barrieroperator.ParseBarrierOperatorGet(payload)
+			return barrieroperator.ParseBarrierOperatorGet(payload), nil
 		case 0x03:
-			return barrieroperator.ParseBarrierOperatorReport(payload)
+			return barrieroperator.ParseBarrierOperatorReport(payload), nil
 		case 0x04:
-			return barrieroperator.ParseBarrierOperatorSignalSupportedGet(payload)
+			return barrieroperator.ParseBarrierOperatorSignalSupportedGet(payload), nil
 		case 0x05:
-			return barrieroperator.ParseBarrierOperatorSignalSupportedReport(payload)
+			return barrieroperator.ParseBarrierOperatorSignalSupportedReport(payload), nil
 		case 0x06:
-			return barrieroperator.ParseBarrierOperatorSignalSet(payload)
+			return barrieroperator.ParseBarrierOperatorSignalSet(payload), nil
 		case 0x07:
-			return barrieroperator.ParseBarrierOperatorSignalGet(payload)
+			return barrieroperator.ParseBarrierOperatorSignalGet(payload), nil
 		case 0x08:
-			return barrieroperator.ParseBarrierOperatorSignalReport(payload)
+			return barrieroperator.ParseBarrierOperatorSignalReport(payload), nil
 		default:
-			panic("Unknown command")
+			return nil, errors.New("Unknown command")
 		}
 
 	}

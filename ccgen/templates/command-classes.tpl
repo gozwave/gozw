@@ -21,9 +21,9 @@ func Parse(payload []byte) (interface{}, error) {
     case {{.GetConstName}}:
       switch payload[1] {
         {{range .Commands}}case {{.Key}}:
-          return {{$cc.GetPackageName}}.Parse{{(ToGoName .Name) "V" $version}}(payload)
+          return {{$cc.GetPackageName}}.Parse{{(ToGoName .Name) "V" $version}}(payload), nil
         {{end}}default:
-          panic("Unknown command")
+          return nil, errors.New("Unknown command")
       }
     {{end}}{{end}}
   }
