@@ -1,5 +1,5 @@
-{{with .}}i := 0{{end}}
-{{range $_, $param := .}}
+{{with .}}i := 0{{end}}{{/* {{with}} here ensures we don't print this if there are no params */}}
+{{range .}}
   if len(payload) <= i {
     return errors.New("slice index out of bounds")
   }
@@ -13,11 +13,11 @@
   {{else if eq .Type "STRUCT_BYTE"}}{{$name := ToGoName .Name}}
     {{range .BitField}}
       {{if .IsNotReserved}}
-        cmd.{{$name}}.{{ToGoName .FieldName}} = (payload[i]{{with .FieldMask}}&{{.}}{{end}}){{with .Shifter}}<<{{.}}{{end}}
+        cmd.{{$name}}.{{ToGoName .FieldName}} = (payload[i]{{with .FieldMask}}&{{.}}{{end}}){{with .Shifter}}>>{{.}}{{end}}
       {{end}}
     {{end}}
     {{range .FieldEnum}}
-      cmd.{{$name}}.{{ToGoName .FieldName}} = (payload[i]{{with .FieldMask}}&{{.}}{{end}}){{with .Shifter}}<<{{.}}{{end}}
+      cmd.{{$name}}.{{ToGoName .FieldName}} = (payload[i]{{with .FieldMask}}&{{.}}{{end}}){{with .Shifter}}>>{{.}}{{end}}
     {{end}}
     {{range .BitFlag}}
       {{if .IsNotReserved}}
