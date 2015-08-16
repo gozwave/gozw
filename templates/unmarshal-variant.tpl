@@ -2,8 +2,8 @@
 {
   markerIndex := i
   for ; markerIndex < len(payload) && payload[markerIndex] != {{$variant.MarkerValue}}; markerIndex++ {}
-  val.{{ToGoName .Name}} = payload[i:markerIndex]
+  cmd.{{ToGoName .Name}} = payload[i:markerIndex]
 }
 {{else}}
-val.{{ToGoName .Name}} = payload[i:]
+cmd.{{ToGoName .Name}} = payload[i:]
 {{end}}
