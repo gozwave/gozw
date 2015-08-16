@@ -29,8 +29,11 @@ func Parse(payload []byte) (interface{}, error) {
         {{range .Commands}}case {{.Key}}:
           return {{$cc.GetPackageName}}.Parse{{(ToGoName .Name) "V" $version}}(payload), nil
         {{end}}default:
-          return nil, errors.New("Unknown command")
+          return nil, errors.New("Unknown command in command class {{.Help}}")
       }
     {{end}}{{end}}
+
+    default:
+      return nil, errors.New("Unknown command class")
   }
 }
