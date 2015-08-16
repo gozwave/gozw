@@ -55,7 +55,7 @@ type SecurityMessageEncapsulation struct {
 
 func NewSecuritySchemeGet() []byte {
 	return []byte{
-		CommandClassSecurity,
+		byte(Security),
 		CommandSecuritySchemeGet,
 		0x0,
 	}
@@ -63,14 +63,14 @@ func NewSecuritySchemeGet() []byte {
 
 func NewSecurityNonceGet() []byte {
 	return []byte{
-		CommandClassSecurity,
+		byte(Security),
 		CommandSecurityNonceGet,
 	}
 }
 
 func NewSecurityNonceReport(nonce []byte) []byte {
 	buf := []byte{
-		CommandClassSecurity,
+		byte(Security),
 		CommandSecurityNonceReport,
 	}
 
@@ -79,7 +79,7 @@ func NewSecurityNonceReport(nonce []byte) []byte {
 
 func NewSecurityNetworkKeySet(key []byte) []byte {
 	buf := []byte{
-		CommandClassSecurity,
+		byte(Security),
 		CommandNetworkKeySet,
 	}
 
@@ -88,7 +88,7 @@ func NewSecurityNetworkKeySet(key []byte) []byte {
 
 func NewSecurityMessageEncapsulation(iv, payload, hmac []byte, receiverNonceID byte) []byte {
 	buf := []byte{
-		CommandClassSecurity,
+		byte(Security),
 		CommandSecurityMessageEncapsulation,
 	}
 
@@ -155,7 +155,7 @@ func ParseSecurityNonceReport(command []byte) *SecurityNonceReport {
 }
 
 func ParseCommandClassSecurity(command []byte) (interface{}, error) {
-	if command[0] != CommandClassSecurity {
+	if command[0] != byte(Security) {
 		return nil, errors.New("Not security command class")
 	}
 
