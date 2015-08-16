@@ -27,7 +27,13 @@ func Parse(payload []byte) (interface{}, error) {
     case {{.GetConstName}}:
       switch payload[1] {
         {{range .Commands}}case {{.Key}}:
-          return {{$cc.GetPackageName}}.Parse{{(ToGoName .Name) "V" $version}}(payload), nil
+          command := {{$cc.GetPackageName}}.{{(ToGoName .Name)}}{}
+          err := command.UnmarshalBinary(payload[2:])
+          if err != nil {
+            return nil, err
+          }
+
+          return command, nil
         {{end}}default:
           return nil, errors.New("Unknown command in command class {{.Help}}")
       }
