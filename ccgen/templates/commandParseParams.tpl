@@ -4,49 +4,49 @@
     {{if eq (index .Variant 0).ParamOffset 255}}
       {{template "parseVariant.tpl" .}}
     {{else}}
-      val.{{ToGoName .Name}} = payload[i:i+{{(index .Variant 0).ParamOffset}}]
+      cmd.{{ToGoName .Name}} = payload[i:i+{{(index .Variant 0).ParamOffset}}]
       i += {{(index .Variant 0).ParamOffset}}
     {{end}}
   {{else if eq .Type "STRUCT_BYTE"}}{{$name := ToGoName .Name}}
-    {{range $_, $subVal := .BitField}}
+    {{range .BitField}}
       {{if .IsNotReserved}}
-        val.{{$name}}.{{ToGoName .FieldName}} = (payload[i]{{with .FieldMask}}&{{.}}{{end}}){{with .Shifter}}<<{{.}}{{end}}
+        cmd.{{$name}}.{{ToGoName .FieldName}} = (payload[i]{{with .FieldMask}}&{{.}}{{end}}){{with .Shifter}}<<{{.}}{{end}}
       {{end}}
     {{end}}
-    {{range $_, $subVal := .FieldEnum}}
-      val.{{$name}}.{{ToGoName .FieldName}} = (payload[i]{{with .FieldMask}}&{{.}}{{end}}){{with .Shifter}}<<{{.}}{{end}}
+    {{range .FieldEnum}}
+      cmd.{{$name}}.{{ToGoName .FieldName}} = (payload[i]{{with .FieldMask}}&{{.}}{{end}}){{with .Shifter}}<<{{.}}{{end}}
     {{end}}
-    {{range $_, $subVal := .BitFlag}}
+    {{range .BitFlag}}
       {{if .IsNotReserved}}
         if payload[i] & {{.FlagMask}} == {{.FlagMask}} {
-          val.{{$name}}.{{ToGoName .FlagName}} = true
+          cmd.{{$name}}.{{ToGoName .FlagName}} = true
         } else {
-          val.{{$name}}.{{ToGoName .FlagName}} = false
+          cmd.{{$name}}.{{ToGoName .FlagName}} = false
         }
       {{end}}
     {{end}}
     i += 1
   {{else if eq .Type "ARRAY"}}
     {{if (index .ArrayAttrib 0).IsAscii}}
-      val.{{ToGoName .Name}} = string(payload[i:i+{{(index .ArrayAttrib 0).Length}}])
+      cmd.{{ToGoName .Name}} = string(payload[i:i+{{(index .ArrayAttrib 0).Length}}])
     {{else}}
-      val.{{ToGoName .Name}} = payload[i:i+{{(index .ArrayAttrib 0).Length}}]
+      cmd.{{ToGoName .Name}} = payload[i:i+{{(index .ArrayAttrib 0).Length}}]
     {{end}}
     i += {{(index .ArrayAttrib 0).Length}}
   {{else if eq .Type "DWORD"}}
-    val.{{ToGoName .Name}} = binary.BigEndian.Uint32(payload[i:i+4])
+    cmd.{{ToGoName .Name}} = binary.BigEndian.Uint32(payload[i:i+4])
     i += 4
   {{else if eq .Type "BIT_24"}}
-    val.{{ToGoName .Name}} = binary.BigEndian.Uint32(payload[i:i+3])
+    cmd.{{ToGoName .Name}} = binary.BigEndian.Uint32(payload[i:i+3])
     i += 3
   {{else if eq .Type "WORD"}}
-    val.{{ToGoName .Name}} = binary.BigEndian.Uint16(payload[i:i+2])
+    cmd.{{ToGoName .Name}} = binary.BigEndian.Uint16(payload[i:i+2])
     i += 2
   {{else if eq .Type "MARKER"}}
     i += 1 // skipping MARKER
   {{else}}
     {{if .IsNotReserved}}
-      val.{{ToGoName .Name}} = payload[i]
+      cmd.{{ToGoName .Name}} = payload[i]
       i++
     {{end}}
   {{end}}
