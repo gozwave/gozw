@@ -17,7 +17,7 @@ func (c CommandClassID) String() string {
       return "{{.Help}}"
     {{end}}
     default:
-      return "Unknown" + fmt.Sprintf(" (0x%X)", byte(c))
+      return fmt.Sprintf("Unknown (0x%X)", byte(c))
   }
 }
 
