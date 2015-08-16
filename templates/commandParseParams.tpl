@@ -1,5 +1,8 @@
 {{with .}}i := 2{{end}}
 {{range $_, $param := .}}
+  if len(payload) <= i {
+    return errors.New("slice index out of bounds")
+  }
   {{if eq .Type "VARIANT"}}
     {{if eq (index .Variant 0).ParamOffset 255}}
       {{template "parseVariant.tpl" .}}
