@@ -17,7 +17,7 @@
       {{end}}
     {{end}}
   }
-  {{else}}
+  {{else if eq .Type "MARKER"}}{{else}}
     {{ToGoName .Name}} {{.GetGoType}}
   {{end}}
 {{end}}

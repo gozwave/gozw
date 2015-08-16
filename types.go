@@ -107,14 +107,6 @@ func (c CommandClass) CanGenerate() (can bool, reason string) {
 		return false, "Not supported"
 	}
 
-	for _, cmd := range c.Commands {
-		for _, param := range cmd.Params {
-			if param.Type == "MARKER" {
-				return false, "Contains a MARKER"
-			}
-		}
-	}
-
 	return true, ""
 }
 

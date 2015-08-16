@@ -6,13 +6,19 @@ package commandclass
 type CommandClassID byte
 
 const (
-  {{range .CommandClasses}}{{if .CanGen}}
-  {{.GetConstName}} CommandClassID = {{.Key}}{{end}}{{end}}
+  {{range .CommandClasses}}
+  {{.GetConstName}} CommandClassID = {{.Key}}{{end}}
 )
 
-var CommandClassNames = map[CommandClassID]string{
-  {{range .CommandClasses}}{{if .CanGen}}
-  {{.GetConstName}}: "{{.Help}}",{{end}}{{end}}
+func (c CommandClassID) String() string {
+  switch c {
+    {{range .CommandClasses}}
+    case {{.GetConstName}}:
+      return "{{.Help}}"
+    {{end}}
+    default:
+      return "Unknown" + fmt.Sprintf(" (0x%X)", c)
+  }
 }
 
 func Parse(payload []byte) (interface{}, error) {
