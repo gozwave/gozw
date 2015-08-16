@@ -2,7 +2,7 @@
 {{range $_, $param := .}}
   {{if eq .Type "VARIANT"}}
     {{if eq (index .Variant 0).ParamOffset 255}}
-      val.{{ToGoName .Name}} = payload[i:]
+      {{template "parseVariant.tpl" .}}
     {{else}}
       val.{{ToGoName .Name}} = payload[i:i+{{(index .Variant 0).ParamOffset}}]
       i += {{(index .Variant 0).ParamOffset}}
@@ -43,7 +43,7 @@
     val.{{ToGoName .Name}} = binary.BigEndian.Uint16(payload[i:i+2])
     i += 2
   {{else if eq .Type "MARKER"}}
-    // MARKER HERE
+    i += 1 // skipping MARKER
   {{else}}
     {{if .IsNotReserved}}
       val.{{ToGoName .Name}} = payload[i]
