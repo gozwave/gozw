@@ -16,7 +16,7 @@ type MultiInstanceReport struct {
 }
 
 func (cmd *MultiInstanceReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -34,4 +34,19 @@ func (cmd *MultiInstanceReport) UnmarshalBinary(payload []byte) error {
 	i += 1
 
 	return nil
+}
+
+func (cmd *MultiInstanceReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.CommandClass)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.Instances) & byte(0x7F)
+
+		payload = append(payload, val)
+	}
+
+	return
 }

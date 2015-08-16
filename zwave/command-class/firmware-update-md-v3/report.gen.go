@@ -25,7 +25,7 @@ type FirmwareUpdateMdReport struct {
 }
 
 func (cmd *FirmwareUpdateMdReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -52,7 +52,7 @@ func (cmd *FirmwareUpdateMdReport) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	val.Data = payload[i:]
+	cmd.Data = payload[i:]
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -62,4 +62,33 @@ func (cmd *FirmwareUpdateMdReport) UnmarshalBinary(payload []byte) error {
 	i += 2
 
 	return nil
+}
+
+func (cmd *FirmwareUpdateMdReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.ReportNumber1) & byte(0x7F)
+
+		if cmd.Properties1.Last {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.ReportNumber2)
+
+	payload = append(payload, cmd.Data...)
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.Checksum)
+		payload = append(payload, buf...)
+	}
+
+	return
 }

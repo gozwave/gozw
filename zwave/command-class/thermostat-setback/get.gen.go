@@ -12,3 +12,8 @@ func (cmd *ThermostatSetbackGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *ThermostatSetbackGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

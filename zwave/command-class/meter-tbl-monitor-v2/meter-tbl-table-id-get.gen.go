@@ -12,3 +12,8 @@ func (cmd *MeterTblTableIdGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *MeterTblTableIdGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

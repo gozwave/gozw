@@ -12,3 +12,8 @@ func (cmd *RateTblActiveRateGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *RateTblActiveRateGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

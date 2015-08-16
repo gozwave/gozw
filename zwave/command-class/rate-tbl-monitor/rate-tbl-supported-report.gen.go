@@ -17,7 +17,7 @@ type RateTblSupportedReport struct {
 }
 
 func (cmd *RateTblSupportedReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -34,4 +34,17 @@ func (cmd *RateTblSupportedReport) UnmarshalBinary(payload []byte) error {
 	i += 2
 
 	return nil
+}
+
+func (cmd *RateTblSupportedReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.RatesSupported)
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.ParameterSetSupportedBitMask)
+		payload = append(payload, buf...)
+	}
+
+	return
 }

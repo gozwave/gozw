@@ -16,7 +16,7 @@ type RateTblRemove struct {
 }
 
 func (cmd *RateTblRemove) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -34,4 +34,21 @@ func (cmd *RateTblRemove) UnmarshalBinary(payload []byte) error {
 	i += 0
 
 	return nil
+}
+
+func (cmd *RateTblRemove) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.RateParameterSetIds) & byte(0x3F)
+
+		payload = append(payload, val)
+	}
+
+	if cmd.RateParameterSetId != nil && len(cmd.RateParameterSetId) > 0 {
+		payload = append(payload, cmd.RateParameterSetId...)
+	}
+
+	return
 }

@@ -27,7 +27,7 @@ type DcpEventStatusReport struct {
 }
 
 func (cmd *DcpEventStatusReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -79,4 +79,27 @@ func (cmd *DcpEventStatusReport) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *DcpEventStatusReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.Year)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.Month)
+
+	payload = append(payload, cmd.Day)
+
+	payload = append(payload, cmd.HourLocalTime)
+
+	payload = append(payload, cmd.MinuteLocalTime)
+
+	payload = append(payload, cmd.SecondLocalTime)
+
+	payload = append(payload, cmd.EventStatus)
+
+	return
 }

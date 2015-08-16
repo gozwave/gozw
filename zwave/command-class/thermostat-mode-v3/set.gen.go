@@ -18,13 +18,13 @@ type ThermostatModeSet struct {
 }
 
 func (cmd *ThermostatModeSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
 
-	cmd.Level.NoOfManufacturerDataFields = (payload[i] & 0xE0) << 5
+	cmd.Level.NoOfManufacturerDataFields = (payload[i] & 0xE0) >> 5
 
 	cmd.Level.Mode = (payload[i] & 0x1F)
 
@@ -38,4 +38,23 @@ func (cmd *ThermostatModeSet) UnmarshalBinary(payload []byte) error {
 	i += 0
 
 	return nil
+}
+
+func (cmd *ThermostatModeSet) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Level.NoOfManufacturerDataFields << byte(5)) & byte(0xE0)
+
+		val |= (cmd.Level.Mode) & byte(0x1F)
+
+		payload = append(payload, val)
+	}
+
+	if cmd.ManufacturerData != nil && len(cmd.ManufacturerData) > 0 {
+		payload = append(payload, cmd.ManufacturerData...)
+	}
+
+	return
 }

@@ -12,3 +12,8 @@ func (cmd *LanguageGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *LanguageGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

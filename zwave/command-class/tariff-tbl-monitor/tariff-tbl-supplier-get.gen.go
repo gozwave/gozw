@@ -12,3 +12,8 @@ func (cmd *TariffTblSupplierGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *TariffTblSupplierGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

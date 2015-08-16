@@ -14,15 +14,28 @@ type PrepaymentBalanceGet struct {
 }
 
 func (cmd *PrepaymentBalanceGet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
 
-	cmd.Properties1.BalanceType = (payload[i] & 0xC0) << 6
+	cmd.Properties1.BalanceType = (payload[i] & 0xC0) >> 6
 
 	i += 1
 
 	return nil
+}
+
+func (cmd *PrepaymentBalanceGet) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.BalanceType << byte(6)) & byte(0xC0)
+
+		payload = append(payload, val)
+	}
+
+	return
 }

@@ -15,7 +15,7 @@ type MeterPulseReport struct {
 }
 
 func (cmd *MeterPulseReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -25,4 +25,15 @@ func (cmd *MeterPulseReport) UnmarshalBinary(payload []byte) error {
 	i += 4
 
 	return nil
+}
+
+func (cmd *MeterPulseReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.PulseCount)
+		payload = append(payload, buf...)
+	}
+
+	return
 }

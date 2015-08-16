@@ -12,3 +12,8 @@ func (cmd *SwitchToggleMultilevelGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *SwitchToggleMultilevelGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

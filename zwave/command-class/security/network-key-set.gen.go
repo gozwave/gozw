@@ -12,13 +12,20 @@ type NetworkKeySet struct {
 }
 
 func (cmd *NetworkKeySet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
 
-	val.NetworkKeyByte = payload[i:]
+	cmd.NetworkKeyByte = payload[i:]
 
 	return nil
+}
+
+func (cmd *NetworkKeySet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.NetworkKeyByte...)
+
+	return
 }

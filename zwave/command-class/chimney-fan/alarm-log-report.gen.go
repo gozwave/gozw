@@ -60,7 +60,7 @@ type ChimneyFanAlarmLogReport struct {
 }
 
 func (cmd *ChimneyFanAlarmLogReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -213,4 +213,159 @@ func (cmd *ChimneyFanAlarmLogReport) UnmarshalBinary(payload []byte) error {
 	i += 1
 
 	return nil
+}
+
+func (cmd *ChimneyFanAlarmLogReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		if cmd.AlarmEvent1.ExternalAlarm1 {
+			val |= byte(0x02) // flip bits on
+		} else {
+			val &= ^byte(0x02) // flip bits off
+		}
+
+		if cmd.AlarmEvent1.SensorError1 {
+			val |= byte(0x04) // flip bits on
+		} else {
+			val &= ^byte(0x04) // flip bits off
+		}
+
+		if cmd.AlarmEvent1.AlarmTemperatureExceeded1 {
+			val |= byte(0x08) // flip bits on
+		} else {
+			val &= ^byte(0x08) // flip bits off
+		}
+
+		if cmd.AlarmEvent1.AlarmStillActive1 {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		if cmd.AlarmEvent2.ExternalAlarm2 {
+			val |= byte(0x02) // flip bits on
+		} else {
+			val &= ^byte(0x02) // flip bits off
+		}
+
+		if cmd.AlarmEvent2.SensorError2 {
+			val |= byte(0x04) // flip bits on
+		} else {
+			val &= ^byte(0x04) // flip bits off
+		}
+
+		if cmd.AlarmEvent2.AlarmTemperatureExceeded2 {
+			val |= byte(0x08) // flip bits on
+		} else {
+			val &= ^byte(0x08) // flip bits off
+		}
+
+		if cmd.AlarmEvent2.AlarmStillActive2 {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		if cmd.AlarmEvent3.ExternalAlarm3 {
+			val |= byte(0x02) // flip bits on
+		} else {
+			val &= ^byte(0x02) // flip bits off
+		}
+
+		if cmd.AlarmEvent3.SensorError3 {
+			val |= byte(0x04) // flip bits on
+		} else {
+			val &= ^byte(0x04) // flip bits off
+		}
+
+		if cmd.AlarmEvent3.AlarmTemperatureExceeded3 {
+			val |= byte(0x08) // flip bits on
+		} else {
+			val &= ^byte(0x08) // flip bits off
+		}
+
+		if cmd.AlarmEvent3.AlarmStillActive3 {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		if cmd.AlarmEvent4.ExternalAlarm4 {
+			val |= byte(0x02) // flip bits on
+		} else {
+			val &= ^byte(0x02) // flip bits off
+		}
+
+		if cmd.AlarmEvent4.SensorError4 {
+			val |= byte(0x04) // flip bits on
+		} else {
+			val &= ^byte(0x04) // flip bits off
+		}
+
+		if cmd.AlarmEvent4.AlarmTemperatureExceeded4 {
+			val |= byte(0x08) // flip bits on
+		} else {
+			val &= ^byte(0x08) // flip bits off
+		}
+
+		if cmd.AlarmEvent4.AlarmStillActive4 {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		if cmd.AlarmEvent5.ExternalAlarm5 {
+			val |= byte(0x02) // flip bits on
+		} else {
+			val &= ^byte(0x02) // flip bits off
+		}
+
+		if cmd.AlarmEvent5.SensorError5 {
+			val |= byte(0x04) // flip bits on
+		} else {
+			val &= ^byte(0x04) // flip bits off
+		}
+
+		if cmd.AlarmEvent5.AlarmTemperatureExceeded5 {
+			val |= byte(0x08) // flip bits on
+		} else {
+			val &= ^byte(0x08) // flip bits off
+		}
+
+		if cmd.AlarmEvent5.AlarmStillActive5 {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	return
 }

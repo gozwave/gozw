@@ -18,7 +18,7 @@ type AssociationGroupInfoReport struct {
 }
 
 func (cmd *AssociationGroupInfoReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -41,4 +41,29 @@ func (cmd *AssociationGroupInfoReport) UnmarshalBinary(payload []byte) error {
 	i += 1
 
 	return nil
+}
+
+func (cmd *AssociationGroupInfoReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.GroupCount) & byte(0x3F)
+
+		if cmd.Properties1.DynamicInfo {
+			val |= byte(0x40) // flip bits on
+		} else {
+			val &= ^byte(0x40) // flip bits off
+		}
+
+		if cmd.Properties1.ListMode {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	return
 }

@@ -12,3 +12,8 @@ func (cmd *ProtectionSupportedGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *ProtectionSupportedGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

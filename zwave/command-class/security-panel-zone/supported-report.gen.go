@@ -16,7 +16,7 @@ type SecurityPanelZoneSupportedReport struct {
 }
 
 func (cmd *SecurityPanelZoneSupportedReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -33,4 +33,23 @@ func (cmd *SecurityPanelZoneSupportedReport) UnmarshalBinary(payload []byte) err
 	i += 1
 
 	return nil
+}
+
+func (cmd *SecurityPanelZoneSupportedReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Parameters1.ZonesSupported) & byte(0x7F)
+
+		if cmd.Parameters1.Zm {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	return
 }

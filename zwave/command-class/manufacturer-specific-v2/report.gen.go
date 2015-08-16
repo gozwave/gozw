@@ -19,7 +19,7 @@ type ManufacturerSpecificReport struct {
 }
 
 func (cmd *ManufacturerSpecificReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -43,4 +43,27 @@ func (cmd *ManufacturerSpecificReport) UnmarshalBinary(payload []byte) error {
 	i += 2
 
 	return nil
+}
+
+func (cmd *ManufacturerSpecificReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.ManufacturerId)
+		payload = append(payload, buf...)
+	}
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.ProductTypeId)
+		payload = append(payload, buf...)
+	}
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.ProductId)
+		payload = append(payload, buf...)
+	}
+
+	return
 }

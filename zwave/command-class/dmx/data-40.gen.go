@@ -20,7 +20,7 @@ type DmxData40 struct {
 }
 
 func (cmd *DmxData40) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -35,7 +35,7 @@ func (cmd *DmxData40) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties1.Page = (payload[i] & 0x0F)
 
-	cmd.Properties1.SequenceNo = (payload[i] & 0x30) << 4
+	cmd.Properties1.SequenceNo = (payload[i] & 0x30) >> 4
 
 	i += 1
 
@@ -48,4 +48,27 @@ func (cmd *DmxData40) UnmarshalBinary(payload []byte) error {
 	i += 40
 
 	return nil
+}
+
+func (cmd *DmxData40) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.Source)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.Page) & byte(0x0F)
+
+		val |= (cmd.Properties1.SequenceNo << byte(4)) & byte(0x30)
+
+		payload = append(payload, val)
+	}
+
+	if paramLen := len(cmd.DmxChannel); paramLen > 40 {
+		return nil, errors.New("Length overflow in array parameter DmxChannel")
+	}
+
+	payload = append(payload, cmd.DmxChannel...)
+
+	return
 }

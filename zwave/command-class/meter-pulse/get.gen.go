@@ -12,3 +12,8 @@ func (cmd *MeterPulseGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *MeterPulseGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

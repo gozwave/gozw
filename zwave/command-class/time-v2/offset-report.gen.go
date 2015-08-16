@@ -36,7 +36,7 @@ type TimeOffsetReport struct {
 }
 
 func (cmd *TimeOffsetReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -116,4 +116,51 @@ func (cmd *TimeOffsetReport) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *TimeOffsetReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Level.HourTzo) & byte(0x7F)
+
+		if cmd.Level.SignTzo {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.MinuteTzo)
+
+	{
+		var val byte
+
+		val |= (cmd.Level2.MinuteOffsetDst) & byte(0x7F)
+
+		if cmd.Level2.SignOffsetDst {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.MonthStartDst)
+
+	payload = append(payload, cmd.DayStartDst)
+
+	payload = append(payload, cmd.HourStartDst)
+
+	payload = append(payload, cmd.MonthEndDst)
+
+	payload = append(payload, cmd.DayEndDst)
+
+	payload = append(payload, cmd.HourEndDst)
+
+	return
 }

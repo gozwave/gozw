@@ -59,7 +59,7 @@ type DcpListSet struct {
 }
 
 func (cmd *DcpListSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -217,4 +217,67 @@ func (cmd *DcpListSet) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *DcpListSet) MarshalBinary() (payload []byte, err error) {
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.Year)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.Month)
+
+	payload = append(payload, cmd.Day)
+
+	payload = append(payload, cmd.HourLocalTime)
+
+	payload = append(payload, cmd.MinuteLocalTime)
+
+	payload = append(payload, cmd.SecondLocalTime)
+
+	payload = append(payload, cmd.DcpRateId)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.NumberOfDc) & byte(0x03)
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.StartYear)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.StartMonth)
+
+	payload = append(payload, cmd.StartDay)
+
+	payload = append(payload, cmd.StartHourLocalTime)
+
+	payload = append(payload, cmd.StartMinuteLocalTime)
+
+	payload = append(payload, cmd.StartSecondLocalTime)
+
+	payload = append(payload, cmd.DurationHourTime)
+
+	payload = append(payload, cmd.DurationMinuteTime)
+
+	payload = append(payload, cmd.DurationSecondTime)
+
+	payload = append(payload, cmd.EventPriority)
+
+	payload = append(payload, cmd.LoadShedding)
+
+	payload = append(payload, cmd.StartAssociationGroup)
+
+	payload = append(payload, cmd.StopAssociationGroup)
+
+	payload = append(payload, cmd.RandomizationInterval)
+
+	return
 }

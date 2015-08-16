@@ -12,3 +12,8 @@ func (cmd *UsersNumberGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *UsersNumberGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

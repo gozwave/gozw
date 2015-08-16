@@ -16,7 +16,7 @@ type AssociationGroupCommandListReport struct {
 }
 
 func (cmd *AssociationGroupCommandListReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -40,4 +40,17 @@ func (cmd *AssociationGroupCommandListReport) UnmarshalBinary(payload []byte) er
 	i += 1
 
 	return nil
+}
+
+func (cmd *AssociationGroupCommandListReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.GroupingIdentifier)
+
+	payload = append(payload, cmd.ListLength)
+
+	if cmd.Command != nil && len(cmd.Command) > 0 {
+		payload = append(payload, cmd.Command...)
+	}
+
+	return
 }

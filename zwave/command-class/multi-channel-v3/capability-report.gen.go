@@ -22,7 +22,7 @@ type MultiChannelCapabilityReport struct {
 }
 
 func (cmd *MultiChannelCapabilityReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -56,7 +56,32 @@ func (cmd *MultiChannelCapabilityReport) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	val.CommandClass = payload[i:]
+	cmd.CommandClass = payload[i:]
 
 	return nil
+}
+
+func (cmd *MultiChannelCapabilityReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.EndPoint) & byte(0x7F)
+
+		if cmd.Properties1.Dynamic {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.GenericDeviceClass)
+
+	payload = append(payload, cmd.SpecificDeviceClass)
+
+	payload = append(payload, cmd.CommandClass...)
+
+	return
 }

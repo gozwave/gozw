@@ -12,3 +12,8 @@ func (cmd *NodeNamingNodeNameGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *NodeNamingNodeNameGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

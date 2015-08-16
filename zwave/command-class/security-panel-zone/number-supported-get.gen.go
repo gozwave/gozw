@@ -12,3 +12,8 @@ func (cmd *SecurityPanelZoneNumberSupportedGet) UnmarshalBinary(payload []byte) 
 
 	return nil
 }
+
+func (cmd *SecurityPanelZoneNumberSupportedGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

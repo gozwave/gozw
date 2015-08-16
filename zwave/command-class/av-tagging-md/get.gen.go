@@ -12,3 +12,8 @@ func (cmd *AvTaggingMdGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *AvTaggingMdGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

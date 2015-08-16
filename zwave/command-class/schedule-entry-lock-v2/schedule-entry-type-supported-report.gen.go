@@ -14,7 +14,7 @@ type ScheduleEntryTypeSupportedReport struct {
 }
 
 func (cmd *ScheduleEntryTypeSupportedReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -31,4 +31,13 @@ func (cmd *ScheduleEntryTypeSupportedReport) UnmarshalBinary(payload []byte) err
 	i++
 
 	return nil
+}
+
+func (cmd *ScheduleEntryTypeSupportedReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.NumberOfSlotsWeekDay)
+
+	payload = append(payload, cmd.NumberOfSlotsYearDay)
+
+	return
 }

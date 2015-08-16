@@ -28,7 +28,7 @@ type SensorTriggerLevelSet struct {
 }
 
 func (cmd *SensorTriggerLevelSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -61,9 +61,9 @@ func (cmd *SensorTriggerLevelSet) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties2.Size = (payload[i] & 0x07)
 
-	cmd.Properties2.Scale = (payload[i] & 0x18) << 3
+	cmd.Properties2.Scale = (payload[i] & 0x18) >> 3
 
-	cmd.Properties2.Precision = (payload[i] & 0xE0) << 5
+	cmd.Properties2.Precision = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -75,4 +75,45 @@ func (cmd *SensorTriggerLevelSet) UnmarshalBinary(payload []byte) error {
 	i += 2
 
 	return nil
+}
+
+func (cmd *SensorTriggerLevelSet) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		if cmd.Properties1.Current {
+			val |= byte(0x40) // flip bits on
+		} else {
+			val &= ^byte(0x40) // flip bits off
+		}
+
+		if cmd.Properties1.Default {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.SensorType)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties2.Size) & byte(0x07)
+
+		val |= (cmd.Properties2.Scale << byte(3)) & byte(0x18)
+
+		val |= (cmd.Properties2.Precision << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	if cmd.TriggerValue != nil && len(cmd.TriggerValue) > 0 {
+		payload = append(payload, cmd.TriggerValue...)
+	}
+
+	return
 }

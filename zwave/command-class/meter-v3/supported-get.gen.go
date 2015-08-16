@@ -12,3 +12,8 @@ func (cmd *MeterSupportedGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *MeterSupportedGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

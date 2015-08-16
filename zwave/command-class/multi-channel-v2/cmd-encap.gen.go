@@ -26,7 +26,7 @@ type MultiChannelCmdEncap struct {
 }
 
 func (cmd *MultiChannelCmdEncap) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -68,7 +68,40 @@ func (cmd *MultiChannelCmdEncap) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	val.Parameter = payload[i:]
+	cmd.Parameter = payload[i:]
 
 	return nil
+}
+
+func (cmd *MultiChannelCmdEncap) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.SourceEndPoint) & byte(0x7F)
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties2.DestinationEndPoint) & byte(0x7F)
+
+		if cmd.Properties2.BitAddress {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.CommandClass)
+
+	payload = append(payload, cmd.Command)
+
+	payload = append(payload, cmd.Parameter...)
+
+	return
 }

@@ -12,3 +12,8 @@ func (cmd *SecurityNonceGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *SecurityNonceGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

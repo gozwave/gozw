@@ -12,13 +12,20 @@ type CmdEncapsulation struct {
 }
 
 func (cmd *CmdEncapsulation) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
 
-	val.Data = payload[i:]
+	cmd.Data = payload[i:]
 
 	return nil
+}
+
+func (cmd *CmdEncapsulation) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.Data...)
+
+	return
 }

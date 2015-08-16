@@ -12,3 +12,8 @@ func (cmd *FirmwareMdGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *FirmwareMdGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

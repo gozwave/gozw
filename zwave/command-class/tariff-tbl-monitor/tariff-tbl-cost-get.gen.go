@@ -35,7 +35,7 @@ type TariffTblCostGet struct {
 }
 
 func (cmd *TariffTblCostGet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -115,4 +115,39 @@ func (cmd *TariffTblCostGet) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *TariffTblCostGet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.RateParameterSetId)
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.StartYear)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.StartMonth)
+
+	payload = append(payload, cmd.StartDay)
+
+	payload = append(payload, cmd.StartHourLocalTime)
+
+	payload = append(payload, cmd.StartMinuteLocalTime)
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.StopYear)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.StopMonth)
+
+	payload = append(payload, cmd.StopDay)
+
+	payload = append(payload, cmd.StopHourLocalTime)
+
+	payload = append(payload, cmd.StopMinuteLocalTime)
+
+	return
 }

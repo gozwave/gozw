@@ -661,7 +661,7 @@ func (c CommandClassID) String() string {
 		return "Command Class Barrier Operator"
 
 	default:
-		return "Unknown" + fmt.Sprintf(" (0x%X)", c)
+		return "Unknown" + fmt.Sprintf(" (0x%X)", byte(c))
 	}
 }
 

@@ -21,7 +21,7 @@ type SimpleAvControlSet struct {
 }
 
 func (cmd *SimpleAvControlSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -46,4 +46,25 @@ func (cmd *SimpleAvControlSet) UnmarshalBinary(payload []byte) error {
 	i += 2
 
 	return nil
+}
+
+func (cmd *SimpleAvControlSet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.SequenceNumber)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.KeyAttributes) & byte(0x07)
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.ItemId)
+		payload = append(payload, buf...)
+	}
+
+	return
 }

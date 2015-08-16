@@ -12,3 +12,8 @@ func (cmd *ChimneyFanAlarmStatusGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *ChimneyFanAlarmStatusGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

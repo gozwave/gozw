@@ -12,3 +12,8 @@ func (cmd *MultiInstanceAssociationGroupingsGet) UnmarshalBinary(payload []byte)
 
 	return nil
 }
+
+func (cmd *MultiInstanceAssociationGroupingsGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

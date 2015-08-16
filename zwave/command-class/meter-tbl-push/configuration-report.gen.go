@@ -31,7 +31,7 @@ type MeterTblPushConfigurationReport struct {
 }
 
 func (cmd *MeterTblPushConfigurationReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -90,4 +90,42 @@ func (cmd *MeterTblPushConfigurationReport) UnmarshalBinary(payload []byte) erro
 	i++
 
 	return nil
+}
+
+func (cmd *MeterTblPushConfigurationReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.OperatingStatusPushMode) & byte(0x0F)
+
+		if cmd.Properties1.Ps {
+			val |= byte(0x10) // flip bits on
+		} else {
+			val &= ^byte(0x10) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.PushDataset)
+		if buf[0] != 0 {
+			return nil, errors.New("BIT_24 value overflow")
+		}
+		payload = append(payload, buf[1:4]...)
+	}
+
+	payload = append(payload, cmd.IntervalMonths)
+
+	payload = append(payload, cmd.IntervalDays)
+
+	payload = append(payload, cmd.IntervalHours)
+
+	payload = append(payload, cmd.IntervalMinutes)
+
+	payload = append(payload, cmd.PushNodeId)
+
+	return
 }

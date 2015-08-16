@@ -16,7 +16,7 @@ type DmxAddressReport struct {
 }
 
 func (cmd *DmxAddressReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -34,4 +34,19 @@ func (cmd *DmxAddressReport) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *DmxAddressReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.PageId) & byte(0x0F)
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.ChannelId)
+
+	return
 }

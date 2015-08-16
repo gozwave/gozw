@@ -20,7 +20,7 @@ type SwitchMultilevelStartLevelChange struct {
 }
 
 func (cmd *SwitchMultilevelStartLevelChange) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -55,4 +55,31 @@ func (cmd *SwitchMultilevelStartLevelChange) UnmarshalBinary(payload []byte) err
 	i++
 
 	return nil
+}
+
+func (cmd *SwitchMultilevelStartLevelChange) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		if cmd.Properties1.IgnoreStartLevel {
+			val |= byte(0x20) // flip bits on
+		} else {
+			val &= ^byte(0x20) // flip bits off
+		}
+
+		if cmd.Properties1.UpDown {
+			val |= byte(0x40) // flip bits on
+		} else {
+			val &= ^byte(0x40) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.StartLevel)
+
+	payload = append(payload, cmd.DimmingDuration)
+
+	return
 }

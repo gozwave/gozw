@@ -22,13 +22,13 @@ type ChimneyFanAlarmStatusSet struct {
 }
 
 func (cmd *ChimneyFanAlarmStatusSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
 
-	cmd.Message.NotUsed2 = (payload[i] & 0xF0) << 4
+	cmd.Message.NotUsed2 = (payload[i] & 0xF0) >> 4
 
 	if payload[i]&0x01 == 0x01 {
 		cmd.Message.NotUsed1 = true
@@ -57,4 +57,41 @@ func (cmd *ChimneyFanAlarmStatusSet) UnmarshalBinary(payload []byte) error {
 	i += 1
 
 	return nil
+}
+
+func (cmd *ChimneyFanAlarmStatusSet) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Message.NotUsed2 << byte(4)) & byte(0xF0)
+
+		if cmd.Message.NotUsed1 {
+			val |= byte(0x01) // flip bits on
+		} else {
+			val &= ^byte(0x01) // flip bits off
+		}
+
+		if cmd.Message.AcknowledgeExternalAlarm {
+			val |= byte(0x02) // flip bits on
+		} else {
+			val &= ^byte(0x02) // flip bits off
+		}
+
+		if cmd.Message.AcknowledgeSensorError {
+			val |= byte(0x04) // flip bits on
+		} else {
+			val &= ^byte(0x04) // flip bits off
+		}
+
+		if cmd.Message.AcknowledgeAlarmTemperatureExceeded {
+			val |= byte(0x08) // flip bits on
+		} else {
+			val &= ^byte(0x08) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	return
 }

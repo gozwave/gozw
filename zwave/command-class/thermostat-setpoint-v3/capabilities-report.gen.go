@@ -34,7 +34,7 @@ type ThermostatSetpointCapabilitiesReport struct {
 }
 
 func (cmd *ThermostatSetpointCapabilitiesReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -50,9 +50,9 @@ func (cmd *ThermostatSetpointCapabilitiesReport) UnmarshalBinary(payload []byte)
 
 	cmd.Properties2.Size = (payload[i] & 0x07)
 
-	cmd.Properties2.Scale = (payload[i] & 0x18) << 3
+	cmd.Properties2.Scale = (payload[i] & 0x18) >> 3
 
-	cmd.Properties2.Precision = (payload[i] & 0xE0) << 5
+	cmd.Properties2.Precision = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -69,9 +69,9 @@ func (cmd *ThermostatSetpointCapabilitiesReport) UnmarshalBinary(payload []byte)
 
 	cmd.Properties3.Size = (payload[i] & 0x07)
 
-	cmd.Properties3.Scale = (payload[i] & 0x18) << 3
+	cmd.Properties3.Scale = (payload[i] & 0x18) >> 3
 
-	cmd.Properties3.Precision = (payload[i] & 0xE0) << 5
+	cmd.Properties3.Precision = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -83,4 +83,49 @@ func (cmd *ThermostatSetpointCapabilitiesReport) UnmarshalBinary(payload []byte)
 	i += 3
 
 	return nil
+}
+
+func (cmd *ThermostatSetpointCapabilitiesReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.SetpointType) & byte(0x0F)
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties2.Size) & byte(0x07)
+
+		val |= (cmd.Properties2.Scale << byte(3)) & byte(0x18)
+
+		val |= (cmd.Properties2.Precision << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	if cmd.MinValue != nil && len(cmd.MinValue) > 0 {
+		payload = append(payload, cmd.MinValue...)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties3.Size) & byte(0x07)
+
+		val |= (cmd.Properties3.Scale << byte(3)) & byte(0x18)
+
+		val |= (cmd.Properties3.Precision << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	if cmd.Maxvalue != nil && len(cmd.Maxvalue) > 0 {
+		payload = append(payload, cmd.Maxvalue...)
+	}
+
+	return
 }

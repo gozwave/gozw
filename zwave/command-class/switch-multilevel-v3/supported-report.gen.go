@@ -18,7 +18,7 @@ type SwitchMultilevelSupportedReport struct {
 }
 
 func (cmd *SwitchMultilevelSupportedReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -37,4 +37,25 @@ func (cmd *SwitchMultilevelSupportedReport) UnmarshalBinary(payload []byte) erro
 	i += 1
 
 	return nil
+}
+
+func (cmd *SwitchMultilevelSupportedReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.PrimarySwitchType) & byte(0x1F)
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties2.SecondarySwitchType) & byte(0x1F)
+
+		payload = append(payload, val)
+	}
+
+	return
 }

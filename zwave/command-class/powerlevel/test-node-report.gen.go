@@ -19,7 +19,7 @@ type PowerlevelTestNodeReport struct {
 }
 
 func (cmd *PowerlevelTestNodeReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -43,4 +43,19 @@ func (cmd *PowerlevelTestNodeReport) UnmarshalBinary(payload []byte) error {
 	i += 2
 
 	return nil
+}
+
+func (cmd *PowerlevelTestNodeReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.TestNodeid)
+
+	payload = append(payload, cmd.StatusOfOperation)
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.TestFrameCount)
+		payload = append(payload, buf...)
+	}
+
+	return
 }

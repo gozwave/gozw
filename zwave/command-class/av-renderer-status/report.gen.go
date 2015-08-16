@@ -12,3 +12,8 @@ func (cmd *AvRendererStatusReport) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *AvRendererStatusReport) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

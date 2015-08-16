@@ -42,7 +42,7 @@ type NodeInfoCachedReport struct {
 }
 
 func (cmd *NodeInfoCachedReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -57,7 +57,7 @@ func (cmd *NodeInfoCachedReport) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties1.Age = (payload[i] & 0x0F)
 
-	cmd.Properties1.Status = (payload[i] & 0xF0) << 4
+	cmd.Properties1.Status = (payload[i] & 0xF0) >> 4
 
 	i += 1
 
@@ -81,7 +81,7 @@ func (cmd *NodeInfoCachedReport) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties3.Security = (payload[i] & 0x0F)
 
-	cmd.Properties3.Sensor = (payload[i] & 0x70) << 4
+	cmd.Properties3.Sensor = (payload[i] & 0x70) >> 4
 
 	if payload[i]&0x80 == 0x80 {
 		cmd.Properties3.Opt = true
@@ -124,7 +124,7 @@ func (cmd *NodeInfoCachedReport) UnmarshalBinary(payload []byte) error {
 		markerIndex := i
 		for ; markerIndex < len(payload) && payload[markerIndex] != 0xF1; markerIndex++ {
 		}
-		val.NonSecureCommandClass = payload[i:markerIndex]
+		cmd.NonSecureCommandClass = payload[i:markerIndex]
 	}
 
 	if len(payload) <= i {
@@ -137,7 +137,71 @@ func (cmd *NodeInfoCachedReport) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	val.SecurityScheme0CommandClass = payload[i:]
+	cmd.SecurityScheme0CommandClass = payload[i:]
 
 	return nil
+}
+
+func (cmd *NodeInfoCachedReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.SeqNo)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.Age) & byte(0x0F)
+
+		val |= (cmd.Properties1.Status << byte(4)) & byte(0xF0)
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties2.Capability) & byte(0x7F)
+
+		if cmd.Properties2.Listening {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties3.Security) & byte(0x0F)
+
+		val |= (cmd.Properties3.Sensor << byte(4)) & byte(0x70)
+
+		if cmd.Properties3.Opt {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.BasicDeviceClass)
+
+	payload = append(payload, cmd.GenericDeviceClass)
+
+	payload = append(payload, cmd.SpecificDeviceClass)
+
+	{
+		if cmd.NonSecureCommandClass != nil && len(cmd.NonSecureCommandClass) > 0 {
+			payload = append(payload, cmd.NonSecureCommandClass...)
+		}
+		payload = append(payload, 0xF1)
+	}
+
+	payload = append(payload, 0xF1) // marker
+
+	payload = append(payload, cmd.SecurityScheme0CommandClass...)
+
+	return
 }

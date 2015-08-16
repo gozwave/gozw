@@ -20,7 +20,7 @@ type TimeReport struct {
 }
 
 func (cmd *TimeReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -51,4 +51,27 @@ func (cmd *TimeReport) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *TimeReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.HourLocalTime.HourLocalTime) & byte(0x1F)
+
+		if cmd.HourLocalTime.RtcFailure {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.MinuteLocalTime)
+
+	payload = append(payload, cmd.SecondLocalTime)
+
+	return
 }

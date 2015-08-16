@@ -12,3 +12,8 @@ func (cmd *DeviceResetLocallyNotification) UnmarshalBinary(payload []byte) error
 
 	return nil
 }
+
+func (cmd *DeviceResetLocallyNotification) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

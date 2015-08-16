@@ -12,3 +12,8 @@ func (cmd *SimpleAvControlGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *SimpleAvControlGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

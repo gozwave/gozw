@@ -12,3 +12,8 @@ func (cmd *ZwaveplusInfoGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *ZwaveplusInfoGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

@@ -18,7 +18,7 @@ type CentralSceneNotification struct {
 }
 
 func (cmd *CentralSceneNotification) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -43,4 +43,21 @@ func (cmd *CentralSceneNotification) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *CentralSceneNotification) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.SequenceNumber)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.KeyAttributes) & byte(0x07)
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.SceneNumber)
+
+	return
 }

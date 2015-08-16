@@ -12,3 +12,8 @@ func (cmd *DcpListSupportedGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *DcpListSupportedGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

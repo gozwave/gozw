@@ -12,3 +12,8 @@ func (cmd *NetworkKeyVerify) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *NetworkKeyVerify) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

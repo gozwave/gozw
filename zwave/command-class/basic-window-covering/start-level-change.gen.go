@@ -14,7 +14,7 @@ type BasicWindowCoveringStartLevelChange struct {
 }
 
 func (cmd *BasicWindowCoveringStartLevelChange) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -29,4 +29,21 @@ func (cmd *BasicWindowCoveringStartLevelChange) UnmarshalBinary(payload []byte) 
 	i += 1
 
 	return nil
+}
+
+func (cmd *BasicWindowCoveringStartLevelChange) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		if cmd.Level.OpenClose {
+			val |= byte(0x40) // flip bits on
+		} else {
+			val &= ^byte(0x40) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	return
 }

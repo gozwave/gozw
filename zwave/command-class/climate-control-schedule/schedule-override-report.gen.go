@@ -16,7 +16,7 @@ type ScheduleOverrideReport struct {
 }
 
 func (cmd *ScheduleOverrideReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -34,4 +34,19 @@ func (cmd *ScheduleOverrideReport) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *ScheduleOverrideReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.OverrideType) & byte(0x03)
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.OverrideState)
+
+	return
 }

@@ -12,3 +12,8 @@ func (cmd *DmxAddressGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *DmxAddressGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

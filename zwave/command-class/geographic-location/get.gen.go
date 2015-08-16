@@ -12,3 +12,8 @@ func (cmd *GeographicLocationGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *GeographicLocationGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

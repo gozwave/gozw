@@ -12,3 +12,8 @@ func (cmd *CentralSceneSupportedGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *CentralSceneSupportedGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

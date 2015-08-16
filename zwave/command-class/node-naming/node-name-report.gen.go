@@ -16,7 +16,7 @@ type NodeNamingNodeNameReport struct {
 }
 
 func (cmd *NodeNamingNodeNameReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -35,4 +35,23 @@ func (cmd *NodeNamingNodeNameReport) UnmarshalBinary(payload []byte) error {
 	i += 16
 
 	return nil
+}
+
+func (cmd *NodeNamingNodeNameReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Level.CharPresentation) & byte(0x07)
+
+		payload = append(payload, val)
+	}
+
+	if paramLen := len(cmd.NodeNameChar); paramLen > 16 {
+		return nil, errors.New("Length overflow in array parameter NodeNameChar")
+	}
+
+	payload = append(payload, []byte(cmd.NodeNameChar)...)
+
+	return
 }

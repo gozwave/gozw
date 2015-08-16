@@ -14,7 +14,7 @@ type VersionCommandClassReport struct {
 }
 
 func (cmd *VersionCommandClassReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -31,4 +31,13 @@ func (cmd *VersionCommandClassReport) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *VersionCommandClassReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.RequestedCommandClass)
+
+	payload = append(payload, cmd.CommandClassVersion)
+
+	return
 }

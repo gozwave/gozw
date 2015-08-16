@@ -21,7 +21,7 @@ type TariffTblSet struct {
 }
 
 func (cmd *TariffTblSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -34,7 +34,7 @@ func (cmd *TariffTblSet) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	cmd.Properties1.TariffPrecision = (payload[i] & 0xE0) << 5
+	cmd.Properties1.TariffPrecision = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -46,4 +46,25 @@ func (cmd *TariffTblSet) UnmarshalBinary(payload []byte) error {
 	i += 4
 
 	return nil
+}
+
+func (cmd *TariffTblSet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.RateParameterSetId)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.TariffPrecision << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.TariffValue)
+		payload = append(payload, buf...)
+	}
+
+	return
 }

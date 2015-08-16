@@ -12,3 +12,8 @@ func (cmd *AvMatchItemToRendererMdReport) UnmarshalBinary(payload []byte) error 
 
 	return nil
 }
+
+func (cmd *AvMatchItemToRendererMdReport) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

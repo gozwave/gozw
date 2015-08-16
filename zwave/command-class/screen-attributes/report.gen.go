@@ -20,7 +20,7 @@ type ScreenAttributesReport struct {
 }
 
 func (cmd *ScreenAttributesReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -52,4 +52,23 @@ func (cmd *ScreenAttributesReport) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *ScreenAttributesReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.NumberOfLines) & byte(0x1F)
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.NumberOfCharactersPerLine)
+
+	payload = append(payload, cmd.SizeOfLineBuffer)
+
+	payload = append(payload, cmd.NumericalPresentationOfACharacter)
+
+	return
 }

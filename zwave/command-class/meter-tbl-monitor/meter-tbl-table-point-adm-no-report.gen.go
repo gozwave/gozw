@@ -16,7 +16,7 @@ type MeterTblTablePointAdmNoReport struct {
 }
 
 func (cmd *MeterTblTablePointAdmNoReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -34,4 +34,21 @@ func (cmd *MeterTblTablePointAdmNoReport) UnmarshalBinary(payload []byte) error 
 	i += 0
 
 	return nil
+}
+
+func (cmd *MeterTblTablePointAdmNoReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.NumberOfCharacters) & byte(0x1F)
+
+		payload = append(payload, val)
+	}
+
+	if cmd.MeterPointAdmNumberCharacter != nil && len(cmd.MeterPointAdmNumberCharacter) > 0 {
+		payload = append(payload, cmd.MeterPointAdmNumberCharacter...)
+	}
+
+	return
 }

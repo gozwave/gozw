@@ -26,7 +26,7 @@ type AlarmReport struct {
 }
 
 func (cmd *AlarmReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -85,4 +85,27 @@ func (cmd *AlarmReport) UnmarshalBinary(payload []byte) error {
 	i += 6
 
 	return nil
+}
+
+func (cmd *AlarmReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.AlarmType)
+
+	payload = append(payload, cmd.AlarmLevel)
+
+	payload = append(payload, cmd.ZensorNetSourceNodeId)
+
+	payload = append(payload, cmd.ZwaveAlarmStatus)
+
+	payload = append(payload, cmd.ZwaveAlarmType)
+
+	payload = append(payload, cmd.ZwaveAlarmEvent)
+
+	payload = append(payload, cmd.NumberOfEventParameters)
+
+	if cmd.EventParameter != nil && len(cmd.EventParameter) > 0 {
+		payload = append(payload, cmd.EventParameter...)
+	}
+
+	return
 }

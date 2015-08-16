@@ -12,3 +12,8 @@ func (cmd *SwitchAllOn) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *SwitchAllOn) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

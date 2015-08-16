@@ -18,7 +18,7 @@ type MultiChannelAssociationReport struct {
 }
 
 func (cmd *MultiChannelAssociationReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -49,7 +49,7 @@ func (cmd *MultiChannelAssociationReport) UnmarshalBinary(payload []byte) error 
 		markerIndex := i
 		for ; markerIndex < len(payload) && payload[markerIndex] != 0x00; markerIndex++ {
 		}
-		val.NodeId = payload[i:markerIndex]
+		cmd.NodeId = payload[i:markerIndex]
 	}
 
 	if len(payload) <= i {
@@ -59,4 +59,24 @@ func (cmd *MultiChannelAssociationReport) UnmarshalBinary(payload []byte) error 
 	i += 1 // skipping MARKER
 
 	return nil
+}
+
+func (cmd *MultiChannelAssociationReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.GroupingIdentifier)
+
+	payload = append(payload, cmd.MaxNodesSupported)
+
+	payload = append(payload, cmd.ReportsToFollow)
+
+	{
+		if cmd.NodeId != nil && len(cmd.NodeId) > 0 {
+			payload = append(payload, cmd.NodeId...)
+		}
+		payload = append(payload, 0x00)
+	}
+
+	payload = append(payload, 0x00) // marker
+
+	return
 }

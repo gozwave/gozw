@@ -12,3 +12,8 @@ func (cmd *IndicatorGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *IndicatorGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

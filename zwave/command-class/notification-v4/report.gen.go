@@ -32,7 +32,7 @@ type NotificationReport struct {
 }
 
 func (cmd *NotificationReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -105,4 +105,41 @@ func (cmd *NotificationReport) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *NotificationReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.V1AlarmType)
+
+	payload = append(payload, cmd.V1AlarmLevel)
+
+	payload = append(payload, cmd.ZensorNetSourceNodeId)
+
+	payload = append(payload, cmd.NotificationStatus)
+
+	payload = append(payload, cmd.NotificationType)
+
+	payload = append(payload, cmd.Event)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.EventParametersLength) & byte(0x1F)
+
+		if cmd.Properties1.Sequence {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	if cmd.EventParameter != nil && len(cmd.EventParameter) > 0 {
+		payload = append(payload, cmd.EventParameter...)
+	}
+
+	payload = append(payload, cmd.SequenceNumber)
+
+	return
 }

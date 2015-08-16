@@ -28,7 +28,7 @@ type CommandConfigurationReport struct {
 }
 
 func (cmd *CommandConfigurationReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -83,7 +83,38 @@ func (cmd *CommandConfigurationReport) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	val.CommandByte = payload[i:]
+	cmd.CommandByte = payload[i:]
 
 	return nil
+}
+
+func (cmd *CommandConfigurationReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.GroupingIdentifier)
+
+	payload = append(payload, cmd.NodeId)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.ReportsToFollow) & byte(0x0F)
+
+		if cmd.Properties1.First {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.CommandLength)
+
+	payload = append(payload, cmd.CommandClassIdentifier)
+
+	payload = append(payload, cmd.CommandIdentifier)
+
+	payload = append(payload, cmd.CommandByte...)
+
+	return
 }

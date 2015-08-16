@@ -22,7 +22,7 @@ type DeviceSpecificReport struct {
 }
 
 func (cmd *DeviceSpecificReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -38,7 +38,7 @@ func (cmd *DeviceSpecificReport) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties2.DeviceIdDataLengthIndicator = (payload[i] & 0x1F)
 
-	cmd.Properties2.DeviceIdDataFormat = (payload[i] & 0xE0) << 5
+	cmd.Properties2.DeviceIdDataFormat = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -46,7 +46,32 @@ func (cmd *DeviceSpecificReport) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	val.DeviceIdData = payload[i:]
+	cmd.DeviceIdData = payload[i:]
 
 	return nil
+}
+
+func (cmd *DeviceSpecificReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.DeviceIdType) & byte(0x07)
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties2.DeviceIdDataLengthIndicator) & byte(0x1F)
+
+		val |= (cmd.Properties2.DeviceIdDataFormat << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.DeviceIdData...)
+
+	return
 }

@@ -12,7 +12,7 @@ type SecurityNonceReport struct {
 }
 
 func (cmd *SecurityNonceReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -23,4 +23,15 @@ func (cmd *SecurityNonceReport) UnmarshalBinary(payload []byte) error {
 	i += 8
 
 	return nil
+}
+
+func (cmd *SecurityNonceReport) MarshalBinary() (payload []byte, err error) {
+
+	if paramLen := len(cmd.NonceByte); paramLen > 8 {
+		return nil, errors.New("Length overflow in array parameter NonceByte")
+	}
+
+	payload = append(payload, cmd.NonceByte...)
+
+	return
 }

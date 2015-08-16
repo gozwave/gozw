@@ -20,7 +20,7 @@ type SceneActuatorConfSet struct {
 }
 
 func (cmd *SceneActuatorConfSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -56,4 +56,27 @@ func (cmd *SceneActuatorConfSet) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *SceneActuatorConfSet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.SceneId)
+
+	payload = append(payload, cmd.DimmingDuration)
+
+	{
+		var val byte
+
+		if cmd.Level2.Override {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.Level)
+
+	return
 }

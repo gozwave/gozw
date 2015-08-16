@@ -22,7 +22,7 @@ type CommandConfigurationSet struct {
 }
 
 func (cmd *CommandConfigurationSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -63,7 +63,24 @@ func (cmd *CommandConfigurationSet) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	val.CommandByte = payload[i:]
+	cmd.CommandByte = payload[i:]
 
 	return nil
+}
+
+func (cmd *CommandConfigurationSet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.GroupingIdentifier)
+
+	payload = append(payload, cmd.NodeId)
+
+	payload = append(payload, cmd.CommandLength)
+
+	payload = append(payload, cmd.CommandClassIdentifier)
+
+	payload = append(payload, cmd.CommandIdentifier)
+
+	payload = append(payload, cmd.CommandByte...)
+
+	return
 }

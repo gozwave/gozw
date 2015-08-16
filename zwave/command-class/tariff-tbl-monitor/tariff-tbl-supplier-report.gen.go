@@ -41,7 +41,7 @@ type TariffTblSupplierReport struct {
 }
 
 func (cmd *TariffTblSupplierReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -98,7 +98,7 @@ func (cmd *TariffTblSupplierReport) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties1.StandingChargePeriod = (payload[i] & 0x1F)
 
-	cmd.Properties1.StandingChargePrecision = (payload[i] & 0xE0) << 5
+	cmd.Properties1.StandingChargePrecision = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -125,4 +125,62 @@ func (cmd *TariffTblSupplierReport) UnmarshalBinary(payload []byte) error {
 	i += 9
 
 	return nil
+}
+
+func (cmd *TariffTblSupplierReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.Year)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.Month)
+
+	payload = append(payload, cmd.Day)
+
+	payload = append(payload, cmd.HourLocalTime)
+
+	payload = append(payload, cmd.MinuteLocalTime)
+
+	payload = append(payload, cmd.SecondLocalTime)
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.Currency)
+		if buf[0] != 0 {
+			return nil, errors.New("BIT_24 value overflow")
+		}
+		payload = append(payload, buf[1:4]...)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.StandingChargePeriod) & byte(0x1F)
+
+		val |= (cmd.Properties1.StandingChargePrecision << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.StandingChargeValue)
+		payload = append(payload, buf...)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties2.NumberOfSupplierCharacters) & byte(0x1F)
+
+		payload = append(payload, val)
+	}
+
+	if cmd.SupplierCharacter != nil && len(cmd.SupplierCharacter) > 0 {
+		payload = append(payload, cmd.SupplierCharacter...)
+	}
+
+	return
 }

@@ -12,3 +12,8 @@ func (cmd *BarrierOperatorGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *BarrierOperatorGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

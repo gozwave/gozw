@@ -12,3 +12,8 @@ func (cmd *PowerlevelGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *PowerlevelGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

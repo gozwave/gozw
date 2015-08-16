@@ -12,3 +12,8 @@ func (cmd *DoorLockOperationGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *DoorLockOperationGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

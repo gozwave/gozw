@@ -43,7 +43,7 @@ type PrepaymentBalanceReport struct {
 }
 
 func (cmd *PrepaymentBalanceReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -51,7 +51,7 @@ func (cmd *PrepaymentBalanceReport) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties1.MeterType = (payload[i] & 0x3F)
 
-	cmd.Properties1.BalanceType = (payload[i] & 0xC0) << 6
+	cmd.Properties1.BalanceType = (payload[i] & 0xC0) >> 6
 
 	i += 1
 
@@ -61,7 +61,7 @@ func (cmd *PrepaymentBalanceReport) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties2.Scale = (payload[i] & 0x1F)
 
-	cmd.Properties2.BalancePrecision = (payload[i] & 0xE0) << 5
+	cmd.Properties2.BalancePrecision = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -76,7 +76,7 @@ func (cmd *PrepaymentBalanceReport) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	cmd.Properties3.DebtPrecision = (payload[i] & 0xE0) << 5
+	cmd.Properties3.DebtPrecision = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -91,7 +91,7 @@ func (cmd *PrepaymentBalanceReport) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	cmd.Properties4.EmerCreditPrecision = (payload[i] & 0xE0) << 5
+	cmd.Properties4.EmerCreditPrecision = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -117,4 +117,74 @@ func (cmd *PrepaymentBalanceReport) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *PrepaymentBalanceReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.MeterType) & byte(0x3F)
+
+		val |= (cmd.Properties1.BalanceType << byte(6)) & byte(0xC0)
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties2.Scale) & byte(0x1F)
+
+		val |= (cmd.Properties2.BalancePrecision << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.BalanceValue)
+		payload = append(payload, buf...)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties3.DebtPrecision << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.Debt)
+		payload = append(payload, buf...)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties4.EmerCreditPrecision << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.EmerCredit)
+		payload = append(payload, buf...)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.Currency)
+		if buf[0] != 0 {
+			return nil, errors.New("BIT_24 value overflow")
+		}
+		payload = append(payload, buf[1:4]...)
+	}
+
+	payload = append(payload, cmd.DebtRecoveryPercentage)
+
+	return
 }

@@ -12,3 +12,8 @@ func (cmd *LockGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *LockGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

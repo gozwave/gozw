@@ -12,3 +12,8 @@ func (cmd *BasicWindowCoveringStopLevelChange) UnmarshalBinary(payload []byte) e
 
 	return nil
 }
+
+func (cmd *BasicWindowCoveringStopLevelChange) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

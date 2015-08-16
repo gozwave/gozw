@@ -12,3 +12,8 @@ func (cmd *PrepaymentSupportedGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *PrepaymentSupportedGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

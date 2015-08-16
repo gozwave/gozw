@@ -30,7 +30,7 @@ type SecurityMessageEncapsulation struct {
 }
 
 func (cmd *SecurityMessageEncapsulation) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -78,7 +78,7 @@ func (cmd *SecurityMessageEncapsulation) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	val.CommandByte = payload[i:]
+	cmd.CommandByte = payload[i:]
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -96,4 +96,49 @@ func (cmd *SecurityMessageEncapsulation) UnmarshalBinary(payload []byte) error {
 	i += 8
 
 	return nil
+}
+
+func (cmd *SecurityMessageEncapsulation) MarshalBinary() (payload []byte, err error) {
+
+	if paramLen := len(cmd.InitializationVectorByte); paramLen > 8 {
+		return nil, errors.New("Length overflow in array parameter InitializationVectorByte")
+	}
+
+	payload = append(payload, cmd.InitializationVectorByte...)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.SequenceCounter) & byte(0x0F)
+
+		if cmd.Properties1.Sequenced {
+			val |= byte(0x10) // flip bits on
+		} else {
+			val &= ^byte(0x10) // flip bits off
+		}
+
+		if cmd.Properties1.SecondFrame {
+			val |= byte(0x20) // flip bits on
+		} else {
+			val &= ^byte(0x20) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.CommandClassIdentifier)
+
+	payload = append(payload, cmd.CommandIdentifier)
+
+	payload = append(payload, cmd.CommandByte...)
+
+	payload = append(payload, cmd.ReceiversNonceIdentifier)
+
+	if paramLen := len(cmd.MessageAuthenticationCodeByte); paramLen > 8 {
+		return nil, errors.New("Length overflow in array parameter MessageAuthenticationCodeByte")
+	}
+
+	payload = append(payload, cmd.MessageAuthenticationCodeByte...)
+
+	return
 }

@@ -18,7 +18,7 @@ type GroupingNameSet struct {
 }
 
 func (cmd *GroupingNameSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -44,4 +44,25 @@ func (cmd *GroupingNameSet) UnmarshalBinary(payload []byte) error {
 	i += 16
 
 	return nil
+}
+
+func (cmd *GroupingNameSet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.GroupingIdentifier)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.CharPresentation) & byte(0x07)
+
+		payload = append(payload, val)
+	}
+
+	if paramLen := len(cmd.GroupingName); paramLen > 16 {
+		return nil, errors.New("Length overflow in array parameter GroupingName")
+	}
+
+	payload = append(payload, []byte(cmd.GroupingName)...)
+
+	return
 }

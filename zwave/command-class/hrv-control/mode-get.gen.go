@@ -12,3 +12,8 @@ func (cmd *HrvControlModeGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *HrvControlModeGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

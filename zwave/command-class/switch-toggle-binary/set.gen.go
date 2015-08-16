@@ -12,3 +12,8 @@ func (cmd *SwitchToggleBinarySet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *SwitchToggleBinarySet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

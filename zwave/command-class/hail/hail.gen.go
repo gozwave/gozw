@@ -12,3 +12,8 @@ func (cmd *Hail) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *Hail) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

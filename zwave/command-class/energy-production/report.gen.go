@@ -22,7 +22,7 @@ type EnergyProductionReport struct {
 }
 
 func (cmd *EnergyProductionReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -37,9 +37,9 @@ func (cmd *EnergyProductionReport) UnmarshalBinary(payload []byte) error {
 
 	cmd.Level.Size = (payload[i] & 0x07)
 
-	cmd.Level.Scale = (payload[i] & 0x18) << 3
+	cmd.Level.Scale = (payload[i] & 0x18) >> 3
 
-	cmd.Level.Precision = (payload[i] & 0xE0) << 5
+	cmd.Level.Precision = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -51,4 +51,27 @@ func (cmd *EnergyProductionReport) UnmarshalBinary(payload []byte) error {
 	i += 1
 
 	return nil
+}
+
+func (cmd *EnergyProductionReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.ParameterNumber)
+
+	{
+		var val byte
+
+		val |= (cmd.Level.Size) & byte(0x07)
+
+		val |= (cmd.Level.Scale << byte(3)) & byte(0x18)
+
+		val |= (cmd.Level.Precision << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	if cmd.Value != nil && len(cmd.Value) > 0 {
+		payload = append(payload, cmd.Value...)
+	}
+
+	return
 }

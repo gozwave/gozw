@@ -19,7 +19,7 @@ type DateReport struct {
 }
 
 func (cmd *DateReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -43,4 +43,19 @@ func (cmd *DateReport) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *DateReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.Year)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.Month)
+
+	payload = append(payload, cmd.Day)
+
+	return
 }

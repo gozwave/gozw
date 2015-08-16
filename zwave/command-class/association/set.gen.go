@@ -14,7 +14,7 @@ type AssociationSet struct {
 }
 
 func (cmd *AssociationSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -27,7 +27,16 @@ func (cmd *AssociationSet) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	val.NodeId = payload[i:]
+	cmd.NodeId = payload[i:]
 
 	return nil
+}
+
+func (cmd *AssociationSet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.GroupingIdentifier)
+
+	payload = append(payload, cmd.NodeId...)
+
+	return
 }

@@ -12,3 +12,8 @@ func (cmd *ApplianceProgramSupportedGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *ApplianceProgramSupportedGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

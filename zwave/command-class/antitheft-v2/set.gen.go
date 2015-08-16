@@ -27,7 +27,7 @@ type AntitheftSet struct {
 }
 
 func (cmd *AntitheftSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -72,4 +72,39 @@ func (cmd *AntitheftSet) UnmarshalBinary(payload []byte) error {
 	i += 3
 
 	return nil
+}
+
+func (cmd *AntitheftSet) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.NumberOfMagicCodeBytes) & byte(0x7F)
+
+		if cmd.Properties1.Enable {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	if cmd.MagicCode != nil && len(cmd.MagicCode) > 0 {
+		payload = append(payload, cmd.MagicCode...)
+	}
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.ManufacturerId)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.AntiTheftHintNumberBytes)
+
+	if cmd.AntiTheftHintByte != nil && len(cmd.AntiTheftHintByte) > 0 {
+		payload = append(payload, cmd.AntiTheftHintByte...)
+	}
+
+	return
 }

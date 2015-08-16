@@ -16,7 +16,7 @@ type UserCodeSet struct {
 }
 
 func (cmd *UserCodeSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -41,4 +41,19 @@ func (cmd *UserCodeSet) UnmarshalBinary(payload []byte) error {
 	i += 10
 
 	return nil
+}
+
+func (cmd *UserCodeSet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.UserIdentifier)
+
+	payload = append(payload, cmd.UserIdStatus)
+
+	if paramLen := len(cmd.UserCode); paramLen > 10 {
+		return nil, errors.New("Length overflow in array parameter UserCode")
+	}
+
+	payload = append(payload, []byte(cmd.UserCode)...)
+
+	return
 }

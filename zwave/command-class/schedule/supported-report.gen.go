@@ -28,7 +28,7 @@ type ScheduleSupportedReport struct {
 }
 
 func (cmd *ScheduleSupportedReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -79,4 +79,47 @@ func (cmd *ScheduleSupportedReport) UnmarshalBinary(payload []byte) error {
 	i += 1
 
 	return nil
+}
+
+func (cmd *ScheduleSupportedReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.NumberOfSupportedScheduleId)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.StartTimeSupport) & byte(0x3F)
+
+		if cmd.Properties1.FallbackSupport {
+			val |= byte(0x40) // flip bits on
+		} else {
+			val &= ^byte(0x40) // flip bits off
+		}
+
+		if cmd.Properties1.SupportEnabledisable {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.NumberOfSupportedCc)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties3.SupportedOverrideTypes) & byte(0x7F)
+
+		if cmd.Properties3.OverrideSupport {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	return
 }

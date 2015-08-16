@@ -17,7 +17,7 @@ type RateTblCurrentDataGet struct {
 }
 
 func (cmd *RateTblCurrentDataGet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -34,4 +34,20 @@ func (cmd *RateTblCurrentDataGet) UnmarshalBinary(payload []byte) error {
 	i += 3
 
 	return nil
+}
+
+func (cmd *RateTblCurrentDataGet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.RateParameterSetId)
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.DatasetRequested)
+		if buf[0] != 0 {
+			return nil, errors.New("BIT_24 value overflow")
+		}
+		payload = append(payload, buf[1:4]...)
+	}
+
+	return
 }

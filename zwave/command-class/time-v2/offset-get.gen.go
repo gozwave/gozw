@@ -12,3 +12,8 @@ func (cmd *TimeOffsetGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *TimeOffsetGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

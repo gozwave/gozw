@@ -25,13 +25,13 @@ type CommandRecordsSupportedReport struct {
 }
 
 func (cmd *CommandRecordsSupportedReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
 
-	cmd.Properties1.MaxCommandLength = (payload[i] & 0xFC) << 2
+	cmd.Properties1.MaxCommandLength = (payload[i] & 0xFC) >> 2
 
 	if payload[i]&0x01 == 0x01 {
 		cmd.Properties1.ConfCmd = true
@@ -62,4 +62,41 @@ func (cmd *CommandRecordsSupportedReport) UnmarshalBinary(payload []byte) error 
 	i += 2
 
 	return nil
+}
+
+func (cmd *CommandRecordsSupportedReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.MaxCommandLength << byte(2)) & byte(0xFC)
+
+		if cmd.Properties1.ConfCmd {
+			val |= byte(0x01) // flip bits on
+		} else {
+			val &= ^byte(0x01) // flip bits off
+		}
+
+		if cmd.Properties1.Vc {
+			val |= byte(0x02) // flip bits on
+		} else {
+			val &= ^byte(0x02) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.FreeCommandRecords)
+		payload = append(payload, buf...)
+	}
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.MaxCommandRecords)
+		payload = append(payload, buf...)
+	}
+
+	return
 }

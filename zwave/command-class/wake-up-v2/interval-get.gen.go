@@ -12,3 +12,8 @@ func (cmd *WakeUpIntervalGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *WakeUpIntervalGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

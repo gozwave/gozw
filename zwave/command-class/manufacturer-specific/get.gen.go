@@ -12,3 +12,8 @@ func (cmd *ManufacturerSpecificGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *ManufacturerSpecificGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

@@ -29,7 +29,7 @@ type MeterTblReport struct {
 }
 
 func (cmd *MeterTblReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -37,7 +37,7 @@ func (cmd *MeterTblReport) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties1.MeterType = (payload[i] & 0x3F)
 
-	cmd.Properties1.RateType = (payload[i] & 0xC0) << 6
+	cmd.Properties1.RateType = (payload[i] & 0xC0) >> 6
 
 	i += 1
 
@@ -71,4 +71,54 @@ func (cmd *MeterTblReport) UnmarshalBinary(payload []byte) error {
 	i += 3
 
 	return nil
+}
+
+func (cmd *MeterTblReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.MeterType) & byte(0x3F)
+
+		val |= (cmd.Properties1.RateType << byte(6)) & byte(0xC0)
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties2.PayMeter) & byte(0x0F)
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.DatasetSupported)
+		if buf[0] != 0 {
+			return nil, errors.New("BIT_24 value overflow")
+		}
+		payload = append(payload, buf[1:4]...)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.DatasetHistorySupported)
+		if buf[0] != 0 {
+			return nil, errors.New("BIT_24 value overflow")
+		}
+		payload = append(payload, buf[1:4]...)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.DataHistorySupported)
+		if buf[0] != 0 {
+			return nil, errors.New("BIT_24 value overflow")
+		}
+		payload = append(payload, buf[1:4]...)
+	}
+
+	return
 }

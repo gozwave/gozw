@@ -38,7 +38,7 @@ type ControllerChangeStatus struct {
 }
 
 func (cmd *ControllerChangeStatus) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -125,7 +125,56 @@ func (cmd *ControllerChangeStatus) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	val.CommandClass = payload[i:]
+	cmd.CommandClass = payload[i:]
 
 	return nil
+}
+
+func (cmd *ControllerChangeStatus) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.SeqNo)
+
+	payload = append(payload, cmd.Status)
+
+	payload = append(payload, cmd.NewNodeId)
+
+	payload = append(payload, cmd.NodeInfoLength)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.Capability) & byte(0x7F)
+
+		if cmd.Properties1.Listening {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties2.Security) & byte(0x7F)
+
+		if cmd.Properties2.Opt {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.BasicDeviceClass)
+
+	payload = append(payload, cmd.GenericDeviceClass)
+
+	payload = append(payload, cmd.SpecificDeviceClass)
+
+	payload = append(payload, cmd.CommandClass...)
+
+	return
 }

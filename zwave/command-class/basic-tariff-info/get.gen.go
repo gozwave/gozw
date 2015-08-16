@@ -12,3 +12,8 @@ func (cmd *BasicTariffInfoGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *BasicTariffInfoGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

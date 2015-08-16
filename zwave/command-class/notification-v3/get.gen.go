@@ -16,7 +16,7 @@ type NotificationGet struct {
 }
 
 func (cmd *NotificationGet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -40,4 +40,15 @@ func (cmd *NotificationGet) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *NotificationGet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.V1AlarmType)
+
+	payload = append(payload, cmd.NotificationType)
+
+	payload = append(payload, cmd.Event)
+
+	return
 }

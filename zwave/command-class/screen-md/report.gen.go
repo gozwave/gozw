@@ -18,7 +18,7 @@ type ScreenMdReport struct {
 }
 
 func (cmd *ScreenMdReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -26,7 +26,7 @@ func (cmd *ScreenMdReport) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties1.CharPresentation = (payload[i] & 0x07)
 
-	cmd.Properties1.ScreenSettings = (payload[i] & 0x38) << 3
+	cmd.Properties1.ScreenSettings = (payload[i] & 0x38) >> 3
 
 	if payload[i]&0x80 == 0x80 {
 		cmd.Properties1.MoreData = true
@@ -37,4 +37,25 @@ func (cmd *ScreenMdReport) UnmarshalBinary(payload []byte) error {
 	i += 1
 
 	return nil
+}
+
+func (cmd *ScreenMdReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.CharPresentation) & byte(0x07)
+
+		val |= (cmd.Properties1.ScreenSettings << byte(3)) & byte(0x38)
+
+		if cmd.Properties1.MoreData {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	return
 }

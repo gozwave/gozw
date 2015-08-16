@@ -12,3 +12,8 @@ func (cmd *CommandRecordsSupportedGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *CommandRecordsSupportedGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

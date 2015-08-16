@@ -26,7 +26,7 @@ type ScheduleEntryLockDailyRepeatingSet struct {
 }
 
 func (cmd *ScheduleEntryLockDailyRepeatingSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -85,4 +85,25 @@ func (cmd *ScheduleEntryLockDailyRepeatingSet) UnmarshalBinary(payload []byte) e
 	i++
 
 	return nil
+}
+
+func (cmd *ScheduleEntryLockDailyRepeatingSet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.SetAction)
+
+	payload = append(payload, cmd.UserIdentifier)
+
+	payload = append(payload, cmd.ScheduleSlotId)
+
+	payload = append(payload, cmd.WeekDayBitmask)
+
+	payload = append(payload, cmd.StartHour)
+
+	payload = append(payload, cmd.StartMinute)
+
+	payload = append(payload, cmd.DurationHour)
+
+	payload = append(payload, cmd.DurationMinute)
+
+	return
 }

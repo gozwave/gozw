@@ -12,3 +12,8 @@ func (cmd *DateGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *DateGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

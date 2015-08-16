@@ -16,7 +16,7 @@ type SecurityCommandsSupportedReport struct {
 }
 
 func (cmd *SecurityCommandsSupportedReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -33,7 +33,7 @@ func (cmd *SecurityCommandsSupportedReport) UnmarshalBinary(payload []byte) erro
 		markerIndex := i
 		for ; markerIndex < len(payload) && payload[markerIndex] != 0xEF; markerIndex++ {
 		}
-		val.CommandClassSupport = payload[i:markerIndex]
+		cmd.CommandClassSupport = payload[i:markerIndex]
 	}
 
 	if len(payload) <= i {
@@ -46,7 +46,25 @@ func (cmd *SecurityCommandsSupportedReport) UnmarshalBinary(payload []byte) erro
 		return errors.New("slice index out of bounds")
 	}
 
-	val.CommandClassControl = payload[i:]
+	cmd.CommandClassControl = payload[i:]
 
 	return nil
+}
+
+func (cmd *SecurityCommandsSupportedReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.ReportsToFollow)
+
+	{
+		if cmd.CommandClassSupport != nil && len(cmd.CommandClassSupport) > 0 {
+			payload = append(payload, cmd.CommandClassSupport...)
+		}
+		payload = append(payload, 0xEF)
+	}
+
+	payload = append(payload, 0xEF) // marker
+
+	payload = append(payload, cmd.CommandClassControl...)
+
+	return
 }

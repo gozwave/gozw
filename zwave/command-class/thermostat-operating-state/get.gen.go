@@ -12,3 +12,8 @@ func (cmd *ThermostatOperatingStateGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *ThermostatOperatingStateGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

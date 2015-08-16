@@ -12,3 +12,8 @@ func (cmd *NotificationSupportedGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *NotificationSupportedGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

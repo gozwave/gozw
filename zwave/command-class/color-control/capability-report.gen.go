@@ -15,7 +15,7 @@ type CapabilityReport struct {
 }
 
 func (cmd *CapabilityReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -25,4 +25,15 @@ func (cmd *CapabilityReport) UnmarshalBinary(payload []byte) error {
 	i += 2
 
 	return nil
+}
+
+func (cmd *CapabilityReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.CapabilityMask)
+		payload = append(payload, buf...)
+	}
+
+	return
 }

@@ -21,7 +21,7 @@ type WakeUpIntervalCapabilitiesReport struct {
 }
 
 func (cmd *WakeUpIntervalCapabilitiesReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -52,4 +52,45 @@ func (cmd *WakeUpIntervalCapabilitiesReport) UnmarshalBinary(payload []byte) err
 	i += 3
 
 	return nil
+}
+
+func (cmd *WakeUpIntervalCapabilitiesReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.MinimumWakeUpIntervalSeconds)
+		if buf[0] != 0 {
+			return nil, errors.New("BIT_24 value overflow")
+		}
+		payload = append(payload, buf[1:4]...)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.MaximumWakeUpIntervalSeconds)
+		if buf[0] != 0 {
+			return nil, errors.New("BIT_24 value overflow")
+		}
+		payload = append(payload, buf[1:4]...)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.DefaultWakeUpIntervalSeconds)
+		if buf[0] != 0 {
+			return nil, errors.New("BIT_24 value overflow")
+		}
+		payload = append(payload, buf[1:4]...)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.WakeUpIntervalStepSeconds)
+		if buf[0] != 0 {
+			return nil, errors.New("BIT_24 value overflow")
+		}
+		payload = append(payload, buf[1:4]...)
+	}
+
+	return
 }

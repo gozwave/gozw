@@ -26,7 +26,7 @@ type GeographicLocationReport struct {
 }
 
 func (cmd *GeographicLocationReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -71,4 +71,41 @@ func (cmd *GeographicLocationReport) UnmarshalBinary(payload []byte) error {
 	i += 1
 
 	return nil
+}
+
+func (cmd *GeographicLocationReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.LongitudeDegrees)
+
+	{
+		var val byte
+
+		val |= (cmd.Level.LongitudeMinutes) & byte(0x7F)
+
+		if cmd.Level.LongSign {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.LatitudeDegrees)
+
+	{
+		var val byte
+
+		val |= (cmd.Level2.LatitudeMinutes) & byte(0x7F)
+
+		if cmd.Level2.LatSign {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	return
 }

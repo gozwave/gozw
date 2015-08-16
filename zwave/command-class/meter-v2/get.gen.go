@@ -14,15 +14,28 @@ type MeterGet struct {
 }
 
 func (cmd *MeterGet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
 
-	cmd.Properties1.Scale = (payload[i] & 0x18) << 3
+	cmd.Properties1.Scale = (payload[i] & 0x18) >> 3
 
 	i += 1
 
 	return nil
+}
+
+func (cmd *MeterGet) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.Scale << byte(3)) & byte(0x18)
+
+		payload = append(payload, val)
+	}
+
+	return
 }

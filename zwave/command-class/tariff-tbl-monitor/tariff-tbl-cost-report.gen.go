@@ -47,7 +47,7 @@ type TariffTblCostReport struct {
 }
 
 func (cmd *TariffTblCostReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -145,7 +145,7 @@ func (cmd *TariffTblCostReport) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	cmd.Properties2.CostPrecision = (payload[i] & 0xE0) << 5
+	cmd.Properties2.CostPrecision = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -157,4 +157,70 @@ func (cmd *TariffTblCostReport) UnmarshalBinary(payload []byte) error {
 	i += 4
 
 	return nil
+}
+
+func (cmd *TariffTblCostReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.RateParameterSetId)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.RateType) & byte(0x03)
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.StartYear)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.StartMonth)
+
+	payload = append(payload, cmd.StartDay)
+
+	payload = append(payload, cmd.StartHourLocalTime)
+
+	payload = append(payload, cmd.StartMinuteLocalTime)
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.StopYear)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.StopMonth)
+
+	payload = append(payload, cmd.StopDay)
+
+	payload = append(payload, cmd.StopHourLocalTime)
+
+	payload = append(payload, cmd.StopMinuteLocalTime)
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.Currency)
+		if buf[0] != 0 {
+			return nil, errors.New("BIT_24 value overflow")
+		}
+		payload = append(payload, buf[1:4]...)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties2.CostPrecision << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.CostValue)
+		payload = append(payload, buf...)
+	}
+
+	return
 }

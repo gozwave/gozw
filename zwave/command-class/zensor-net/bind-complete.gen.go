@@ -12,3 +12,8 @@ func (cmd *BindComplete) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *BindComplete) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

@@ -12,3 +12,8 @@ func (cmd *AntitheftGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *AntitheftGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

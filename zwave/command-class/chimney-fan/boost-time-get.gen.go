@@ -12,3 +12,8 @@ func (cmd *ChimneyFanBoostTimeGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *ChimneyFanBoostTimeGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

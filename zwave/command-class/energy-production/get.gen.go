@@ -12,7 +12,7 @@ type EnergyProductionGet struct {
 }
 
 func (cmd *EnergyProductionGet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -22,4 +22,11 @@ func (cmd *EnergyProductionGet) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *EnergyProductionGet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.ParameterNumber)
+
+	return
 }

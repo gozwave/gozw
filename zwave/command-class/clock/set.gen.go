@@ -18,7 +18,7 @@ type ClockSet struct {
 }
 
 func (cmd *ClockSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -26,7 +26,7 @@ func (cmd *ClockSet) UnmarshalBinary(payload []byte) error {
 
 	cmd.Level.Hour = (payload[i] & 0x1F)
 
-	cmd.Level.Weekday = (payload[i] & 0xE0) << 5
+	cmd.Level.Weekday = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -38,4 +38,21 @@ func (cmd *ClockSet) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *ClockSet) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Level.Hour) & byte(0x1F)
+
+		val |= (cmd.Level.Weekday << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.Minute)
+
+	return
 }

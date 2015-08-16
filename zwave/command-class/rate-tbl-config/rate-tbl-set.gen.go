@@ -49,7 +49,7 @@ type RateTblSet struct {
 }
 
 func (cmd *RateTblSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -64,7 +64,7 @@ func (cmd *RateTblSet) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties1.NumberOfRateChar = (payload[i] & 0x1F)
 
-	cmd.Properties1.RateType = (payload[i] & 0x60) << 5
+	cmd.Properties1.RateType = (payload[i] & 0x60) >> 5
 
 	i += 1
 
@@ -102,7 +102,7 @@ func (cmd *RateTblSet) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties2.ConsumptionScale = (payload[i] & 0x1F)
 
-	cmd.Properties2.ConsumptionPrecision = (payload[i] & 0xE0) << 5
+	cmd.Properties2.ConsumptionPrecision = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -126,7 +126,7 @@ func (cmd *RateTblSet) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties3.MaxDemandScale = (payload[i] & 0x1F)
 
-	cmd.Properties3.MaxDemandPrecision = (payload[i] & 0xE0) << 5
+	cmd.Properties3.MaxDemandPrecision = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -145,4 +145,75 @@ func (cmd *RateTblSet) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *RateTblSet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.RateParameterSetId)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.NumberOfRateChar) & byte(0x1F)
+
+		val |= (cmd.Properties1.RateType << byte(5)) & byte(0x60)
+
+		payload = append(payload, val)
+	}
+
+	if cmd.RateCharacter != nil && len(cmd.RateCharacter) > 0 {
+		payload = append(payload, cmd.RateCharacter...)
+	}
+
+	payload = append(payload, cmd.StartHourLocalTime)
+
+	payload = append(payload, cmd.StartMinuteLocalTime)
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.DurationMinute)
+		payload = append(payload, buf...)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties2.ConsumptionScale) & byte(0x1F)
+
+		val |= (cmd.Properties2.ConsumptionPrecision << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.MinConsumptionValue)
+		payload = append(payload, buf...)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.MaxConsumptionValue)
+		payload = append(payload, buf...)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties3.MaxDemandScale) & byte(0x1F)
+
+		val |= (cmd.Properties3.MaxDemandPrecision << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.MaxDemandValue)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.DcpRateId)
+
+	return
 }

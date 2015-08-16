@@ -17,7 +17,7 @@ type ConfigurationBulkGet struct {
 }
 
 func (cmd *ConfigurationBulkGet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -34,4 +34,17 @@ func (cmd *ConfigurationBulkGet) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *ConfigurationBulkGet) MarshalBinary() (payload []byte, err error) {
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.ParameterOffset)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.NumberOfParameters)
+
+	return
 }

@@ -12,3 +12,8 @@ func (cmd *SensorTriggerLevelGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *SensorTriggerLevelGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

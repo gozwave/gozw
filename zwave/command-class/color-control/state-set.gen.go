@@ -14,7 +14,7 @@ type StateSet struct {
 }
 
 func (cmd *StateSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -25,4 +25,17 @@ func (cmd *StateSet) UnmarshalBinary(payload []byte) error {
 	i += 1
 
 	return nil
+}
+
+func (cmd *StateSet) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.StateDataLength) & byte(0x1F)
+
+		payload = append(payload, val)
+	}
+
+	return
 }

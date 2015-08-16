@@ -12,3 +12,8 @@ func (cmd *ScreenAttributesGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *ScreenAttributesGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

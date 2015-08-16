@@ -51,7 +51,7 @@ type CommandScheduleReport struct {
 }
 
 func (cmd *CommandScheduleReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -80,7 +80,7 @@ func (cmd *CommandScheduleReport) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties1.StartMonth = (payload[i] & 0x0F)
 
-	cmd.Properties1.ActiveId = (payload[i] & 0xF0) << 4
+	cmd.Properties1.ActiveId = (payload[i] & 0xF0) >> 4
 
 	i += 1
 
@@ -112,7 +112,7 @@ func (cmd *CommandScheduleReport) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties4.StartHour = (payload[i] & 0x1F)
 
-	cmd.Properties4.DurationType = (payload[i] & 0xE0) << 5
+	cmd.Properties4.DurationType = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -146,4 +146,75 @@ func (cmd *CommandScheduleReport) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *CommandScheduleReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.ScheduleId)
+
+	payload = append(payload, cmd.UserIdentifier)
+
+	payload = append(payload, cmd.StartYear)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.StartMonth) & byte(0x0F)
+
+		val |= (cmd.Properties1.ActiveId << byte(4)) & byte(0xF0)
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties2.StartDayOfMonth) & byte(0x1F)
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties3.StartWeekday) & byte(0x7F)
+
+		if cmd.Properties3.Res {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties4.StartHour) & byte(0x1F)
+
+		val |= (cmd.Properties4.DurationType << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties5.StartMinute) & byte(0x3F)
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.DurationByte)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.ReportsToFollow)
+
+	payload = append(payload, cmd.NumberOfCmdToFollow)
+
+	return
 }

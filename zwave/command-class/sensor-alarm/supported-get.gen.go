@@ -12,3 +12,8 @@ func (cmd *SensorAlarmSupportedGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *SensorAlarmSupportedGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

@@ -12,3 +12,8 @@ func (cmd *AvContentSearchMdReport) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *AvContentSearchMdReport) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

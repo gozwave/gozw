@@ -16,7 +16,7 @@ type HrvControlModeSupportedReport struct {
 }
 
 func (cmd *HrvControlModeSupportedReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -34,4 +34,19 @@ func (cmd *HrvControlModeSupportedReport) UnmarshalBinary(payload []byte) error 
 	i++
 
 	return nil
+}
+
+func (cmd *HrvControlModeSupportedReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.ManualControlSupported) & byte(0x0F)
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.BitMask)
+
+	return
 }

@@ -16,7 +16,7 @@ type ApplianceTypeReport struct {
 }
 
 func (cmd *ApplianceTypeReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -34,4 +34,19 @@ func (cmd *ApplianceTypeReport) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *ApplianceTypeReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.ApplianceType) & byte(0x3F)
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.ApplianceModeSupportedBitmask)
+
+	return
 }

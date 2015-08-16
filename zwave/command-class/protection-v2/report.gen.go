@@ -18,7 +18,7 @@ type ProtectionReport struct {
 }
 
 func (cmd *ProtectionReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -37,4 +37,25 @@ func (cmd *ProtectionReport) UnmarshalBinary(payload []byte) error {
 	i += 1
 
 	return nil
+}
+
+func (cmd *ProtectionReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Level.LocalProtectionState) & byte(0x0F)
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Level2.RfProtectionState) & byte(0x0F)
+
+		payload = append(payload, val)
+	}
+
+	return
 }

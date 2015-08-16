@@ -16,7 +16,7 @@ type RemoteAssociationConfigurationSet struct {
 }
 
 func (cmd *RemoteAssociationConfigurationSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -40,4 +40,15 @@ func (cmd *RemoteAssociationConfigurationSet) UnmarshalBinary(payload []byte) er
 	i++
 
 	return nil
+}
+
+func (cmd *RemoteAssociationConfigurationSet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.LocalGroupingIdentifier)
+
+	payload = append(payload, cmd.RemoteNodeid)
+
+	payload = append(payload, cmd.RemoteGroupingIdentifier)
+
+	return
 }

@@ -16,7 +16,7 @@ type ControllerChange struct {
 }
 
 func (cmd *ControllerChange) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -44,4 +44,15 @@ func (cmd *ControllerChange) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *ControllerChange) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.SeqNo)
+
+	payload = append(payload, cmd.Mode)
+
+	payload = append(payload, cmd.TxOptions)
+
+	return
 }

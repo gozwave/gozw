@@ -12,3 +12,8 @@ func (cmd *ThermostatFanModeSupportedGet) UnmarshalBinary(payload []byte) error 
 
 	return nil
 }
+
+func (cmd *ThermostatFanModeSupportedGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

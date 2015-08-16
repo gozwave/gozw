@@ -12,3 +12,8 @@ func (cmd *MeterReset) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *MeterReset) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

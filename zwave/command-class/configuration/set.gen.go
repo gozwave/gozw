@@ -20,7 +20,7 @@ type ConfigurationSet struct {
 }
 
 func (cmd *ConfigurationSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -51,4 +51,29 @@ func (cmd *ConfigurationSet) UnmarshalBinary(payload []byte) error {
 	i += 1
 
 	return nil
+}
+
+func (cmd *ConfigurationSet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.ParameterNumber)
+
+	{
+		var val byte
+
+		val |= (cmd.Level.Size) & byte(0x07)
+
+		if cmd.Level.Default {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	if cmd.ConfigurationValue != nil && len(cmd.ConfigurationValue) > 0 {
+		payload = append(payload, cmd.ConfigurationValue...)
+	}
+
+	return
 }

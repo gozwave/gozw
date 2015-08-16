@@ -41,7 +41,7 @@ type MeterTblHistoricalDataGet struct {
 }
 
 func (cmd *MeterTblHistoricalDataGet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -142,4 +142,52 @@ func (cmd *MeterTblHistoricalDataGet) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *MeterTblHistoricalDataGet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.MaximumReports)
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.HistoricalDatasetRequested)
+		if buf[0] != 0 {
+			return nil, errors.New("BIT_24 value overflow")
+		}
+		payload = append(payload, buf[1:4]...)
+	}
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.StartYear)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.StartMonth)
+
+	payload = append(payload, cmd.StartDay)
+
+	payload = append(payload, cmd.StartHourLocalTime)
+
+	payload = append(payload, cmd.StartMinuteLocalTime)
+
+	payload = append(payload, cmd.StartSecondLocalTime)
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.StopYear)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.StopMonth)
+
+	payload = append(payload, cmd.StopDay)
+
+	payload = append(payload, cmd.StopHourLocalTime)
+
+	payload = append(payload, cmd.StopMinuteLocalTime)
+
+	payload = append(payload, cmd.StopSecondLocalTime)
+
+	return
 }

@@ -20,7 +20,7 @@ type MeterSupportedReport struct {
 }
 
 func (cmd *MeterSupportedReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -45,4 +45,31 @@ func (cmd *MeterSupportedReport) UnmarshalBinary(payload []byte) error {
 	i += 1
 
 	return nil
+}
+
+func (cmd *MeterSupportedReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.MeterType) & byte(0x1F)
+
+		if cmd.Properties1.MeterReset {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties2.ScaleSupported) & byte(0x0F)
+
+		payload = append(payload, val)
+	}
+
+	return
 }

@@ -12,3 +12,8 @@ func (cmd *MeterTblPushConfigurationGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *MeterTblPushConfigurationGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

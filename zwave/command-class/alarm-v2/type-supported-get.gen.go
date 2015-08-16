@@ -12,3 +12,8 @@ func (cmd *AlarmTypeSupportedGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *AlarmTypeSupportedGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

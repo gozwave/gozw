@@ -12,3 +12,8 @@ func (cmd *ApplianceGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *ApplianceGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

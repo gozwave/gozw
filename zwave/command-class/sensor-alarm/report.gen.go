@@ -21,7 +21,7 @@ type SensorAlarmReport struct {
 }
 
 func (cmd *SensorAlarmReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -52,4 +52,21 @@ func (cmd *SensorAlarmReport) UnmarshalBinary(payload []byte) error {
 	i += 2
 
 	return nil
+}
+
+func (cmd *SensorAlarmReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.SourceNodeId)
+
+	payload = append(payload, cmd.SensorType)
+
+	payload = append(payload, cmd.SensorState)
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.Seconds)
+		payload = append(payload, buf...)
+	}
+
+	return
 }

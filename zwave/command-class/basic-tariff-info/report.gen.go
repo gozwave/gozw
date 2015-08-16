@@ -37,7 +37,7 @@ type BasicTariffInfoReport struct {
 }
 
 func (cmd *BasicTariffInfoReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -105,4 +105,57 @@ func (cmd *BasicTariffInfoReport) UnmarshalBinary(payload []byte) error {
 	i += 4
 
 	return nil
+}
+
+func (cmd *BasicTariffInfoReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.TotalNoImportRates) & byte(0x0F)
+
+		if cmd.Properties1.Dual {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties2.E1CurrentRateInUse) & byte(0x0F)
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.E1RateConsumptionRegister)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.E1TimeForNextRateHours)
+
+	payload = append(payload, cmd.E1TimeForNextRateMinutes)
+
+	payload = append(payload, cmd.E1TimeForNextRateSeconds)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties3.E2CurrentRateInUse) & byte(0x0F)
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.E2RateConsumptionRegister)
+		payload = append(payload, buf...)
+	}
+
+	return
 }

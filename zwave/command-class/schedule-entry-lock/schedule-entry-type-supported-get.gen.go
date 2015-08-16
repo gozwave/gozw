@@ -12,3 +12,8 @@ func (cmd *ScheduleEntryTypeSupportedGet) UnmarshalBinary(payload []byte) error 
 
 	return nil
 }
+
+func (cmd *ScheduleEntryTypeSupportedGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

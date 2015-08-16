@@ -33,7 +33,7 @@ type MeterTblCurrentDataReport struct {
 }
 
 func (cmd *MeterTblCurrentDataReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -100,4 +100,44 @@ func (cmd *MeterTblCurrentDataReport) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *MeterTblCurrentDataReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.ReportsToFollow)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.RateType) & byte(0x03)
+
+		payload = append(payload, val)
+	}
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.Dataset)
+		if buf[0] != 0 {
+			return nil, errors.New("BIT_24 value overflow")
+		}
+		payload = append(payload, buf[1:4]...)
+	}
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.Year)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.Month)
+
+	payload = append(payload, cmd.Day)
+
+	payload = append(payload, cmd.HourLocalTime)
+
+	payload = append(payload, cmd.MinuteLocalTime)
+
+	payload = append(payload, cmd.SecondLocalTime)
+
+	return
 }

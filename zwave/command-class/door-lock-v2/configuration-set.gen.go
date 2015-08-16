@@ -22,7 +22,7 @@ type DoorLockConfigurationSet struct {
 }
 
 func (cmd *DoorLockConfigurationSet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -37,7 +37,7 @@ func (cmd *DoorLockConfigurationSet) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties1.InsideDoorHandlesState = (payload[i] & 0x0F)
 
-	cmd.Properties1.OutsideDoorHandlesState = (payload[i] & 0xF0) << 4
+	cmd.Properties1.OutsideDoorHandlesState = (payload[i] & 0xF0) >> 4
 
 	i += 1
 
@@ -56,4 +56,25 @@ func (cmd *DoorLockConfigurationSet) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *DoorLockConfigurationSet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.OperationType)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.InsideDoorHandlesState) & byte(0x0F)
+
+		val |= (cmd.Properties1.OutsideDoorHandlesState << byte(4)) & byte(0xF0)
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.LockTimeoutMinutes)
+
+	payload = append(payload, cmd.LockTimeoutSeconds)
+
+	return
 }

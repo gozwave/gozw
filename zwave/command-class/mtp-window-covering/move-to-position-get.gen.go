@@ -12,3 +12,8 @@ func (cmd *MoveToPositionGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *MoveToPositionGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

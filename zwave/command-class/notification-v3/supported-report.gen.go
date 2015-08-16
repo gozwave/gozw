@@ -18,7 +18,7 @@ type NotificationSupportedReport struct {
 }
 
 func (cmd *NotificationSupportedReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -42,4 +42,25 @@ func (cmd *NotificationSupportedReport) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *NotificationSupportedReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.NumberOfBitMasks) & byte(0x1F)
+
+		if cmd.Properties1.V1Alarm {
+			val |= byte(0x80) // flip bits on
+		} else {
+			val &= ^byte(0x80) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.BitMask)
+
+	return
 }

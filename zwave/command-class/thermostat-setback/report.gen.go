@@ -16,7 +16,7 @@ type ThermostatSetbackReport struct {
 }
 
 func (cmd *ThermostatSetbackReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -34,4 +34,19 @@ func (cmd *ThermostatSetbackReport) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *ThermostatSetbackReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.SetbackType) & byte(0x03)
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.SetbackState)
+
+	return
 }

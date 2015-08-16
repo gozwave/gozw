@@ -48,7 +48,7 @@ type ChimneyFanSetupReport struct {
 }
 
 func (cmd *ChimneyFanSetupReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -84,9 +84,9 @@ func (cmd *ChimneyFanSetupReport) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties1.Size1 = (payload[i] & 0x07)
 
-	cmd.Properties1.Scale1 = (payload[i] & 0x18) << 3
+	cmd.Properties1.Scale1 = (payload[i] & 0x18) >> 3
 
-	cmd.Properties1.Precision1 = (payload[i] & 0xE0) << 5
+	cmd.Properties1.Precision1 = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -103,9 +103,9 @@ func (cmd *ChimneyFanSetupReport) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties2.Size2 = (payload[i] & 0x07)
 
-	cmd.Properties2.Scale2 = (payload[i] & 0x18) << 3
+	cmd.Properties2.Scale2 = (payload[i] & 0x18) >> 3
 
-	cmd.Properties2.Precision2 = (payload[i] & 0xE0) << 5
+	cmd.Properties2.Precision2 = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -122,9 +122,9 @@ func (cmd *ChimneyFanSetupReport) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties3.Size3 = (payload[i] & 0x07)
 
-	cmd.Properties3.Scale3 = (payload[i] & 0x18) << 3
+	cmd.Properties3.Scale3 = (payload[i] & 0x18) >> 3
 
-	cmd.Properties3.Precision3 = (payload[i] & 0xE0) << 5
+	cmd.Properties3.Precision3 = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -136,4 +136,65 @@ func (cmd *ChimneyFanSetupReport) UnmarshalBinary(payload []byte) error {
 	i += 8
 
 	return nil
+}
+
+func (cmd *ChimneyFanSetupReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.Mode)
+
+	payload = append(payload, cmd.BoostTime)
+
+	payload = append(payload, cmd.StopTime)
+
+	payload = append(payload, cmd.MinSpeed)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.Size1) & byte(0x07)
+
+		val |= (cmd.Properties1.Scale1 << byte(3)) & byte(0x18)
+
+		val |= (cmd.Properties1.Precision1 << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	if cmd.StartTemperature != nil && len(cmd.StartTemperature) > 0 {
+		payload = append(payload, cmd.StartTemperature...)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties2.Size2) & byte(0x07)
+
+		val |= (cmd.Properties2.Scale2 << byte(3)) & byte(0x18)
+
+		val |= (cmd.Properties2.Precision2 << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	if cmd.StopTemperature != nil && len(cmd.StopTemperature) > 0 {
+		payload = append(payload, cmd.StopTemperature...)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties3.Size3) & byte(0x07)
+
+		val |= (cmd.Properties3.Scale3 << byte(3)) & byte(0x18)
+
+		val |= (cmd.Properties3.Precision3 << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	if cmd.AlarmTemperatureValue != nil && len(cmd.AlarmTemperatureValue) > 0 {
+		payload = append(payload, cmd.AlarmTemperatureValue...)
+	}
+
+	return
 }

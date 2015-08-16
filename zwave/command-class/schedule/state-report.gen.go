@@ -30,7 +30,7 @@ type ScheduleStateReport struct {
 }
 
 func (cmd *ScheduleStateReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -43,7 +43,7 @@ func (cmd *ScheduleStateReport) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	cmd.Properties1.ReportsToFollow = (payload[i] & 0xFE) << 1
+	cmd.Properties1.ReportsToFollow = (payload[i] & 0xFE) >> 1
 
 	if payload[i]&0x01 == 0x01 {
 		cmd.Properties1.Override = true
@@ -59,7 +59,7 @@ func (cmd *ScheduleStateReport) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties2.ActiveId1 = (payload[i] & 0x0F)
 
-	cmd.Properties2.ActiveId2 = (payload[i] & 0xF0) << 4
+	cmd.Properties2.ActiveId2 = (payload[i] & 0xF0) >> 4
 
 	i += 1
 
@@ -69,9 +69,50 @@ func (cmd *ScheduleStateReport) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties3.ActiveId3 = (payload[i] & 0x0F)
 
-	cmd.Properties3.ActiveIdN = (payload[i] & 0xF0) << 4
+	cmd.Properties3.ActiveIdN = (payload[i] & 0xF0) >> 4
 
 	i += 1
 
 	return nil
+}
+
+func (cmd *ScheduleStateReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.NumberOfSupportedScheduleId)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.ReportsToFollow << byte(1)) & byte(0xFE)
+
+		if cmd.Properties1.Override {
+			val |= byte(0x01) // flip bits on
+		} else {
+			val &= ^byte(0x01) // flip bits off
+		}
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties2.ActiveId1) & byte(0x0F)
+
+		val |= (cmd.Properties2.ActiveId2 << byte(4)) & byte(0xF0)
+
+		payload = append(payload, val)
+	}
+
+	{
+		var val byte
+
+		val |= (cmd.Properties3.ActiveId3) & byte(0x0F)
+
+		val |= (cmd.Properties3.ActiveIdN << byte(4)) & byte(0xF0)
+
+		payload = append(payload, val)
+	}
+
+	return
 }

@@ -14,7 +14,7 @@ type SecurityPanelZoneSensorStateGet struct {
 }
 
 func (cmd *SecurityPanelZoneSensorStateGet) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -31,4 +31,13 @@ func (cmd *SecurityPanelZoneSensorStateGet) UnmarshalBinary(payload []byte) erro
 	i++
 
 	return nil
+}
+
+func (cmd *SecurityPanelZoneSensorStateGet) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.ZoneNumber)
+
+	payload = append(payload, cmd.SensorNumber)
+
+	return
 }

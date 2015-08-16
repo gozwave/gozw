@@ -12,3 +12,8 @@ func (cmd *HrvControlVentilationRateGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *HrvControlVentilationRateGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

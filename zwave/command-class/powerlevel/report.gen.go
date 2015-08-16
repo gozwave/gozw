@@ -14,7 +14,7 @@ type PowerlevelReport struct {
 }
 
 func (cmd *PowerlevelReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -31,4 +31,13 @@ func (cmd *PowerlevelReport) UnmarshalBinary(payload []byte) error {
 	i++
 
 	return nil
+}
+
+func (cmd *PowerlevelReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.PowerLevel)
+
+	payload = append(payload, cmd.Timeout)
+
+	return
 }

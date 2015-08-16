@@ -39,7 +39,7 @@ type RecordReport struct {
 }
 
 func (cmd *RecordReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -75,7 +75,7 @@ func (cmd *RecordReport) UnmarshalBinary(payload []byte) error {
 
 	cmd.Properties1.HourLocalTime = (payload[i] & 0x1F)
 
-	cmd.Properties1.RecordStatus = (payload[i] & 0xE0) << 5
+	cmd.Properties1.RecordStatus = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -118,7 +118,46 @@ func (cmd *RecordReport) UnmarshalBinary(payload []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	val.UserCode = payload[i:]
+	cmd.UserCode = payload[i:]
 
 	return nil
+}
+
+func (cmd *RecordReport) MarshalBinary() (payload []byte, err error) {
+
+	payload = append(payload, cmd.RecordNumber)
+
+	{
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, cmd.Year)
+		payload = append(payload, buf...)
+	}
+
+	payload = append(payload, cmd.Month)
+
+	payload = append(payload, cmd.Day)
+
+	{
+		var val byte
+
+		val |= (cmd.Properties1.HourLocalTime) & byte(0x1F)
+
+		val |= (cmd.Properties1.RecordStatus << byte(5)) & byte(0xE0)
+
+		payload = append(payload, val)
+	}
+
+	payload = append(payload, cmd.MinuteLocalTime)
+
+	payload = append(payload, cmd.SecondLocalTime)
+
+	payload = append(payload, cmd.EventType)
+
+	payload = append(payload, cmd.UserIdentifier)
+
+	payload = append(payload, cmd.UserCodeLength)
+
+	payload = append(payload, cmd.UserCode...)
+
+	return
 }

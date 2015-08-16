@@ -17,7 +17,7 @@ type MeterTblStatusSupportedReport struct {
 }
 
 func (cmd *MeterTblStatusSupportedReport) UnmarshalBinary(payload []byte) error {
-	i := 2
+	i := 0
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -34,4 +34,20 @@ func (cmd *MeterTblStatusSupportedReport) UnmarshalBinary(payload []byte) error 
 	i++
 
 	return nil
+}
+
+func (cmd *MeterTblStatusSupportedReport) MarshalBinary() (payload []byte, err error) {
+
+	{
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, cmd.SupportedOperatingStatus)
+		if buf[0] != 0 {
+			return nil, errors.New("BIT_24 value overflow")
+		}
+		payload = append(payload, buf[1:4]...)
+	}
+
+	payload = append(payload, cmd.StatusEventLogDepth)
+
+	return
 }

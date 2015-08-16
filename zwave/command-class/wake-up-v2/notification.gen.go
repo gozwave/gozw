@@ -12,3 +12,8 @@ func (cmd *WakeUpNotification) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *WakeUpNotification) MarshalBinary() (payload []byte, err error) {
+
+	return
+}

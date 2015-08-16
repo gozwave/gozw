@@ -12,3 +12,8 @@ func (cmd *VersionGet) UnmarshalBinary(payload []byte) error {
 
 	return nil
 }
+
+func (cmd *VersionGet) MarshalBinary() (payload []byte, err error) {
+
+	return
+}
