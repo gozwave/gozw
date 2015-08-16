@@ -200,8 +200,9 @@ func (g *Generator) fixVariants() {
 
 				if param.Type == "VARIANT" {
 					if len(cmd.Params) > i+1 && cmd.Params[i+1].Type == "MARKER" {
-						param.Variant[0].StopAtMarker = true
+						param.Variant[0].MarkerDelimited = true
 						param.Variant[0].MarkerValue = cmd.Params[i+1].Const[0].FlagMask
+						param.Variant[0].MarkerDelimited = false
 					} else {
 						param.Variant[0].StopAtMarker = false
 					}

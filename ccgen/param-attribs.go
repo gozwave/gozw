@@ -86,8 +86,8 @@ type Variant struct {
 	SizeMask    string `xml:"sizemask,attr"`
 	SizeOffset  string `xml:"sizeoffs,attr"`
 
-	StopAtMarker bool
 	MarkerValue  string
+	MarkerDelimited bool
 }
 
 type Bitmask struct {
