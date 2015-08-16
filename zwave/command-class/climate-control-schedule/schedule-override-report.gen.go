@@ -6,7 +6,9 @@ package climatecontrolschedule
 // <no value>
 
 type ScheduleOverrideReport struct {
-	OverrideType byte
+	Properties1 struct {
+		OverrideType byte
+	}
 
 	OverrideState byte
 }
@@ -16,7 +18,7 @@ func ParseScheduleOverrideReport(payload []byte) ScheduleOverrideReport {
 
 	i := 2
 
-	val.OverrideType = (payload[i] & 0x03)
+	val.Properties1.OverrideType = (payload[i] & 0x03)
 
 	i += 1
 

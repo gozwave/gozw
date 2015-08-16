@@ -10,7 +10,9 @@ import "encoding/binary"
 type TariffTblReport struct {
 	RateParameterSetId byte
 
-	TariffPrecision byte
+	Properties1 struct {
+		TariffPrecision byte
+	}
 
 	TariffValue uint32
 }
@@ -23,7 +25,7 @@ func ParseTariffTblReport(payload []byte) TariffTblReport {
 	val.RateParameterSetId = payload[i]
 	i++
 
-	val.TariffPrecision = (payload[i] & 0xE0) << 5
+	val.Properties1.TariffPrecision = (payload[i] & 0xE0) << 5
 
 	i += 1
 

@@ -8,9 +8,11 @@ package dmx
 type DmxData40 struct {
 	Source byte
 
-	Page byte
+	Properties1 struct {
+		Page byte
 
-	SequenceNo byte
+		SequenceNo byte
+	}
 
 	DmxChannel []byte
 }
@@ -23,9 +25,9 @@ func ParseDmxData40(payload []byte) DmxData40 {
 	val.Source = payload[i]
 	i++
 
-	val.Page = (payload[i] & 0x0F)
+	val.Properties1.Page = (payload[i] & 0x0F)
 
-	val.SequenceNo = (payload[i] & 0x30) << 4
+	val.Properties1.SequenceNo = (payload[i] & 0x30) << 4
 
 	i += 1
 

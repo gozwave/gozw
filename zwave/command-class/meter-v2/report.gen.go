@@ -8,15 +8,19 @@ import "encoding/binary"
 // <no value>
 
 type MeterReport struct {
-	MeterType byte
+	Properties1 struct {
+		MeterType byte
 
-	RateType byte
+		RateType byte
+	}
 
-	Size byte
+	Properties2 struct {
+		Size byte
 
-	Scale byte
+		Scale byte
 
-	Precision byte
+		Precision byte
+	}
 
 	MeterValue []byte
 
@@ -30,17 +34,17 @@ func ParseMeterReport(payload []byte) MeterReport {
 
 	i := 2
 
-	val.MeterType = (payload[i] & 0x1F)
+	val.Properties1.MeterType = (payload[i] & 0x1F)
 
-	val.RateType = (payload[i] & 0x60) << 5
+	val.Properties1.RateType = (payload[i] & 0x60) << 5
 
 	i += 1
 
-	val.Size = (payload[i] & 0x07)
+	val.Properties2.Size = (payload[i] & 0x07)
 
-	val.Scale = (payload[i] & 0x18) << 3
+	val.Properties2.Scale = (payload[i] & 0x18) << 3
 
-	val.Precision = (payload[i] & 0xE0) << 5
+	val.Properties2.Precision = (payload[i] & 0xE0) << 5
 
 	i += 1
 

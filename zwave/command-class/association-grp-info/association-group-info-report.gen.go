@@ -6,11 +6,13 @@ package associationgrpinfo
 // <no value>
 
 type AssociationGroupInfoReport struct {
-	GroupCount byte
+	Properties1 struct {
+		GroupCount byte
 
-	DynamicInfo bool
+		DynamicInfo bool
 
-	ListMode bool
+		ListMode bool
+	}
 }
 
 func ParseAssociationGroupInfoReport(payload []byte) AssociationGroupInfoReport {
@@ -18,18 +20,18 @@ func ParseAssociationGroupInfoReport(payload []byte) AssociationGroupInfoReport 
 
 	i := 2
 
-	val.GroupCount = (payload[i] & 0x3F)
+	val.Properties1.GroupCount = (payload[i] & 0x3F)
 
 	if payload[i]&0x40 == 0x40 {
-		val.DynamicInfo = true
+		val.Properties1.DynamicInfo = true
 	} else {
-		val.DynamicInfo = false
+		val.Properties1.DynamicInfo = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.ListMode = true
+		val.Properties1.ListMode = true
 	} else {
-		val.ListMode = false
+		val.Properties1.ListMode = false
 	}
 
 	i += 1

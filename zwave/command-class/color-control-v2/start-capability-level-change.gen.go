@@ -6,13 +6,15 @@ package colorcontrolv2
 // <no value>
 
 type StartCapabilityLevelChange struct {
-	Res1 byte
+	Properties1 struct {
+		Res1 byte
 
-	IgnoreStartState bool
+		IgnoreStartState bool
 
-	Updown bool
+		Updown bool
 
-	Res2 bool
+		Res2 bool
+	}
 
 	CapabilityId byte
 
@@ -24,24 +26,24 @@ func ParseStartCapabilityLevelChange(payload []byte) StartCapabilityLevelChange 
 
 	i := 2
 
-	val.Res1 = (payload[i] & 0x1F)
+	val.Properties1.Res1 = (payload[i] & 0x1F)
 
 	if payload[i]&0x20 == 0x20 {
-		val.IgnoreStartState = true
+		val.Properties1.IgnoreStartState = true
 	} else {
-		val.IgnoreStartState = false
+		val.Properties1.IgnoreStartState = false
 	}
 
 	if payload[i]&0x40 == 0x40 {
-		val.Updown = true
+		val.Properties1.Updown = true
 	} else {
-		val.Updown = false
+		val.Properties1.Updown = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.Res2 = true
+		val.Properties1.Res2 = true
 	} else {
-		val.Res2 = false
+		val.Properties1.Res2 = false
 	}
 
 	i += 1

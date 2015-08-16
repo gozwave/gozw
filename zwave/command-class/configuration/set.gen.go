@@ -8,9 +8,11 @@ package configuration
 type ConfigurationSet struct {
 	ParameterNumber byte
 
-	Size byte
+	Level struct {
+		Size byte
 
-	Default bool
+		Default bool
+	}
 
 	ConfigurationValue []byte
 }
@@ -23,12 +25,12 @@ func ParseConfigurationSet(payload []byte) ConfigurationSet {
 	val.ParameterNumber = payload[i]
 	i++
 
-	val.Size = (payload[i] & 0x07)
+	val.Level.Size = (payload[i] & 0x07)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Default = true
+		val.Level.Default = true
 	} else {
-		val.Default = false
+		val.Level.Default = false
 	}
 
 	i += 1

@@ -8,9 +8,11 @@ package doorlock
 type DoorLockConfigurationReport struct {
 	OperationType byte
 
-	InsideDoorHandlesState byte
+	Properties1 struct {
+		InsideDoorHandlesState byte
 
-	OutsideDoorHandlesState byte
+		OutsideDoorHandlesState byte
+	}
 
 	LockTimeoutMinutes byte
 
@@ -25,9 +27,9 @@ func ParseDoorLockConfigurationReport(payload []byte) DoorLockConfigurationRepor
 	val.OperationType = payload[i]
 	i++
 
-	val.InsideDoorHandlesState = (payload[i] & 0x0F)
+	val.Properties1.InsideDoorHandlesState = (payload[i] & 0x0F)
 
-	val.OutsideDoorHandlesState = (payload[i] & 0xF0) << 4
+	val.Properties1.OutsideDoorHandlesState = (payload[i] & 0xF0) << 4
 
 	i += 1
 

@@ -6,7 +6,9 @@ package thermostatoperatingstate
 // <no value>
 
 type ThermostatOperatingStateReport struct {
-	OperatingState byte
+	Level struct {
+		OperatingState byte
+	}
 }
 
 func ParseThermostatOperatingStateReport(payload []byte) ThermostatOperatingStateReport {
@@ -14,7 +16,7 @@ func ParseThermostatOperatingStateReport(payload []byte) ThermostatOperatingStat
 
 	i := 2
 
-	val.OperatingState = (payload[i] & 0x0F)
+	val.Level.OperatingState = (payload[i] & 0x0F)
 
 	i += 1
 

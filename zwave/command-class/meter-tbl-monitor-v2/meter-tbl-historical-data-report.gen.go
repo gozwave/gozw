@@ -10,9 +10,11 @@ import "encoding/binary"
 type MeterTblHistoricalDataReport struct {
 	ReportsToFollow byte
 
-	RateType byte
+	Properties1 struct {
+		RateType byte
 
-	OperatingStatusIndication bool
+		OperatingStatusIndication bool
+	}
 
 	Dataset uint32
 
@@ -37,12 +39,12 @@ func ParseMeterTblHistoricalDataReport(payload []byte) MeterTblHistoricalDataRep
 	val.ReportsToFollow = payload[i]
 	i++
 
-	val.RateType = (payload[i] & 0x03)
+	val.Properties1.RateType = (payload[i] & 0x03)
 
 	if payload[i]&0x80 == 0x80 {
-		val.OperatingStatusIndication = true
+		val.Properties1.OperatingStatusIndication = true
 	} else {
-		val.OperatingStatusIndication = false
+		val.Properties1.OperatingStatusIndication = false
 	}
 
 	i += 1

@@ -6,15 +6,19 @@ package scheduleentrylockv3
 // <no value>
 
 type ScheduleEntryLockTimeOffsetReport struct {
-	HourTzo byte
+	Level struct {
+		HourTzo byte
 
-	SignTzo bool
+		SignTzo bool
+	}
 
 	MinuteTzo byte
 
-	MinuteOffsetDst byte
+	Level2 struct {
+		MinuteOffsetDst byte
 
-	SignOffsetDst bool
+		SignOffsetDst bool
+	}
 }
 
 func ParseScheduleEntryLockTimeOffsetReport(payload []byte) ScheduleEntryLockTimeOffsetReport {
@@ -22,12 +26,12 @@ func ParseScheduleEntryLockTimeOffsetReport(payload []byte) ScheduleEntryLockTim
 
 	i := 2
 
-	val.HourTzo = (payload[i] & 0x7F)
+	val.Level.HourTzo = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.SignTzo = true
+		val.Level.SignTzo = true
 	} else {
-		val.SignTzo = false
+		val.Level.SignTzo = false
 	}
 
 	i += 1
@@ -35,12 +39,12 @@ func ParseScheduleEntryLockTimeOffsetReport(payload []byte) ScheduleEntryLockTim
 	val.MinuteTzo = payload[i]
 	i++
 
-	val.MinuteOffsetDst = (payload[i] & 0x7F)
+	val.Level2.MinuteOffsetDst = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.SignOffsetDst = true
+		val.Level2.SignOffsetDst = true
 	} else {
-		val.SignOffsetDst = false
+		val.Level2.SignOffsetDst = false
 	}
 
 	i += 1

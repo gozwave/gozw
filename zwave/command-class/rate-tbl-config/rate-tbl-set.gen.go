@@ -10,9 +10,11 @@ import "encoding/binary"
 type RateTblSet struct {
 	RateParameterSetId byte
 
-	NumberOfRateChar byte
+	Properties1 struct {
+		NumberOfRateChar byte
 
-	RateType byte
+		RateType byte
+	}
 
 	RateCharacter []byte
 
@@ -22,17 +24,21 @@ type RateTblSet struct {
 
 	DurationMinute uint16
 
-	ConsumptionScale byte
+	Properties2 struct {
+		ConsumptionScale byte
 
-	ConsumptionPrecision byte
+		ConsumptionPrecision byte
+	}
 
 	MinConsumptionValue uint32
 
 	MaxConsumptionValue uint32
 
-	MaxDemandScale byte
+	Properties3 struct {
+		MaxDemandScale byte
 
-	MaxDemandPrecision byte
+		MaxDemandPrecision byte
+	}
 
 	MaxDemandValue uint32
 
@@ -47,9 +53,9 @@ func ParseRateTblSet(payload []byte) RateTblSet {
 	val.RateParameterSetId = payload[i]
 	i++
 
-	val.NumberOfRateChar = (payload[i] & 0x1F)
+	val.Properties1.NumberOfRateChar = (payload[i] & 0x1F)
 
-	val.RateType = (payload[i] & 0x60) << 5
+	val.Properties1.RateType = (payload[i] & 0x60) << 5
 
 	i += 1
 
@@ -65,9 +71,9 @@ func ParseRateTblSet(payload []byte) RateTblSet {
 	val.DurationMinute = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
-	val.ConsumptionScale = (payload[i] & 0x1F)
+	val.Properties2.ConsumptionScale = (payload[i] & 0x1F)
 
-	val.ConsumptionPrecision = (payload[i] & 0xE0) << 5
+	val.Properties2.ConsumptionPrecision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
@@ -77,9 +83,9 @@ func ParseRateTblSet(payload []byte) RateTblSet {
 	val.MaxConsumptionValue = binary.BigEndian.Uint32(payload[i : i+4])
 	i += 4
 
-	val.MaxDemandScale = (payload[i] & 0x1F)
+	val.Properties3.MaxDemandScale = (payload[i] & 0x1F)
 
-	val.MaxDemandPrecision = (payload[i] & 0xE0) << 5
+	val.Properties3.MaxDemandPrecision = (payload[i] & 0xE0) << 5
 
 	i += 1
 

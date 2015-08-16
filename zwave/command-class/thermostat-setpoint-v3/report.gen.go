@@ -6,13 +6,17 @@ package thermostatsetpointv3
 // <no value>
 
 type ThermostatSetpointReport struct {
-	SetpointType byte
+	Level struct {
+		SetpointType byte
+	}
 
-	Size byte
+	Level2 struct {
+		Size byte
 
-	Scale byte
+		Scale byte
 
-	Precision byte
+		Precision byte
+	}
 
 	Value []byte
 }
@@ -22,15 +26,15 @@ func ParseThermostatSetpointReport(payload []byte) ThermostatSetpointReport {
 
 	i := 2
 
-	val.SetpointType = (payload[i] & 0x0F)
+	val.Level.SetpointType = (payload[i] & 0x0F)
 
 	i += 1
 
-	val.Size = (payload[i] & 0x07)
+	val.Level2.Size = (payload[i] & 0x07)
 
-	val.Scale = (payload[i] & 0x18) << 3
+	val.Level2.Scale = (payload[i] & 0x18) << 3
 
-	val.Precision = (payload[i] & 0xE0) << 5
+	val.Level2.Precision = (payload[i] & 0xE0) << 5
 
 	i += 1
 

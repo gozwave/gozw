@@ -6,7 +6,9 @@ package metertblconfig
 // <no value>
 
 type MeterTblTablePointAdmNoSet struct {
-	NumberOfCharacters byte
+	Properties1 struct {
+		NumberOfCharacters byte
+	}
 
 	MeterPointAdmNumberCharacter []byte
 }
@@ -16,7 +18,7 @@ func ParseMeterTblTablePointAdmNoSet(payload []byte) MeterTblTablePointAdmNoSet 
 
 	i := 2
 
-	val.NumberOfCharacters = (payload[i] & 0x1F)
+	val.Properties1.NumberOfCharacters = (payload[i] & 0x1F)
 
 	i += 1
 

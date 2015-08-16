@@ -14,13 +14,17 @@ type ControllerChangeStatus struct {
 
 	NodeInfoLength byte
 
-	Capability byte
+	Properties1 struct {
+		Capability byte
 
-	Listening bool
+		Listening bool
+	}
 
-	Security byte
+	Properties2 struct {
+		Security byte
 
-	Opt bool
+		Opt bool
+	}
 
 	BasicDeviceClass byte
 
@@ -48,22 +52,22 @@ func ParseControllerChangeStatus(payload []byte) ControllerChangeStatus {
 	val.NodeInfoLength = payload[i]
 	i++
 
-	val.Capability = (payload[i] & 0x7F)
+	val.Properties1.Capability = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Listening = true
+		val.Properties1.Listening = true
 	} else {
-		val.Listening = false
+		val.Properties1.Listening = false
 	}
 
 	i += 1
 
-	val.Security = (payload[i] & 0x7F)
+	val.Properties2.Security = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Opt = true
+		val.Properties2.Opt = true
 	} else {
-		val.Opt = false
+		val.Properties2.Opt = false
 	}
 
 	i += 1

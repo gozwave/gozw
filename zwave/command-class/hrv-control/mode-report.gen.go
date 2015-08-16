@@ -6,7 +6,9 @@ package hrvcontrol
 // <no value>
 
 type HrvControlModeReport struct {
-	Mode byte
+	Properties1 struct {
+		Mode byte
+	}
 }
 
 func ParseHrvControlModeReport(payload []byte) HrvControlModeReport {
@@ -14,7 +16,7 @@ func ParseHrvControlModeReport(payload []byte) HrvControlModeReport {
 
 	i := 2
 
-	val.Mode = (payload[i] & 0x1F)
+	val.Properties1.Mode = (payload[i] & 0x1F)
 
 	i += 1
 

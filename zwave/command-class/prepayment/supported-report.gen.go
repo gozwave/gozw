@@ -6,7 +6,9 @@ package prepayment
 // <no value>
 
 type PrepaymentSupportedReport struct {
-	TypesSupported byte
+	Properties1 struct {
+		TypesSupported byte
+	}
 }
 
 func ParsePrepaymentSupportedReport(payload []byte) PrepaymentSupportedReport {
@@ -14,7 +16,7 @@ func ParsePrepaymentSupportedReport(payload []byte) PrepaymentSupportedReport {
 
 	i := 2
 
-	val.TypesSupported = (payload[i] & 0x0F)
+	val.Properties1.TypesSupported = (payload[i] & 0x0F)
 
 	i += 1
 

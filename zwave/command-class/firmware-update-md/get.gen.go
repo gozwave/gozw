@@ -8,9 +8,11 @@ package firmwareupdatemd
 type FirmwareUpdateMdGet struct {
 	NumberOfReports byte
 
-	ReportNumber1 byte
+	Properties1 struct {
+		ReportNumber1 byte
 
-	Zero bool
+		Zero bool
+	}
 
 	ReportNumber2 byte
 }
@@ -23,12 +25,12 @@ func ParseFirmwareUpdateMdGet(payload []byte) FirmwareUpdateMdGet {
 	val.NumberOfReports = payload[i]
 	i++
 
-	val.ReportNumber1 = (payload[i] & 0x7F)
+	val.Properties1.ReportNumber1 = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Zero = true
+		val.Properties1.Zero = true
 	} else {
-		val.Zero = false
+		val.Properties1.Zero = false
 	}
 
 	i += 1

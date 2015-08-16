@@ -6,9 +6,11 @@ package thermostatfanmodev2
 // <no value>
 
 type ThermostatFanModeSet struct {
-	Off bool
+	Level struct {
+		Off bool
 
-	FanMode byte
+		FanMode byte
+	}
 }
 
 func ParseThermostatFanModeSet(payload []byte) ThermostatFanModeSet {
@@ -16,12 +18,12 @@ func ParseThermostatFanModeSet(payload []byte) ThermostatFanModeSet {
 
 	i := 2
 
-	val.FanMode = (payload[i] & 0x0F)
+	val.Level.FanMode = (payload[i] & 0x0F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Off = true
+		val.Level.Off = true
 	} else {
-		val.Off = false
+		val.Level.Off = false
 	}
 
 	i += 1

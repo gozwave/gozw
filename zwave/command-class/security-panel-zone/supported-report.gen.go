@@ -6,9 +6,11 @@ package securitypanelzone
 // <no value>
 
 type SecurityPanelZoneSupportedReport struct {
-	ZonesSupported byte
+	Parameters1 struct {
+		ZonesSupported byte
 
-	Zm bool
+		Zm bool
+	}
 }
 
 func ParseSecurityPanelZoneSupportedReport(payload []byte) SecurityPanelZoneSupportedReport {
@@ -16,12 +18,12 @@ func ParseSecurityPanelZoneSupportedReport(payload []byte) SecurityPanelZoneSupp
 
 	i := 2
 
-	val.ZonesSupported = (payload[i] & 0x7F)
+	val.Parameters1.ZonesSupported = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Zm = true
+		val.Parameters1.Zm = true
 	} else {
-		val.Zm = false
+		val.Parameters1.Zm = false
 	}
 
 	i += 1

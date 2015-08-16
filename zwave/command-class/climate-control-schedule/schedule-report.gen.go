@@ -8,7 +8,9 @@ import "encoding/binary"
 // <no value>
 
 type ScheduleReport struct {
-	Weekday byte
+	Properties1 struct {
+		Weekday byte
+	}
 
 	Switchpoint0 uint32
 
@@ -34,7 +36,7 @@ func ParseScheduleReport(payload []byte) ScheduleReport {
 
 	i := 2
 
-	val.Weekday = (payload[i] & 0x07)
+	val.Properties1.Weekday = (payload[i] & 0x07)
 
 	i += 1
 

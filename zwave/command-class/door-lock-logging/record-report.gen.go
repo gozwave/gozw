@@ -16,9 +16,11 @@ type RecordReport struct {
 
 	Day byte
 
-	HourLocalTime byte
+	Properties1 struct {
+		HourLocalTime byte
 
-	RecordStatus byte
+		RecordStatus byte
+	}
 
 	MinuteLocalTime byte
 
@@ -50,9 +52,9 @@ func ParseRecordReport(payload []byte) RecordReport {
 	val.Day = payload[i]
 	i++
 
-	val.HourLocalTime = (payload[i] & 0x1F)
+	val.Properties1.HourLocalTime = (payload[i] & 0x1F)
 
-	val.RecordStatus = (payload[i] & 0xE0) << 5
+	val.Properties1.RecordStatus = (payload[i] & 0xE0) << 5
 
 	i += 1
 

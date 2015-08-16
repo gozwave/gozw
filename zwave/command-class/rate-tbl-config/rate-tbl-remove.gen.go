@@ -6,7 +6,9 @@ package ratetblconfig
 // <no value>
 
 type RateTblRemove struct {
-	RateParameterSetIds byte
+	Properties1 struct {
+		RateParameterSetIds byte
+	}
 
 	RateParameterSetId []byte
 }
@@ -16,7 +18,7 @@ func ParseRateTblRemove(payload []byte) RateTblRemove {
 
 	i := 2
 
-	val.RateParameterSetIds = (payload[i] & 0x3F)
+	val.Properties1.RateParameterSetIds = (payload[i] & 0x3F)
 
 	i += 1
 

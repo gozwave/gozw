@@ -10,25 +10,29 @@ type ChimneyFanStatusReport struct {
 
 	Speed byte
 
-	NotUsed byte
+	AlarmStatus struct {
+		NotUsed byte
 
-	Service bool
+		Service bool
 
-	ExternalAlarm bool
+		ExternalAlarm bool
 
-	SensorError bool
+		SensorError bool
 
-	AlarmTemperatureExceeded bool
+		AlarmTemperatureExceeded bool
 
-	SpeedChangeEnable bool
+		SpeedChangeEnable bool
 
-	StartTemperatureExceeded bool
+		StartTemperatureExceeded bool
+	}
 
-	Size byte
+	Properties1 struct {
+		Size byte
 
-	Scale byte
+		Scale byte
 
-	Precision byte
+		Precision byte
+	}
 
 	Value []byte
 }
@@ -44,51 +48,51 @@ func ParseChimneyFanStatusReport(payload []byte) ChimneyFanStatusReport {
 	val.Speed = payload[i]
 	i++
 
-	val.NotUsed = (payload[i] & 0x30) << 4
+	val.AlarmStatus.NotUsed = (payload[i] & 0x30) << 4
 
 	if payload[i]&0x01 == 0x01 {
-		val.Service = true
+		val.AlarmStatus.Service = true
 	} else {
-		val.Service = false
+		val.AlarmStatus.Service = false
 	}
 
 	if payload[i]&0x02 == 0x02 {
-		val.ExternalAlarm = true
+		val.AlarmStatus.ExternalAlarm = true
 	} else {
-		val.ExternalAlarm = false
+		val.AlarmStatus.ExternalAlarm = false
 	}
 
 	if payload[i]&0x04 == 0x04 {
-		val.SensorError = true
+		val.AlarmStatus.SensorError = true
 	} else {
-		val.SensorError = false
+		val.AlarmStatus.SensorError = false
 	}
 
 	if payload[i]&0x08 == 0x08 {
-		val.AlarmTemperatureExceeded = true
+		val.AlarmStatus.AlarmTemperatureExceeded = true
 	} else {
-		val.AlarmTemperatureExceeded = false
+		val.AlarmStatus.AlarmTemperatureExceeded = false
 	}
 
 	if payload[i]&0x40 == 0x40 {
-		val.SpeedChangeEnable = true
+		val.AlarmStatus.SpeedChangeEnable = true
 	} else {
-		val.SpeedChangeEnable = false
+		val.AlarmStatus.SpeedChangeEnable = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.StartTemperatureExceeded = true
+		val.AlarmStatus.StartTemperatureExceeded = true
 	} else {
-		val.StartTemperatureExceeded = false
+		val.AlarmStatus.StartTemperatureExceeded = false
 	}
 
 	i += 1
 
-	val.Size = (payload[i] & 0x07)
+	val.Properties1.Size = (payload[i] & 0x07)
 
-	val.Scale = (payload[i] & 0x18) << 3
+	val.Properties1.Scale = (payload[i] & 0x18) << 3
 
-	val.Precision = (payload[i] & 0xE0) << 5
+	val.Properties1.Precision = (payload[i] & 0xE0) << 5
 
 	i += 1
 

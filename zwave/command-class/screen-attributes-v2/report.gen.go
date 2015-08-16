@@ -6,9 +6,11 @@ package screenattributesv2
 // <no value>
 
 type ScreenAttributesReport struct {
-	NumberOfLines byte
+	Properties1 struct {
+		NumberOfLines byte
 
-	EscapeSequence bool
+		EscapeSequence bool
+	}
 
 	NumberOfCharactersPerLine byte
 
@@ -24,12 +26,12 @@ func ParseScreenAttributesReport(payload []byte) ScreenAttributesReport {
 
 	i := 2
 
-	val.NumberOfLines = (payload[i] & 0x1F)
+	val.Properties1.NumberOfLines = (payload[i] & 0x1F)
 
 	if payload[i]&0x20 == 0x20 {
-		val.EscapeSequence = true
+		val.Properties1.EscapeSequence = true
 	} else {
-		val.EscapeSequence = false
+		val.Properties1.EscapeSequence = false
 	}
 
 	i += 1

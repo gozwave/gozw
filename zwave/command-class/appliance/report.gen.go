@@ -6,9 +6,11 @@ package appliance
 // <no value>
 
 type ApplianceReport struct {
-	NoOfManufacturerDataFields byte
+	Properties1 struct {
+		NoOfManufacturerDataFields byte
 
-	ApplianceMode byte
+		ApplianceMode byte
+	}
 
 	ApplianceProgram byte
 
@@ -20,9 +22,9 @@ func ParseApplianceReport(payload []byte) ApplianceReport {
 
 	i := 2
 
-	val.NoOfManufacturerDataFields = (payload[i] & 0xF0) << 4
+	val.Properties1.NoOfManufacturerDataFields = (payload[i] & 0xF0) << 4
 
-	val.ApplianceMode = (payload[i] & 0x0F)
+	val.Properties1.ApplianceMode = (payload[i] & 0x0F)
 
 	i += 1
 

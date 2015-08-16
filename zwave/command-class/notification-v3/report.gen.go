@@ -18,9 +18,11 @@ type NotificationReport struct {
 
 	Event byte
 
-	EventParametersLength byte
+	Properties1 struct {
+		EventParametersLength byte
 
-	Sequence bool
+		Sequence bool
+	}
 
 	EventParameter []byte
 
@@ -50,12 +52,12 @@ func ParseNotificationReport(payload []byte) NotificationReport {
 	val.Event = payload[i]
 	i++
 
-	val.EventParametersLength = (payload[i] & 0x1F)
+	val.Properties1.EventParametersLength = (payload[i] & 0x1F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Sequence = true
+		val.Properties1.Sequence = true
 	} else {
-		val.Sequence = false
+		val.Properties1.Sequence = false
 	}
 
 	i += 1

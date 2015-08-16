@@ -6,7 +6,9 @@ package thermostatfanmode
 // <no value>
 
 type ThermostatFanModeSet struct {
-	FanMode byte
+	Level struct {
+		FanMode byte
+	}
 }
 
 func ParseThermostatFanModeSet(payload []byte) ThermostatFanModeSet {
@@ -14,7 +16,7 @@ func ParseThermostatFanModeSet(payload []byte) ThermostatFanModeSet {
 
 	i := 2
 
-	val.FanMode = (payload[i] & 0x0F)
+	val.Level.FanMode = (payload[i] & 0x0F)
 
 	i += 1
 

@@ -6,7 +6,9 @@ package applicationcapability
 // <no value>
 
 type CommandCommandClassNotSupported struct {
-	Dynamic bool
+	Properties1 struct {
+		Dynamic bool
+	}
 
 	OffendingCommandClass byte
 
@@ -19,9 +21,9 @@ func ParseCommandCommandClassNotSupported(payload []byte) CommandCommandClassNot
 	i := 2
 
 	if payload[i]&0x80 == 0x80 {
-		val.Dynamic = true
+		val.Properties1.Dynamic = true
 	} else {
-		val.Dynamic = false
+		val.Properties1.Dynamic = false
 	}
 
 	i += 1

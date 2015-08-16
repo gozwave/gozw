@@ -22,13 +22,17 @@ type TariffTblSupplierReport struct {
 
 	Currency uint32
 
-	StandingChargePeriod byte
+	Properties1 struct {
+		StandingChargePeriod byte
 
-	StandingChargePrecision byte
+		StandingChargePrecision byte
+	}
 
 	StandingChargeValue uint32
 
-	NumberOfSupplierCharacters byte
+	Properties2 struct {
+		NumberOfSupplierCharacters byte
+	}
 
 	SupplierCharacter []byte
 }
@@ -59,16 +63,16 @@ func ParseTariffTblSupplierReport(payload []byte) TariffTblSupplierReport {
 	val.Currency = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.StandingChargePeriod = (payload[i] & 0x1F)
+	val.Properties1.StandingChargePeriod = (payload[i] & 0x1F)
 
-	val.StandingChargePrecision = (payload[i] & 0xE0) << 5
+	val.Properties1.StandingChargePrecision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
 	val.StandingChargeValue = binary.BigEndian.Uint32(payload[i : i+4])
 	i += 4
 
-	val.NumberOfSupplierCharacters = (payload[i] & 0x1F)
+	val.Properties2.NumberOfSupplierCharacters = (payload[i] & 0x1F)
 
 	i += 1
 

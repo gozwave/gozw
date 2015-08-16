@@ -6,7 +6,9 @@ package thermostatsetpointv3
 // <no value>
 
 type ThermostatSetpointGet struct {
-	SetpointType byte
+	Level struct {
+		SetpointType byte
+	}
 }
 
 func ParseThermostatSetpointGet(payload []byte) ThermostatSetpointGet {
@@ -14,7 +16,7 @@ func ParseThermostatSetpointGet(payload []byte) ThermostatSetpointGet {
 
 	i := 2
 
-	val.SetpointType = (payload[i] & 0x0F)
+	val.Level.SetpointType = (payload[i] & 0x0F)
 
 	i += 1
 

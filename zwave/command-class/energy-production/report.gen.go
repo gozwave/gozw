@@ -8,11 +8,13 @@ package energyproduction
 type EnergyProductionReport struct {
 	ParameterNumber byte
 
-	Size byte
+	Level struct {
+		Size byte
 
-	Scale byte
+		Scale byte
 
-	Precision byte
+		Precision byte
+	}
 
 	Value []byte
 }
@@ -25,11 +27,11 @@ func ParseEnergyProductionReport(payload []byte) EnergyProductionReport {
 	val.ParameterNumber = payload[i]
 	i++
 
-	val.Size = (payload[i] & 0x07)
+	val.Level.Size = (payload[i] & 0x07)
 
-	val.Scale = (payload[i] & 0x18) << 3
+	val.Level.Scale = (payload[i] & 0x18) << 3
 
-	val.Precision = (payload[i] & 0xE0) << 5
+	val.Level.Precision = (payload[i] & 0xE0) << 5
 
 	i += 1
 

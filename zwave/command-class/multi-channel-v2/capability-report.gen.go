@@ -6,9 +6,11 @@ package multichannelv2
 // <no value>
 
 type MultiChannelCapabilityReport struct {
-	EndPoint byte
+	Properties1 struct {
+		EndPoint byte
 
-	Dynamic bool
+		Dynamic bool
+	}
 
 	GenericDeviceClass byte
 
@@ -22,12 +24,12 @@ func ParseMultiChannelCapabilityReport(payload []byte) MultiChannelCapabilityRep
 
 	i := 2
 
-	val.EndPoint = (payload[i] & 0x7F)
+	val.Properties1.EndPoint = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Dynamic = true
+		val.Properties1.Dynamic = true
 	} else {
-		val.Dynamic = false
+		val.Properties1.Dynamic = false
 	}
 
 	i += 1

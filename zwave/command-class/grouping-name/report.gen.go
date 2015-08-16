@@ -8,7 +8,9 @@ package groupingname
 type GroupingNameReport struct {
 	GroupingIdentifier byte
 
-	CharPresentation byte
+	Properties1 struct {
+		CharPresentation byte
+	}
 
 	GroupingName string
 }
@@ -21,7 +23,7 @@ func ParseGroupingNameReport(payload []byte) GroupingNameReport {
 	val.GroupingIdentifier = payload[i]
 	i++
 
-	val.CharPresentation = (payload[i] & 0x07)
+	val.Properties1.CharPresentation = (payload[i] & 0x07)
 
 	i += 1
 

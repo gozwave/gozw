@@ -8,7 +8,9 @@ package sensormultilevelv5
 type SensorMultilevelSupportedScaleReport struct {
 	SensorType byte
 
-	ScaleBitMask byte
+	Properties1 struct {
+		ScaleBitMask byte
+	}
 }
 
 func ParseSensorMultilevelSupportedScaleReport(payload []byte) SensorMultilevelSupportedScaleReport {
@@ -19,7 +21,7 @@ func ParseSensorMultilevelSupportedScaleReport(payload []byte) SensorMultilevelS
 	val.SensorType = payload[i]
 	i++
 
-	val.ScaleBitMask = (payload[i] & 0x0F)
+	val.Properties1.ScaleBitMask = (payload[i] & 0x0F)
 
 	i += 1
 

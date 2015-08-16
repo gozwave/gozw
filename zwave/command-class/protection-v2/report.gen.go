@@ -6,9 +6,13 @@ package protectionv2
 // <no value>
 
 type ProtectionReport struct {
-	LocalProtectionState byte
+	Level struct {
+		LocalProtectionState byte
+	}
 
-	RfProtectionState byte
+	Level2 struct {
+		RfProtectionState byte
+	}
 }
 
 func ParseProtectionReport(payload []byte) ProtectionReport {
@@ -16,11 +20,11 @@ func ParseProtectionReport(payload []byte) ProtectionReport {
 
 	i := 2
 
-	val.LocalProtectionState = (payload[i] & 0x0F)
+	val.Level.LocalProtectionState = (payload[i] & 0x0F)
 
 	i += 1
 
-	val.RfProtectionState = (payload[i] & 0x0F)
+	val.Level2.RfProtectionState = (payload[i] & 0x0F)
 
 	i += 1
 

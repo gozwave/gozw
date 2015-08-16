@@ -6,21 +6,27 @@ package thermostatsetpointv3
 // <no value>
 
 type ThermostatSetpointCapabilitiesReport struct {
-	SetpointType byte
+	Properties1 struct {
+		SetpointType byte
+	}
 
-	Size byte
+	Properties2 struct {
+		Size byte
 
-	Scale byte
+		Scale byte
 
-	Precision byte
+		Precision byte
+	}
 
 	MinValue []byte
 
-	Size byte
+	Properties3 struct {
+		Size byte
 
-	Scale byte
+		Scale byte
 
-	Precision byte
+		Precision byte
+	}
 
 	Maxvalue []byte
 }
@@ -30,26 +36,26 @@ func ParseThermostatSetpointCapabilitiesReport(payload []byte) ThermostatSetpoin
 
 	i := 2
 
-	val.SetpointType = (payload[i] & 0x0F)
+	val.Properties1.SetpointType = (payload[i] & 0x0F)
 
 	i += 1
 
-	val.Size = (payload[i] & 0x07)
+	val.Properties2.Size = (payload[i] & 0x07)
 
-	val.Scale = (payload[i] & 0x18) << 3
+	val.Properties2.Scale = (payload[i] & 0x18) << 3
 
-	val.Precision = (payload[i] & 0xE0) << 5
+	val.Properties2.Precision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
 	val.MinValue = payload[i : i+1]
 	i += 1
 
-	val.Size = (payload[i] & 0x07)
+	val.Properties3.Size = (payload[i] & 0x07)
 
-	val.Scale = (payload[i] & 0x18) << 3
+	val.Properties3.Scale = (payload[i] & 0x18) << 3
 
-	val.Precision = (payload[i] & 0xE0) << 5
+	val.Properties3.Precision = (payload[i] & 0xE0) << 5
 
 	i += 1
 

@@ -6,15 +6,17 @@ package chimneyfan
 // <no value>
 
 type ChimneyFanAlarmStatusSet struct {
-	NotUsed2 byte
+	Message struct {
+		NotUsed2 byte
 
-	NotUsed1 bool
+		NotUsed1 bool
 
-	AcknowledgeExternalAlarm bool
+		AcknowledgeExternalAlarm bool
 
-	AcknowledgeSensorError bool
+		AcknowledgeSensorError bool
 
-	AcknowledgeAlarmTemperatureExceeded bool
+		AcknowledgeAlarmTemperatureExceeded bool
+	}
 }
 
 func ParseChimneyFanAlarmStatusSet(payload []byte) ChimneyFanAlarmStatusSet {
@@ -22,30 +24,30 @@ func ParseChimneyFanAlarmStatusSet(payload []byte) ChimneyFanAlarmStatusSet {
 
 	i := 2
 
-	val.NotUsed2 = (payload[i] & 0xF0) << 4
+	val.Message.NotUsed2 = (payload[i] & 0xF0) << 4
 
 	if payload[i]&0x01 == 0x01 {
-		val.NotUsed1 = true
+		val.Message.NotUsed1 = true
 	} else {
-		val.NotUsed1 = false
+		val.Message.NotUsed1 = false
 	}
 
 	if payload[i]&0x02 == 0x02 {
-		val.AcknowledgeExternalAlarm = true
+		val.Message.AcknowledgeExternalAlarm = true
 	} else {
-		val.AcknowledgeExternalAlarm = false
+		val.Message.AcknowledgeExternalAlarm = false
 	}
 
 	if payload[i]&0x04 == 0x04 {
-		val.AcknowledgeSensorError = true
+		val.Message.AcknowledgeSensorError = true
 	} else {
-		val.AcknowledgeSensorError = false
+		val.Message.AcknowledgeSensorError = false
 	}
 
 	if payload[i]&0x08 == 0x08 {
-		val.AcknowledgeAlarmTemperatureExceeded = true
+		val.Message.AcknowledgeAlarmTemperatureExceeded = true
 	} else {
-		val.AcknowledgeAlarmTemperatureExceeded = false
+		val.Message.AcknowledgeAlarmTemperatureExceeded = false
 	}
 
 	i += 1

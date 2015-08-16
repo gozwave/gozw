@@ -6,7 +6,9 @@ package basicwindowcovering
 // <no value>
 
 type BasicWindowCoveringStartLevelChange struct {
-	OpenClose bool
+	Level struct {
+		OpenClose bool
+	}
 }
 
 func ParseBasicWindowCoveringStartLevelChange(payload []byte) BasicWindowCoveringStartLevelChange {
@@ -15,9 +17,9 @@ func ParseBasicWindowCoveringStartLevelChange(payload []byte) BasicWindowCoverin
 	i := 2
 
 	if payload[i]&0x40 == 0x40 {
-		val.OpenClose = true
+		val.Level.OpenClose = true
 	} else {
-		val.OpenClose = false
+		val.Level.OpenClose = false
 	}
 
 	i += 1

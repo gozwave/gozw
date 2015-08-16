@@ -10,7 +10,9 @@ import "encoding/binary"
 type MeterTblCurrentDataReport struct {
 	ReportsToFollow byte
 
-	RateType byte
+	Properties1 struct {
+		RateType byte
+	}
 
 	Dataset uint32
 
@@ -35,7 +37,7 @@ func ParseMeterTblCurrentDataReport(payload []byte) MeterTblCurrentDataReport {
 	val.ReportsToFollow = payload[i]
 	i++
 
-	val.RateType = (payload[i] & 0x03)
+	val.Properties1.RateType = (payload[i] & 0x03)
 
 	i += 1
 

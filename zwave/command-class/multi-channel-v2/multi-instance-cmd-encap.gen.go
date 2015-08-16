@@ -6,7 +6,9 @@ package multichannelv2
 // <no value>
 
 type MultiInstanceCmdEncap struct {
-	Instance byte
+	Properties1 struct {
+		Instance byte
+	}
 
 	CommandClass byte
 
@@ -20,7 +22,7 @@ func ParseMultiInstanceCmdEncap(payload []byte) MultiInstanceCmdEncap {
 
 	i := 2
 
-	val.Instance = (payload[i] & 0x7F)
+	val.Properties1.Instance = (payload[i] & 0x7F)
 
 	i += 1
 

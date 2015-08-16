@@ -6,9 +6,11 @@ package thermostatmodev3
 // <no value>
 
 type ThermostatModeReport struct {
-	NoOfManufacturerDataFields byte
+	Level struct {
+		NoOfManufacturerDataFields byte
 
-	Mode byte
+		Mode byte
+	}
 
 	ManufacturerData []byte
 }
@@ -18,9 +20,9 @@ func ParseThermostatModeReport(payload []byte) ThermostatModeReport {
 
 	i := 2
 
-	val.NoOfManufacturerDataFields = (payload[i] & 0xE0) << 5
+	val.Level.NoOfManufacturerDataFields = (payload[i] & 0xE0) << 5
 
-	val.Mode = (payload[i] & 0x1F)
+	val.Level.Mode = (payload[i] & 0x1F)
 
 	i += 1
 

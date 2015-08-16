@@ -8,9 +8,11 @@ import "encoding/binary"
 // <no value>
 
 type ProtectionSupportedReport struct {
-	Timeout bool
+	Level struct {
+		Timeout bool
 
-	ExclusiveControl bool
+		ExclusiveControl bool
+	}
 
 	LocalProtectionState uint16
 
@@ -23,15 +25,15 @@ func ParseProtectionSupportedReport(payload []byte) ProtectionSupportedReport {
 	i := 2
 
 	if payload[i]&0x01 == 0x01 {
-		val.Timeout = true
+		val.Level.Timeout = true
 	} else {
-		val.Timeout = false
+		val.Level.Timeout = false
 	}
 
 	if payload[i]&0x02 == 0x02 {
-		val.ExclusiveControl = true
+		val.Level.ExclusiveControl = true
 	} else {
-		val.ExclusiveControl = false
+		val.Level.ExclusiveControl = false
 	}
 
 	i += 1

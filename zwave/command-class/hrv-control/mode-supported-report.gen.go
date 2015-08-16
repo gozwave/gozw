@@ -6,7 +6,9 @@ package hrvcontrol
 // <no value>
 
 type HrvControlModeSupportedReport struct {
-	ManualControlSupported byte
+	Properties1 struct {
+		ManualControlSupported byte
+	}
 
 	BitMask byte
 }
@@ -16,7 +18,7 @@ func ParseHrvControlModeSupportedReport(payload []byte) HrvControlModeSupportedR
 
 	i := 2
 
-	val.ManualControlSupported = (payload[i] & 0x0F)
+	val.Properties1.ManualControlSupported = (payload[i] & 0x0F)
 
 	i += 1
 

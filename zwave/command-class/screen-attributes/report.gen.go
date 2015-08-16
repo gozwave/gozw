@@ -6,7 +6,9 @@ package screenattributes
 // <no value>
 
 type ScreenAttributesReport struct {
-	NumberOfLines byte
+	Properties1 struct {
+		NumberOfLines byte
+	}
 
 	NumberOfCharactersPerLine byte
 
@@ -20,7 +22,7 @@ func ParseScreenAttributesReport(payload []byte) ScreenAttributesReport {
 
 	i := 2
 
-	val.NumberOfLines = (payload[i] & 0x1F)
+	val.Properties1.NumberOfLines = (payload[i] & 0x1F)
 
 	i += 1
 

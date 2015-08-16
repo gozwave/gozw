@@ -10,7 +10,9 @@ import "encoding/binary"
 type TariffTblCostReport struct {
 	RateParameterSetId byte
 
-	RateType byte
+	Properties1 struct {
+		RateType byte
+	}
 
 	StartYear uint16
 
@@ -34,7 +36,9 @@ type TariffTblCostReport struct {
 
 	Currency uint32
 
-	CostPrecision byte
+	Properties2 struct {
+		CostPrecision byte
+	}
 
 	CostValue uint32
 }
@@ -47,7 +51,7 @@ func ParseTariffTblCostReport(payload []byte) TariffTblCostReport {
 	val.RateParameterSetId = payload[i]
 	i++
 
-	val.RateType = (payload[i] & 0x03)
+	val.Properties1.RateType = (payload[i] & 0x03)
 
 	i += 1
 
@@ -84,7 +88,7 @@ func ParseTariffTblCostReport(payload []byte) TariffTblCostReport {
 	val.Currency = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
-	val.CostPrecision = (payload[i] & 0xE0) << 5
+	val.Properties2.CostPrecision = (payload[i] & 0xE0) << 5
 
 	i += 1
 

@@ -6,7 +6,9 @@ package thermostatfanstate
 // <no value>
 
 type ThermostatFanStateReport struct {
-	FanOperatingState byte
+	Level struct {
+		FanOperatingState byte
+	}
 }
 
 func ParseThermostatFanStateReport(payload []byte) ThermostatFanStateReport {
@@ -14,7 +16,7 @@ func ParseThermostatFanStateReport(payload []byte) ThermostatFanStateReport {
 
 	i := 2
 
-	val.FanOperatingState = (payload[i] & 0x0F)
+	val.Level.FanOperatingState = (payload[i] & 0x0F)
 
 	i += 1
 

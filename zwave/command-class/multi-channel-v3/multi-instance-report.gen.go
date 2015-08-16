@@ -8,7 +8,9 @@ package multichannelv3
 type MultiInstanceReport struct {
 	CommandClass byte
 
-	Instances byte
+	Properties1 struct {
+		Instances byte
+	}
 }
 
 func ParseMultiInstanceReport(payload []byte) MultiInstanceReport {
@@ -19,7 +21,7 @@ func ParseMultiInstanceReport(payload []byte) MultiInstanceReport {
 	val.CommandClass = payload[i]
 	i++
 
-	val.Instances = (payload[i] & 0x7F)
+	val.Properties1.Instances = (payload[i] & 0x7F)
 
 	i += 1
 

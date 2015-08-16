@@ -12,11 +12,13 @@ type ConfigurationBulkSet struct {
 
 	NumberOfParameters byte
 
-	Size byte
+	Properties1 struct {
+		Size byte
 
-	Handshake bool
+		Handshake bool
 
-	Default bool
+		Default bool
+	}
 }
 
 func ParseConfigurationBulkSet(payload []byte) ConfigurationBulkSet {
@@ -30,18 +32,18 @@ func ParseConfigurationBulkSet(payload []byte) ConfigurationBulkSet {
 	val.NumberOfParameters = payload[i]
 	i++
 
-	val.Size = (payload[i] & 0x07)
+	val.Properties1.Size = (payload[i] & 0x07)
 
 	if payload[i]&0x40 == 0x40 {
-		val.Handshake = true
+		val.Properties1.Handshake = true
 	} else {
-		val.Handshake = false
+		val.Properties1.Handshake = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.Default = true
+		val.Properties1.Default = true
 	} else {
-		val.Default = false
+		val.Properties1.Default = false
 	}
 
 	i += 1

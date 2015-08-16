@@ -6,9 +6,11 @@ package associationgrpinfo
 // <no value>
 
 type AssociationGroupInfoGet struct {
-	ListMode bool
+	Properties1 struct {
+		ListMode bool
 
-	RefreshCache bool
+		RefreshCache bool
+	}
 
 	GroupingIdentifier byte
 }
@@ -19,15 +21,15 @@ func ParseAssociationGroupInfoGet(payload []byte) AssociationGroupInfoGet {
 	i := 2
 
 	if payload[i]&0x40 == 0x40 {
-		val.ListMode = true
+		val.Properties1.ListMode = true
 	} else {
-		val.ListMode = false
+		val.Properties1.ListMode = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.RefreshCache = true
+		val.Properties1.RefreshCache = true
 	} else {
-		val.RefreshCache = false
+		val.Properties1.RefreshCache = false
 	}
 
 	i += 1

@@ -8,7 +8,9 @@ package configurationv2
 type ConfigurationReport struct {
 	ParameterNumber byte
 
-	Size byte
+	Level struct {
+		Size byte
+	}
 
 	ConfigurationValue []byte
 }
@@ -21,7 +23,7 @@ func ParseConfigurationReport(payload []byte) ConfigurationReport {
 	val.ParameterNumber = payload[i]
 	i++
 
-	val.Size = (payload[i] & 0x07)
+	val.Level.Size = (payload[i] & 0x07)
 
 	i += 1
 

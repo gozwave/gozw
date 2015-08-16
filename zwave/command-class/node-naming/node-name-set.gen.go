@@ -6,7 +6,9 @@ package nodenaming
 // <no value>
 
 type NodeNamingNodeNameSet struct {
-	CharPresentation byte
+	Level struct {
+		CharPresentation byte
+	}
 
 	NodeNameChar string
 }
@@ -16,7 +18,7 @@ func ParseNodeNamingNodeNameSet(payload []byte) NodeNamingNodeNameSet {
 
 	i := 2
 
-	val.CharPresentation = (payload[i] & 0x07)
+	val.Level.CharPresentation = (payload[i] & 0x07)
 
 	i += 1
 

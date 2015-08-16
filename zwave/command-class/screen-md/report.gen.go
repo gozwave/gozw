@@ -6,11 +6,13 @@ package screenmd
 // <no value>
 
 type ScreenMdReport struct {
-	CharPresentation byte
+	Properties1 struct {
+		CharPresentation byte
 
-	ScreenSettings byte
+		ScreenSettings byte
 
-	MoreData bool
+		MoreData bool
+	}
 }
 
 func ParseScreenMdReport(payload []byte) ScreenMdReport {
@@ -18,14 +20,14 @@ func ParseScreenMdReport(payload []byte) ScreenMdReport {
 
 	i := 2
 
-	val.CharPresentation = (payload[i] & 0x07)
+	val.Properties1.CharPresentation = (payload[i] & 0x07)
 
-	val.ScreenSettings = (payload[i] & 0x38) << 3
+	val.Properties1.ScreenSettings = (payload[i] & 0x38) << 3
 
 	if payload[i]&0x80 == 0x80 {
-		val.MoreData = true
+		val.Properties1.MoreData = true
 	} else {
-		val.MoreData = false
+		val.Properties1.MoreData = false
 	}
 
 	i += 1

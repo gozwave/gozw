@@ -8,7 +8,9 @@ package centralscene
 type CentralSceneNotification struct {
 	SequenceNumber byte
 
-	KeyAttributes byte
+	Properties1 struct {
+		KeyAttributes byte
+	}
 
 	SceneNumber byte
 }
@@ -21,7 +23,7 @@ func ParseCentralSceneNotification(payload []byte) CentralSceneNotification {
 	val.SequenceNumber = payload[i]
 	i++
 
-	val.KeyAttributes = (payload[i] & 0x07)
+	val.Properties1.KeyAttributes = (payload[i] & 0x07)
 
 	i += 1
 

@@ -10,9 +10,11 @@ type CommandConfigurationReport struct {
 
 	NodeId byte
 
-	ReportsToFollow byte
+	Properties1 struct {
+		ReportsToFollow byte
 
-	First bool
+		First bool
+	}
 
 	CommandLength byte
 
@@ -34,12 +36,12 @@ func ParseCommandConfigurationReport(payload []byte) CommandConfigurationReport 
 	val.NodeId = payload[i]
 	i++
 
-	val.ReportsToFollow = (payload[i] & 0x0F)
+	val.Properties1.ReportsToFollow = (payload[i] & 0x0F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.First = true
+		val.Properties1.First = true
 	} else {
-		val.First = false
+		val.Properties1.First = false
 	}
 
 	i += 1

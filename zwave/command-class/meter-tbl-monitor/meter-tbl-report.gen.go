@@ -8,11 +8,15 @@ import "encoding/binary"
 // <no value>
 
 type MeterTblReport struct {
-	MeterType byte
+	Properties1 struct {
+		MeterType byte
 
-	RateType byte
+		RateType byte
+	}
 
-	PayMeter byte
+	Properties2 struct {
+		PayMeter byte
+	}
 
 	DatasetSupported uint32
 
@@ -26,13 +30,13 @@ func ParseMeterTblReport(payload []byte) MeterTblReport {
 
 	i := 2
 
-	val.MeterType = (payload[i] & 0x3F)
+	val.Properties1.MeterType = (payload[i] & 0x3F)
 
-	val.RateType = (payload[i] & 0xC0) << 6
+	val.Properties1.RateType = (payload[i] & 0xC0) << 6
 
 	i += 1
 
-	val.PayMeter = (payload[i] & 0x0F)
+	val.Properties2.PayMeter = (payload[i] & 0x0F)
 
 	i += 1
 

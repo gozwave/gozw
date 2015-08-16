@@ -8,7 +8,9 @@ package sensormultilevelv6
 type SensorMultilevelGet struct {
 	SensorType byte
 
-	Scale byte
+	Properties1 struct {
+		Scale byte
+	}
 }
 
 func ParseSensorMultilevelGet(payload []byte) SensorMultilevelGet {
@@ -19,7 +21,7 @@ func ParseSensorMultilevelGet(payload []byte) SensorMultilevelGet {
 	val.SensorType = payload[i]
 	i++
 
-	val.Scale = (payload[i] & 0x18) << 3
+	val.Properties1.Scale = (payload[i] & 0x18) << 3
 
 	i += 1
 

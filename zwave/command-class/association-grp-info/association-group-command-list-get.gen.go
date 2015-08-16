@@ -6,7 +6,9 @@ package associationgrpinfo
 // <no value>
 
 type AssociationGroupCommandListGet struct {
-	AllowCache bool
+	Properties1 struct {
+		AllowCache bool
+	}
 
 	GroupingIdentifier byte
 }
@@ -17,9 +19,9 @@ func ParseAssociationGroupCommandListGet(payload []byte) AssociationGroupCommand
 	i := 2
 
 	if payload[i]&0x80 == 0x80 {
-		val.AllowCache = true
+		val.Properties1.AllowCache = true
 	} else {
-		val.AllowCache = false
+		val.Properties1.AllowCache = false
 	}
 
 	i += 1

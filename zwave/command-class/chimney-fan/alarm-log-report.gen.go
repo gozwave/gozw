@@ -6,45 +6,55 @@ package chimneyfan
 // <no value>
 
 type ChimneyFanAlarmLogReport struct {
-	ExternalAlarm1 bool
+	AlarmEvent1 struct {
+		ExternalAlarm1 bool
 
-	SensorError1 bool
+		SensorError1 bool
 
-	AlarmTemperatureExceeded1 bool
+		AlarmTemperatureExceeded1 bool
 
-	AlarmStillActive1 bool
+		AlarmStillActive1 bool
+	}
 
-	ExternalAlarm2 bool
+	AlarmEvent2 struct {
+		ExternalAlarm2 bool
 
-	SensorError2 bool
+		SensorError2 bool
 
-	AlarmTemperatureExceeded2 bool
+		AlarmTemperatureExceeded2 bool
 
-	AlarmStillActive2 bool
+		AlarmStillActive2 bool
+	}
 
-	ExternalAlarm3 bool
+	AlarmEvent3 struct {
+		ExternalAlarm3 bool
 
-	SensorError3 bool
+		SensorError3 bool
 
-	AlarmTemperatureExceeded3 bool
+		AlarmTemperatureExceeded3 bool
 
-	AlarmStillActive3 bool
+		AlarmStillActive3 bool
+	}
 
-	ExternalAlarm4 bool
+	AlarmEvent4 struct {
+		ExternalAlarm4 bool
 
-	SensorError4 bool
+		SensorError4 bool
 
-	AlarmTemperatureExceeded4 bool
+		AlarmTemperatureExceeded4 bool
 
-	AlarmStillActive4 bool
+		AlarmStillActive4 bool
+	}
 
-	ExternalAlarm5 bool
+	AlarmEvent5 struct {
+		ExternalAlarm5 bool
 
-	SensorError5 bool
+		SensorError5 bool
 
-	AlarmTemperatureExceeded5 bool
+		AlarmTemperatureExceeded5 bool
 
-	AlarmStillActive5 bool
+		AlarmStillActive5 bool
+	}
 }
 
 func ParseChimneyFanAlarmLogReport(payload []byte) ChimneyFanAlarmLogReport {
@@ -53,131 +63,131 @@ func ParseChimneyFanAlarmLogReport(payload []byte) ChimneyFanAlarmLogReport {
 	i := 2
 
 	if payload[i]&0x02 == 0x02 {
-		val.ExternalAlarm1 = true
+		val.AlarmEvent1.ExternalAlarm1 = true
 	} else {
-		val.ExternalAlarm1 = false
+		val.AlarmEvent1.ExternalAlarm1 = false
 	}
 
 	if payload[i]&0x04 == 0x04 {
-		val.SensorError1 = true
+		val.AlarmEvent1.SensorError1 = true
 	} else {
-		val.SensorError1 = false
+		val.AlarmEvent1.SensorError1 = false
 	}
 
 	if payload[i]&0x08 == 0x08 {
-		val.AlarmTemperatureExceeded1 = true
+		val.AlarmEvent1.AlarmTemperatureExceeded1 = true
 	} else {
-		val.AlarmTemperatureExceeded1 = false
+		val.AlarmEvent1.AlarmTemperatureExceeded1 = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.AlarmStillActive1 = true
+		val.AlarmEvent1.AlarmStillActive1 = true
 	} else {
-		val.AlarmStillActive1 = false
+		val.AlarmEvent1.AlarmStillActive1 = false
 	}
 
 	i += 1
 
 	if payload[i]&0x02 == 0x02 {
-		val.ExternalAlarm2 = true
+		val.AlarmEvent2.ExternalAlarm2 = true
 	} else {
-		val.ExternalAlarm2 = false
+		val.AlarmEvent2.ExternalAlarm2 = false
 	}
 
 	if payload[i]&0x04 == 0x04 {
-		val.SensorError2 = true
+		val.AlarmEvent2.SensorError2 = true
 	} else {
-		val.SensorError2 = false
+		val.AlarmEvent2.SensorError2 = false
 	}
 
 	if payload[i]&0x08 == 0x08 {
-		val.AlarmTemperatureExceeded2 = true
+		val.AlarmEvent2.AlarmTemperatureExceeded2 = true
 	} else {
-		val.AlarmTemperatureExceeded2 = false
+		val.AlarmEvent2.AlarmTemperatureExceeded2 = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.AlarmStillActive2 = true
+		val.AlarmEvent2.AlarmStillActive2 = true
 	} else {
-		val.AlarmStillActive2 = false
+		val.AlarmEvent2.AlarmStillActive2 = false
 	}
 
 	i += 1
 
 	if payload[i]&0x02 == 0x02 {
-		val.ExternalAlarm3 = true
+		val.AlarmEvent3.ExternalAlarm3 = true
 	} else {
-		val.ExternalAlarm3 = false
+		val.AlarmEvent3.ExternalAlarm3 = false
 	}
 
 	if payload[i]&0x04 == 0x04 {
-		val.SensorError3 = true
+		val.AlarmEvent3.SensorError3 = true
 	} else {
-		val.SensorError3 = false
+		val.AlarmEvent3.SensorError3 = false
 	}
 
 	if payload[i]&0x08 == 0x08 {
-		val.AlarmTemperatureExceeded3 = true
+		val.AlarmEvent3.AlarmTemperatureExceeded3 = true
 	} else {
-		val.AlarmTemperatureExceeded3 = false
+		val.AlarmEvent3.AlarmTemperatureExceeded3 = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.AlarmStillActive3 = true
+		val.AlarmEvent3.AlarmStillActive3 = true
 	} else {
-		val.AlarmStillActive3 = false
+		val.AlarmEvent3.AlarmStillActive3 = false
 	}
 
 	i += 1
 
 	if payload[i]&0x02 == 0x02 {
-		val.ExternalAlarm4 = true
+		val.AlarmEvent4.ExternalAlarm4 = true
 	} else {
-		val.ExternalAlarm4 = false
+		val.AlarmEvent4.ExternalAlarm4 = false
 	}
 
 	if payload[i]&0x04 == 0x04 {
-		val.SensorError4 = true
+		val.AlarmEvent4.SensorError4 = true
 	} else {
-		val.SensorError4 = false
+		val.AlarmEvent4.SensorError4 = false
 	}
 
 	if payload[i]&0x08 == 0x08 {
-		val.AlarmTemperatureExceeded4 = true
+		val.AlarmEvent4.AlarmTemperatureExceeded4 = true
 	} else {
-		val.AlarmTemperatureExceeded4 = false
+		val.AlarmEvent4.AlarmTemperatureExceeded4 = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.AlarmStillActive4 = true
+		val.AlarmEvent4.AlarmStillActive4 = true
 	} else {
-		val.AlarmStillActive4 = false
+		val.AlarmEvent4.AlarmStillActive4 = false
 	}
 
 	i += 1
 
 	if payload[i]&0x02 == 0x02 {
-		val.ExternalAlarm5 = true
+		val.AlarmEvent5.ExternalAlarm5 = true
 	} else {
-		val.ExternalAlarm5 = false
+		val.AlarmEvent5.ExternalAlarm5 = false
 	}
 
 	if payload[i]&0x04 == 0x04 {
-		val.SensorError5 = true
+		val.AlarmEvent5.SensorError5 = true
 	} else {
-		val.SensorError5 = false
+		val.AlarmEvent5.SensorError5 = false
 	}
 
 	if payload[i]&0x08 == 0x08 {
-		val.AlarmTemperatureExceeded5 = true
+		val.AlarmEvent5.AlarmTemperatureExceeded5 = true
 	} else {
-		val.AlarmTemperatureExceeded5 = false
+		val.AlarmEvent5.AlarmTemperatureExceeded5 = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.AlarmStillActive5 = true
+		val.AlarmEvent5.AlarmStillActive5 = true
 	} else {
-		val.AlarmStillActive5 = false
+		val.AlarmEvent5.AlarmStillActive5 = false
 	}
 
 	i += 1

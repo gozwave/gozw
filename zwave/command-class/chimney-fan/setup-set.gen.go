@@ -14,27 +14,33 @@ type ChimneyFanSetupSet struct {
 
 	MinSpeed byte
 
-	Size1 byte
+	Properties1 struct {
+		Size1 byte
 
-	Scale1 byte
+		Scale1 byte
 
-	Precision1 byte
+		Precision1 byte
+	}
 
 	StartTemperature []byte
 
-	Size2 byte
+	Properties2 struct {
+		Size2 byte
 
-	Scale2 byte
+		Scale2 byte
 
-	Precision2 byte
+		Precision2 byte
+	}
 
 	StopTemperature []byte
 
-	Size3 byte
+	Properties3 struct {
+		Size3 byte
 
-	Scale3 byte
+		Scale3 byte
 
-	Precision3 byte
+		Precision3 byte
+	}
 
 	AlarmTemperatureValue []byte
 }
@@ -56,33 +62,33 @@ func ParseChimneyFanSetupSet(payload []byte) ChimneyFanSetupSet {
 	val.MinSpeed = payload[i]
 	i++
 
-	val.Size1 = (payload[i] & 0x07)
+	val.Properties1.Size1 = (payload[i] & 0x07)
 
-	val.Scale1 = (payload[i] & 0x18) << 3
+	val.Properties1.Scale1 = (payload[i] & 0x18) << 3
 
-	val.Precision1 = (payload[i] & 0xE0) << 5
+	val.Properties1.Precision1 = (payload[i] & 0xE0) << 5
 
 	i += 1
 
 	val.StartTemperature = payload[i : i+4]
 	i += 4
 
-	val.Size2 = (payload[i] & 0x07)
+	val.Properties2.Size2 = (payload[i] & 0x07)
 
-	val.Scale2 = (payload[i] & 0x18) << 3
+	val.Properties2.Scale2 = (payload[i] & 0x18) << 3
 
-	val.Precision2 = (payload[i] & 0xE0) << 5
+	val.Properties2.Precision2 = (payload[i] & 0xE0) << 5
 
 	i += 1
 
 	val.StopTemperature = payload[i : i+6]
 	i += 6
 
-	val.Size3 = (payload[i] & 0x07)
+	val.Properties3.Size3 = (payload[i] & 0x07)
 
-	val.Scale3 = (payload[i] & 0x18) << 3
+	val.Properties3.Scale3 = (payload[i] & 0x18) << 3
 
-	val.Precision3 = (payload[i] & 0xE0) << 5
+	val.Properties3.Precision3 = (payload[i] & 0xE0) << 5
 
 	i += 1
 

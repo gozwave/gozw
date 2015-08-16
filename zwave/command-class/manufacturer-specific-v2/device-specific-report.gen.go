@@ -6,11 +6,15 @@ package manufacturerspecificv2
 // <no value>
 
 type DeviceSpecificReport struct {
-	DeviceIdType byte
+	Properties1 struct {
+		DeviceIdType byte
+	}
 
-	DeviceIdDataLengthIndicator byte
+	Properties2 struct {
+		DeviceIdDataLengthIndicator byte
 
-	DeviceIdDataFormat byte
+		DeviceIdDataFormat byte
+	}
 
 	DeviceIdData []byte
 }
@@ -20,13 +24,13 @@ func ParseDeviceSpecificReport(payload []byte) DeviceSpecificReport {
 
 	i := 2
 
-	val.DeviceIdType = (payload[i] & 0x07)
+	val.Properties1.DeviceIdType = (payload[i] & 0x07)
 
 	i += 1
 
-	val.DeviceIdDataLengthIndicator = (payload[i] & 0x1F)
+	val.Properties2.DeviceIdDataLengthIndicator = (payload[i] & 0x1F)
 
-	val.DeviceIdDataFormat = (payload[i] & 0xE0) << 5
+	val.Properties2.DeviceIdDataFormat = (payload[i] & 0xE0) << 5
 
 	i += 1
 

@@ -6,11 +6,15 @@ package multichannelv3
 // <no value>
 
 type MultiChannelCmdEncap struct {
-	SourceEndPoint byte
+	Properties1 struct {
+		SourceEndPoint byte
+	}
 
-	DestinationEndPoint byte
+	Properties2 struct {
+		DestinationEndPoint byte
 
-	BitAddress bool
+		BitAddress bool
+	}
 
 	CommandClass byte
 
@@ -24,16 +28,16 @@ func ParseMultiChannelCmdEncap(payload []byte) MultiChannelCmdEncap {
 
 	i := 2
 
-	val.SourceEndPoint = (payload[i] & 0x7F)
+	val.Properties1.SourceEndPoint = (payload[i] & 0x7F)
 
 	i += 1
 
-	val.DestinationEndPoint = (payload[i] & 0x7F)
+	val.Properties2.DestinationEndPoint = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.BitAddress = true
+		val.Properties2.BitAddress = true
 	} else {
-		val.BitAddress = false
+		val.Properties2.BitAddress = false
 	}
 
 	i += 1

@@ -6,9 +6,11 @@ package thermostatfanmodev3
 // <no value>
 
 type ThermostatFanModeReport struct {
-	Off bool
+	Properties1 struct {
+		Off bool
 
-	FanMode byte
+		FanMode byte
+	}
 }
 
 func ParseThermostatFanModeReport(payload []byte) ThermostatFanModeReport {
@@ -16,12 +18,12 @@ func ParseThermostatFanModeReport(payload []byte) ThermostatFanModeReport {
 
 	i := 2
 
-	val.FanMode = (payload[i] & 0x0F)
+	val.Properties1.FanMode = (payload[i] & 0x0F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Off = true
+		val.Properties1.Off = true
 	} else {
-		val.Off = false
+		val.Properties1.Off = false
 	}
 
 	i += 1

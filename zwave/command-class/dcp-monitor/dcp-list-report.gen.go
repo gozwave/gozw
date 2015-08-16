@@ -24,7 +24,9 @@ type DcpListReport struct {
 
 	DcpId byte
 
-	NumberOfDc byte
+	Properties1 struct {
+		NumberOfDc byte
+	}
 
 	StartYear uint16
 
@@ -84,7 +86,7 @@ func ParseDcpListReport(payload []byte) DcpListReport {
 	val.DcpId = payload[i]
 	i++
 
-	val.NumberOfDc = (payload[i] & 0x03)
+	val.Properties1.NumberOfDc = (payload[i] & 0x03)
 
 	i += 1
 

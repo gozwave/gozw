@@ -10,7 +10,9 @@ type SceneActuatorConfSet struct {
 
 	DimmingDuration byte
 
-	Override bool
+	Level2 struct {
+		Override bool
+	}
 
 	Level byte
 }
@@ -27,9 +29,9 @@ func ParseSceneActuatorConfSet(payload []byte) SceneActuatorConfSet {
 	i++
 
 	if payload[i]&0x80 == 0x80 {
-		val.Override = true
+		val.Level2.Override = true
 	} else {
-		val.Override = false
+		val.Level2.Override = false
 	}
 
 	i += 1

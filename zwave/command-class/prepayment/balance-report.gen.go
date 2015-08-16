@@ -8,21 +8,29 @@ import "encoding/binary"
 // <no value>
 
 type PrepaymentBalanceReport struct {
-	MeterType byte
+	Properties1 struct {
+		MeterType byte
 
-	BalanceType byte
+		BalanceType byte
+	}
 
-	Scale byte
+	Properties2 struct {
+		Scale byte
 
-	BalancePrecision byte
+		BalancePrecision byte
+	}
 
 	BalanceValue uint32
 
-	DebtPrecision byte
+	Properties3 struct {
+		DebtPrecision byte
+	}
 
 	Debt uint32
 
-	EmerCreditPrecision byte
+	Properties4 struct {
+		EmerCreditPrecision byte
+	}
 
 	EmerCredit uint32
 
@@ -36,29 +44,29 @@ func ParsePrepaymentBalanceReport(payload []byte) PrepaymentBalanceReport {
 
 	i := 2
 
-	val.MeterType = (payload[i] & 0x3F)
+	val.Properties1.MeterType = (payload[i] & 0x3F)
 
-	val.BalanceType = (payload[i] & 0xC0) << 6
+	val.Properties1.BalanceType = (payload[i] & 0xC0) << 6
 
 	i += 1
 
-	val.Scale = (payload[i] & 0x1F)
+	val.Properties2.Scale = (payload[i] & 0x1F)
 
-	val.BalancePrecision = (payload[i] & 0xE0) << 5
+	val.Properties2.BalancePrecision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
 	val.BalanceValue = binary.BigEndian.Uint32(payload[i : i+4])
 	i += 4
 
-	val.DebtPrecision = (payload[i] & 0xE0) << 5
+	val.Properties3.DebtPrecision = (payload[i] & 0xE0) << 5
 
 	i += 1
 
 	val.Debt = binary.BigEndian.Uint32(payload[i : i+4])
 	i += 4
 
-	val.EmerCreditPrecision = (payload[i] & 0xE0) << 5
+	val.Properties4.EmerCreditPrecision = (payload[i] & 0xE0) << 5
 
 	i += 1
 

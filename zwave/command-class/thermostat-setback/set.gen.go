@@ -6,7 +6,9 @@ package thermostatsetback
 // <no value>
 
 type ThermostatSetbackSet struct {
-	SetbackType byte
+	Properties1 struct {
+		SetbackType byte
+	}
 
 	SetbackState byte
 }
@@ -16,7 +18,7 @@ func ParseThermostatSetbackSet(payload []byte) ThermostatSetbackSet {
 
 	i := 2
 
-	val.SetbackType = (payload[i] & 0x03)
+	val.Properties1.SetbackType = (payload[i] & 0x03)
 
 	i += 1
 

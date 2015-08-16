@@ -6,17 +6,21 @@ package sensorconfiguration
 // <no value>
 
 type SensorTriggerLevelSet struct {
-	Current bool
+	Properties1 struct {
+		Current bool
 
-	Default bool
+		Default bool
+	}
 
 	SensorType byte
 
-	Size byte
+	Properties2 struct {
+		Size byte
 
-	Scale byte
+		Scale byte
 
-	Precision byte
+		Precision byte
+	}
 
 	TriggerValue []byte
 }
@@ -27,15 +31,15 @@ func ParseSensorTriggerLevelSet(payload []byte) SensorTriggerLevelSet {
 	i := 2
 
 	if payload[i]&0x40 == 0x40 {
-		val.Current = true
+		val.Properties1.Current = true
 	} else {
-		val.Current = false
+		val.Properties1.Current = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.Default = true
+		val.Properties1.Default = true
 	} else {
-		val.Default = false
+		val.Properties1.Default = false
 	}
 
 	i += 1
@@ -43,11 +47,11 @@ func ParseSensorTriggerLevelSet(payload []byte) SensorTriggerLevelSet {
 	val.SensorType = payload[i]
 	i++
 
-	val.Size = (payload[i] & 0x07)
+	val.Properties2.Size = (payload[i] & 0x07)
 
-	val.Scale = (payload[i] & 0x18) << 3
+	val.Properties2.Scale = (payload[i] & 0x18) << 3
 
-	val.Precision = (payload[i] & 0xE0) << 5
+	val.Properties2.Precision = (payload[i] & 0xE0) << 5
 
 	i += 1
 

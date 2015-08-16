@@ -6,7 +6,9 @@ package appliance
 // <no value>
 
 type ApplianceTypeReport struct {
-	ApplianceType byte
+	Properties1 struct {
+		ApplianceType byte
+	}
 
 	ApplianceModeSupportedBitmask byte
 }
@@ -16,7 +18,7 @@ func ParseApplianceTypeReport(payload []byte) ApplianceTypeReport {
 
 	i := 2
 
-	val.ApplianceType = (payload[i] & 0x3F)
+	val.Properties1.ApplianceType = (payload[i] & 0x3F)
 
 	i += 1
 

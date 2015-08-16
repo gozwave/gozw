@@ -6,7 +6,9 @@ package thermostatoperatingstatev2
 // <no value>
 
 type ThermostatOperatingStateReport struct {
-	OperatingState byte
+	Properties1 struct {
+		OperatingState byte
+	}
 }
 
 func ParseThermostatOperatingStateReport(payload []byte) ThermostatOperatingStateReport {
@@ -14,7 +16,7 @@ func ParseThermostatOperatingStateReport(payload []byte) ThermostatOperatingStat
 
 	i := 2
 
-	val.OperatingState = (payload[i] & 0x0F)
+	val.Properties1.OperatingState = (payload[i] & 0x0F)
 
 	i += 1
 

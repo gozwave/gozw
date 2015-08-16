@@ -6,9 +6,11 @@ package switchtogglemultilevel
 // <no value>
 
 type SwitchToggleMultilevelStartLevelChange struct {
-	IgnoreStartLevel bool
+	Level struct {
+		IgnoreStartLevel bool
 
-	RollOver bool
+		RollOver bool
+	}
 
 	StartLevel byte
 }
@@ -19,15 +21,15 @@ func ParseSwitchToggleMultilevelStartLevelChange(payload []byte) SwitchToggleMul
 	i := 2
 
 	if payload[i]&0x20 == 0x20 {
-		val.IgnoreStartLevel = true
+		val.Level.IgnoreStartLevel = true
 	} else {
-		val.IgnoreStartLevel = false
+		val.Level.IgnoreStartLevel = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.RollOver = true
+		val.Level.RollOver = true
 	} else {
-		val.RollOver = false
+		val.Level.RollOver = false
 	}
 
 	i += 1

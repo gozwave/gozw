@@ -8,17 +8,23 @@ package schedule
 type ScheduleStateReport struct {
 	NumberOfSupportedScheduleId byte
 
-	ReportsToFollow byte
+	Properties1 struct {
+		ReportsToFollow byte
 
-	Override bool
+		Override bool
+	}
 
-	ActiveId1 byte
+	Properties2 struct {
+		ActiveId1 byte
 
-	ActiveId2 byte
+		ActiveId2 byte
+	}
 
-	ActiveId3 byte
+	Properties3 struct {
+		ActiveId3 byte
 
-	ActiveIdN byte
+		ActiveIdN byte
+	}
 }
 
 func ParseScheduleStateReport(payload []byte) ScheduleStateReport {
@@ -29,25 +35,25 @@ func ParseScheduleStateReport(payload []byte) ScheduleStateReport {
 	val.NumberOfSupportedScheduleId = payload[i]
 	i++
 
-	val.ReportsToFollow = (payload[i] & 0xFE) << 1
+	val.Properties1.ReportsToFollow = (payload[i] & 0xFE) << 1
 
 	if payload[i]&0x01 == 0x01 {
-		val.Override = true
+		val.Properties1.Override = true
 	} else {
-		val.Override = false
+		val.Properties1.Override = false
 	}
 
 	i += 1
 
-	val.ActiveId1 = (payload[i] & 0x0F)
+	val.Properties2.ActiveId1 = (payload[i] & 0x0F)
 
-	val.ActiveId2 = (payload[i] & 0xF0) << 4
+	val.Properties2.ActiveId2 = (payload[i] & 0xF0) << 4
 
 	i += 1
 
-	val.ActiveId3 = (payload[i] & 0x0F)
+	val.Properties3.ActiveId3 = (payload[i] & 0x0F)
 
-	val.ActiveIdN = (payload[i] & 0xF0) << 4
+	val.Properties3.ActiveIdN = (payload[i] & 0xF0) << 4
 
 	i += 1
 

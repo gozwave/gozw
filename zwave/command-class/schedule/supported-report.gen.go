@@ -8,17 +8,21 @@ package schedule
 type ScheduleSupportedReport struct {
 	NumberOfSupportedScheduleId byte
 
-	StartTimeSupport byte
+	Properties1 struct {
+		StartTimeSupport byte
 
-	FallbackSupport bool
+		FallbackSupport bool
 
-	SupportEnabledisable bool
+		SupportEnabledisable bool
+	}
 
 	NumberOfSupportedCc byte
 
-	SupportedOverrideTypes byte
+	Properties3 struct {
+		SupportedOverrideTypes byte
 
-	OverrideSupport bool
+		OverrideSupport bool
+	}
 }
 
 func ParseScheduleSupportedReport(payload []byte) ScheduleSupportedReport {
@@ -29,18 +33,18 @@ func ParseScheduleSupportedReport(payload []byte) ScheduleSupportedReport {
 	val.NumberOfSupportedScheduleId = payload[i]
 	i++
 
-	val.StartTimeSupport = (payload[i] & 0x3F)
+	val.Properties1.StartTimeSupport = (payload[i] & 0x3F)
 
 	if payload[i]&0x40 == 0x40 {
-		val.FallbackSupport = true
+		val.Properties1.FallbackSupport = true
 	} else {
-		val.FallbackSupport = false
+		val.Properties1.FallbackSupport = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.SupportEnabledisable = true
+		val.Properties1.SupportEnabledisable = true
 	} else {
-		val.SupportEnabledisable = false
+		val.Properties1.SupportEnabledisable = false
 	}
 
 	i += 1
@@ -48,12 +52,12 @@ func ParseScheduleSupportedReport(payload []byte) ScheduleSupportedReport {
 	val.NumberOfSupportedCc = payload[i]
 	i++
 
-	val.SupportedOverrideTypes = (payload[i] & 0x7F)
+	val.Properties3.SupportedOverrideTypes = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.OverrideSupport = true
+		val.Properties3.OverrideSupport = true
 	} else {
-		val.OverrideSupport = false
+		val.Properties3.OverrideSupport = false
 	}
 
 	i += 1

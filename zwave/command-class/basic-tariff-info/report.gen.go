@@ -8,11 +8,15 @@ import "encoding/binary"
 // <no value>
 
 type BasicTariffInfoReport struct {
-	TotalNoImportRates byte
+	Properties1 struct {
+		TotalNoImportRates byte
 
-	Dual bool
+		Dual bool
+	}
 
-	E1CurrentRateInUse byte
+	Properties2 struct {
+		E1CurrentRateInUse byte
+	}
 
 	E1RateConsumptionRegister uint32
 
@@ -22,7 +26,9 @@ type BasicTariffInfoReport struct {
 
 	E1TimeForNextRateSeconds byte
 
-	E2CurrentRateInUse byte
+	Properties3 struct {
+		E2CurrentRateInUse byte
+	}
 
 	E2RateConsumptionRegister uint32
 }
@@ -32,17 +38,17 @@ func ParseBasicTariffInfoReport(payload []byte) BasicTariffInfoReport {
 
 	i := 2
 
-	val.TotalNoImportRates = (payload[i] & 0x0F)
+	val.Properties1.TotalNoImportRates = (payload[i] & 0x0F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Dual = true
+		val.Properties1.Dual = true
 	} else {
-		val.Dual = false
+		val.Properties1.Dual = false
 	}
 
 	i += 1
 
-	val.E1CurrentRateInUse = (payload[i] & 0x0F)
+	val.Properties2.E1CurrentRateInUse = (payload[i] & 0x0F)
 
 	i += 1
 
@@ -58,7 +64,7 @@ func ParseBasicTariffInfoReport(payload []byte) BasicTariffInfoReport {
 	val.E1TimeForNextRateSeconds = payload[i]
 	i++
 
-	val.E2CurrentRateInUse = (payload[i] & 0x0F)
+	val.Properties3.E2CurrentRateInUse = (payload[i] & 0x0F)
 
 	i += 1
 

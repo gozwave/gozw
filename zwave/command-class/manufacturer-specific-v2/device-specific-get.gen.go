@@ -6,7 +6,9 @@ package manufacturerspecificv2
 // <no value>
 
 type DeviceSpecificGet struct {
-	DeviceIdType byte
+	Properties1 struct {
+		DeviceIdType byte
+	}
 }
 
 func ParseDeviceSpecificGet(payload []byte) DeviceSpecificGet {
@@ -14,7 +16,7 @@ func ParseDeviceSpecificGet(payload []byte) DeviceSpecificGet {
 
 	i := 2
 
-	val.DeviceIdType = (payload[i] & 0x07)
+	val.Properties1.DeviceIdType = (payload[i] & 0x07)
 
 	i += 1
 

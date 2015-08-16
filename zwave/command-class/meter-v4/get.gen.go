@@ -6,9 +6,11 @@ package meterv4
 // <no value>
 
 type MeterGet struct {
-	Scale byte
+	Properties1 struct {
+		Scale byte
 
-	RateType byte
+		RateType byte
+	}
 
 	Scale2 byte
 }
@@ -18,9 +20,9 @@ func ParseMeterGet(payload []byte) MeterGet {
 
 	i := 2
 
-	val.Scale = (payload[i] & 0x38) << 3
+	val.Properties1.Scale = (payload[i] & 0x38) << 3
 
-	val.RateType = (payload[i] & 0xC0) << 6
+	val.Properties1.RateType = (payload[i] & 0xC0) << 6
 
 	i += 1
 

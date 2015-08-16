@@ -8,9 +8,11 @@ import "encoding/binary"
 // <no value>
 
 type AntitheftSet struct {
-	NumberOfMagicCodeBytes byte
+	Properties1 struct {
+		NumberOfMagicCodeBytes byte
 
-	Enable bool
+		Enable bool
+	}
 
 	MagicCode []byte
 
@@ -26,12 +28,12 @@ func ParseAntitheftSet(payload []byte) AntitheftSet {
 
 	i := 2
 
-	val.NumberOfMagicCodeBytes = (payload[i] & 0x7F)
+	val.Properties1.NumberOfMagicCodeBytes = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Enable = true
+		val.Properties1.Enable = true
 	} else {
-		val.Enable = false
+		val.Properties1.Enable = false
 	}
 
 	i += 1

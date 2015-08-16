@@ -8,9 +8,11 @@ import "encoding/binary"
 // <no value>
 
 type MeterTblPushConfigurationSet struct {
-	OperatingStatusPushMode byte
+	Properties1 struct {
+		OperatingStatusPushMode byte
 
-	Ps bool
+		Ps bool
+	}
 
 	PushDataset uint32
 
@@ -30,12 +32,12 @@ func ParseMeterTblPushConfigurationSet(payload []byte) MeterTblPushConfiguration
 
 	i := 2
 
-	val.OperatingStatusPushMode = (payload[i] & 0x0F)
+	val.Properties1.OperatingStatusPushMode = (payload[i] & 0x0F)
 
 	if payload[i]&0x10 == 0x10 {
-		val.Ps = true
+		val.Properties1.Ps = true
 	} else {
-		val.Ps = false
+		val.Properties1.Ps = false
 	}
 
 	i += 1

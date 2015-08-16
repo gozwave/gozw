@@ -14,19 +14,29 @@ type CommandScheduleSet struct {
 
 	StartYear byte
 
-	StartMonth byte
+	Properties1 struct {
+		StartMonth byte
+	}
 
-	StartDayOfMonth byte
+	Properties2 struct {
+		StartDayOfMonth byte
+	}
 
-	StartWeekday byte
+	Properties3 struct {
+		StartWeekday byte
 
-	Res bool
+		Res bool
+	}
 
-	StartHour byte
+	Properties4 struct {
+		StartHour byte
 
-	DurationType byte
+		DurationType byte
+	}
 
-	StartMinute byte
+	Properties5 struct {
+		StartMinute byte
+	}
 
 	DurationByte uint16
 
@@ -49,31 +59,31 @@ func ParseCommandScheduleSet(payload []byte) CommandScheduleSet {
 	val.StartYear = payload[i]
 	i++
 
-	val.StartMonth = (payload[i] & 0x0F)
+	val.Properties1.StartMonth = (payload[i] & 0x0F)
 
 	i += 1
 
-	val.StartDayOfMonth = (payload[i] & 0x1F)
+	val.Properties2.StartDayOfMonth = (payload[i] & 0x1F)
 
 	i += 1
 
-	val.StartWeekday = (payload[i] & 0x7F)
+	val.Properties3.StartWeekday = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Res = true
+		val.Properties3.Res = true
 	} else {
-		val.Res = false
+		val.Properties3.Res = false
 	}
 
 	i += 1
 
-	val.StartHour = (payload[i] & 0x1F)
+	val.Properties4.StartHour = (payload[i] & 0x1F)
 
-	val.DurationType = (payload[i] & 0xE0) << 5
+	val.Properties4.DurationType = (payload[i] & 0xE0) << 5
 
 	i += 1
 
-	val.StartMinute = (payload[i] & 0x3F)
+	val.Properties5.StartMinute = (payload[i] & 0x3F)
 
 	i += 1
 

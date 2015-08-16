@@ -6,7 +6,9 @@ package dmx
 // <no value>
 
 type DmxAddressReport struct {
-	PageId byte
+	Properties1 struct {
+		PageId byte
+	}
 
 	ChannelId byte
 }
@@ -16,7 +18,7 @@ func ParseDmxAddressReport(payload []byte) DmxAddressReport {
 
 	i := 2
 
-	val.PageId = (payload[i] & 0x0F)
+	val.Properties1.PageId = (payload[i] & 0x0F)
 
 	i += 1
 

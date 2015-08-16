@@ -6,11 +6,13 @@ package chimneyfan
 // <no value>
 
 type ChimneyFanStopTempReport struct {
-	Size byte
+	Properties1 struct {
+		Size byte
 
-	Scale byte
+		Scale byte
 
-	Precision byte
+		Precision byte
+	}
 
 	Value []byte
 }
@@ -20,11 +22,11 @@ func ParseChimneyFanStopTempReport(payload []byte) ChimneyFanStopTempReport {
 
 	i := 2
 
-	val.Size = (payload[i] & 0x07)
+	val.Properties1.Size = (payload[i] & 0x07)
 
-	val.Scale = (payload[i] & 0x18) << 3
+	val.Properties1.Scale = (payload[i] & 0x18) << 3
 
-	val.Precision = (payload[i] & 0xE0) << 5
+	val.Properties1.Precision = (payload[i] & 0xE0) << 5
 
 	i += 1
 

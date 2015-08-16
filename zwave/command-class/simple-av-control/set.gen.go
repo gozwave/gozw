@@ -10,7 +10,9 @@ import "encoding/binary"
 type SimpleAvControlSet struct {
 	SequenceNumber byte
 
-	KeyAttributes byte
+	Properties1 struct {
+		KeyAttributes byte
+	}
 
 	ItemId uint16
 }
@@ -23,7 +25,7 @@ func ParseSimpleAvControlSet(payload []byte) SimpleAvControlSet {
 	val.SequenceNumber = payload[i]
 	i++
 
-	val.KeyAttributes = (payload[i] & 0x07)
+	val.Properties1.KeyAttributes = (payload[i] & 0x07)
 
 	i += 1
 

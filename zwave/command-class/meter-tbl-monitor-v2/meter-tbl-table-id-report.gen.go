@@ -6,7 +6,9 @@ package metertblmonitorv2
 // <no value>
 
 type MeterTblTableIdReport struct {
-	NumberOfCharacters byte
+	Properties1 struct {
+		NumberOfCharacters byte
+	}
 
 	MeterIdCharacter []byte
 }
@@ -16,7 +18,7 @@ func ParseMeterTblTableIdReport(payload []byte) MeterTblTableIdReport {
 
 	i := 2
 
-	val.NumberOfCharacters = (payload[i] & 0x1F)
+	val.Properties1.NumberOfCharacters = (payload[i] & 0x1F)
 
 	i += 1
 

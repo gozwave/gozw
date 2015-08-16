@@ -6,19 +6,21 @@ package chimneyfan
 // <no value>
 
 type ChimneyFanAlarmStatusReport struct {
-	NotUsed byte
+	AlarmStatus struct {
+		NotUsed byte
 
-	Service bool
+		Service bool
 
-	ExternalAlarm bool
+		ExternalAlarm bool
 
-	SensorError bool
+		SensorError bool
 
-	AlarmTemperatureExceeded bool
+		AlarmTemperatureExceeded bool
 
-	SpeedChangeEnable bool
+		SpeedChangeEnable bool
 
-	StartTemperatureExceeded bool
+		StartTemperatureExceeded bool
+	}
 }
 
 func ParseChimneyFanAlarmStatusReport(payload []byte) ChimneyFanAlarmStatusReport {
@@ -26,42 +28,42 @@ func ParseChimneyFanAlarmStatusReport(payload []byte) ChimneyFanAlarmStatusRepor
 
 	i := 2
 
-	val.NotUsed = (payload[i] & 0x30) << 4
+	val.AlarmStatus.NotUsed = (payload[i] & 0x30) << 4
 
 	if payload[i]&0x01 == 0x01 {
-		val.Service = true
+		val.AlarmStatus.Service = true
 	} else {
-		val.Service = false
+		val.AlarmStatus.Service = false
 	}
 
 	if payload[i]&0x02 == 0x02 {
-		val.ExternalAlarm = true
+		val.AlarmStatus.ExternalAlarm = true
 	} else {
-		val.ExternalAlarm = false
+		val.AlarmStatus.ExternalAlarm = false
 	}
 
 	if payload[i]&0x04 == 0x04 {
-		val.SensorError = true
+		val.AlarmStatus.SensorError = true
 	} else {
-		val.SensorError = false
+		val.AlarmStatus.SensorError = false
 	}
 
 	if payload[i]&0x08 == 0x08 {
-		val.AlarmTemperatureExceeded = true
+		val.AlarmStatus.AlarmTemperatureExceeded = true
 	} else {
-		val.AlarmTemperatureExceeded = false
+		val.AlarmStatus.AlarmTemperatureExceeded = false
 	}
 
 	if payload[i]&0x40 == 0x40 {
-		val.SpeedChangeEnable = true
+		val.AlarmStatus.SpeedChangeEnable = true
 	} else {
-		val.SpeedChangeEnable = false
+		val.AlarmStatus.SpeedChangeEnable = false
 	}
 
 	if payload[i]&0x80 == 0x80 {
-		val.StartTemperatureExceeded = true
+		val.AlarmStatus.StartTemperatureExceeded = true
 	} else {
-		val.StartTemperatureExceeded = false
+		val.AlarmStatus.StartTemperatureExceeded = false
 	}
 
 	i += 1

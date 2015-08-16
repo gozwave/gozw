@@ -6,9 +6,11 @@ package notificationv3
 // <no value>
 
 type NotificationSupportedReport struct {
-	NumberOfBitMasks byte
+	Properties1 struct {
+		NumberOfBitMasks byte
 
-	V1Alarm bool
+		V1Alarm bool
+	}
 
 	BitMask byte
 }
@@ -18,12 +20,12 @@ func ParseNotificationSupportedReport(payload []byte) NotificationSupportedRepor
 
 	i := 2
 
-	val.NumberOfBitMasks = (payload[i] & 0x1F)
+	val.Properties1.NumberOfBitMasks = (payload[i] & 0x1F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.V1Alarm = true
+		val.Properties1.V1Alarm = true
 	} else {
-		val.V1Alarm = false
+		val.Properties1.V1Alarm = false
 	}
 
 	i += 1

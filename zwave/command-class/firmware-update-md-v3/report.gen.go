@@ -8,9 +8,11 @@ import "encoding/binary"
 // <no value>
 
 type FirmwareUpdateMdReport struct {
-	ReportNumber1 byte
+	Properties1 struct {
+		ReportNumber1 byte
 
-	Last bool
+		Last bool
+	}
 
 	ReportNumber2 byte
 
@@ -24,12 +26,12 @@ func ParseFirmwareUpdateMdReport(payload []byte) FirmwareUpdateMdReport {
 
 	i := 2
 
-	val.ReportNumber1 = (payload[i] & 0x7F)
+	val.Properties1.ReportNumber1 = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Last = true
+		val.Properties1.Last = true
 	} else {
-		val.Last = false
+		val.Properties1.Last = false
 	}
 
 	i += 1

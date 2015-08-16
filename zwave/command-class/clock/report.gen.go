@@ -6,9 +6,11 @@ package clock
 // <no value>
 
 type ClockReport struct {
-	Hour byte
+	Level struct {
+		Hour byte
 
-	Weekday byte
+		Weekday byte
+	}
 
 	Minute byte
 }
@@ -18,9 +20,9 @@ func ParseClockReport(payload []byte) ClockReport {
 
 	i := 2
 
-	val.Hour = (payload[i] & 0x1F)
+	val.Level.Hour = (payload[i] & 0x1F)
 
-	val.Weekday = (payload[i] & 0xE0) << 5
+	val.Level.Weekday = (payload[i] & 0xE0) << 5
 
 	i += 1
 

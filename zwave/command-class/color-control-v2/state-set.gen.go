@@ -6,7 +6,9 @@ package colorcontrolv2
 // <no value>
 
 type StateSet struct {
-	StateDataLength byte
+	Properties1 struct {
+		StateDataLength byte
+	}
 
 	DimmingDuration byte
 }
@@ -16,7 +18,7 @@ func ParseStateSet(payload []byte) StateSet {
 
 	i := 2
 
-	val.StateDataLength = (payload[i] & 0x1F)
+	val.Properties1.StateDataLength = (payload[i] & 0x1F)
 
 	i += 1
 

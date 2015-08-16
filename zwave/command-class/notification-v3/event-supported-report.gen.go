@@ -8,7 +8,9 @@ package notificationv3
 type EventSupportedReport struct {
 	NotificationType byte
 
-	NumberOfBitMasks byte
+	Properties1 struct {
+		NumberOfBitMasks byte
+	}
 
 	BitMask byte
 }
@@ -21,7 +23,7 @@ func ParseEventSupportedReport(payload []byte) EventSupportedReport {
 	val.NotificationType = payload[i]
 	i++
 
-	val.NumberOfBitMasks = (payload[i] & 0x1F)
+	val.Properties1.NumberOfBitMasks = (payload[i] & 0x1F)
 
 	i += 1
 

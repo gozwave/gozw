@@ -8,15 +8,19 @@ package geographiclocation
 type GeographicLocationSet struct {
 	LongitudeDegrees byte
 
-	LongitudeMinutes byte
+	Level struct {
+		LongitudeMinutes byte
 
-	LongSign bool
+		LongSign bool
+	}
 
 	LatitudeDegrees byte
 
-	LatitudeMinutes byte
+	Level2 struct {
+		LatitudeMinutes byte
 
-	LatSign bool
+		LatSign bool
+	}
 }
 
 func ParseGeographicLocationSet(payload []byte) GeographicLocationSet {
@@ -27,12 +31,12 @@ func ParseGeographicLocationSet(payload []byte) GeographicLocationSet {
 	val.LongitudeDegrees = payload[i]
 	i++
 
-	val.LongitudeMinutes = (payload[i] & 0x7F)
+	val.Level.LongitudeMinutes = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.LongSign = true
+		val.Level.LongSign = true
 	} else {
-		val.LongSign = false
+		val.Level.LongSign = false
 	}
 
 	i += 1
@@ -40,12 +44,12 @@ func ParseGeographicLocationSet(payload []byte) GeographicLocationSet {
 	val.LatitudeDegrees = payload[i]
 	i++
 
-	val.LatitudeMinutes = (payload[i] & 0x7F)
+	val.Level2.LatitudeMinutes = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.LatSign = true
+		val.Level2.LatSign = true
 	} else {
-		val.LatSign = false
+		val.Level2.LatSign = false
 	}
 
 	i += 1

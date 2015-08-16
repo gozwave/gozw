@@ -6,9 +6,13 @@ package switchmultilevelv3
 // <no value>
 
 type SwitchMultilevelSupportedReport struct {
-	PrimarySwitchType byte
+	Properties1 struct {
+		PrimarySwitchType byte
+	}
 
-	SecondarySwitchType byte
+	Properties2 struct {
+		SecondarySwitchType byte
+	}
 }
 
 func ParseSwitchMultilevelSupportedReport(payload []byte) SwitchMultilevelSupportedReport {
@@ -16,11 +20,11 @@ func ParseSwitchMultilevelSupportedReport(payload []byte) SwitchMultilevelSuppor
 
 	i := 2
 
-	val.PrimarySwitchType = (payload[i] & 0x1F)
+	val.Properties1.PrimarySwitchType = (payload[i] & 0x1F)
 
 	i += 1
 
-	val.SecondarySwitchType = (payload[i] & 0x1F)
+	val.Properties2.SecondarySwitchType = (payload[i] & 0x1F)
 
 	i += 1
 

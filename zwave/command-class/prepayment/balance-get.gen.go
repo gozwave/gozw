@@ -6,7 +6,9 @@ package prepayment
 // <no value>
 
 type PrepaymentBalanceGet struct {
-	BalanceType byte
+	Properties1 struct {
+		BalanceType byte
+	}
 }
 
 func ParsePrepaymentBalanceGet(payload []byte) PrepaymentBalanceGet {
@@ -14,7 +16,7 @@ func ParsePrepaymentBalanceGet(payload []byte) PrepaymentBalanceGet {
 
 	i := 2
 
-	val.BalanceType = (payload[i] & 0xC0) << 6
+	val.Properties1.BalanceType = (payload[i] & 0xC0) << 6
 
 	i += 1
 

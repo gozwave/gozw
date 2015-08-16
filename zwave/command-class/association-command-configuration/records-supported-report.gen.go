@@ -8,11 +8,13 @@ import "encoding/binary"
 // <no value>
 
 type CommandRecordsSupportedReport struct {
-	MaxCommandLength byte
+	Properties1 struct {
+		MaxCommandLength byte
 
-	ConfCmd bool
+		ConfCmd bool
 
-	Vc bool
+		Vc bool
+	}
 
 	FreeCommandRecords uint16
 
@@ -24,18 +26,18 @@ func ParseCommandRecordsSupportedReport(payload []byte) CommandRecordsSupportedR
 
 	i := 2
 
-	val.MaxCommandLength = (payload[i] & 0xFC) << 2
+	val.Properties1.MaxCommandLength = (payload[i] & 0xFC) << 2
 
 	if payload[i]&0x01 == 0x01 {
-		val.ConfCmd = true
+		val.Properties1.ConfCmd = true
 	} else {
-		val.ConfCmd = false
+		val.Properties1.ConfCmd = false
 	}
 
 	if payload[i]&0x02 == 0x02 {
-		val.Vc = true
+		val.Properties1.Vc = true
 	} else {
-		val.Vc = false
+		val.Properties1.Vc = false
 	}
 
 	i += 1

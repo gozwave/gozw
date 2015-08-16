@@ -6,7 +6,9 @@ package climatecontrolschedule
 // <no value>
 
 type ScheduleGet struct {
-	Weekday byte
+	Properties1 struct {
+		Weekday byte
+	}
 }
 
 func ParseScheduleGet(payload []byte) ScheduleGet {
@@ -14,7 +16,7 @@ func ParseScheduleGet(payload []byte) ScheduleGet {
 
 	i := 2
 
-	val.Weekday = (payload[i] & 0x07)
+	val.Properties1.Weekday = (payload[i] & 0x07)
 
 	i += 1
 

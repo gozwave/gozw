@@ -6,15 +6,19 @@ package meterv4
 // <no value>
 
 type MeterSupportedReport struct {
-	MeterReset bool
+	Properties1 struct {
+		MeterReset bool
 
-	MeterType byte
+		MeterType byte
 
-	RateType byte
+		RateType byte
+	}
 
-	ScaleSupported0 byte
+	Properties2 struct {
+		ScaleSupported0 byte
 
-	Mst bool
+		Mst bool
+	}
 
 	NumberOfScaleSupportedBytesToFollow byte
 
@@ -26,24 +30,24 @@ func ParseMeterSupportedReport(payload []byte) MeterSupportedReport {
 
 	i := 2
 
-	val.MeterType = (payload[i] & 0x1F)
+	val.Properties1.MeterType = (payload[i] & 0x1F)
 
-	val.RateType = (payload[i] & 0x60) << 5
+	val.Properties1.RateType = (payload[i] & 0x60) << 5
 
 	if payload[i]&0x80 == 0x80 {
-		val.MeterReset = true
+		val.Properties1.MeterReset = true
 	} else {
-		val.MeterReset = false
+		val.Properties1.MeterReset = false
 	}
 
 	i += 1
 
-	val.ScaleSupported0 = (payload[i] & 0x7F)
+	val.Properties2.ScaleSupported0 = (payload[i] & 0x7F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.Mst = true
+		val.Properties2.Mst = true
 	} else {
-		val.Mst = false
+		val.Properties2.Mst = false
 	}
 
 	i += 1

@@ -6,7 +6,9 @@ package multichannelv2
 // <no value>
 
 type MultiChannelCapabilityGet struct {
-	EndPoint byte
+	Properties1 struct {
+		EndPoint byte
+	}
 }
 
 func ParseMultiChannelCapabilityGet(payload []byte) MultiChannelCapabilityGet {
@@ -14,7 +16,7 @@ func ParseMultiChannelCapabilityGet(payload []byte) MultiChannelCapabilityGet {
 
 	i := 2
 
-	val.EndPoint = (payload[i] & 0x7F)
+	val.Properties1.EndPoint = (payload[i] & 0x7F)
 
 	i += 1
 

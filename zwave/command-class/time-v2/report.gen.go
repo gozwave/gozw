@@ -6,9 +6,11 @@ package timev2
 // <no value>
 
 type TimeReport struct {
-	HourLocalTime byte
+	HourLocalTime struct {
+		HourLocalTime byte
 
-	RtcFailure bool
+		RtcFailure bool
+	}
 
 	MinuteLocalTime byte
 
@@ -20,12 +22,12 @@ func ParseTimeReport(payload []byte) TimeReport {
 
 	i := 2
 
-	val.HourLocalTime = (payload[i] & 0x1F)
+	val.HourLocalTime.HourLocalTime = (payload[i] & 0x1F)
 
 	if payload[i]&0x80 == 0x80 {
-		val.RtcFailure = true
+		val.HourLocalTime.RtcFailure = true
 	} else {
-		val.RtcFailure = false
+		val.HourLocalTime.RtcFailure = false
 	}
 
 	i += 1
