@@ -39,7 +39,10 @@ func NewGenerator() (*Generator, error) {
 
 	gen.zwClasses = &zw
 
-	gen.fixVariants()
+	err = gen.fixVariants()
+	if err != nil {
+		return nil, err
+	}
 
 	return gen, nil
 }
@@ -193,22 +196,48 @@ func (g *Generator) initTemplates() error {
 	return nil
 }
 
-func (g *Generator) fixVariants() {
+func (g *Generator) fixVariants() error {
 	for _, cc := range g.zwClasses.CommandClasses {
+		if !cc.CanGen() {
+			continue
+		}
+
 		for _, cmd := range cc.Commands {
 			for i, param := range cmd.Params {
 
 				if param.Type == "VARIANT" {
+					if param.Variant[0].ParamOffset != byte(255) {
+						continue
+					}
+
 					if len(cmd.Params) > i+1 && cmd.Params[i+1].Type == "MARKER" {
+						// This command is followed by marker, where it stops
 						param.Variant[0].MarkerDelimited = true
 						param.Variant[0].MarkerValue = cmd.Params[i+1].Const[0].FlagMask
+					} else if len(cmd.Params) == i+1 {
+						// If this is the last param, we don't need to do anything special
 						param.Variant[0].MarkerDelimited = false
 					} else {
-						param.Variant[0].StopAtMarker = false
+						// This variant is followed by more bytes (only applies to a few commands
+						// like Security / Message Encapsulation and Firmware Update Md)
+
+						var remainingBytes uint8
+						for j := i + 1; j < len(cmd.Params); j++ {
+							paramLength, err := cmd.Params[j].GetEncodedByteLength()
+							if err != nil {
+								return err
+							}
+
+							remainingBytes += paramLength
+						}
+
+						param.Variant[0].RemainingBytes = remainingBytes
 					}
 				}
 
 			}
 		}
 	}
+
+	return nil
 }

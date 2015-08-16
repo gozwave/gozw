@@ -1,6 +1,9 @@
 package ccgen
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type Param struct {
 	Key            string `xml:"key,attr"`
@@ -30,6 +33,44 @@ type Param struct {
 
 func (p Param) IsNotReserved() bool {
 	return !isReservedString(p.Name)
+}
+
+func (p Param) GetEncodedByteLength() (uint8, error) {
+	switch p.Type {
+
+	case "BYTE":
+		return 1, nil
+
+	case "CONST":
+		return 1, nil
+
+	case "MARKER":
+		return 1, nil
+
+	case "STRUCT_BYTE":
+		return 1, errors.New("Unimplemented param type: STRUCT_BYTE")
+
+	case "WORD":
+		return 2, nil
+
+	case "BIT_24":
+		return 3, nil
+
+	case "DWORD":
+		return 4, nil
+
+	case "ARRAY":
+		if len(p.ArrayAttrib) > 0 && p.ArrayAttrib[0].Length != 0 {
+			return byte(p.ArrayAttrib[0].Length), nil
+		} else {
+			return 0, errors.New("Field has unknown or indeterminate length")
+		}
+
+	default:
+		fmt.Println(p.Name, p.Type)
+		return 0, errors.New("Field has unknown or indeterminate length")
+
+	}
 }
 
 func (p Param) GetGoType() (string, error) {
