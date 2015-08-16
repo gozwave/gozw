@@ -3,9 +3,14 @@
 
 package {{.CommandClass.GetPackageName}}
 
-// {{.Help}}
 {{$version := .CommandClass.Version}}
 {{$typeName := (ToGoName .Command.Name) "V" $version}}
+
+func init() {
+  gob.Register({{$typeName}}{})
+}
+
+// {{.Help}}
 type {{$typeName}} struct {
   {{range $_, $param := .Command.Params}}
     {{template "command-struct-fields.tpl" $param}}
