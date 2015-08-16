@@ -17,3 +17,8 @@ func (cmd *{{$typeName}}) UnmarshalBinary(payload []byte) error {
 
   return nil
 }
+
+func (cmd *{{$typeName}}) MarshalBinary() (payload []byte, err error) {
+  {{template "marshal-command-params.tpl" .Command.Params}}
+  return
+}
