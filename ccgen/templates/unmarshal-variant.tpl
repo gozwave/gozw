@@ -1,9 +1,14 @@
 {{$variant := (index .Variant 0)}}{{if $variant.MarkerDelimited}}
 {
-  markerIndex := i
-  for ; markerIndex < len(payload) && payload[markerIndex] != {{$variant.MarkerValue}}; markerIndex++ {}
-  cmd.{{ToGoName .Name}} = payload[i:markerIndex]
+  fieldStart := i
+  for ; i < len(payload) && payload[i] != {{$variant.MarkerValue}}; i++ {}
+  cmd.{{ToGoName .Name}} = payload[fieldStart:i]
 }
 {{else}}
+{{if ne $variant.RemainingBytes 0}}
+cmd.{{ToGoName .Name}} = payload[i:len(payload)-{{$variant.RemainingBytes}}]
+i += len(payload) - {{$variant.RemainingBytes}}
+{{else}}
 cmd.{{ToGoName .Name}} = payload[i:]
+{{end}}
 {{end}}
