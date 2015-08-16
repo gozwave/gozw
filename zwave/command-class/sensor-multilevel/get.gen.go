@@ -3,12 +3,20 @@
 
 package sensormultilevel
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(SensorMultilevelGet{})
+}
+
+// <no value>
 type SensorMultilevelGet struct {
 }
 
-func (cmd *SensorMultilevelGet) UnmarshalBinary(payload []byte) error {
+func (cmd *SensorMultilevelGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

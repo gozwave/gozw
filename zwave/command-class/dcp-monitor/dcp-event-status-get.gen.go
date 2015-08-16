@@ -5,11 +5,15 @@ package dcpmonitor
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(DcpEventStatusGet{})
+}
 
+// <no value>
 type DcpEventStatusGet struct {
 	Year uint16
 
@@ -24,7 +28,10 @@ type DcpEventStatusGet struct {
 	SecondLocalTime byte
 }
 
-func (cmd *DcpEventStatusGet) UnmarshalBinary(payload []byte) error {
+func (cmd *DcpEventStatusGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

@@ -3,17 +3,26 @@
 
 package applicationstatus
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ApplicationBusy{})
+}
 
 // <no value>
-
 type ApplicationBusy struct {
 	Status byte
 
 	WaitTime byte
 }
 
-func (cmd *ApplicationBusy) UnmarshalBinary(payload []byte) error {
+func (cmd *ApplicationBusy) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

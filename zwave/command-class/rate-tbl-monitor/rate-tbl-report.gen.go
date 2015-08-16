@@ -5,11 +5,15 @@ package ratetblmonitor
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(RateTblReport{})
+}
 
+// <no value>
 type RateTblReport struct {
 	RateParameterSetId byte
 
@@ -48,7 +52,10 @@ type RateTblReport struct {
 	DcpRateId byte
 }
 
-func (cmd *RateTblReport) UnmarshalBinary(payload []byte) error {
+func (cmd *RateTblReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

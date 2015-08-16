@@ -3,17 +3,26 @@
 
 package networkmanagementinclusion
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ReturnRouteDelete{})
+}
 
 // <no value>
-
 type ReturnRouteDelete struct {
 	SeqNo byte
 
 	NodeId byte
 }
 
-func (cmd *ReturnRouteDelete) UnmarshalBinary(payload []byte) error {
+func (cmd *ReturnRouteDelete) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

@@ -3,15 +3,24 @@
 
 package climatecontrolschedule
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ScheduleChangedReport{})
+}
 
 // <no value>
-
 type ScheduleChangedReport struct {
 	Changecounter byte
 }
 
-func (cmd *ScheduleChangedReport) UnmarshalBinary(payload []byte) error {
+func (cmd *ScheduleChangedReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

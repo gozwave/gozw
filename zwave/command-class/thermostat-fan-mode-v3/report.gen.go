@@ -3,10 +3,16 @@
 
 package thermostatfanmodev3
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ThermostatFanModeReport{})
+}
 
 // <no value>
-
 type ThermostatFanModeReport struct {
 	Properties1 struct {
 		Off bool
@@ -15,7 +21,10 @@ type ThermostatFanModeReport struct {
 	}
 }
 
-func (cmd *ThermostatFanModeReport) UnmarshalBinary(payload []byte) error {
+func (cmd *ThermostatFanModeReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

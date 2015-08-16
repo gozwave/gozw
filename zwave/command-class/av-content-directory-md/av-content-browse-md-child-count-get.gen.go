@@ -3,12 +3,20 @@
 
 package avcontentdirectorymd
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(AvContentBrowseMdChildCountGet{})
+}
+
+// <no value>
 type AvContentBrowseMdChildCountGet struct {
 }
 
-func (cmd *AvContentBrowseMdChildCountGet) UnmarshalBinary(payload []byte) error {
+func (cmd *AvContentBrowseMdChildCountGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

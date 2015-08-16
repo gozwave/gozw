@@ -5,11 +5,15 @@ package timeparameters
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(TimeParametersSet{})
+}
 
+// <no value>
 type TimeParametersSet struct {
 	Year uint16
 
@@ -24,7 +28,10 @@ type TimeParametersSet struct {
 	SecondUtc byte
 }
 
-func (cmd *TimeParametersSet) UnmarshalBinary(payload []byte) error {
+func (cmd *TimeParametersSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

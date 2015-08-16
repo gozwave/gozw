@@ -3,10 +3,16 @@
 
 package associationcommandconfiguration
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(CommandConfigurationReport{})
+}
 
 // <no value>
-
 type CommandConfigurationReport struct {
 	GroupingIdentifier byte
 
@@ -27,7 +33,10 @@ type CommandConfigurationReport struct {
 	CommandByte []byte
 }
 
-func (cmd *CommandConfigurationReport) UnmarshalBinary(payload []byte) error {
+func (cmd *CommandConfigurationReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

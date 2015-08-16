@@ -5,11 +5,15 @@ package time
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(DateReport{})
+}
 
+// <no value>
 type DateReport struct {
 	Year uint16
 
@@ -18,7 +22,10 @@ type DateReport struct {
 	Day byte
 }
 
-func (cmd *DateReport) UnmarshalBinary(payload []byte) error {
+func (cmd *DateReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

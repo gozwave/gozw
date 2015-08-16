@@ -3,15 +3,24 @@
 
 package chimneyfan
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ChimneyFanBoostTimeSet{})
+}
 
 // <no value>
-
 type ChimneyFanBoostTimeSet struct {
 	Time byte
 }
 
-func (cmd *ChimneyFanBoostTimeSet) UnmarshalBinary(payload []byte) error {
+func (cmd *ChimneyFanBoostTimeSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

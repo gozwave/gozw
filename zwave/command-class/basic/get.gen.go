@@ -3,12 +3,20 @@
 
 package basic
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(BasicGet{})
+}
+
+// <no value>
 type BasicGet struct {
 }
 
-func (cmd *BasicGet) UnmarshalBinary(payload []byte) error {
+func (cmd *BasicGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

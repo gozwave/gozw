@@ -5,18 +5,25 @@ package metertblmonitorv2
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(MeterTblStatusSupportedReport{})
+}
 
+// <no value>
 type MeterTblStatusSupportedReport struct {
 	SupportedOperatingStatus uint32
 
 	StatusEventLogDepth byte
 }
 
-func (cmd *MeterTblStatusSupportedReport) UnmarshalBinary(payload []byte) error {
+func (cmd *MeterTblStatusSupportedReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

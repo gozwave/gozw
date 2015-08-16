@@ -3,10 +3,16 @@
 
 package dmx
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(DmxData40{})
+}
 
 // <no value>
-
 type DmxData40 struct {
 	Source byte
 
@@ -19,7 +25,10 @@ type DmxData40 struct {
 	DmxChannel []byte
 }
 
-func (cmd *DmxData40) UnmarshalBinary(payload []byte) error {
+func (cmd *DmxData40) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

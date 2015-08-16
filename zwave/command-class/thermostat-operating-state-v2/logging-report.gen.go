@@ -3,15 +3,24 @@
 
 package thermostatoperatingstatev2
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ThermostatOperatingStateLoggingReport{})
+}
 
 // <no value>
-
 type ThermostatOperatingStateLoggingReport struct {
 	ReportsToFollow byte
 }
 
-func (cmd *ThermostatOperatingStateLoggingReport) UnmarshalBinary(payload []byte) error {
+func (cmd *ThermostatOperatingStateLoggingReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

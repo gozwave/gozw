@@ -3,10 +3,16 @@
 
 package scenecontrollerconf
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(SceneControllerConfSet{})
+}
 
 // <no value>
-
 type SceneControllerConfSet struct {
 	GroupId byte
 
@@ -15,7 +21,10 @@ type SceneControllerConfSet struct {
 	DimmingDuration byte
 }
 
-func (cmd *SceneControllerConfSet) UnmarshalBinary(payload []byte) error {
+func (cmd *SceneControllerConfSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

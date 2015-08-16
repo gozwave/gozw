@@ -3,12 +3,20 @@
 
 package thermostatfanmode
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(ThermostatFanModeGet{})
+}
+
+// <no value>
 type ThermostatFanModeGet struct {
 }
 
-func (cmd *ThermostatFanModeGet) UnmarshalBinary(payload []byte) error {
+func (cmd *ThermostatFanModeGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

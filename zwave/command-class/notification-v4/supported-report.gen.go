@@ -3,10 +3,16 @@
 
 package notificationv4
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(NotificationSupportedReport{})
+}
 
 // <no value>
-
 type NotificationSupportedReport struct {
 	Properties1 struct {
 		NumberOfBitMasks byte
@@ -17,7 +23,10 @@ type NotificationSupportedReport struct {
 	BitMask byte
 }
 
-func (cmd *NotificationSupportedReport) UnmarshalBinary(payload []byte) error {
+func (cmd *NotificationSupportedReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

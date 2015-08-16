@@ -5,11 +5,15 @@ package basictariffinfo
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(BasicTariffInfoReport{})
+}
 
+// <no value>
 type BasicTariffInfoReport struct {
 	Properties1 struct {
 		TotalNoImportRates byte
@@ -36,7 +40,10 @@ type BasicTariffInfoReport struct {
 	E2RateConsumptionRegister uint32
 }
 
-func (cmd *BasicTariffInfoReport) UnmarshalBinary(payload []byte) error {
+func (cmd *BasicTariffInfoReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

@@ -3,10 +3,16 @@
 
 package multichannelv3
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(MultiChannelEndPointFindReport{})
+}
 
 // <no value>
-
 type MultiChannelEndPointFindReport struct {
 	ReportsToFollow byte
 
@@ -15,7 +21,10 @@ type MultiChannelEndPointFindReport struct {
 	SpecificDeviceClass byte
 }
 
-func (cmd *MultiChannelEndPointFindReport) UnmarshalBinary(payload []byte) error {
+func (cmd *MultiChannelEndPointFindReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

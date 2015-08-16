@@ -3,17 +3,26 @@
 
 package manufacturerspecificv2
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(DeviceSpecificGet{})
+}
 
 // <no value>
-
 type DeviceSpecificGet struct {
 	Properties1 struct {
 		DeviceIdType byte
 	}
 }
 
-func (cmd *DeviceSpecificGet) UnmarshalBinary(payload []byte) error {
+func (cmd *DeviceSpecificGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

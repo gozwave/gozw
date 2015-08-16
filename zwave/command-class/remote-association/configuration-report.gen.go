@@ -3,10 +3,16 @@
 
 package remoteassociation
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(RemoteAssociationConfigurationReport{})
+}
 
 // <no value>
-
 type RemoteAssociationConfigurationReport struct {
 	LocalGroupingIdentifier byte
 
@@ -15,7 +21,10 @@ type RemoteAssociationConfigurationReport struct {
 	RemoteGroupingIdentifier byte
 }
 
-func (cmd *RemoteAssociationConfigurationReport) UnmarshalBinary(payload []byte) error {
+func (cmd *RemoteAssociationConfigurationReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

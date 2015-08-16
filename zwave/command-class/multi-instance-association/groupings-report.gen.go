@@ -3,15 +3,24 @@
 
 package multiinstanceassociation
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(MultiInstanceAssociationGroupingsReport{})
+}
 
 // <no value>
-
 type MultiInstanceAssociationGroupingsReport struct {
 	SupportedGroupings byte
 }
 
-func (cmd *MultiInstanceAssociationGroupingsReport) UnmarshalBinary(payload []byte) error {
+func (cmd *MultiInstanceAssociationGroupingsReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

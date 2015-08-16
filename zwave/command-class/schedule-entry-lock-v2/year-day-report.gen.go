@@ -3,10 +3,16 @@
 
 package scheduleentrylockv2
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ScheduleEntryLockYearDayReport{})
+}
 
 // <no value>
-
 type ScheduleEntryLockYearDayReport struct {
 	UserIdentifier byte
 
@@ -33,7 +39,10 @@ type ScheduleEntryLockYearDayReport struct {
 	StopMinute byte
 }
 
-func (cmd *ScheduleEntryLockYearDayReport) UnmarshalBinary(payload []byte) error {
+func (cmd *ScheduleEntryLockYearDayReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

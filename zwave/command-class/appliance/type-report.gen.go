@@ -3,10 +3,16 @@
 
 package appliance
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ApplianceTypeReport{})
+}
 
 // <no value>
-
 type ApplianceTypeReport struct {
 	Properties1 struct {
 		ApplianceType byte
@@ -15,7 +21,10 @@ type ApplianceTypeReport struct {
 	ApplianceModeSupportedBitmask byte
 }
 
-func (cmd *ApplianceTypeReport) UnmarshalBinary(payload []byte) error {
+func (cmd *ApplianceTypeReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

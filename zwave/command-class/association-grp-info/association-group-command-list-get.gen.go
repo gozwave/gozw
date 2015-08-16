@@ -3,10 +3,16 @@
 
 package associationgrpinfo
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(AssociationGroupCommandListGet{})
+}
 
 // <no value>
-
 type AssociationGroupCommandListGet struct {
 	Properties1 struct {
 		AllowCache bool
@@ -15,7 +21,10 @@ type AssociationGroupCommandListGet struct {
 	GroupingIdentifier byte
 }
 
-func (cmd *AssociationGroupCommandListGet) UnmarshalBinary(payload []byte) error {
+func (cmd *AssociationGroupCommandListGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

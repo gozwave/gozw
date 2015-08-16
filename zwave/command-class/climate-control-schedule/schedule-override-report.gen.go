@@ -3,10 +3,16 @@
 
 package climatecontrolschedule
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ScheduleOverrideReport{})
+}
 
 // <no value>
-
 type ScheduleOverrideReport struct {
 	Properties1 struct {
 		OverrideType byte
@@ -15,7 +21,10 @@ type ScheduleOverrideReport struct {
 	OverrideState byte
 }
 
-func (cmd *ScheduleOverrideReport) UnmarshalBinary(payload []byte) error {
+func (cmd *ScheduleOverrideReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

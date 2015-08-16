@@ -3,10 +3,16 @@
 
 package sceneactuatorconf
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(SceneActuatorConfReport{})
+}
 
 // <no value>
-
 type SceneActuatorConfReport struct {
 	SceneId byte
 
@@ -15,7 +21,10 @@ type SceneActuatorConfReport struct {
 	DimmingDuration byte
 }
 
-func (cmd *SceneActuatorConfReport) UnmarshalBinary(payload []byte) error {
+func (cmd *SceneActuatorConfReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

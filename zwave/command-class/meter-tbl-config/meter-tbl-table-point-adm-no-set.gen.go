@@ -3,10 +3,16 @@
 
 package metertblconfig
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(MeterTblTablePointAdmNoSet{})
+}
 
 // <no value>
-
 type MeterTblTablePointAdmNoSet struct {
 	Properties1 struct {
 		NumberOfCharacters byte
@@ -15,7 +21,10 @@ type MeterTblTablePointAdmNoSet struct {
 	MeterPointAdmNumberCharacter []byte
 }
 
-func (cmd *MeterTblTablePointAdmNoSet) UnmarshalBinary(payload []byte) error {
+func (cmd *MeterTblTablePointAdmNoSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

@@ -3,10 +3,16 @@
 
 package dmx
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(DmxAddressSet{})
+}
 
 // <no value>
-
 type DmxAddressSet struct {
 	Properties1 struct {
 		PageId byte
@@ -15,7 +21,10 @@ type DmxAddressSet struct {
 	ChannelId byte
 }
 
-func (cmd *DmxAddressSet) UnmarshalBinary(payload []byte) error {
+func (cmd *DmxAddressSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

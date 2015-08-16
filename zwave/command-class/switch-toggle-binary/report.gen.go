@@ -3,15 +3,24 @@
 
 package switchtogglebinary
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(SwitchToggleBinaryReport{})
+}
 
 // <no value>
-
 type SwitchToggleBinaryReport struct {
 	Value byte
 }
 
-func (cmd *SwitchToggleBinaryReport) UnmarshalBinary(payload []byte) error {
+func (cmd *SwitchToggleBinaryReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

@@ -3,12 +3,20 @@
 
 package nodenaming
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(NodeNamingNodeNameGet{})
+}
+
+// <no value>
 type NodeNamingNodeNameGet struct {
 }
 
-func (cmd *NodeNamingNodeNameGet) UnmarshalBinary(payload []byte) error {
+func (cmd *NodeNamingNodeNameGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

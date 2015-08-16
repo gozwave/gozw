@@ -5,11 +5,15 @@ package simpleavcontrol
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(SimpleAvControlSet{})
+}
 
+// <no value>
 type SimpleAvControlSet struct {
 	SequenceNumber byte
 
@@ -20,7 +24,10 @@ type SimpleAvControlSet struct {
 	ItemId uint16
 }
 
-func (cmd *SimpleAvControlSet) UnmarshalBinary(payload []byte) error {
+func (cmd *SimpleAvControlSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

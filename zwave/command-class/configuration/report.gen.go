@@ -3,10 +3,16 @@
 
 package configuration
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ConfigurationReport{})
+}
 
 // <no value>
-
 type ConfigurationReport struct {
 	ParameterNumber byte
 
@@ -17,7 +23,10 @@ type ConfigurationReport struct {
 	ConfigurationValue []byte
 }
 
-func (cmd *ConfigurationReport) UnmarshalBinary(payload []byte) error {
+func (cmd *ConfigurationReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

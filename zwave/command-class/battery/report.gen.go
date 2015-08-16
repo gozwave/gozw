@@ -3,15 +3,24 @@
 
 package battery
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(BatteryReport{})
+}
 
 // <no value>
-
 type BatteryReport struct {
 	BatteryLevel byte
 }
 
-func (cmd *BatteryReport) UnmarshalBinary(payload []byte) error {
+func (cmd *BatteryReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

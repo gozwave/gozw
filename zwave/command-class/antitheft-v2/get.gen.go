@@ -3,12 +3,20 @@
 
 package antitheftv2
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(AntitheftGet{})
+}
+
+// <no value>
 type AntitheftGet struct {
 }
 
-func (cmd *AntitheftGet) UnmarshalBinary(payload []byte) error {
+func (cmd *AntitheftGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

@@ -3,10 +3,16 @@
 
 package thermostatheating
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ThermostatHeatingSetpointSet{})
+}
 
 // <no value>
-
 type ThermostatHeatingSetpointSet struct {
 	SetpointNr byte
 
@@ -21,7 +27,10 @@ type ThermostatHeatingSetpointSet struct {
 	Value []byte
 }
 
-func (cmd *ThermostatHeatingSetpointSet) UnmarshalBinary(payload []byte) error {
+func (cmd *ThermostatHeatingSetpointSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

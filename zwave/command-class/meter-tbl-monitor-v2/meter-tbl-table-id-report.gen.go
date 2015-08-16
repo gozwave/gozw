@@ -3,10 +3,16 @@
 
 package metertblmonitorv2
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(MeterTblTableIdReport{})
+}
 
 // <no value>
-
 type MeterTblTableIdReport struct {
 	Properties1 struct {
 		NumberOfCharacters byte
@@ -15,7 +21,10 @@ type MeterTblTableIdReport struct {
 	MeterIdCharacter []byte
 }
 
-func (cmd *MeterTblTableIdReport) UnmarshalBinary(payload []byte) error {
+func (cmd *MeterTblTableIdReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

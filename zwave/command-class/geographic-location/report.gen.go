@@ -3,10 +3,16 @@
 
 package geographiclocation
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(GeographicLocationReport{})
+}
 
 // <no value>
-
 type GeographicLocationReport struct {
 	LongitudeDegrees byte
 
@@ -25,7 +31,10 @@ type GeographicLocationReport struct {
 	}
 }
 
-func (cmd *GeographicLocationReport) UnmarshalBinary(payload []byte) error {
+func (cmd *GeographicLocationReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

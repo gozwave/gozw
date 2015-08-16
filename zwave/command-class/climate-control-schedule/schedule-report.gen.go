@@ -5,11 +5,15 @@ package climatecontrolschedule
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(ScheduleReport{})
+}
 
+// <no value>
 type ScheduleReport struct {
 	Properties1 struct {
 		Weekday byte
@@ -34,7 +38,10 @@ type ScheduleReport struct {
 	Switchpoint8 uint32
 }
 
-func (cmd *ScheduleReport) UnmarshalBinary(payload []byte) error {
+func (cmd *ScheduleReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

@@ -3,15 +3,24 @@
 
 package dmx
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(DmxCapabilityGet{})
+}
 
 // <no value>
-
 type DmxCapabilityGet struct {
 	ChannelId byte
 }
 
-func (cmd *DmxCapabilityGet) UnmarshalBinary(payload []byte) error {
+func (cmd *DmxCapabilityGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

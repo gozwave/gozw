@@ -5,11 +5,15 @@ package antitheft
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(AntitheftReport{})
+}
 
+// <no value>
 type AntitheftReport struct {
 	AntiTheftProtectionStatus byte
 
@@ -20,7 +24,10 @@ type AntitheftReport struct {
 	AntiTheftHintByte []byte
 }
 
-func (cmd *AntitheftReport) UnmarshalBinary(payload []byte) error {
+func (cmd *AntitheftReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

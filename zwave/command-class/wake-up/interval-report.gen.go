@@ -5,18 +5,25 @@ package wakeup
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(WakeUpIntervalReport{})
+}
 
+// <no value>
 type WakeUpIntervalReport struct {
 	Seconds uint32
 
 	Nodeid byte
 }
 
-func (cmd *WakeUpIntervalReport) UnmarshalBinary(payload []byte) error {
+func (cmd *WakeUpIntervalReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

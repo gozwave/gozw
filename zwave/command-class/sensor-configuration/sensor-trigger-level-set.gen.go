@@ -3,10 +3,16 @@
 
 package sensorconfiguration
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(SensorTriggerLevelSet{})
+}
 
 // <no value>
-
 type SensorTriggerLevelSet struct {
 	Properties1 struct {
 		Current bool
@@ -27,7 +33,10 @@ type SensorTriggerLevelSet struct {
 	TriggerValue []byte
 }
 
-func (cmd *SensorTriggerLevelSet) UnmarshalBinary(payload []byte) error {
+func (cmd *SensorTriggerLevelSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

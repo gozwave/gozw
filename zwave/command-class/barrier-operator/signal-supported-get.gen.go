@@ -3,12 +3,20 @@
 
 package barrieroperator
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(BarrierOperatorSignalSupportedGet{})
+}
+
+// <no value>
 type BarrierOperatorSignalSupportedGet struct {
 }
 
-func (cmd *BarrierOperatorSignalSupportedGet) UnmarshalBinary(payload []byte) error {
+func (cmd *BarrierOperatorSignalSupportedGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

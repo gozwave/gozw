@@ -3,10 +3,16 @@
 
 package colorcontrolv2
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(StateSet{})
+}
 
 // <no value>
-
 type StateSet struct {
 	Properties1 struct {
 		StateDataLength byte
@@ -15,7 +21,10 @@ type StateSet struct {
 	DimmingDuration byte
 }
 
-func (cmd *StateSet) UnmarshalBinary(payload []byte) error {
+func (cmd *StateSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

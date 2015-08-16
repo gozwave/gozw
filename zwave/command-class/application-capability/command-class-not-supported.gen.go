@@ -3,10 +3,16 @@
 
 package applicationcapability
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(CommandCommandClassNotSupported{})
+}
 
 // <no value>
-
 type CommandCommandClassNotSupported struct {
 	Properties1 struct {
 		Dynamic bool
@@ -17,7 +23,10 @@ type CommandCommandClassNotSupported struct {
 	OffendingCommand byte
 }
 
-func (cmd *CommandCommandClassNotSupported) UnmarshalBinary(payload []byte) error {
+func (cmd *CommandCommandClassNotSupported) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

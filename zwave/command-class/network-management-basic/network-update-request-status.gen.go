@@ -3,17 +3,26 @@
 
 package networkmanagementbasic
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(NetworkUpdateRequestStatus{})
+}
 
 // <no value>
-
 type NetworkUpdateRequestStatus struct {
 	SeqNo byte
 
 	Status byte
 }
 
-func (cmd *NetworkUpdateRequestStatus) UnmarshalBinary(payload []byte) error {
+func (cmd *NetworkUpdateRequestStatus) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

@@ -5,11 +5,15 @@ package schedule
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(CommandScheduleSet{})
+}
 
+// <no value>
 type CommandScheduleSet struct {
 	ScheduleId byte
 
@@ -48,7 +52,10 @@ type CommandScheduleSet struct {
 	NumberOfCmdToFollow byte
 }
 
-func (cmd *CommandScheduleSet) UnmarshalBinary(payload []byte) error {
+func (cmd *CommandScheduleSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

@@ -3,12 +3,20 @@
 
 package scheduleentrylockv2
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(ScheduleEntryLockTimeOffsetGet{})
+}
+
+// <no value>
 type ScheduleEntryLockTimeOffsetGet struct {
 }
 
-func (cmd *ScheduleEntryLockTimeOffsetGet) UnmarshalBinary(payload []byte) error {
+func (cmd *ScheduleEntryLockTimeOffsetGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

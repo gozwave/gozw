@@ -3,10 +3,16 @@
 
 package notificationv3
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(NotificationReport{})
+}
 
 // <no value>
-
 type NotificationReport struct {
 	V1AlarmType byte
 
@@ -31,7 +37,10 @@ type NotificationReport struct {
 	SequenceNumber byte
 }
 
-func (cmd *NotificationReport) UnmarshalBinary(payload []byte) error {
+func (cmd *NotificationReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

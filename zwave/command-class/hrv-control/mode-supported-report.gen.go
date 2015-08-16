@@ -3,10 +3,16 @@
 
 package hrvcontrol
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(HrvControlModeSupportedReport{})
+}
 
 // <no value>
-
 type HrvControlModeSupportedReport struct {
 	Properties1 struct {
 		ManualControlSupported byte
@@ -15,7 +21,10 @@ type HrvControlModeSupportedReport struct {
 	BitMask byte
 }
 
-func (cmd *HrvControlModeSupportedReport) UnmarshalBinary(payload []byte) error {
+func (cmd *HrvControlModeSupportedReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

@@ -3,10 +3,16 @@
 
 package timev2
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(TimeOffsetSet{})
+}
 
 // <no value>
-
 type TimeOffsetSet struct {
 	Level struct {
 		HourTzo byte
@@ -35,7 +41,10 @@ type TimeOffsetSet struct {
 	HourEndDst byte
 }
 
-func (cmd *TimeOffsetSet) UnmarshalBinary(payload []byte) error {
+func (cmd *TimeOffsetSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

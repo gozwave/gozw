@@ -3,12 +3,20 @@
 
 package ratetblmonitor
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(RateTblSupportedGet{})
+}
+
+// <no value>
 type RateTblSupportedGet struct {
 }
 
-func (cmd *RateTblSupportedGet) UnmarshalBinary(payload []byte) error {
+func (cmd *RateTblSupportedGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

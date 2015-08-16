@@ -3,10 +3,16 @@
 
 package screenattributesv2
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ScreenAttributesReport{})
+}
 
 // <no value>
-
 type ScreenAttributesReport struct {
 	Properties1 struct {
 		NumberOfLines byte
@@ -23,7 +29,10 @@ type ScreenAttributesReport struct {
 	ScreenTimeout byte
 }
 
-func (cmd *ScreenAttributesReport) UnmarshalBinary(payload []byte) error {
+func (cmd *ScreenAttributesReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

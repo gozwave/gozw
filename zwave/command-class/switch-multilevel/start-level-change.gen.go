@@ -3,10 +3,16 @@
 
 package switchmultilevel
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(SwitchMultilevelStartLevelChange{})
+}
 
 // <no value>
-
 type SwitchMultilevelStartLevelChange struct {
 	Level struct {
 		IgnoreStartLevel bool
@@ -17,7 +23,10 @@ type SwitchMultilevelStartLevelChange struct {
 	StartLevel byte
 }
 
-func (cmd *SwitchMultilevelStartLevelChange) UnmarshalBinary(payload []byte) error {
+func (cmd *SwitchMultilevelStartLevelChange) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

@@ -3,12 +3,20 @@
 
 package zensornet
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(BindRequest{})
+}
+
+// <no value>
 type BindRequest struct {
 }
 
-func (cmd *BindRequest) UnmarshalBinary(payload []byte) error {
+func (cmd *BindRequest) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

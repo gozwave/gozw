@@ -3,15 +3,24 @@
 
 package security
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(SecuritySchemeReport{})
+}
 
 // <no value>
-
 type SecuritySchemeReport struct {
 	SupportedSecuritySchemes byte
 }
 
-func (cmd *SecuritySchemeReport) UnmarshalBinary(payload []byte) error {
+func (cmd *SecuritySchemeReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

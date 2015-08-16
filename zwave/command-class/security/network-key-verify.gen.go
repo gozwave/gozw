@@ -3,12 +3,20 @@
 
 package security
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(NetworkKeyVerify{})
+}
+
+// <no value>
 type NetworkKeyVerify struct {
 }
 
-func (cmd *NetworkKeyVerify) UnmarshalBinary(payload []byte) error {
+func (cmd *NetworkKeyVerify) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

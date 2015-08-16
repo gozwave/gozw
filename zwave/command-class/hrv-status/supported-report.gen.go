@@ -3,15 +3,24 @@
 
 package hrvstatus
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(HrvStatusSupportedReport{})
+}
 
 // <no value>
-
 type HrvStatusSupportedReport struct {
 	BitMask byte
 }
 
-func (cmd *HrvStatusSupportedReport) UnmarshalBinary(payload []byte) error {
+func (cmd *HrvStatusSupportedReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

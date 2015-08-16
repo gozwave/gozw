@@ -3,17 +3,26 @@
 
 package thermostatmodev2
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ThermostatModeReport{})
+}
 
 // <no value>
-
 type ThermostatModeReport struct {
 	Level struct {
 		Mode byte
 	}
 }
 
-func (cmd *ThermostatModeReport) UnmarshalBinary(payload []byte) error {
+func (cmd *ThermostatModeReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

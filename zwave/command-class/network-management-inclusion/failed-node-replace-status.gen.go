@@ -3,10 +3,16 @@
 
 package networkmanagementinclusion
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(FailedNodeReplaceStatus{})
+}
 
 // <no value>
-
 type FailedNodeReplaceStatus struct {
 	SeqNo byte
 
@@ -15,7 +21,10 @@ type FailedNodeReplaceStatus struct {
 	NodeId byte
 }
 
-func (cmd *FailedNodeReplaceStatus) UnmarshalBinary(payload []byte) error {
+func (cmd *FailedNodeReplaceStatus) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

@@ -3,12 +3,20 @@
 
 package wakeup
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(WakeUpNoMoreInformation{})
+}
+
+// <no value>
 type WakeUpNoMoreInformation struct {
 }
 
-func (cmd *WakeUpNoMoreInformation) UnmarshalBinary(payload []byte) error {
+func (cmd *WakeUpNoMoreInformation) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

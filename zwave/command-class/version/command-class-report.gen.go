@@ -3,17 +3,26 @@
 
 package version
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(VersionCommandClassReport{})
+}
 
 // <no value>
-
 type VersionCommandClassReport struct {
 	RequestedCommandClass byte
 
 	CommandClassVersion byte
 }
 
-func (cmd *VersionCommandClassReport) UnmarshalBinary(payload []byte) error {
+func (cmd *VersionCommandClassReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

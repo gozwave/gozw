@@ -5,11 +5,15 @@ package metertblmonitorv2
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(MeterTblCurrentDataReport{})
+}
 
+// <no value>
 type MeterTblCurrentDataReport struct {
 	ReportsToFollow byte
 
@@ -34,7 +38,10 @@ type MeterTblCurrentDataReport struct {
 	SecondLocalTime byte
 }
 
-func (cmd *MeterTblCurrentDataReport) UnmarshalBinary(payload []byte) error {
+func (cmd *MeterTblCurrentDataReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

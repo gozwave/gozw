@@ -3,10 +3,16 @@
 
 package chimneyfan
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ChimneyFanAlarmTempSet{})
+}
 
 // <no value>
-
 type ChimneyFanAlarmTempSet struct {
 	Properties1 struct {
 		Size byte
@@ -19,7 +25,10 @@ type ChimneyFanAlarmTempSet struct {
 	Value []byte
 }
 
-func (cmd *ChimneyFanAlarmTempSet) UnmarshalBinary(payload []byte) error {
+func (cmd *ChimneyFanAlarmTempSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

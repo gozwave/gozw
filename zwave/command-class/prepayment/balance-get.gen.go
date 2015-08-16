@@ -3,17 +3,26 @@
 
 package prepayment
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(PrepaymentBalanceGet{})
+}
 
 // <no value>
-
 type PrepaymentBalanceGet struct {
 	Properties1 struct {
 		BalanceType byte
 	}
 }
 
-func (cmd *PrepaymentBalanceGet) UnmarshalBinary(payload []byte) error {
+func (cmd *PrepaymentBalanceGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

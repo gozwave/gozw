@@ -3,17 +3,26 @@
 
 package notificationv3
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(NotificationSet{})
+}
 
 // <no value>
-
 type NotificationSet struct {
 	NotificationType byte
 
 	NotificationStatus byte
 }
 
-func (cmd *NotificationSet) UnmarshalBinary(payload []byte) error {
+func (cmd *NotificationSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

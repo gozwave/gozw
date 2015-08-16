@@ -3,15 +3,24 @@
 
 package hrvcontrol
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(HrvControlBypassSet{})
+}
 
 // <no value>
-
 type HrvControlBypassSet struct {
 	Bypass byte
 }
 
-func (cmd *HrvControlBypassSet) UnmarshalBinary(payload []byte) error {
+func (cmd *HrvControlBypassSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

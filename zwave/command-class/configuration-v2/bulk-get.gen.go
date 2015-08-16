@@ -5,18 +5,25 @@ package configurationv2
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(ConfigurationBulkGet{})
+}
 
+// <no value>
 type ConfigurationBulkGet struct {
 	ParameterOffset uint16
 
 	NumberOfParameters byte
 }
 
-func (cmd *ConfigurationBulkGet) UnmarshalBinary(payload []byte) error {
+func (cmd *ConfigurationBulkGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

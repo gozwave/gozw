@@ -5,11 +5,15 @@ package ratetblmonitor
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(RateTblHistoricalDataGet{})
+}
 
+// <no value>
 type RateTblHistoricalDataGet struct {
 	MaximumReports byte
 
@@ -42,7 +46,10 @@ type RateTblHistoricalDataGet struct {
 	StopSecondLocalTime byte
 }
 
-func (cmd *RateTblHistoricalDataGet) UnmarshalBinary(payload []byte) error {
+func (cmd *RateTblHistoricalDataGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

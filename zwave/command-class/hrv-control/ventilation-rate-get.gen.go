@@ -3,12 +3,20 @@
 
 package hrvcontrol
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(HrvControlVentilationRateGet{})
+}
+
+// <no value>
 type HrvControlVentilationRateGet struct {
 }
 
-func (cmd *HrvControlVentilationRateGet) UnmarshalBinary(payload []byte) error {
+func (cmd *HrvControlVentilationRateGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

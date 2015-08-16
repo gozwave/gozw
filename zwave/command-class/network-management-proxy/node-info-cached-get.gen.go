@@ -3,10 +3,16 @@
 
 package networkmanagementproxy
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(NodeInfoCachedGet{})
+}
 
 // <no value>
-
 type NodeInfoCachedGet struct {
 	SeqNo byte
 
@@ -17,7 +23,10 @@ type NodeInfoCachedGet struct {
 	NodeId byte
 }
 
-func (cmd *NodeInfoCachedGet) UnmarshalBinary(payload []byte) error {
+func (cmd *NodeInfoCachedGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

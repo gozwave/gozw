@@ -3,17 +3,26 @@
 
 package thermostatheating
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ThermostatHeatingTimedOffSet{})
+}
 
 // <no value>
-
 type ThermostatHeatingTimedOffSet struct {
 	Minutes byte
 
 	Hours byte
 }
 
-func (cmd *ThermostatHeatingTimedOffSet) UnmarshalBinary(payload []byte) error {
+func (cmd *ThermostatHeatingTimedOffSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

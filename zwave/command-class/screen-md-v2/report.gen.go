@@ -3,10 +3,16 @@
 
 package screenmdv2
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ScreenMdReport{})
+}
 
 // <no value>
-
 type ScreenMdReport struct {
 	Properties1 struct {
 		CharPresentation byte
@@ -21,7 +27,10 @@ type ScreenMdReport struct {
 	}
 }
 
-func (cmd *ScreenMdReport) UnmarshalBinary(payload []byte) error {
+func (cmd *ScreenMdReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

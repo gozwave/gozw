@@ -3,12 +3,20 @@
 
 package securitypanelzone
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(SecurityPanelZoneNumberSupportedGet{})
+}
+
+// <no value>
 type SecurityPanelZoneNumberSupportedGet struct {
 }
 
-func (cmd *SecurityPanelZoneNumberSupportedGet) UnmarshalBinary(payload []byte) error {
+func (cmd *SecurityPanelZoneNumberSupportedGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

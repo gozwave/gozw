@@ -3,10 +3,16 @@
 
 package doorlockv2
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(DoorLockOperationReport{})
+}
 
 // <no value>
-
 type DoorLockOperationReport struct {
 	DoorLockMode byte
 
@@ -23,7 +29,10 @@ type DoorLockOperationReport struct {
 	LockTimeoutSeconds byte
 }
 
-func (cmd *DoorLockOperationReport) UnmarshalBinary(payload []byte) error {
+func (cmd *DoorLockOperationReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

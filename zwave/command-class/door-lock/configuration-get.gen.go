@@ -3,12 +3,20 @@
 
 package doorlock
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(DoorLockConfigurationGet{})
+}
+
+// <no value>
 type DoorLockConfigurationGet struct {
 }
 
-func (cmd *DoorLockConfigurationGet) UnmarshalBinary(payload []byte) error {
+func (cmd *DoorLockConfigurationGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

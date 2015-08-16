@@ -3,10 +3,16 @@
 
 package groupingname
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(GroupingNameSet{})
+}
 
 // <no value>
-
 type GroupingNameSet struct {
 	GroupingIdentifier byte
 
@@ -17,7 +23,10 @@ type GroupingNameSet struct {
 	GroupingName string
 }
 
-func (cmd *GroupingNameSet) UnmarshalBinary(payload []byte) error {
+func (cmd *GroupingNameSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

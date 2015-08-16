@@ -3,10 +3,16 @@
 
 package firmwareupdatemdv2
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(FirmwareUpdateMdGet{})
+}
 
 // <no value>
-
 type FirmwareUpdateMdGet struct {
 	NumberOfReports byte
 
@@ -19,7 +25,10 @@ type FirmwareUpdateMdGet struct {
 	ReportNumber2 byte
 }
 
-func (cmd *FirmwareUpdateMdGet) UnmarshalBinary(payload []byte) error {
+func (cmd *FirmwareUpdateMdGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

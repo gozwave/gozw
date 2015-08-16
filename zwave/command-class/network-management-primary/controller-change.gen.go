@@ -3,10 +3,16 @@
 
 package networkmanagementprimary
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ControllerChange{})
+}
 
 // <no value>
-
 type ControllerChange struct {
 	SeqNo byte
 
@@ -15,7 +21,10 @@ type ControllerChange struct {
 	TxOptions byte
 }
 
-func (cmd *ControllerChange) UnmarshalBinary(payload []byte) error {
+func (cmd *ControllerChange) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

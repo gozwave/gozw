@@ -3,17 +3,26 @@
 
 package simpleavcontrol
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(SimpleAvControlSupportedReport{})
+}
 
 // <no value>
-
 type SimpleAvControlSupportedReport struct {
 	ReportNo byte
 
 	BitMask byte
 }
 
-func (cmd *SimpleAvControlSupportedReport) UnmarshalBinary(payload []byte) error {
+func (cmd *SimpleAvControlSupportedReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

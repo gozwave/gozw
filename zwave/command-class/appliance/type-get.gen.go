@@ -3,12 +3,20 @@
 
 package appliance
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(ApplianceTypeGet{})
+}
+
+// <no value>
 type ApplianceTypeGet struct {
 }
 
-func (cmd *ApplianceTypeGet) UnmarshalBinary(payload []byte) error {
+func (cmd *ApplianceTypeGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

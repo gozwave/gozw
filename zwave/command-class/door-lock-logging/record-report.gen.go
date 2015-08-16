@@ -5,11 +5,15 @@ package doorlocklogging
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(RecordReport{})
+}
 
+// <no value>
 type RecordReport struct {
 	RecordNumber byte
 
@@ -38,7 +42,10 @@ type RecordReport struct {
 	UserCode []byte
 }
 
-func (cmd *RecordReport) UnmarshalBinary(payload []byte) error {
+func (cmd *RecordReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

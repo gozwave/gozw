@@ -3,12 +3,20 @@
 
 package chimneyfan
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(ChimneyFanModeGet{})
+}
+
+// <no value>
 type ChimneyFanModeGet struct {
 }
 
-func (cmd *ChimneyFanModeGet) UnmarshalBinary(payload []byte) error {
+func (cmd *ChimneyFanModeGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

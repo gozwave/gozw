@@ -5,11 +5,15 @@ package dcpconfig
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(DcpListRemove{})
+}
 
+// <no value>
 type DcpListRemove struct {
 	Year uint16
 
@@ -24,7 +28,10 @@ type DcpListRemove struct {
 	SecondLocalTime byte
 }
 
-func (cmd *DcpListRemove) UnmarshalBinary(payload []byte) error {
+func (cmd *DcpListRemove) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

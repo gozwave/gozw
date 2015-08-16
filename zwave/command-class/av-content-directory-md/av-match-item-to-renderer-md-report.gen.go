@@ -3,12 +3,20 @@
 
 package avcontentdirectorymd
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(AvMatchItemToRendererMdReport{})
+}
+
+// <no value>
 type AvMatchItemToRendererMdReport struct {
 }
 
-func (cmd *AvMatchItemToRendererMdReport) UnmarshalBinary(payload []byte) error {
+func (cmd *AvMatchItemToRendererMdReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

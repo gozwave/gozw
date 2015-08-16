@@ -3,15 +3,24 @@
 
 package proprietary
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ProprietaryGet{})
+}
 
 // <no value>
-
 type ProprietaryGet struct {
 	Data []byte
 }
 
-func (cmd *ProprietaryGet) UnmarshalBinary(payload []byte) error {
+func (cmd *ProprietaryGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

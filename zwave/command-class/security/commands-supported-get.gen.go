@@ -3,12 +3,20 @@
 
 package security
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(SecurityCommandsSupportedGet{})
+}
+
+// <no value>
 type SecurityCommandsSupportedGet struct {
 }
 
-func (cmd *SecurityCommandsSupportedGet) UnmarshalBinary(payload []byte) error {
+func (cmd *SecurityCommandsSupportedGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

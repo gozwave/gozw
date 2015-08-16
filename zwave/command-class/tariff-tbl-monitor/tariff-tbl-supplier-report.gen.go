@@ -5,11 +5,15 @@ package tarifftblmonitor
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(TariffTblSupplierReport{})
+}
 
+// <no value>
 type TariffTblSupplierReport struct {
 	Year uint16
 
@@ -40,7 +44,10 @@ type TariffTblSupplierReport struct {
 	SupplierCharacter []byte
 }
 
-func (cmd *TariffTblSupplierReport) UnmarshalBinary(payload []byte) error {
+func (cmd *TariffTblSupplierReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

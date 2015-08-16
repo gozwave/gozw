@@ -3,10 +3,16 @@
 
 package sensormultilevelv6
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(SensorMultilevelReport{})
+}
 
 // <no value>
-
 type SensorMultilevelReport struct {
 	SensorType byte
 
@@ -21,7 +27,10 @@ type SensorMultilevelReport struct {
 	SensorValue []byte
 }
 
-func (cmd *SensorMultilevelReport) UnmarshalBinary(payload []byte) error {
+func (cmd *SensorMultilevelReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

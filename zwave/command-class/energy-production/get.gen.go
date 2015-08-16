@@ -3,15 +3,24 @@
 
 package energyproduction
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(EnergyProductionGet{})
+}
 
 // <no value>
-
 type EnergyProductionGet struct {
 	ParameterNumber byte
 }
 
-func (cmd *EnergyProductionGet) UnmarshalBinary(payload []byte) error {
+func (cmd *EnergyProductionGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

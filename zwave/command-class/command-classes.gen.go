@@ -6,6 +6,151 @@ package commandclass
 import (
 	"errors"
 	"fmt"
+
+	"github.com/helioslabs/gozw/zwave/command-class/alarm"
+	"github.com/helioslabs/gozw/zwave/command-class/alarm-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/antitheft"
+	"github.com/helioslabs/gozw/zwave/command-class/antitheft-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/appliance"
+	"github.com/helioslabs/gozw/zwave/command-class/application-capability"
+	"github.com/helioslabs/gozw/zwave/command-class/application-status"
+	"github.com/helioslabs/gozw/zwave/command-class/association"
+	"github.com/helioslabs/gozw/zwave/command-class/association-command-configuration"
+	"github.com/helioslabs/gozw/zwave/command-class/association-grp-info"
+	"github.com/helioslabs/gozw/zwave/command-class/association-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/av-content-directory-md"
+	"github.com/helioslabs/gozw/zwave/command-class/av-content-search-md"
+	"github.com/helioslabs/gozw/zwave/command-class/av-renderer-status"
+	"github.com/helioslabs/gozw/zwave/command-class/av-tagging-md"
+	"github.com/helioslabs/gozw/zwave/command-class/barrier-operator"
+	"github.com/helioslabs/gozw/zwave/command-class/basic"
+	"github.com/helioslabs/gozw/zwave/command-class/basic-tariff-info"
+	"github.com/helioslabs/gozw/zwave/command-class/basic-window-covering"
+	"github.com/helioslabs/gozw/zwave/command-class/battery"
+	"github.com/helioslabs/gozw/zwave/command-class/central-scene"
+	"github.com/helioslabs/gozw/zwave/command-class/chimney-fan"
+	"github.com/helioslabs/gozw/zwave/command-class/climate-control-schedule"
+	"github.com/helioslabs/gozw/zwave/command-class/clock"
+	"github.com/helioslabs/gozw/zwave/command-class/color-control"
+	"github.com/helioslabs/gozw/zwave/command-class/color-control-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/configuration"
+	"github.com/helioslabs/gozw/zwave/command-class/configuration-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/dcp-config"
+	"github.com/helioslabs/gozw/zwave/command-class/dcp-monitor"
+	"github.com/helioslabs/gozw/zwave/command-class/device-reset-locally"
+	"github.com/helioslabs/gozw/zwave/command-class/dmx"
+	"github.com/helioslabs/gozw/zwave/command-class/door-lock"
+	"github.com/helioslabs/gozw/zwave/command-class/door-lock-logging"
+	"github.com/helioslabs/gozw/zwave/command-class/door-lock-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/energy-production"
+	"github.com/helioslabs/gozw/zwave/command-class/firmware-update-md"
+	"github.com/helioslabs/gozw/zwave/command-class/firmware-update-md-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/firmware-update-md-v3"
+	"github.com/helioslabs/gozw/zwave/command-class/geographic-location"
+	"github.com/helioslabs/gozw/zwave/command-class/grouping-name"
+	"github.com/helioslabs/gozw/zwave/command-class/hail"
+	"github.com/helioslabs/gozw/zwave/command-class/hrv-control"
+	"github.com/helioslabs/gozw/zwave/command-class/hrv-status"
+	"github.com/helioslabs/gozw/zwave/command-class/indicator"
+	"github.com/helioslabs/gozw/zwave/command-class/language"
+	"github.com/helioslabs/gozw/zwave/command-class/lock"
+	"github.com/helioslabs/gozw/zwave/command-class/manufacturer-specific"
+	"github.com/helioslabs/gozw/zwave/command-class/manufacturer-specific-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/meter"
+	"github.com/helioslabs/gozw/zwave/command-class/meter-pulse"
+	"github.com/helioslabs/gozw/zwave/command-class/meter-tbl-config"
+	"github.com/helioslabs/gozw/zwave/command-class/meter-tbl-monitor"
+	"github.com/helioslabs/gozw/zwave/command-class/meter-tbl-monitor-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/meter-tbl-push"
+	"github.com/helioslabs/gozw/zwave/command-class/meter-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/meter-v3"
+	"github.com/helioslabs/gozw/zwave/command-class/meter-v4"
+	"github.com/helioslabs/gozw/zwave/command-class/mtp-window-covering"
+	"github.com/helioslabs/gozw/zwave/command-class/multi-channel-association-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/multi-channel-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/multi-channel-v3"
+	"github.com/helioslabs/gozw/zwave/command-class/multi-cmd"
+	"github.com/helioslabs/gozw/zwave/command-class/multi-instance"
+	"github.com/helioslabs/gozw/zwave/command-class/multi-instance-association"
+	"github.com/helioslabs/gozw/zwave/command-class/network-management-basic"
+	"github.com/helioslabs/gozw/zwave/command-class/network-management-inclusion"
+	"github.com/helioslabs/gozw/zwave/command-class/network-management-primary"
+	"github.com/helioslabs/gozw/zwave/command-class/network-management-proxy"
+	"github.com/helioslabs/gozw/zwave/command-class/node-naming"
+	"github.com/helioslabs/gozw/zwave/command-class/notification-v3"
+	"github.com/helioslabs/gozw/zwave/command-class/notification-v4"
+	"github.com/helioslabs/gozw/zwave/command-class/powerlevel"
+	"github.com/helioslabs/gozw/zwave/command-class/prepayment"
+	"github.com/helioslabs/gozw/zwave/command-class/prepayment-encapsulation"
+	"github.com/helioslabs/gozw/zwave/command-class/proprietary"
+	"github.com/helioslabs/gozw/zwave/command-class/protection"
+	"github.com/helioslabs/gozw/zwave/command-class/protection-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/rate-tbl-config"
+	"github.com/helioslabs/gozw/zwave/command-class/rate-tbl-monitor"
+	"github.com/helioslabs/gozw/zwave/command-class/remote-association"
+	"github.com/helioslabs/gozw/zwave/command-class/remote-association-activate"
+	"github.com/helioslabs/gozw/zwave/command-class/scene-activation"
+	"github.com/helioslabs/gozw/zwave/command-class/scene-actuator-conf"
+	"github.com/helioslabs/gozw/zwave/command-class/scene-controller-conf"
+	"github.com/helioslabs/gozw/zwave/command-class/schedule"
+	"github.com/helioslabs/gozw/zwave/command-class/schedule-entry-lock"
+	"github.com/helioslabs/gozw/zwave/command-class/schedule-entry-lock-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/schedule-entry-lock-v3"
+	"github.com/helioslabs/gozw/zwave/command-class/screen-attributes"
+	"github.com/helioslabs/gozw/zwave/command-class/screen-attributes-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/screen-md"
+	"github.com/helioslabs/gozw/zwave/command-class/screen-md-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/security"
+	"github.com/helioslabs/gozw/zwave/command-class/security-panel-mode"
+	"github.com/helioslabs/gozw/zwave/command-class/security-panel-zone"
+	"github.com/helioslabs/gozw/zwave/command-class/security-panel-zone-sensor"
+	"github.com/helioslabs/gozw/zwave/command-class/sensor-alarm"
+	"github.com/helioslabs/gozw/zwave/command-class/sensor-binary"
+	"github.com/helioslabs/gozw/zwave/command-class/sensor-binary-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/sensor-configuration"
+	"github.com/helioslabs/gozw/zwave/command-class/sensor-multilevel"
+	"github.com/helioslabs/gozw/zwave/command-class/sensor-multilevel-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/sensor-multilevel-v3"
+	"github.com/helioslabs/gozw/zwave/command-class/sensor-multilevel-v4"
+	"github.com/helioslabs/gozw/zwave/command-class/sensor-multilevel-v5"
+	"github.com/helioslabs/gozw/zwave/command-class/sensor-multilevel-v6"
+	"github.com/helioslabs/gozw/zwave/command-class/silence-alarm"
+	"github.com/helioslabs/gozw/zwave/command-class/simple-av-control"
+	"github.com/helioslabs/gozw/zwave/command-class/switch-all"
+	"github.com/helioslabs/gozw/zwave/command-class/switch-binary"
+	"github.com/helioslabs/gozw/zwave/command-class/switch-multilevel"
+	"github.com/helioslabs/gozw/zwave/command-class/switch-multilevel-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/switch-multilevel-v3"
+	"github.com/helioslabs/gozw/zwave/command-class/switch-toggle-binary"
+	"github.com/helioslabs/gozw/zwave/command-class/switch-toggle-multilevel"
+	"github.com/helioslabs/gozw/zwave/command-class/tariff-config"
+	"github.com/helioslabs/gozw/zwave/command-class/tariff-tbl-monitor"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-fan-mode"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-fan-mode-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-fan-mode-v3"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-fan-mode-v4"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-fan-state"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-heating"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-mode"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-mode-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-mode-v3"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-operating-state"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-operating-state-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-setback"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-setpoint"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-setpoint-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-setpoint-v3"
+	"github.com/helioslabs/gozw/zwave/command-class/time"
+	"github.com/helioslabs/gozw/zwave/command-class/time-parameters"
+	"github.com/helioslabs/gozw/zwave/command-class/time-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/user-code"
+	"github.com/helioslabs/gozw/zwave/command-class/version"
+	"github.com/helioslabs/gozw/zwave/command-class/version-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/wake-up"
+	"github.com/helioslabs/gozw/zwave/command-class/wake-up-v2"
+	"github.com/helioslabs/gozw/zwave/command-class/zensor-net"
+	"github.com/helioslabs/gozw/zwave/command-class/zwaveplus-info"
+	"github.com/helioslabs/gozw/zwave/command-class/zwaveplus-info-v2"
 )
 
 type CommandClassID byte
@@ -180,15 +325,6 @@ func (c CommandClassID) String() string {
 	case Alarm:
 		return "Command Class Alarm"
 
-	case AlarmV2:
-		return "Command Class Alarm"
-
-	case NotificationV3:
-		return "Command Class Notification"
-
-	case NotificationV4:
-		return "Command Class Notification"
-
 	case ApplicationStatus:
 		return "Command Class Application Status"
 
@@ -196,9 +332,6 @@ func (c CommandClassID) String() string {
 		return "Command Class Association Command Configuration"
 
 	case Association:
-		return "Command Class Association"
-
-	case AssociationV2:
 		return "Command Class Association"
 
 	case AvContentDirectoryMd:
@@ -237,9 +370,6 @@ func (c CommandClassID) String() string {
 	case Configuration:
 		return "Command Class Configuration"
 
-	case ConfigurationV2:
-		return "Command Class Configuration"
-
 	case ControllerReplication:
 		return "Command Class Controller Replication"
 
@@ -258,19 +388,10 @@ func (c CommandClassID) String() string {
 	case DoorLock:
 		return "Command Class Door Lock"
 
-	case DoorLockV2:
-		return "Command Class Door Lock"
-
 	case EnergyProduction:
 		return "Command Class Energy Production"
 
 	case FirmwareUpdateMd:
-		return "Command Class Firmware Update Md"
-
-	case FirmwareUpdateMdV2:
-		return "Command Class Firmware Update Md"
-
-	case FirmwareUpdateMdV3:
 		return "Command Class Firmware Update Md"
 
 	case GeographicLocation:
@@ -306,9 +427,6 @@ func (c CommandClassID) String() string {
 	case ManufacturerSpecific:
 		return "Command Class Manufacturer Specific"
 
-	case ManufacturerSpecificV2:
-		return "Command Class Manufacturer Specific"
-
 	case Mark:
 		return "Command Class Mark"
 
@@ -321,35 +439,14 @@ func (c CommandClassID) String() string {
 	case MeterTblMonitor:
 		return "Command Class Meter Tbl Monitor"
 
-	case MeterTblMonitorV2:
-		return "Command Class Meter Tbl Monitor"
-
 	case MeterTblPush:
 		return "Command Class Meter Tbl Push"
 
 	case Meter:
 		return "Command Class Meter"
 
-	case MeterV2:
-		return "Command Class Meter"
-
-	case MeterV3:
-		return "Command Class Meter"
-
-	case MeterV4:
-		return "Command Class Meter"
-
 	case MtpWindowCovering:
 		return "Command Class Mtp Window Covering"
-
-	case MultiChannelAssociationV2:
-		return "Command Class Multi Channel Association"
-
-	case MultiChannelV2:
-		return "Command Class Multi Channel"
-
-	case MultiChannelV3:
-		return "Command Class Multi Channel"
 
 	case MultiCmd:
 		return "Command Class Multi Cmd"
@@ -393,9 +490,6 @@ func (c CommandClassID) String() string {
 	case Protection:
 		return "Command Class Protection"
 
-	case ProtectionV2:
-		return "Command Class Protection"
-
 	case RateTblConfig:
 		return "Command Class Rate Tbl Config"
 
@@ -420,22 +514,10 @@ func (c CommandClassID) String() string {
 	case ScheduleEntryLock:
 		return "Command Class Schedule Entry Lock"
 
-	case ScheduleEntryLockV2:
-		return "Command Class Schedule Entry Lock"
-
-	case ScheduleEntryLockV3:
-		return "Command Class Schedule Entry Lock"
-
 	case ScreenAttributes:
 		return "Command Class Screen Attributes"
 
-	case ScreenAttributesV2:
-		return "Command Class Screen Attributes"
-
 	case ScreenMd:
-		return "Command Class Screen Md"
-
-	case ScreenMdV2:
 		return "Command Class Screen Md"
 
 	case SecurityPanelMode:
@@ -456,28 +538,10 @@ func (c CommandClassID) String() string {
 	case SensorBinary:
 		return "Command Class Sensor Binary"
 
-	case SensorBinaryV2:
-		return "Command Class Sensor Binary"
-
 	case SensorConfiguration:
 		return "Command Class Sensor Configuration"
 
 	case SensorMultilevel:
-		return "Command Class Sensor Multilevel"
-
-	case SensorMultilevelV2:
-		return "Command Class Sensor Multilevel"
-
-	case SensorMultilevelV3:
-		return "Command Class Sensor Multilevel"
-
-	case SensorMultilevelV4:
-		return "Command Class Sensor Multilevel"
-
-	case SensorMultilevelV5:
-		return "Command Class Sensor Multilevel"
-
-	case SensorMultilevelV6:
 		return "Command Class Sensor Multilevel"
 
 	case SilenceAlarm:
@@ -495,12 +559,6 @@ func (c CommandClassID) String() string {
 	case SwitchMultilevel:
 		return "Command Class Switch Multilevel"
 
-	case SwitchMultilevelV2:
-		return "Command Class Switch Multilevel"
-
-	case SwitchMultilevelV3:
-		return "Command Class Switch Multilevel"
-
 	case SwitchToggleBinary:
 		return "Command Class Switch Toggle Binary"
 
@@ -516,15 +574,6 @@ func (c CommandClassID) String() string {
 	case ThermostatFanMode:
 		return "Command Class Thermostat Fan Mode"
 
-	case ThermostatFanModeV2:
-		return "Command Class Thermostat Fan Mode"
-
-	case ThermostatFanModeV3:
-		return "Command Class Thermostat Fan Mode"
-
-	case ThermostatFanModeV4:
-		return "Command Class Thermostat Fan Mode"
-
 	case ThermostatFanState:
 		return "Command Class Thermostat Fan State"
 
@@ -534,16 +583,7 @@ func (c CommandClassID) String() string {
 	case ThermostatMode:
 		return "Command Class Thermostat Mode"
 
-	case ThermostatModeV2:
-		return "Command Class Thermostat Mode"
-
-	case ThermostatModeV3:
-		return "Command Class Thermostat Mode"
-
 	case ThermostatOperatingState:
-		return "Command Class Thermostat Operating State"
-
-	case ThermostatOperatingStateV2:
 		return "Command Class Thermostat Operating State"
 
 	case ThermostatSetback:
@@ -552,25 +592,13 @@ func (c CommandClassID) String() string {
 	case ThermostatSetpoint:
 		return "Command Class Thermostat Setpoint"
 
-	case ThermostatSetpointV2:
-		return "Command Class Thermostat Setpoint"
-
-	case ThermostatSetpointV3:
-		return "Command Class Thermostat Setpoint"
-
 	case TimeParameters:
 		return "Command Class Time Parameters"
 
 	case Time:
 		return "Command Class Time"
 
-	case TimeV2:
-		return "Command Class Time"
-
 	case TransportService:
-		return "Command Class Transport Service"
-
-	case TransportServiceV2:
 		return "Command Class Transport Service"
 
 	case UserCode:
@@ -579,13 +607,7 @@ func (c CommandClassID) String() string {
 	case Version:
 		return "Command Class Version"
 
-	case VersionV2:
-		return "Command Class Version"
-
 	case WakeUp:
-		return "Command Class Wake Up"
-
-	case WakeUpV2:
 		return "Command Class Wake Up"
 
 	case ZensorNet:
@@ -597,9 +619,6 @@ func (c CommandClassID) String() string {
 	case Zip:
 		return "Command Class Z/IP"
 
-	case ZipV2:
-		return "Command Class Z/IP"
-
 	case ZwaveCmdClass:
 		return "Z-Wave protocol Command Class"
 
@@ -607,9 +626,6 @@ func (c CommandClassID) String() string {
 		return "Command Class Application Capability"
 
 	case ColorControl:
-		return "Command Class Color Control"
-
-	case ColorControlV2:
 		return "Command Class Color Control"
 
 	case Schedule:
@@ -636,13 +652,7 @@ func (c CommandClassID) String() string {
 	case Antitheft:
 		return "Command Class Anti-theft"
 
-	case AntitheftV2:
-		return "Command Class Anti-theft"
-
 	case ZwaveplusInfo:
-		return "Command Class Z-Wave+ Info"
-
-	case ZwaveplusInfoV2:
 		return "Command Class Z-Wave+ Info"
 
 	case ZipGateway:
@@ -665,2317 +675,5213 @@ func (c CommandClassID) String() string {
 	}
 }
 
-func Parse(payload []byte) (interface{}, error) {
-	switch CommandClassID(payload[0]) {
+func Parse(ccVersion uint8, payload []byte) (interface{}, error) {
+	switch {
 
-	case Alarm:
+	case payload[0] == byte(Alarm) && ccVersion == 1:
 		switch payload[1] {
 		case 0x04:
-			return alarm.ParseAlarmGet(payload), nil
+			command := alarm.AlarmGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return alarm.ParseAlarmReport(payload), nil
+			command := alarm.AlarmReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Alarm")
 		}
 
-	case AlarmV2:
+	case payload[0] == byte(AlarmV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x04:
-			return alarmv2.ParseAlarmGet(payload), nil
+			command := alarmv2.AlarmGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return alarmv2.ParseAlarmReport(payload), nil
+			command := alarmv2.AlarmReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return alarmv2.ParseAlarmSet(payload), nil
+			command := alarmv2.AlarmSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return alarmv2.ParseAlarmTypeSupportedGet(payload), nil
+			command := alarmv2.AlarmTypeSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return alarmv2.ParseAlarmTypeSupportedReport(payload), nil
+			command := alarmv2.AlarmTypeSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Alarm")
 		}
 
-	case NotificationV3:
+	case payload[0] == byte(NotificationV3) && ccVersion == 3:
 		switch payload[1] {
 		case 0x04:
-			return notificationv3.ParseNotificationGet(payload), nil
+			command := notificationv3.NotificationGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return notificationv3.ParseNotificationReport(payload), nil
+			command := notificationv3.NotificationReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return notificationv3.ParseNotificationSet(payload), nil
+			command := notificationv3.NotificationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return notificationv3.ParseNotificationSupportedGet(payload), nil
+			command := notificationv3.NotificationSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return notificationv3.ParseNotificationSupportedReport(payload), nil
+			command := notificationv3.NotificationSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return notificationv3.ParseEventSupportedGet(payload), nil
+			command := notificationv3.EventSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return notificationv3.ParseEventSupportedReport(payload), nil
+			command := notificationv3.EventSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Notification")
 		}
 
-	case NotificationV4:
+	case payload[0] == byte(NotificationV4) && ccVersion == 4:
 		switch payload[1] {
 		case 0x04:
-			return notificationv4.ParseNotificationGet(payload), nil
+			command := notificationv4.NotificationGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return notificationv4.ParseNotificationReport(payload), nil
+			command := notificationv4.NotificationReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return notificationv4.ParseNotificationSet(payload), nil
+			command := notificationv4.NotificationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return notificationv4.ParseNotificationSupportedGet(payload), nil
+			command := notificationv4.NotificationSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return notificationv4.ParseNotificationSupportedReport(payload), nil
+			command := notificationv4.NotificationSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return notificationv4.ParseEventSupportedGet(payload), nil
+			command := notificationv4.EventSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return notificationv4.ParseEventSupportedReport(payload), nil
+			command := notificationv4.EventSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Notification")
 		}
 
-	case ApplicationStatus:
+	case payload[0] == byte(ApplicationStatus) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return applicationstatus.ParseApplicationBusy(payload), nil
+			command := applicationstatus.ApplicationBusy{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return applicationstatus.ParseApplicationRejectedRequest(payload), nil
+			command := applicationstatus.ApplicationRejectedRequest{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Application Status")
 		}
 
-	case AssociationCommandConfiguration:
+	case payload[0] == byte(AssociationCommandConfiguration) && ccVersion == 1:
 		switch payload[1] {
 		case 0x04:
-			return associationcommandconfiguration.ParseCommandConfigurationGet(payload), nil
+			command := associationcommandconfiguration.CommandConfigurationGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return associationcommandconfiguration.ParseCommandConfigurationReport(payload), nil
+			command := associationcommandconfiguration.CommandConfigurationReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return associationcommandconfiguration.ParseCommandConfigurationSet(payload), nil
+			command := associationcommandconfiguration.CommandConfigurationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return associationcommandconfiguration.ParseCommandRecordsSupportedGet(payload), nil
+			command := associationcommandconfiguration.CommandRecordsSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return associationcommandconfiguration.ParseCommandRecordsSupportedReport(payload), nil
+			command := associationcommandconfiguration.CommandRecordsSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Association Command Configuration")
 		}
 
-	case Association:
+	case payload[0] == byte(Association) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return association.ParseAssociationGet(payload), nil
+			command := association.AssociationGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return association.ParseAssociationGroupingsGet(payload), nil
+			command := association.AssociationGroupingsGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return association.ParseAssociationGroupingsReport(payload), nil
+			command := association.AssociationGroupingsReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return association.ParseAssociationRemove(payload), nil
+			command := association.AssociationRemove{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return association.ParseAssociationReport(payload), nil
+			command := association.AssociationReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return association.ParseAssociationSet(payload), nil
+			command := association.AssociationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Association")
 		}
 
-	case AssociationV2:
+	case payload[0] == byte(AssociationV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x02:
-			return associationv2.ParseAssociationGet(payload), nil
+			command := associationv2.AssociationGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return associationv2.ParseAssociationGroupingsGet(payload), nil
+			command := associationv2.AssociationGroupingsGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return associationv2.ParseAssociationGroupingsReport(payload), nil
+			command := associationv2.AssociationGroupingsReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return associationv2.ParseAssociationRemove(payload), nil
+			command := associationv2.AssociationRemove{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return associationv2.ParseAssociationReport(payload), nil
+			command := associationv2.AssociationReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return associationv2.ParseAssociationSet(payload), nil
+			command := associationv2.AssociationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0B:
-			return associationv2.ParseAssociationSpecificGroupGet(payload), nil
+			command := associationv2.AssociationSpecificGroupGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0C:
-			return associationv2.ParseAssociationSpecificGroupReport(payload), nil
+			command := associationv2.AssociationSpecificGroupReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Association")
 		}
 
-	case AvContentDirectoryMd:
+	case payload[0] == byte(AvContentDirectoryMd) && ccVersion == 1:
 		switch payload[1] {
 		case 0x03:
-			return avcontentdirectorymd.ParseAvContentBrowseMdByLetterGet(payload), nil
+			command := avcontentdirectorymd.AvContentBrowseMdByLetterGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return avcontentdirectorymd.ParseAvContentBrowseMdByLetterReport(payload), nil
+			command := avcontentdirectorymd.AvContentBrowseMdByLetterReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return avcontentdirectorymd.ParseAvContentBrowseMdChildCountGet(payload), nil
+			command := avcontentdirectorymd.AvContentBrowseMdChildCountGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return avcontentdirectorymd.ParseAvContentBrowseMdChildCountReport(payload), nil
+			command := avcontentdirectorymd.AvContentBrowseMdChildCountReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return avcontentdirectorymd.ParseAvContentBrowseMdGet(payload), nil
+			command := avcontentdirectorymd.AvContentBrowseMdGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return avcontentdirectorymd.ParseAvContentBrowseMdReport(payload), nil
+			command := avcontentdirectorymd.AvContentBrowseMdReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return avcontentdirectorymd.ParseAvMatchItemToRendererMdGet(payload), nil
+			command := avcontentdirectorymd.AvMatchItemToRendererMdGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return avcontentdirectorymd.ParseAvMatchItemToRendererMdReport(payload), nil
+			command := avcontentdirectorymd.AvMatchItemToRendererMdReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Av Content Directory Md")
 		}
 
-	case AvContentSearchMd:
+	case payload[0] == byte(AvContentSearchMd) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return avcontentsearchmd.ParseAvContentSearchMdGet(payload), nil
+			command := avcontentsearchmd.AvContentSearchMdGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return avcontentsearchmd.ParseAvContentSearchMdReport(payload), nil
+			command := avcontentsearchmd.AvContentSearchMdReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Av Content Search Md")
 		}
 
-	case AvRendererStatus:
+	case payload[0] == byte(AvRendererStatus) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return avrendererstatus.ParseAvRendererStatusGet(payload), nil
+			command := avrendererstatus.AvRendererStatusGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return avrendererstatus.ParseAvRendererStatusReport(payload), nil
+			command := avrendererstatus.AvRendererStatusReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Av Renderer Status")
 		}
 
-	case AvTaggingMd:
+	case payload[0] == byte(AvTaggingMd) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return avtaggingmd.ParseAvTaggingMdGet(payload), nil
+			command := avtaggingmd.AvTaggingMdGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return avtaggingmd.ParseAvTaggingMdReport(payload), nil
+			command := avtaggingmd.AvTaggingMdReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Av Tagging Md")
 		}
 
-	case BasicTariffInfo:
+	case payload[0] == byte(BasicTariffInfo) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return basictariffinfo.ParseBasicTariffInfoGet(payload), nil
+			command := basictariffinfo.BasicTariffInfoGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return basictariffinfo.ParseBasicTariffInfoReport(payload), nil
+			command := basictariffinfo.BasicTariffInfoReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Basic Tariff Info")
 		}
 
-	case BasicWindowCovering:
+	case payload[0] == byte(BasicWindowCovering) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return basicwindowcovering.ParseBasicWindowCoveringStartLevelChange(payload), nil
+			command := basicwindowcovering.BasicWindowCoveringStartLevelChange{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return basicwindowcovering.ParseBasicWindowCoveringStopLevelChange(payload), nil
+			command := basicwindowcovering.BasicWindowCoveringStopLevelChange{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Basic Window Covering")
 		}
 
-	case Basic:
+	case payload[0] == byte(Basic) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return basic.ParseBasicGet(payload), nil
+			command := basic.BasicGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return basic.ParseBasicReport(payload), nil
+			command := basic.BasicReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return basic.ParseBasicSet(payload), nil
+			command := basic.BasicSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Basic")
 		}
 
-	case Battery:
+	case payload[0] == byte(Battery) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return battery.ParseBatteryGet(payload), nil
+			command := battery.BatteryGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return battery.ParseBatteryReport(payload), nil
+			command := battery.BatteryReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Battery")
 		}
 
-	case ChimneyFan:
+	case payload[0] == byte(ChimneyFan) && ccVersion == 1:
 		switch payload[1] {
 		case 0x20:
-			return chimneyfan.ParseChimneyFanAlarmLogGet(payload), nil
+			command := chimneyfan.ChimneyFanAlarmLogGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x21:
-			return chimneyfan.ParseChimneyFanAlarmLogReport(payload), nil
+			command := chimneyfan.ChimneyFanAlarmLogReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x1F:
-			return chimneyfan.ParseChimneyFanAlarmLogSet(payload), nil
+			command := chimneyfan.ChimneyFanAlarmLogSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x23:
-			return chimneyfan.ParseChimneyFanAlarmStatusGet(payload), nil
+			command := chimneyfan.ChimneyFanAlarmStatusGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x24:
-			return chimneyfan.ParseChimneyFanAlarmStatusReport(payload), nil
+			command := chimneyfan.ChimneyFanAlarmStatusReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x22:
-			return chimneyfan.ParseChimneyFanAlarmStatusSet(payload), nil
+			command := chimneyfan.ChimneyFanAlarmStatusSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0E:
-			return chimneyfan.ParseChimneyFanAlarmTempGet(payload), nil
+			command := chimneyfan.ChimneyFanAlarmTempGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0F:
-			return chimneyfan.ParseChimneyFanAlarmTempReport(payload), nil
+			command := chimneyfan.ChimneyFanAlarmTempReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0D:
-			return chimneyfan.ParseChimneyFanAlarmTempSet(payload), nil
+			command := chimneyfan.ChimneyFanAlarmTempSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x11:
-			return chimneyfan.ParseChimneyFanBoostTimeGet(payload), nil
+			command := chimneyfan.ChimneyFanBoostTimeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x12:
-			return chimneyfan.ParseChimneyFanBoostTimeReport(payload), nil
+			command := chimneyfan.ChimneyFanBoostTimeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x10:
-			return chimneyfan.ParseChimneyFanBoostTimeSet(payload), nil
+			command := chimneyfan.ChimneyFanBoostTimeSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x28:
-			return chimneyfan.ParseChimneyFanDefaultSet(payload), nil
+			command := chimneyfan.ChimneyFanDefaultSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x26:
-			return chimneyfan.ParseChimneyFanMinSpeedGet(payload), nil
+			command := chimneyfan.ChimneyFanMinSpeedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x27:
-			return chimneyfan.ParseChimneyFanMinSpeedReport(payload), nil
+			command := chimneyfan.ChimneyFanMinSpeedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x25:
-			return chimneyfan.ParseChimneyFanMinSpeedSet(payload), nil
+			command := chimneyfan.ChimneyFanMinSpeedSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x17:
-			return chimneyfan.ParseChimneyFanModeGet(payload), nil
+			command := chimneyfan.ChimneyFanModeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x18:
-			return chimneyfan.ParseChimneyFanModeReport(payload), nil
+			command := chimneyfan.ChimneyFanModeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x16:
-			return chimneyfan.ParseChimneyFanModeSet(payload), nil
+			command := chimneyfan.ChimneyFanModeSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x1A:
-			return chimneyfan.ParseChimneyFanSetupGet(payload), nil
+			command := chimneyfan.ChimneyFanSetupGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x1B:
-			return chimneyfan.ParseChimneyFanSetupReport(payload), nil
+			command := chimneyfan.ChimneyFanSetupReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x19:
-			return chimneyfan.ParseChimneyFanSetupSet(payload), nil
+			command := chimneyfan.ChimneyFanSetupSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return chimneyfan.ParseChimneyFanSpeedGet(payload), nil
+			command := chimneyfan.ChimneyFanSpeedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return chimneyfan.ParseChimneyFanSpeedReport(payload), nil
+			command := chimneyfan.ChimneyFanSpeedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return chimneyfan.ParseChimneyFanSpeedSet(payload), nil
+			command := chimneyfan.ChimneyFanSpeedSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return chimneyfan.ParseChimneyFanStartTempGet(payload), nil
+			command := chimneyfan.ChimneyFanStartTempGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x09:
-			return chimneyfan.ParseChimneyFanStartTempReport(payload), nil
+			command := chimneyfan.ChimneyFanStartTempReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return chimneyfan.ParseChimneyFanStartTempSet(payload), nil
+			command := chimneyfan.ChimneyFanStartTempSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return chimneyfan.ParseChimneyFanStateGet(payload), nil
+			command := chimneyfan.ChimneyFanStateGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return chimneyfan.ParseChimneyFanStateReport(payload), nil
+			command := chimneyfan.ChimneyFanStateReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return chimneyfan.ParseChimneyFanStateSet(payload), nil
+			command := chimneyfan.ChimneyFanStateSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x1D:
-			return chimneyfan.ParseChimneyFanStatusGet(payload), nil
+			command := chimneyfan.ChimneyFanStatusGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x1E:
-			return chimneyfan.ParseChimneyFanStatusReport(payload), nil
+			command := chimneyfan.ChimneyFanStatusReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0B:
-			return chimneyfan.ParseChimneyFanStopTempGet(payload), nil
+			command := chimneyfan.ChimneyFanStopTempGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0C:
-			return chimneyfan.ParseChimneyFanStopTempReport(payload), nil
+			command := chimneyfan.ChimneyFanStopTempReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0A:
-			return chimneyfan.ParseChimneyFanStopTempSet(payload), nil
+			command := chimneyfan.ChimneyFanStopTempSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x14:
-			return chimneyfan.ParseChimneyFanStopTimeGet(payload), nil
+			command := chimneyfan.ChimneyFanStopTimeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x15:
-			return chimneyfan.ParseChimneyFanStopTimeReport(payload), nil
+			command := chimneyfan.ChimneyFanStopTimeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x13:
-			return chimneyfan.ParseChimneyFanStopTimeSet(payload), nil
+			command := chimneyfan.ChimneyFanStopTimeSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Chimney Fan")
 		}
 
-	case ClimateControlSchedule:
+	case payload[0] == byte(ClimateControlSchedule) && ccVersion == 1:
 		switch payload[1] {
 		case 0x04:
-			return climatecontrolschedule.ParseScheduleChangedGet(payload), nil
+			command := climatecontrolschedule.ScheduleChangedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return climatecontrolschedule.ParseScheduleChangedReport(payload), nil
+			command := climatecontrolschedule.ScheduleChangedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return climatecontrolschedule.ParseScheduleGet(payload), nil
+			command := climatecontrolschedule.ScheduleGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return climatecontrolschedule.ParseScheduleOverrideGet(payload), nil
+			command := climatecontrolschedule.ScheduleOverrideGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return climatecontrolschedule.ParseScheduleOverrideReport(payload), nil
+			command := climatecontrolschedule.ScheduleOverrideReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return climatecontrolschedule.ParseScheduleOverrideSet(payload), nil
+			command := climatecontrolschedule.ScheduleOverrideSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return climatecontrolschedule.ParseScheduleReport(payload), nil
+			command := climatecontrolschedule.ScheduleReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return climatecontrolschedule.ParseScheduleSet(payload), nil
+			command := climatecontrolschedule.ScheduleSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Climate Control Schedule")
 		}
 
-	case Clock:
+	case payload[0] == byte(Clock) && ccVersion == 1:
 		switch payload[1] {
 		case 0x05:
-			return clock.ParseClockGet(payload), nil
+			command := clock.ClockGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return clock.ParseClockReport(payload), nil
+			command := clock.ClockReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return clock.ParseClockSet(payload), nil
+			command := clock.ClockSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Clock")
 		}
 
-	case Configuration:
+	case payload[0] == byte(Configuration) && ccVersion == 1:
 		switch payload[1] {
 		case 0x05:
-			return configuration.ParseConfigurationGet(payload), nil
+			command := configuration.ConfigurationGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return configuration.ParseConfigurationReport(payload), nil
+			command := configuration.ConfigurationReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return configuration.ParseConfigurationSet(payload), nil
+			command := configuration.ConfigurationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Configuration")
 		}
 
-	case ConfigurationV2:
+	case payload[0] == byte(ConfigurationV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x08:
-			return configurationv2.ParseConfigurationBulkGet(payload), nil
+			command := configurationv2.ConfigurationBulkGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x09:
-			return configurationv2.ParseConfigurationBulkReport(payload), nil
+			command := configurationv2.ConfigurationBulkReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return configurationv2.ParseConfigurationBulkSet(payload), nil
+			command := configurationv2.ConfigurationBulkSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return configurationv2.ParseConfigurationGet(payload), nil
+			command := configurationv2.ConfigurationGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return configurationv2.ParseConfigurationReport(payload), nil
+			command := configurationv2.ConfigurationReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return configurationv2.ParseConfigurationSet(payload), nil
+			command := configurationv2.ConfigurationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Configuration")
 		}
 
-	case DcpConfig:
+	case payload[0] == byte(DcpConfig) && ccVersion == 1:
 		switch payload[1] {
 		case 0x04:
-			return dcpconfig.ParseDcpListRemove(payload), nil
+			command := dcpconfig.DcpListRemove{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return dcpconfig.ParseDcpListSet(payload), nil
+			command := dcpconfig.DcpListSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return dcpconfig.ParseDcpListSupportedGet(payload), nil
+			command := dcpconfig.DcpListSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return dcpconfig.ParseDcpListSupportedReport(payload), nil
+			command := dcpconfig.DcpListSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Dcp Config")
 		}
 
-	case DcpMonitor:
+	case payload[0] == byte(DcpMonitor) && ccVersion == 1:
 		switch payload[1] {
 		case 0x03:
-			return dcpmonitor.ParseDcpEventStatusGet(payload), nil
+			command := dcpmonitor.DcpEventStatusGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return dcpmonitor.ParseDcpEventStatusReport(payload), nil
+			command := dcpmonitor.DcpEventStatusReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return dcpmonitor.ParseDcpListGet(payload), nil
+			command := dcpmonitor.DcpListGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return dcpmonitor.ParseDcpListReport(payload), nil
+			command := dcpmonitor.DcpListReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Dcp Monitor")
 		}
 
-	case DoorLockLogging:
+	case payload[0] == byte(DoorLockLogging) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return doorlocklogging.ParseDoorLockLoggingRecordsSupportedGet(payload), nil
+			command := doorlocklogging.DoorLockLoggingRecordsSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return doorlocklogging.ParseDoorLockLoggingRecordsSupportedReport(payload), nil
+			command := doorlocklogging.DoorLockLoggingRecordsSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return doorlocklogging.ParseRecordGet(payload), nil
+			command := doorlocklogging.RecordGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return doorlocklogging.ParseRecordReport(payload), nil
+			command := doorlocklogging.RecordReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Door Lock Logging")
 		}
 
-	case DoorLock:
+	case payload[0] == byte(DoorLock) && ccVersion == 1:
 		switch payload[1] {
 		case 0x05:
-			return doorlock.ParseDoorLockConfigurationGet(payload), nil
+			command := doorlock.DoorLockConfigurationGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return doorlock.ParseDoorLockConfigurationReport(payload), nil
+			command := doorlock.DoorLockConfigurationReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return doorlock.ParseDoorLockConfigurationSet(payload), nil
+			command := doorlock.DoorLockConfigurationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return doorlock.ParseDoorLockOperationGet(payload), nil
+			command := doorlock.DoorLockOperationGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return doorlock.ParseDoorLockOperationReport(payload), nil
+			command := doorlock.DoorLockOperationReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return doorlock.ParseDoorLockOperationSet(payload), nil
+			command := doorlock.DoorLockOperationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Door Lock")
 		}
 
-	case DoorLockV2:
+	case payload[0] == byte(DoorLockV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x05:
-			return doorlockv2.ParseDoorLockConfigurationGet(payload), nil
+			command := doorlockv2.DoorLockConfigurationGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return doorlockv2.ParseDoorLockConfigurationReport(payload), nil
+			command := doorlockv2.DoorLockConfigurationReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return doorlockv2.ParseDoorLockConfigurationSet(payload), nil
+			command := doorlockv2.DoorLockConfigurationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return doorlockv2.ParseDoorLockOperationGet(payload), nil
+			command := doorlockv2.DoorLockOperationGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return doorlockv2.ParseDoorLockOperationReport(payload), nil
+			command := doorlockv2.DoorLockOperationReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return doorlockv2.ParseDoorLockOperationSet(payload), nil
+			command := doorlockv2.DoorLockOperationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Door Lock")
 		}
 
-	case EnergyProduction:
+	case payload[0] == byte(EnergyProduction) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return energyproduction.ParseEnergyProductionGet(payload), nil
+			command := energyproduction.EnergyProductionGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return energyproduction.ParseEnergyProductionReport(payload), nil
+			command := energyproduction.EnergyProductionReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Energy Production")
 		}
 
-	case FirmwareUpdateMd:
+	case payload[0] == byte(FirmwareUpdateMd) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return firmwareupdatemd.ParseFirmwareMdGet(payload), nil
+			command := firmwareupdatemd.FirmwareMdGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return firmwareupdatemd.ParseFirmwareMdReport(payload), nil
+			command := firmwareupdatemd.FirmwareMdReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return firmwareupdatemd.ParseFirmwareUpdateMdGet(payload), nil
+			command := firmwareupdatemd.FirmwareUpdateMdGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return firmwareupdatemd.ParseFirmwareUpdateMdReport(payload), nil
+			command := firmwareupdatemd.FirmwareUpdateMdReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return firmwareupdatemd.ParseFirmwareUpdateMdRequestGet(payload), nil
+			command := firmwareupdatemd.FirmwareUpdateMdRequestGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return firmwareupdatemd.ParseFirmwareUpdateMdRequestReport(payload), nil
+			command := firmwareupdatemd.FirmwareUpdateMdRequestReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return firmwareupdatemd.ParseFirmwareUpdateMdStatusReport(payload), nil
+			command := firmwareupdatemd.FirmwareUpdateMdStatusReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Firmware Update Md")
 		}
 
-	case FirmwareUpdateMdV2:
+	case payload[0] == byte(FirmwareUpdateMdV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x01:
-			return firmwareupdatemdv2.ParseFirmwareMdGet(payload), nil
+			command := firmwareupdatemdv2.FirmwareMdGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return firmwareupdatemdv2.ParseFirmwareMdReport(payload), nil
+			command := firmwareupdatemdv2.FirmwareMdReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return firmwareupdatemdv2.ParseFirmwareUpdateMdGet(payload), nil
+			command := firmwareupdatemdv2.FirmwareUpdateMdGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return firmwareupdatemdv2.ParseFirmwareUpdateMdReport(payload), nil
+			command := firmwareupdatemdv2.FirmwareUpdateMdReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return firmwareupdatemdv2.ParseFirmwareUpdateMdRequestGet(payload), nil
+			command := firmwareupdatemdv2.FirmwareUpdateMdRequestGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return firmwareupdatemdv2.ParseFirmwareUpdateMdRequestReport(payload), nil
+			command := firmwareupdatemdv2.FirmwareUpdateMdRequestReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return firmwareupdatemdv2.ParseFirmwareUpdateMdStatusReport(payload), nil
+			command := firmwareupdatemdv2.FirmwareUpdateMdStatusReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Firmware Update Md")
 		}
 
-	case FirmwareUpdateMdV3:
+	case payload[0] == byte(FirmwareUpdateMdV3) && ccVersion == 3:
 		switch payload[1] {
 		case 0x01:
-			return firmwareupdatemdv3.ParseFirmwareMdGet(payload), nil
+			command := firmwareupdatemdv3.FirmwareMdGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return firmwareupdatemdv3.ParseFirmwareMdReport(payload), nil
+			command := firmwareupdatemdv3.FirmwareMdReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return firmwareupdatemdv3.ParseFirmwareUpdateMdGet(payload), nil
+			command := firmwareupdatemdv3.FirmwareUpdateMdGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return firmwareupdatemdv3.ParseFirmwareUpdateMdReport(payload), nil
+			command := firmwareupdatemdv3.FirmwareUpdateMdReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return firmwareupdatemdv3.ParseFirmwareUpdateMdRequestGet(payload), nil
+			command := firmwareupdatemdv3.FirmwareUpdateMdRequestGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return firmwareupdatemdv3.ParseFirmwareUpdateMdRequestReport(payload), nil
+			command := firmwareupdatemdv3.FirmwareUpdateMdRequestReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return firmwareupdatemdv3.ParseFirmwareUpdateMdStatusReport(payload), nil
+			command := firmwareupdatemdv3.FirmwareUpdateMdStatusReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Firmware Update Md")
 		}
 
-	case GeographicLocation:
+	case payload[0] == byte(GeographicLocation) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return geographiclocation.ParseGeographicLocationGet(payload), nil
+			command := geographiclocation.GeographicLocationGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return geographiclocation.ParseGeographicLocationReport(payload), nil
+			command := geographiclocation.GeographicLocationReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return geographiclocation.ParseGeographicLocationSet(payload), nil
+			command := geographiclocation.GeographicLocationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Geographic Location")
 		}
 
-	case GroupingName:
+	case payload[0] == byte(GroupingName) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return groupingname.ParseGroupingNameGet(payload), nil
+			command := groupingname.GroupingNameGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return groupingname.ParseGroupingNameReport(payload), nil
+			command := groupingname.GroupingNameReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return groupingname.ParseGroupingNameSet(payload), nil
+			command := groupingname.GroupingNameSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Grouping Name")
 		}
 
-	case Hail:
+	case payload[0] == byte(Hail) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return hail.ParseHail(payload), nil
+			command := hail.Hail{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Hail")
 		}
 
-	case HrvControl:
+	case payload[0] == byte(HrvControl) && ccVersion == 1:
 		switch payload[1] {
 		case 0x05:
-			return hrvcontrol.ParseHrvControlBypassGet(payload), nil
+			command := hrvcontrol.HrvControlBypassGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return hrvcontrol.ParseHrvControlBypassReport(payload), nil
+			command := hrvcontrol.HrvControlBypassReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return hrvcontrol.ParseHrvControlBypassSet(payload), nil
+			command := hrvcontrol.HrvControlBypassSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return hrvcontrol.ParseHrvControlModeGet(payload), nil
+			command := hrvcontrol.HrvControlModeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return hrvcontrol.ParseHrvControlModeReport(payload), nil
+			command := hrvcontrol.HrvControlModeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return hrvcontrol.ParseHrvControlModeSet(payload), nil
+			command := hrvcontrol.HrvControlModeSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0A:
-			return hrvcontrol.ParseHrvControlModeSupportedGet(payload), nil
+			command := hrvcontrol.HrvControlModeSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0B:
-			return hrvcontrol.ParseHrvControlModeSupportedReport(payload), nil
+			command := hrvcontrol.HrvControlModeSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return hrvcontrol.ParseHrvControlVentilationRateGet(payload), nil
+			command := hrvcontrol.HrvControlVentilationRateGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x09:
-			return hrvcontrol.ParseHrvControlVentilationRateReport(payload), nil
+			command := hrvcontrol.HrvControlVentilationRateReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return hrvcontrol.ParseHrvControlVentilationRateSet(payload), nil
+			command := hrvcontrol.HrvControlVentilationRateSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Hrv Control")
 		}
 
-	case HrvStatus:
+	case payload[0] == byte(HrvStatus) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return hrvstatus.ParseHrvStatusGet(payload), nil
+			command := hrvstatus.HrvStatusGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return hrvstatus.ParseHrvStatusReport(payload), nil
+			command := hrvstatus.HrvStatusReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return hrvstatus.ParseHrvStatusSupportedGet(payload), nil
+			command := hrvstatus.HrvStatusSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return hrvstatus.ParseHrvStatusSupportedReport(payload), nil
+			command := hrvstatus.HrvStatusSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Hrv Status")
 		}
 
-	case Indicator:
+	case payload[0] == byte(Indicator) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return indicator.ParseIndicatorGet(payload), nil
+			command := indicator.IndicatorGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return indicator.ParseIndicatorReport(payload), nil
+			command := indicator.IndicatorReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return indicator.ParseIndicatorSet(payload), nil
+			command := indicator.IndicatorSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Indicator")
 		}
 
-	case Language:
+	case payload[0] == byte(Language) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return language.ParseLanguageGet(payload), nil
+			command := language.LanguageGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return language.ParseLanguageReport(payload), nil
+			command := language.LanguageReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return language.ParseLanguageSet(payload), nil
+			command := language.LanguageSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Language")
 		}
 
-	case Lock:
+	case payload[0] == byte(Lock) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return lock.ParseLockGet(payload), nil
+			command := lock.LockGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return lock.ParseLockReport(payload), nil
+			command := lock.LockReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return lock.ParseLockSet(payload), nil
+			command := lock.LockSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Lock")
 		}
 
-	case ManufacturerSpecific:
+	case payload[0] == byte(ManufacturerSpecific) && ccVersion == 1:
 		switch payload[1] {
 		case 0x04:
-			return manufacturerspecific.ParseManufacturerSpecificGet(payload), nil
+			command := manufacturerspecific.ManufacturerSpecificGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return manufacturerspecific.ParseManufacturerSpecificReport(payload), nil
+			command := manufacturerspecific.ManufacturerSpecificReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Manufacturer Specific")
 		}
 
-	case ManufacturerSpecificV2:
+	case payload[0] == byte(ManufacturerSpecificV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x04:
-			return manufacturerspecificv2.ParseManufacturerSpecificGet(payload), nil
+			command := manufacturerspecificv2.ManufacturerSpecificGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return manufacturerspecificv2.ParseManufacturerSpecificReport(payload), nil
+			command := manufacturerspecificv2.ManufacturerSpecificReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return manufacturerspecificv2.ParseDeviceSpecificGet(payload), nil
+			command := manufacturerspecificv2.DeviceSpecificGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return manufacturerspecificv2.ParseDeviceSpecificReport(payload), nil
+			command := manufacturerspecificv2.DeviceSpecificReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Manufacturer Specific")
 		}
 
-	case MeterPulse:
+	case payload[0] == byte(MeterPulse) && ccVersion == 1:
 		switch payload[1] {
 		case 0x04:
-			return meterpulse.ParseMeterPulseGet(payload), nil
+			command := meterpulse.MeterPulseGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return meterpulse.ParseMeterPulseReport(payload), nil
+			command := meterpulse.MeterPulseReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Meter Pulse")
 		}
 
-	case MeterTblConfig:
+	case payload[0] == byte(MeterTblConfig) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return metertblconfig.ParseMeterTblTablePointAdmNoSet(payload), nil
+			command := metertblconfig.MeterTblTablePointAdmNoSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Meter Tbl Config")
 		}
 
-	case MeterTblMonitor:
+	case payload[0] == byte(MeterTblMonitor) && ccVersion == 1:
 		switch payload[1] {
 		case 0x0B:
-			return metertblmonitor.ParseMeterTblStatusReport(payload), nil
+			command := metertblmonitor.MeterTblStatusReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0A:
-			return metertblmonitor.ParseMeterTblStatusDateGet(payload), nil
+			command := metertblmonitor.MeterTblStatusDateGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x09:
-			return metertblmonitor.ParseMeterTblStatusDepthGet(payload), nil
+			command := metertblmonitor.MeterTblStatusDepthGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return metertblmonitor.ParseMeterTblStatusSupportedGet(payload), nil
+			command := metertblmonitor.MeterTblStatusSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return metertblmonitor.ParseMeterTblStatusSupportedReport(payload), nil
+			command := metertblmonitor.MeterTblStatusSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0C:
-			return metertblmonitor.ParseMeterTblCurrentDataGet(payload), nil
+			command := metertblmonitor.MeterTblCurrentDataGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0D:
-			return metertblmonitor.ParseMeterTblCurrentDataReport(payload), nil
+			command := metertblmonitor.MeterTblCurrentDataReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0E:
-			return metertblmonitor.ParseMeterTblHistoricalDataGet(payload), nil
+			command := metertblmonitor.MeterTblHistoricalDataGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0F:
-			return metertblmonitor.ParseMeterTblHistoricalDataReport(payload), nil
+			command := metertblmonitor.MeterTblHistoricalDataReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return metertblmonitor.ParseMeterTblReport(payload), nil
+			command := metertblmonitor.MeterTblReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return metertblmonitor.ParseMeterTblTableCapabilityGet(payload), nil
+			command := metertblmonitor.MeterTblTableCapabilityGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return metertblmonitor.ParseMeterTblTableIdGet(payload), nil
+			command := metertblmonitor.MeterTblTableIdGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return metertblmonitor.ParseMeterTblTableIdReport(payload), nil
+			command := metertblmonitor.MeterTblTableIdReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return metertblmonitor.ParseMeterTblTablePointAdmNoGet(payload), nil
+			command := metertblmonitor.MeterTblTablePointAdmNoGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return metertblmonitor.ParseMeterTblTablePointAdmNoReport(payload), nil
+			command := metertblmonitor.MeterTblTablePointAdmNoReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Meter Tbl Monitor")
 		}
 
-	case MeterTblMonitorV2:
+	case payload[0] == byte(MeterTblMonitorV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x0B:
-			return metertblmonitorv2.ParseMeterTblStatusReport(payload), nil
+			command := metertblmonitorv2.MeterTblStatusReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0A:
-			return metertblmonitorv2.ParseMeterTblStatusDateGet(payload), nil
+			command := metertblmonitorv2.MeterTblStatusDateGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x09:
-			return metertblmonitorv2.ParseMeterTblStatusDepthGet(payload), nil
+			command := metertblmonitorv2.MeterTblStatusDepthGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return metertblmonitorv2.ParseMeterTblStatusSupportedGet(payload), nil
+			command := metertblmonitorv2.MeterTblStatusSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return metertblmonitorv2.ParseMeterTblStatusSupportedReport(payload), nil
+			command := metertblmonitorv2.MeterTblStatusSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0C:
-			return metertblmonitorv2.ParseMeterTblCurrentDataGet(payload), nil
+			command := metertblmonitorv2.MeterTblCurrentDataGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0D:
-			return metertblmonitorv2.ParseMeterTblCurrentDataReport(payload), nil
+			command := metertblmonitorv2.MeterTblCurrentDataReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0E:
-			return metertblmonitorv2.ParseMeterTblHistoricalDataGet(payload), nil
+			command := metertblmonitorv2.MeterTblHistoricalDataGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0F:
-			return metertblmonitorv2.ParseMeterTblHistoricalDataReport(payload), nil
+			command := metertblmonitorv2.MeterTblHistoricalDataReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return metertblmonitorv2.ParseMeterTblReport(payload), nil
+			command := metertblmonitorv2.MeterTblReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return metertblmonitorv2.ParseMeterTblTableCapabilityGet(payload), nil
+			command := metertblmonitorv2.MeterTblTableCapabilityGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return metertblmonitorv2.ParseMeterTblTableIdGet(payload), nil
+			command := metertblmonitorv2.MeterTblTableIdGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return metertblmonitorv2.ParseMeterTblTableIdReport(payload), nil
+			command := metertblmonitorv2.MeterTblTableIdReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return metertblmonitorv2.ParseMeterTblTablePointAdmNoGet(payload), nil
+			command := metertblmonitorv2.MeterTblTablePointAdmNoGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return metertblmonitorv2.ParseMeterTblTablePointAdmNoReport(payload), nil
+			command := metertblmonitorv2.MeterTblTablePointAdmNoReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Meter Tbl Monitor")
 		}
 
-	case MeterTblPush:
+	case payload[0] == byte(MeterTblPush) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return metertblpush.ParseMeterTblPushConfigurationGet(payload), nil
+			command := metertblpush.MeterTblPushConfigurationGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return metertblpush.ParseMeterTblPushConfigurationReport(payload), nil
+			command := metertblpush.MeterTblPushConfigurationReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return metertblpush.ParseMeterTblPushConfigurationSet(payload), nil
+			command := metertblpush.MeterTblPushConfigurationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Meter Tbl Push")
 		}
 
-	case Meter:
+	case payload[0] == byte(Meter) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return meter.ParseMeterGet(payload), nil
+			command := meter.MeterGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return meter.ParseMeterReport(payload), nil
+			command := meter.MeterReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Meter")
 		}
 
-	case MeterV2:
+	case payload[0] == byte(MeterV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x01:
-			return meterv2.ParseMeterGet(payload), nil
+			command := meterv2.MeterGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return meterv2.ParseMeterReport(payload), nil
+			command := meterv2.MeterReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return meterv2.ParseMeterReset(payload), nil
+			command := meterv2.MeterReset{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return meterv2.ParseMeterSupportedGet(payload), nil
+			command := meterv2.MeterSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return meterv2.ParseMeterSupportedReport(payload), nil
+			command := meterv2.MeterSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Meter")
 		}
 
-	case MeterV3:
+	case payload[0] == byte(MeterV3) && ccVersion == 3:
 		switch payload[1] {
 		case 0x01:
-			return meterv3.ParseMeterGet(payload), nil
+			command := meterv3.MeterGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return meterv3.ParseMeterReport(payload), nil
+			command := meterv3.MeterReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return meterv3.ParseMeterReset(payload), nil
+			command := meterv3.MeterReset{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return meterv3.ParseMeterSupportedGet(payload), nil
+			command := meterv3.MeterSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return meterv3.ParseMeterSupportedReport(payload), nil
+			command := meterv3.MeterSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Meter")
 		}
 
-	case MeterV4:
+	case payload[0] == byte(MeterV4) && ccVersion == 4:
 		switch payload[1] {
 		case 0x01:
-			return meterv4.ParseMeterGet(payload), nil
+			command := meterv4.MeterGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return meterv4.ParseMeterReport(payload), nil
+			command := meterv4.MeterReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return meterv4.ParseMeterReset(payload), nil
+			command := meterv4.MeterReset{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return meterv4.ParseMeterSupportedGet(payload), nil
+			command := meterv4.MeterSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return meterv4.ParseMeterSupportedReport(payload), nil
+			command := meterv4.MeterSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Meter")
 		}
 
-	case MtpWindowCovering:
+	case payload[0] == byte(MtpWindowCovering) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return mtpwindowcovering.ParseMoveToPositionGet(payload), nil
+			command := mtpwindowcovering.MoveToPositionGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return mtpwindowcovering.ParseMoveToPositionReport(payload), nil
+			command := mtpwindowcovering.MoveToPositionReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return mtpwindowcovering.ParseMoveToPositionSet(payload), nil
+			command := mtpwindowcovering.MoveToPositionSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Mtp Window Covering")
 		}
 
-	case MultiChannelAssociationV2:
+	case payload[0] == byte(MultiChannelAssociationV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x02:
-			return multichannelassociationv2.ParseMultiChannelAssociationGet(payload), nil
+			command := multichannelassociationv2.MultiChannelAssociationGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return multichannelassociationv2.ParseMultiChannelAssociationGroupingsGet(payload), nil
+			command := multichannelassociationv2.MultiChannelAssociationGroupingsGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return multichannelassociationv2.ParseMultiChannelAssociationGroupingsReport(payload), nil
+			command := multichannelassociationv2.MultiChannelAssociationGroupingsReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return multichannelassociationv2.ParseMultiChannelAssociationRemove(payload), nil
+			command := multichannelassociationv2.MultiChannelAssociationRemove{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return multichannelassociationv2.ParseMultiChannelAssociationReport(payload), nil
+			command := multichannelassociationv2.MultiChannelAssociationReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return multichannelassociationv2.ParseMultiChannelAssociationSet(payload), nil
+			command := multichannelassociationv2.MultiChannelAssociationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Multi Channel Association")
 		}
 
-	case MultiChannelV2:
+	case payload[0] == byte(MultiChannelV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x09:
-			return multichannelv2.ParseMultiChannelCapabilityGet(payload), nil
+			command := multichannelv2.MultiChannelCapabilityGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0A:
-			return multichannelv2.ParseMultiChannelCapabilityReport(payload), nil
+			command := multichannelv2.MultiChannelCapabilityReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0D:
-			return multichannelv2.ParseMultiChannelCmdEncap(payload), nil
+			command := multichannelv2.MultiChannelCmdEncap{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0B:
-			return multichannelv2.ParseMultiChannelEndPointFind(payload), nil
+			command := multichannelv2.MultiChannelEndPointFind{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0C:
-			return multichannelv2.ParseMultiChannelEndPointFindReport(payload), nil
+			command := multichannelv2.MultiChannelEndPointFindReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return multichannelv2.ParseMultiChannelEndPointGet(payload), nil
+			command := multichannelv2.MultiChannelEndPointGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return multichannelv2.ParseMultiChannelEndPointReport(payload), nil
+			command := multichannelv2.MultiChannelEndPointReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return multichannelv2.ParseMultiInstanceCmdEncap(payload), nil
+			command := multichannelv2.MultiInstanceCmdEncap{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return multichannelv2.ParseMultiInstanceGet(payload), nil
+			command := multichannelv2.MultiInstanceGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return multichannelv2.ParseMultiInstanceReport(payload), nil
+			command := multichannelv2.MultiInstanceReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Multi Channel")
 		}
 
-	case MultiChannelV3:
+	case payload[0] == byte(MultiChannelV3) && ccVersion == 3:
 		switch payload[1] {
 		case 0x09:
-			return multichannelv3.ParseMultiChannelCapabilityGet(payload), nil
+			command := multichannelv3.MultiChannelCapabilityGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0A:
-			return multichannelv3.ParseMultiChannelCapabilityReport(payload), nil
+			command := multichannelv3.MultiChannelCapabilityReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0D:
-			return multichannelv3.ParseMultiChannelCmdEncap(payload), nil
+			command := multichannelv3.MultiChannelCmdEncap{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0B:
-			return multichannelv3.ParseMultiChannelEndPointFind(payload), nil
+			command := multichannelv3.MultiChannelEndPointFind{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0C:
-			return multichannelv3.ParseMultiChannelEndPointFindReport(payload), nil
+			command := multichannelv3.MultiChannelEndPointFindReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return multichannelv3.ParseMultiChannelEndPointGet(payload), nil
+			command := multichannelv3.MultiChannelEndPointGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return multichannelv3.ParseMultiChannelEndPointReport(payload), nil
+			command := multichannelv3.MultiChannelEndPointReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return multichannelv3.ParseMultiInstanceCmdEncap(payload), nil
+			command := multichannelv3.MultiInstanceCmdEncap{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return multichannelv3.ParseMultiInstanceGet(payload), nil
+			command := multichannelv3.MultiInstanceGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return multichannelv3.ParseMultiInstanceReport(payload), nil
+			command := multichannelv3.MultiInstanceReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Multi Channel")
 		}
 
-	case MultiCmd:
+	case payload[0] == byte(MultiCmd) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return multicmd.ParseMultiCmdEncap(payload), nil
+			command := multicmd.MultiCmdEncap{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Multi Cmd")
 		}
 
-	case MultiInstanceAssociation:
+	case payload[0] == byte(MultiInstanceAssociation) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return multiinstanceassociation.ParseMultiInstanceAssociationGet(payload), nil
+			command := multiinstanceassociation.MultiInstanceAssociationGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return multiinstanceassociation.ParseMultiInstanceAssociationGroupingsGet(payload), nil
+			command := multiinstanceassociation.MultiInstanceAssociationGroupingsGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return multiinstanceassociation.ParseMultiInstanceAssociationGroupingsReport(payload), nil
+			command := multiinstanceassociation.MultiInstanceAssociationGroupingsReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return multiinstanceassociation.ParseMultiInstanceAssociationRemove(payload), nil
+			command := multiinstanceassociation.MultiInstanceAssociationRemove{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return multiinstanceassociation.ParseMultiInstanceAssociationReport(payload), nil
+			command := multiinstanceassociation.MultiInstanceAssociationReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return multiinstanceassociation.ParseMultiInstanceAssociationSet(payload), nil
+			command := multiinstanceassociation.MultiInstanceAssociationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Multi Instance Association")
 		}
 
-	case MultiInstance:
+	case payload[0] == byte(MultiInstance) && ccVersion == 1:
 		switch payload[1] {
 		case 0x06:
-			return multiinstance.ParseMultiInstanceCmdEncap(payload), nil
+			command := multiinstance.MultiInstanceCmdEncap{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return multiinstance.ParseMultiInstanceGet(payload), nil
+			command := multiinstance.MultiInstanceGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return multiinstance.ParseMultiInstanceReport(payload), nil
+			command := multiinstance.MultiInstanceReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Multi Instance")
 		}
 
-	case NetworkManagementProxy:
+	case payload[0] == byte(NetworkManagementProxy) && ccVersion == 1:
 		switch payload[1] {
 		case 0x03:
-			return networkmanagementproxy.ParseNodeInfoCachedGet(payload), nil
+			command := networkmanagementproxy.NodeInfoCachedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return networkmanagementproxy.ParseNodeInfoCachedReport(payload), nil
+			command := networkmanagementproxy.NodeInfoCachedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return networkmanagementproxy.ParseNodeListGet(payload), nil
+			command := networkmanagementproxy.NodeListGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return networkmanagementproxy.ParseNodeListReport(payload), nil
+			command := networkmanagementproxy.NodeListReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Network Management Proxy")
 		}
 
-	case NetworkManagementBasic:
+	case payload[0] == byte(NetworkManagementBasic) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return networkmanagementbasic.ParseLearnModeSet(payload), nil
+			command := networkmanagementbasic.LearnModeSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return networkmanagementbasic.ParseLearnModeSetStatus(payload), nil
+			command := networkmanagementbasic.LearnModeSetStatus{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return networkmanagementbasic.ParseNodeInformationSend(payload), nil
+			command := networkmanagementbasic.NodeInformationSend{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return networkmanagementbasic.ParseNetworkUpdateRequest(payload), nil
+			command := networkmanagementbasic.NetworkUpdateRequest{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return networkmanagementbasic.ParseNetworkUpdateRequestStatus(payload), nil
+			command := networkmanagementbasic.NetworkUpdateRequestStatus{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return networkmanagementbasic.ParseDefaultSet(payload), nil
+			command := networkmanagementbasic.DefaultSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return networkmanagementbasic.ParseDefaultSetComplete(payload), nil
+			command := networkmanagementbasic.DefaultSetComplete{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Network Management Basic")
 		}
 
-	case NetworkManagementInclusion:
+	case payload[0] == byte(NetworkManagementInclusion) && ccVersion == 1:
 		switch payload[1] {
 		case 0x07:
-			return networkmanagementinclusion.ParseFailedNodeRemove(payload), nil
+			command := networkmanagementinclusion.FailedNodeRemove{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return networkmanagementinclusion.ParseFailedNodeRemoveStatus(payload), nil
+			command := networkmanagementinclusion.FailedNodeRemoveStatus{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return networkmanagementinclusion.ParseNodeAdd(payload), nil
+			command := networkmanagementinclusion.NodeAdd{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return networkmanagementinclusion.ParseNodeAddStatus(payload), nil
+			command := networkmanagementinclusion.NodeAddStatus{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return networkmanagementinclusion.ParseNodeRemove(payload), nil
+			command := networkmanagementinclusion.NodeRemove{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return networkmanagementinclusion.ParseNodeRemoveStatus(payload), nil
+			command := networkmanagementinclusion.NodeRemoveStatus{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x09:
-			return networkmanagementinclusion.ParseFailedNodeReplace(payload), nil
+			command := networkmanagementinclusion.FailedNodeReplace{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0A:
-			return networkmanagementinclusion.ParseFailedNodeReplaceStatus(payload), nil
+			command := networkmanagementinclusion.FailedNodeReplaceStatus{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0B:
-			return networkmanagementinclusion.ParseNodeNeighborUpdateRequest(payload), nil
+			command := networkmanagementinclusion.NodeNeighborUpdateRequest{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0C:
-			return networkmanagementinclusion.ParseNodeNeighborUpdateStatus(payload), nil
+			command := networkmanagementinclusion.NodeNeighborUpdateStatus{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0D:
-			return networkmanagementinclusion.ParseReturnRouteAssign(payload), nil
+			command := networkmanagementinclusion.ReturnRouteAssign{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0E:
-			return networkmanagementinclusion.ParseReturnRouteAssignComplete(payload), nil
+			command := networkmanagementinclusion.ReturnRouteAssignComplete{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0F:
-			return networkmanagementinclusion.ParseReturnRouteDelete(payload), nil
+			command := networkmanagementinclusion.ReturnRouteDelete{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x10:
-			return networkmanagementinclusion.ParseReturnRouteDeleteComplete(payload), nil
+			command := networkmanagementinclusion.ReturnRouteDeleteComplete{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Network Management Inclusion")
 		}
 
-	case NodeNaming:
+	case payload[0] == byte(NodeNaming) && ccVersion == 1:
 		switch payload[1] {
 		case 0x06:
-			return nodenaming.ParseNodeNamingNodeLocationReport(payload), nil
+			command := nodenaming.NodeNamingNodeLocationReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return nodenaming.ParseNodeNamingNodeLocationSet(payload), nil
+			command := nodenaming.NodeNamingNodeLocationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return nodenaming.ParseNodeNamingNodeLocationGet(payload), nil
+			command := nodenaming.NodeNamingNodeLocationGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return nodenaming.ParseNodeNamingNodeNameGet(payload), nil
+			command := nodenaming.NodeNamingNodeNameGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return nodenaming.ParseNodeNamingNodeNameReport(payload), nil
+			command := nodenaming.NodeNamingNodeNameReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return nodenaming.ParseNodeNamingNodeNameSet(payload), nil
+			command := nodenaming.NodeNamingNodeNameSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Node Naming")
 		}
 
-	case Powerlevel:
+	case payload[0] == byte(Powerlevel) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return powerlevel.ParsePowerlevelGet(payload), nil
+			command := powerlevel.PowerlevelGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return powerlevel.ParsePowerlevelReport(payload), nil
+			command := powerlevel.PowerlevelReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return powerlevel.ParsePowerlevelSet(payload), nil
+			command := powerlevel.PowerlevelSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return powerlevel.ParsePowerlevelTestNodeGet(payload), nil
+			command := powerlevel.PowerlevelTestNodeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return powerlevel.ParsePowerlevelTestNodeReport(payload), nil
+			command := powerlevel.PowerlevelTestNodeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return powerlevel.ParsePowerlevelTestNodeSet(payload), nil
+			command := powerlevel.PowerlevelTestNodeSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Powerlevel")
 		}
 
-	case PrepaymentEncapsulation:
+	case payload[0] == byte(PrepaymentEncapsulation) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return prepaymentencapsulation.ParseCmdEncapsulation(payload), nil
+			command := prepaymentencapsulation.CmdEncapsulation{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Prepayment Encapsulation")
 		}
 
-	case Prepayment:
+	case payload[0] == byte(Prepayment) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return prepayment.ParsePrepaymentBalanceGet(payload), nil
+			command := prepayment.PrepaymentBalanceGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return prepayment.ParsePrepaymentBalanceReport(payload), nil
+			command := prepayment.PrepaymentBalanceReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return prepayment.ParsePrepaymentSupportedGet(payload), nil
+			command := prepayment.PrepaymentSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return prepayment.ParsePrepaymentSupportedReport(payload), nil
+			command := prepayment.PrepaymentSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Prepayment")
 		}
 
-	case Proprietary:
+	case payload[0] == byte(Proprietary) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return proprietary.ParseProprietaryGet(payload), nil
+			command := proprietary.ProprietaryGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return proprietary.ParseProprietaryReport(payload), nil
+			command := proprietary.ProprietaryReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return proprietary.ParseProprietarySet(payload), nil
+			command := proprietary.ProprietarySet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Proprietary")
 		}
 
-	case Protection:
+	case payload[0] == byte(Protection) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return protection.ParseProtectionGet(payload), nil
+			command := protection.ProtectionGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return protection.ParseProtectionReport(payload), nil
+			command := protection.ProtectionReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return protection.ParseProtectionSet(payload), nil
+			command := protection.ProtectionSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Protection")
 		}
 
-	case ProtectionV2:
+	case payload[0] == byte(ProtectionV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x07:
-			return protectionv2.ParseProtectionEcGet(payload), nil
+			command := protectionv2.ProtectionEcGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return protectionv2.ParseProtectionEcReport(payload), nil
+			command := protectionv2.ProtectionEcReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return protectionv2.ParseProtectionEcSet(payload), nil
+			command := protectionv2.ProtectionEcSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return protectionv2.ParseProtectionGet(payload), nil
+			command := protectionv2.ProtectionGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return protectionv2.ParseProtectionReport(payload), nil
+			command := protectionv2.ProtectionReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return protectionv2.ParseProtectionSet(payload), nil
+			command := protectionv2.ProtectionSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return protectionv2.ParseProtectionSupportedGet(payload), nil
+			command := protectionv2.ProtectionSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return protectionv2.ParseProtectionSupportedReport(payload), nil
+			command := protectionv2.ProtectionSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0A:
-			return protectionv2.ParseProtectionTimeoutGet(payload), nil
+			command := protectionv2.ProtectionTimeoutGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0B:
-			return protectionv2.ParseProtectionTimeoutReport(payload), nil
+			command := protectionv2.ProtectionTimeoutReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x09:
-			return protectionv2.ParseProtectionTimeoutSet(payload), nil
+			command := protectionv2.ProtectionTimeoutSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Protection")
 		}
 
-	case RateTblConfig:
+	case payload[0] == byte(RateTblConfig) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return ratetblconfig.ParseRateTblRemove(payload), nil
+			command := ratetblconfig.RateTblRemove{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return ratetblconfig.ParseRateTblSet(payload), nil
+			command := ratetblconfig.RateTblSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Rate Tbl Config")
 		}
 
-	case RateTblMonitor:
+	case payload[0] == byte(RateTblMonitor) && ccVersion == 1:
 		switch payload[1] {
 		case 0x05:
-			return ratetblmonitor.ParseRateTblActiveRateGet(payload), nil
+			command := ratetblmonitor.RateTblActiveRateGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return ratetblmonitor.ParseRateTblActiveRateReport(payload), nil
+			command := ratetblmonitor.RateTblActiveRateReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return ratetblmonitor.ParseRateTblCurrentDataGet(payload), nil
+			command := ratetblmonitor.RateTblCurrentDataGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return ratetblmonitor.ParseRateTblCurrentDataReport(payload), nil
+			command := ratetblmonitor.RateTblCurrentDataReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return ratetblmonitor.ParseRateTblGet(payload), nil
+			command := ratetblmonitor.RateTblGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x09:
-			return ratetblmonitor.ParseRateTblHistoricalDataGet(payload), nil
+			command := ratetblmonitor.RateTblHistoricalDataGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0A:
-			return ratetblmonitor.ParseRateTblHistoricalDataReport(payload), nil
+			command := ratetblmonitor.RateTblHistoricalDataReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return ratetblmonitor.ParseRateTblReport(payload), nil
+			command := ratetblmonitor.RateTblReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return ratetblmonitor.ParseRateTblSupportedGet(payload), nil
+			command := ratetblmonitor.RateTblSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return ratetblmonitor.ParseRateTblSupportedReport(payload), nil
+			command := ratetblmonitor.RateTblSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Rate Tbl Monitor")
 		}
 
-	case RemoteAssociationActivate:
+	case payload[0] == byte(RemoteAssociationActivate) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return remoteassociationactivate.ParseRemoteAssociationActivate(payload), nil
+			command := remoteassociationactivate.RemoteAssociationActivate{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Remote Association Activate")
 		}
 
-	case RemoteAssociation:
+	case payload[0] == byte(RemoteAssociation) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return remoteassociation.ParseRemoteAssociationConfigurationGet(payload), nil
+			command := remoteassociation.RemoteAssociationConfigurationGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return remoteassociation.ParseRemoteAssociationConfigurationReport(payload), nil
+			command := remoteassociation.RemoteAssociationConfigurationReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return remoteassociation.ParseRemoteAssociationConfigurationSet(payload), nil
+			command := remoteassociation.RemoteAssociationConfigurationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Remote Association")
 		}
 
-	case SceneActivation:
+	case payload[0] == byte(SceneActivation) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return sceneactivation.ParseSceneActivationSet(payload), nil
+			command := sceneactivation.SceneActivationSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Scene Activation")
 		}
 
-	case SceneActuatorConf:
+	case payload[0] == byte(SceneActuatorConf) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return sceneactuatorconf.ParseSceneActuatorConfGet(payload), nil
+			command := sceneactuatorconf.SceneActuatorConfGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return sceneactuatorconf.ParseSceneActuatorConfReport(payload), nil
+			command := sceneactuatorconf.SceneActuatorConfReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return sceneactuatorconf.ParseSceneActuatorConfSet(payload), nil
+			command := sceneactuatorconf.SceneActuatorConfSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Scene Actuator Conf")
 		}
 
-	case SceneControllerConf:
+	case payload[0] == byte(SceneControllerConf) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return scenecontrollerconf.ParseSceneControllerConfGet(payload), nil
+			command := scenecontrollerconf.SceneControllerConfGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return scenecontrollerconf.ParseSceneControllerConfReport(payload), nil
+			command := scenecontrollerconf.SceneControllerConfReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return scenecontrollerconf.ParseSceneControllerConfSet(payload), nil
+			command := scenecontrollerconf.SceneControllerConfSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Scene Controller Conf")
 		}
 
-	case ScheduleEntryLock:
+	case payload[0] == byte(ScheduleEntryLock) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return scheduleentrylock.ParseScheduleEntryLockEnableAllSet(payload), nil
+			command := scheduleentrylock.ScheduleEntryLockEnableAllSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return scheduleentrylock.ParseScheduleEntryLockEnableSet(payload), nil
+			command := scheduleentrylock.ScheduleEntryLockEnableSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return scheduleentrylock.ParseScheduleEntryLockWeekDayGet(payload), nil
+			command := scheduleentrylock.ScheduleEntryLockWeekDayGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return scheduleentrylock.ParseScheduleEntryLockWeekDayReport(payload), nil
+			command := scheduleentrylock.ScheduleEntryLockWeekDayReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return scheduleentrylock.ParseScheduleEntryLockWeekDaySet(payload), nil
+			command := scheduleentrylock.ScheduleEntryLockWeekDaySet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return scheduleentrylock.ParseScheduleEntryLockYearDayGet(payload), nil
+			command := scheduleentrylock.ScheduleEntryLockYearDayGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return scheduleentrylock.ParseScheduleEntryLockYearDayReport(payload), nil
+			command := scheduleentrylock.ScheduleEntryLockYearDayReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return scheduleentrylock.ParseScheduleEntryLockYearDaySet(payload), nil
+			command := scheduleentrylock.ScheduleEntryLockYearDaySet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x09:
-			return scheduleentrylock.ParseScheduleEntryTypeSupportedGet(payload), nil
+			command := scheduleentrylock.ScheduleEntryTypeSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0A:
-			return scheduleentrylock.ParseScheduleEntryTypeSupportedReport(payload), nil
+			command := scheduleentrylock.ScheduleEntryTypeSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Schedule Entry Lock")
 		}
 
-	case ScheduleEntryLockV2:
+	case payload[0] == byte(ScheduleEntryLockV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x02:
-			return scheduleentrylockv2.ParseScheduleEntryLockEnableAllSet(payload), nil
+			command := scheduleentrylockv2.ScheduleEntryLockEnableAllSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return scheduleentrylockv2.ParseScheduleEntryLockEnableSet(payload), nil
+			command := scheduleentrylockv2.ScheduleEntryLockEnableSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0B:
-			return scheduleentrylockv2.ParseScheduleEntryLockTimeOffsetGet(payload), nil
+			command := scheduleentrylockv2.ScheduleEntryLockTimeOffsetGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0C:
-			return scheduleentrylockv2.ParseScheduleEntryLockTimeOffsetReport(payload), nil
+			command := scheduleentrylockv2.ScheduleEntryLockTimeOffsetReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0D:
-			return scheduleentrylockv2.ParseScheduleEntryLockTimeOffsetSet(payload), nil
+			command := scheduleentrylockv2.ScheduleEntryLockTimeOffsetSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return scheduleentrylockv2.ParseScheduleEntryLockWeekDayGet(payload), nil
+			command := scheduleentrylockv2.ScheduleEntryLockWeekDayGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return scheduleentrylockv2.ParseScheduleEntryLockWeekDayReport(payload), nil
+			command := scheduleentrylockv2.ScheduleEntryLockWeekDayReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return scheduleentrylockv2.ParseScheduleEntryLockWeekDaySet(payload), nil
+			command := scheduleentrylockv2.ScheduleEntryLockWeekDaySet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return scheduleentrylockv2.ParseScheduleEntryLockYearDayGet(payload), nil
+			command := scheduleentrylockv2.ScheduleEntryLockYearDayGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return scheduleentrylockv2.ParseScheduleEntryLockYearDayReport(payload), nil
+			command := scheduleentrylockv2.ScheduleEntryLockYearDayReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return scheduleentrylockv2.ParseScheduleEntryLockYearDaySet(payload), nil
+			command := scheduleentrylockv2.ScheduleEntryLockYearDaySet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x09:
-			return scheduleentrylockv2.ParseScheduleEntryTypeSupportedGet(payload), nil
+			command := scheduleentrylockv2.ScheduleEntryTypeSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0A:
-			return scheduleentrylockv2.ParseScheduleEntryTypeSupportedReport(payload), nil
+			command := scheduleentrylockv2.ScheduleEntryTypeSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Schedule Entry Lock")
 		}
 
-	case ScheduleEntryLockV3:
+	case payload[0] == byte(ScheduleEntryLockV3) && ccVersion == 3:
 		switch payload[1] {
 		case 0x02:
-			return scheduleentrylockv3.ParseScheduleEntryLockEnableAllSet(payload), nil
+			command := scheduleentrylockv3.ScheduleEntryLockEnableAllSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return scheduleentrylockv3.ParseScheduleEntryLockEnableSet(payload), nil
+			command := scheduleentrylockv3.ScheduleEntryLockEnableSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0B:
-			return scheduleentrylockv3.ParseScheduleEntryLockTimeOffsetGet(payload), nil
+			command := scheduleentrylockv3.ScheduleEntryLockTimeOffsetGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0C:
-			return scheduleentrylockv3.ParseScheduleEntryLockTimeOffsetReport(payload), nil
+			command := scheduleentrylockv3.ScheduleEntryLockTimeOffsetReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0D:
-			return scheduleentrylockv3.ParseScheduleEntryLockTimeOffsetSet(payload), nil
+			command := scheduleentrylockv3.ScheduleEntryLockTimeOffsetSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return scheduleentrylockv3.ParseScheduleEntryLockWeekDayGet(payload), nil
+			command := scheduleentrylockv3.ScheduleEntryLockWeekDayGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return scheduleentrylockv3.ParseScheduleEntryLockWeekDayReport(payload), nil
+			command := scheduleentrylockv3.ScheduleEntryLockWeekDayReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return scheduleentrylockv3.ParseScheduleEntryLockWeekDaySet(payload), nil
+			command := scheduleentrylockv3.ScheduleEntryLockWeekDaySet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return scheduleentrylockv3.ParseScheduleEntryLockYearDayGet(payload), nil
+			command := scheduleentrylockv3.ScheduleEntryLockYearDayGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return scheduleentrylockv3.ParseScheduleEntryLockYearDayReport(payload), nil
+			command := scheduleentrylockv3.ScheduleEntryLockYearDayReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return scheduleentrylockv3.ParseScheduleEntryLockYearDaySet(payload), nil
+			command := scheduleentrylockv3.ScheduleEntryLockYearDaySet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x09:
-			return scheduleentrylockv3.ParseScheduleEntryTypeSupportedGet(payload), nil
+			command := scheduleentrylockv3.ScheduleEntryTypeSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0A:
-			return scheduleentrylockv3.ParseScheduleEntryTypeSupportedReport(payload), nil
+			command := scheduleentrylockv3.ScheduleEntryTypeSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0E:
-			return scheduleentrylockv3.ParseScheduleEntryLockDailyRepeatingGet(payload), nil
+			command := scheduleentrylockv3.ScheduleEntryLockDailyRepeatingGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0F:
-			return scheduleentrylockv3.ParseScheduleEntryLockDailyRepeatingReport(payload), nil
+			command := scheduleentrylockv3.ScheduleEntryLockDailyRepeatingReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x10:
-			return scheduleentrylockv3.ParseScheduleEntryLockDailyRepeatingSet(payload), nil
+			command := scheduleentrylockv3.ScheduleEntryLockDailyRepeatingSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Schedule Entry Lock")
 		}
 
-	case ScreenAttributes:
+	case payload[0] == byte(ScreenAttributes) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return screenattributes.ParseScreenAttributesGet(payload), nil
+			command := screenattributes.ScreenAttributesGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return screenattributes.ParseScreenAttributesReport(payload), nil
+			command := screenattributes.ScreenAttributesReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Screen Attributes")
 		}
 
-	case ScreenAttributesV2:
+	case payload[0] == byte(ScreenAttributesV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x01:
-			return screenattributesv2.ParseScreenAttributesGet(payload), nil
+			command := screenattributesv2.ScreenAttributesGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return screenattributesv2.ParseScreenAttributesReport(payload), nil
+			command := screenattributesv2.ScreenAttributesReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Screen Attributes")
 		}
 
-	case ScreenMd:
+	case payload[0] == byte(ScreenMd) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return screenmd.ParseScreenMdGet(payload), nil
+			command := screenmd.ScreenMdGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return screenmd.ParseScreenMdReport(payload), nil
+			command := screenmd.ScreenMdReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Screen Md")
 		}
 
-	case ScreenMdV2:
+	case payload[0] == byte(ScreenMdV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x01:
-			return screenmdv2.ParseScreenMdGet(payload), nil
+			command := screenmdv2.ScreenMdGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return screenmdv2.ParseScreenMdReport(payload), nil
+			command := screenmdv2.ScreenMdReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Screen Md")
 		}
 
-	case SecurityPanelMode:
+	case payload[0] == byte(SecurityPanelMode) && ccVersion == 1:
 		switch payload[1] {
 		case 0x03:
-			return securitypanelmode.ParseSecurityPanelModeGet(payload), nil
+			command := securitypanelmode.SecurityPanelModeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return securitypanelmode.ParseSecurityPanelModeReport(payload), nil
+			command := securitypanelmode.SecurityPanelModeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return securitypanelmode.ParseSecurityPanelModeSet(payload), nil
+			command := securitypanelmode.SecurityPanelModeSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return securitypanelmode.ParseSecurityPanelModeSupportedGet(payload), nil
+			command := securitypanelmode.SecurityPanelModeSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return securitypanelmode.ParseSecurityPanelModeSupportedReport(payload), nil
+			command := securitypanelmode.SecurityPanelModeSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Security Panel Mode")
 		}
 
-	case SecurityPanelZoneSensor:
+	case payload[0] == byte(SecurityPanelZoneSensor) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return securitypanelzonesensor.ParseCommandClassSecurityPanelZoneSensorInstalledReport(payload), nil
+			command := securitypanelzonesensor.CommandClassSecurityPanelZoneSensorInstalledReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return securitypanelzonesensor.ParseSecurityPanelZoneSensorTypeGet(payload), nil
+			command := securitypanelzonesensor.SecurityPanelZoneSensorTypeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return securitypanelzonesensor.ParseSecurityPanelZoneSensorTypeReport(payload), nil
+			command := securitypanelzonesensor.SecurityPanelZoneSensorTypeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return securitypanelzonesensor.ParseSecurityPanelZoneSensorInstalledGet(payload), nil
+			command := securitypanelzonesensor.SecurityPanelZoneSensorInstalledGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return securitypanelzonesensor.ParseSecurityPanelZoneSensorStateGet(payload), nil
+			command := securitypanelzonesensor.SecurityPanelZoneSensorStateGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return securitypanelzonesensor.ParseSecurityPanelZoneSensorStateReport(payload), nil
+			command := securitypanelzonesensor.SecurityPanelZoneSensorStateReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Security Panel Zone Sensor")
 		}
 
-	case SecurityPanelZone:
+	case payload[0] == byte(SecurityPanelZone) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return securitypanelzone.ParseSecurityPanelZoneNumberSupportedGet(payload), nil
+			command := securitypanelzone.SecurityPanelZoneNumberSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return securitypanelzone.ParseSecurityPanelZoneStateGet(payload), nil
+			command := securitypanelzone.SecurityPanelZoneStateGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return securitypanelzone.ParseSecurityPanelZoneStateReport(payload), nil
+			command := securitypanelzone.SecurityPanelZoneStateReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return securitypanelzone.ParseSecurityPanelZoneSupportedReport(payload), nil
+			command := securitypanelzone.SecurityPanelZoneSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return securitypanelzone.ParseSecurityPanelZoneTypeGet(payload), nil
+			command := securitypanelzone.SecurityPanelZoneTypeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return securitypanelzone.ParseSecurityPanelZoneTypeReport(payload), nil
+			command := securitypanelzone.SecurityPanelZoneTypeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Security Panel Zone")
 		}
 
-	case Security:
+	case payload[0] == byte(Security) && ccVersion == 1:
 		switch payload[1] {
 		case 0x06:
-			return security.ParseNetworkKeySet(payload), nil
+			command := security.NetworkKeySet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return security.ParseNetworkKeyVerify(payload), nil
+			command := security.NetworkKeyVerify{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return security.ParseSecurityCommandsSupportedGet(payload), nil
+			command := security.SecurityCommandsSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return security.ParseSecurityCommandsSupportedReport(payload), nil
+			command := security.SecurityCommandsSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x81:
-			return security.ParseSecurityMessageEncapsulation(payload), nil
+			command := security.SecurityMessageEncapsulation{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0xC1:
-			return security.ParseSecurityMessageEncapsulationNonceGet(payload), nil
+			command := security.SecurityMessageEncapsulationNonceGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x40:
-			return security.ParseSecurityNonceGet(payload), nil
+			command := security.SecurityNonceGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x80:
-			return security.ParseSecurityNonceReport(payload), nil
+			command := security.SecurityNonceReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return security.ParseSecuritySchemeGet(payload), nil
+			command := security.SecuritySchemeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return security.ParseSecuritySchemeInherit(payload), nil
+			command := security.SecuritySchemeInherit{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return security.ParseSecuritySchemeReport(payload), nil
+			command := security.SecuritySchemeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Security")
 		}
 
-	case SensorAlarm:
+	case payload[0] == byte(SensorAlarm) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return sensoralarm.ParseSensorAlarmGet(payload), nil
+			command := sensoralarm.SensorAlarmGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return sensoralarm.ParseSensorAlarmReport(payload), nil
+			command := sensoralarm.SensorAlarmReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return sensoralarm.ParseSensorAlarmSupportedGet(payload), nil
+			command := sensoralarm.SensorAlarmSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return sensoralarm.ParseSensorAlarmSupportedReport(payload), nil
+			command := sensoralarm.SensorAlarmSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Sensor Alarm")
 		}
 
-	case SensorBinary:
+	case payload[0] == byte(SensorBinary) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return sensorbinary.ParseSensorBinaryGet(payload), nil
+			command := sensorbinary.SensorBinaryGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return sensorbinary.ParseSensorBinaryReport(payload), nil
+			command := sensorbinary.SensorBinaryReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Sensor Binary")
 		}
 
-	case SensorBinaryV2:
+	case payload[0] == byte(SensorBinaryV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x02:
-			return sensorbinaryv2.ParseSensorBinaryGet(payload), nil
+			command := sensorbinaryv2.SensorBinaryGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return sensorbinaryv2.ParseSensorBinaryReport(payload), nil
+			command := sensorbinaryv2.SensorBinaryReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return sensorbinaryv2.ParseSensorBinarySupportedGetSensor(payload), nil
+			command := sensorbinaryv2.SensorBinarySupportedGetSensor{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return sensorbinaryv2.ParseSensorBinarySupportedSensorReport(payload), nil
+			command := sensorbinaryv2.SensorBinarySupportedSensorReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Sensor Binary")
 		}
 
-	case SensorConfiguration:
+	case payload[0] == byte(SensorConfiguration) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return sensorconfiguration.ParseSensorTriggerLevelGet(payload), nil
+			command := sensorconfiguration.SensorTriggerLevelGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return sensorconfiguration.ParseSensorTriggerLevelReport(payload), nil
+			command := sensorconfiguration.SensorTriggerLevelReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return sensorconfiguration.ParseSensorTriggerLevelSet(payload), nil
+			command := sensorconfiguration.SensorTriggerLevelSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Sensor Configuration")
 		}
 
-	case SensorMultilevel:
+	case payload[0] == byte(SensorMultilevel) && ccVersion == 1:
 		switch payload[1] {
 		case 0x04:
-			return sensormultilevel.ParseSensorMultilevelGet(payload), nil
+			command := sensormultilevel.SensorMultilevelGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return sensormultilevel.ParseSensorMultilevelReport(payload), nil
+			command := sensormultilevel.SensorMultilevelReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Sensor Multilevel")
 		}
 
-	case SensorMultilevelV2:
+	case payload[0] == byte(SensorMultilevelV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x04:
-			return sensormultilevelv2.ParseSensorMultilevelGet(payload), nil
+			command := sensormultilevelv2.SensorMultilevelGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return sensormultilevelv2.ParseSensorMultilevelReport(payload), nil
+			command := sensormultilevelv2.SensorMultilevelReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Sensor Multilevel")
 		}
 
-	case SensorMultilevelV3:
+	case payload[0] == byte(SensorMultilevelV3) && ccVersion == 3:
 		switch payload[1] {
 		case 0x04:
-			return sensormultilevelv3.ParseSensorMultilevelGet(payload), nil
+			command := sensormultilevelv3.SensorMultilevelGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return sensormultilevelv3.ParseSensorMultilevelReport(payload), nil
+			command := sensormultilevelv3.SensorMultilevelReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Sensor Multilevel")
 		}
 
-	case SensorMultilevelV4:
+	case payload[0] == byte(SensorMultilevelV4) && ccVersion == 4:
 		switch payload[1] {
 		case 0x04:
-			return sensormultilevelv4.ParseSensorMultilevelGet(payload), nil
+			command := sensormultilevelv4.SensorMultilevelGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return sensormultilevelv4.ParseSensorMultilevelReport(payload), nil
+			command := sensormultilevelv4.SensorMultilevelReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Sensor Multilevel")
 		}
 
-	case SensorMultilevelV5:
+	case payload[0] == byte(SensorMultilevelV5) && ccVersion == 5:
 		switch payload[1] {
 		case 0x04:
-			return sensormultilevelv5.ParseSensorMultilevelGet(payload), nil
+			command := sensormultilevelv5.SensorMultilevelGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return sensormultilevelv5.ParseSensorMultilevelReport(payload), nil
+			command := sensormultilevelv5.SensorMultilevelReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return sensormultilevelv5.ParseSensorMultilevelSupportedGetSensor(payload), nil
+			command := sensormultilevelv5.SensorMultilevelSupportedGetSensor{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return sensormultilevelv5.ParseSensorMultilevelSupportedSensorReport(payload), nil
+			command := sensormultilevelv5.SensorMultilevelSupportedSensorReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return sensormultilevelv5.ParseSensorMultilevelSupportedGetScale(payload), nil
+			command := sensormultilevelv5.SensorMultilevelSupportedGetScale{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return sensormultilevelv5.ParseSensorMultilevelSupportedScaleReport(payload), nil
+			command := sensormultilevelv5.SensorMultilevelSupportedScaleReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Sensor Multilevel")
 		}
 
-	case SensorMultilevelV6:
+	case payload[0] == byte(SensorMultilevelV6) && ccVersion == 6:
 		switch payload[1] {
 		case 0x04:
-			return sensormultilevelv6.ParseSensorMultilevelGet(payload), nil
+			command := sensormultilevelv6.SensorMultilevelGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return sensormultilevelv6.ParseSensorMultilevelReport(payload), nil
+			command := sensormultilevelv6.SensorMultilevelReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return sensormultilevelv6.ParseSensorMultilevelSupportedGetSensor(payload), nil
+			command := sensormultilevelv6.SensorMultilevelSupportedGetSensor{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return sensormultilevelv6.ParseSensorMultilevelSupportedSensorReport(payload), nil
+			command := sensormultilevelv6.SensorMultilevelSupportedSensorReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return sensormultilevelv6.ParseSensorMultilevelSupportedGetScale(payload), nil
+			command := sensormultilevelv6.SensorMultilevelSupportedGetScale{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return sensormultilevelv6.ParseSensorMultilevelSupportedScaleReport(payload), nil
+			command := sensormultilevelv6.SensorMultilevelSupportedScaleReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Sensor Multilevel")
 		}
 
-	case SilenceAlarm:
+	case payload[0] == byte(SilenceAlarm) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return silencealarm.ParseSensorAlarmSet(payload), nil
+			command := silencealarm.SensorAlarmSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Silence Alarm")
 		}
 
-	case SimpleAvControl:
+	case payload[0] == byte(SimpleAvControl) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return simpleavcontrol.ParseSimpleAvControlGet(payload), nil
+			command := simpleavcontrol.SimpleAvControlGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return simpleavcontrol.ParseSimpleAvControlReport(payload), nil
+			command := simpleavcontrol.SimpleAvControlReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return simpleavcontrol.ParseSimpleAvControlSet(payload), nil
+			command := simpleavcontrol.SimpleAvControlSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return simpleavcontrol.ParseSimpleAvControlSupportedGet(payload), nil
+			command := simpleavcontrol.SimpleAvControlSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return simpleavcontrol.ParseSimpleAvControlSupportedReport(payload), nil
+			command := simpleavcontrol.SimpleAvControlSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Simple Av Control")
 		}
 
-	case SwitchAll:
+	case payload[0] == byte(SwitchAll) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return switchall.ParseSwitchAllGet(payload), nil
+			command := switchall.SwitchAllGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return switchall.ParseSwitchAllOff(payload), nil
+			command := switchall.SwitchAllOff{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return switchall.ParseSwitchAllOn(payload), nil
+			command := switchall.SwitchAllOn{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return switchall.ParseSwitchAllReport(payload), nil
+			command := switchall.SwitchAllReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return switchall.ParseSwitchAllSet(payload), nil
+			command := switchall.SwitchAllSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Switch All")
 		}
 
-	case SwitchBinary:
+	case payload[0] == byte(SwitchBinary) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return switchbinary.ParseSwitchBinaryGet(payload), nil
+			command := switchbinary.SwitchBinaryGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return switchbinary.ParseSwitchBinaryReport(payload), nil
+			command := switchbinary.SwitchBinaryReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return switchbinary.ParseSwitchBinarySet(payload), nil
+			command := switchbinary.SwitchBinarySet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Switch Binary")
 		}
 
-	case SwitchMultilevel:
+	case payload[0] == byte(SwitchMultilevel) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return switchmultilevel.ParseSwitchMultilevelGet(payload), nil
+			command := switchmultilevel.SwitchMultilevelGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return switchmultilevel.ParseSwitchMultilevelReport(payload), nil
+			command := switchmultilevel.SwitchMultilevelReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return switchmultilevel.ParseSwitchMultilevelSet(payload), nil
+			command := switchmultilevel.SwitchMultilevelSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return switchmultilevel.ParseSwitchMultilevelStartLevelChange(payload), nil
+			command := switchmultilevel.SwitchMultilevelStartLevelChange{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return switchmultilevel.ParseSwitchMultilevelStopLevelChange(payload), nil
+			command := switchmultilevel.SwitchMultilevelStopLevelChange{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Switch Multilevel")
 		}
 
-	case SwitchMultilevelV2:
+	case payload[0] == byte(SwitchMultilevelV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x02:
-			return switchmultilevelv2.ParseSwitchMultilevelGet(payload), nil
+			command := switchmultilevelv2.SwitchMultilevelGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return switchmultilevelv2.ParseSwitchMultilevelReport(payload), nil
+			command := switchmultilevelv2.SwitchMultilevelReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return switchmultilevelv2.ParseSwitchMultilevelSet(payload), nil
+			command := switchmultilevelv2.SwitchMultilevelSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return switchmultilevelv2.ParseSwitchMultilevelStartLevelChange(payload), nil
+			command := switchmultilevelv2.SwitchMultilevelStartLevelChange{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return switchmultilevelv2.ParseSwitchMultilevelStopLevelChange(payload), nil
+			command := switchmultilevelv2.SwitchMultilevelStopLevelChange{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Switch Multilevel")
 		}
 
-	case SwitchMultilevelV3:
+	case payload[0] == byte(SwitchMultilevelV3) && ccVersion == 3:
 		switch payload[1] {
 		case 0x02:
-			return switchmultilevelv3.ParseSwitchMultilevelGet(payload), nil
+			command := switchmultilevelv3.SwitchMultilevelGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return switchmultilevelv3.ParseSwitchMultilevelReport(payload), nil
+			command := switchmultilevelv3.SwitchMultilevelReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return switchmultilevelv3.ParseSwitchMultilevelSet(payload), nil
+			command := switchmultilevelv3.SwitchMultilevelSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return switchmultilevelv3.ParseSwitchMultilevelStartLevelChange(payload), nil
+			command := switchmultilevelv3.SwitchMultilevelStartLevelChange{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return switchmultilevelv3.ParseSwitchMultilevelStopLevelChange(payload), nil
+			command := switchmultilevelv3.SwitchMultilevelStopLevelChange{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return switchmultilevelv3.ParseSwitchMultilevelSupportedGet(payload), nil
+			command := switchmultilevelv3.SwitchMultilevelSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return switchmultilevelv3.ParseSwitchMultilevelSupportedReport(payload), nil
+			command := switchmultilevelv3.SwitchMultilevelSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Switch Multilevel")
 		}
 
-	case SwitchToggleBinary:
+	case payload[0] == byte(SwitchToggleBinary) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return switchtogglebinary.ParseSwitchToggleBinarySet(payload), nil
+			command := switchtogglebinary.SwitchToggleBinarySet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return switchtogglebinary.ParseSwitchToggleBinaryGet(payload), nil
+			command := switchtogglebinary.SwitchToggleBinaryGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return switchtogglebinary.ParseSwitchToggleBinaryReport(payload), nil
+			command := switchtogglebinary.SwitchToggleBinaryReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Switch Toggle Binary")
 		}
 
-	case SwitchToggleMultilevel:
+	case payload[0] == byte(SwitchToggleMultilevel) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return switchtogglemultilevel.ParseSwitchToggleMultilevelSet(payload), nil
+			command := switchtogglemultilevel.SwitchToggleMultilevelSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return switchtogglemultilevel.ParseSwitchToggleMultilevelGet(payload), nil
+			command := switchtogglemultilevel.SwitchToggleMultilevelGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return switchtogglemultilevel.ParseSwitchToggleMultilevelReport(payload), nil
+			command := switchtogglemultilevel.SwitchToggleMultilevelReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return switchtogglemultilevel.ParseSwitchToggleMultilevelStartLevelChange(payload), nil
+			command := switchtogglemultilevel.SwitchToggleMultilevelStartLevelChange{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return switchtogglemultilevel.ParseSwitchToggleMultilevelStopLevelChange(payload), nil
+			command := switchtogglemultilevel.SwitchToggleMultilevelStopLevelChange{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Switch Toggle Multilevel")
 		}
 
-	case TariffConfig:
+	case payload[0] == byte(TariffConfig) && ccVersion == 1:
 		switch payload[1] {
 		case 0x03:
-			return tariffconfig.ParseTariffTblRemove(payload), nil
+			command := tariffconfig.TariffTblRemove{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return tariffconfig.ParseTariffTblSet(payload), nil
+			command := tariffconfig.TariffTblSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return tariffconfig.ParseTariffTblSupplierSet(payload), nil
+			command := tariffconfig.TariffTblSupplierSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Tariff Config")
 		}
 
-	case TariffTblMonitor:
+	case payload[0] == byte(TariffTblMonitor) && ccVersion == 1:
 		switch payload[1] {
 		case 0x05:
-			return tarifftblmonitor.ParseTariffTblCostGet(payload), nil
+			command := tarifftblmonitor.TariffTblCostGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return tarifftblmonitor.ParseTariffTblCostReport(payload), nil
+			command := tarifftblmonitor.TariffTblCostReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return tarifftblmonitor.ParseTariffTblGet(payload), nil
+			command := tarifftblmonitor.TariffTblGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return tarifftblmonitor.ParseTariffTblReport(payload), nil
+			command := tarifftblmonitor.TariffTblReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return tarifftblmonitor.ParseTariffTblSupplierGet(payload), nil
+			command := tarifftblmonitor.TariffTblSupplierGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return tarifftblmonitor.ParseTariffTblSupplierReport(payload), nil
+			command := tarifftblmonitor.TariffTblSupplierReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Tariff Tbl Monitor")
 		}
 
-	case ThermostatFanMode:
+	case payload[0] == byte(ThermostatFanMode) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return thermostatfanmode.ParseThermostatFanModeGet(payload), nil
+			command := thermostatfanmode.ThermostatFanModeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return thermostatfanmode.ParseThermostatFanModeReport(payload), nil
+			command := thermostatfanmode.ThermostatFanModeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return thermostatfanmode.ParseThermostatFanModeSet(payload), nil
+			command := thermostatfanmode.ThermostatFanModeSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return thermostatfanmode.ParseThermostatFanModeSupportedGet(payload), nil
+			command := thermostatfanmode.ThermostatFanModeSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return thermostatfanmode.ParseThermostatFanModeSupportedReport(payload), nil
+			command := thermostatfanmode.ThermostatFanModeSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Thermostat Fan Mode")
 		}
 
-	case ThermostatFanModeV2:
+	case payload[0] == byte(ThermostatFanModeV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x02:
-			return thermostatfanmodev2.ParseThermostatFanModeGet(payload), nil
+			command := thermostatfanmodev2.ThermostatFanModeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return thermostatfanmodev2.ParseThermostatFanModeReport(payload), nil
+			command := thermostatfanmodev2.ThermostatFanModeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return thermostatfanmodev2.ParseThermostatFanModeSet(payload), nil
+			command := thermostatfanmodev2.ThermostatFanModeSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return thermostatfanmodev2.ParseThermostatFanModeSupportedGet(payload), nil
+			command := thermostatfanmodev2.ThermostatFanModeSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return thermostatfanmodev2.ParseThermostatFanModeSupportedReport(payload), nil
+			command := thermostatfanmodev2.ThermostatFanModeSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Thermostat Fan Mode")
 		}
 
-	case ThermostatFanModeV3:
+	case payload[0] == byte(ThermostatFanModeV3) && ccVersion == 3:
 		switch payload[1] {
 		case 0x02:
-			return thermostatfanmodev3.ParseThermostatFanModeGet(payload), nil
+			command := thermostatfanmodev3.ThermostatFanModeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return thermostatfanmodev3.ParseThermostatFanModeReport(payload), nil
+			command := thermostatfanmodev3.ThermostatFanModeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return thermostatfanmodev3.ParseThermostatFanModeSet(payload), nil
+			command := thermostatfanmodev3.ThermostatFanModeSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return thermostatfanmodev3.ParseThermostatFanModeSupportedGet(payload), nil
+			command := thermostatfanmodev3.ThermostatFanModeSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return thermostatfanmodev3.ParseThermostatFanModeSupportedReport(payload), nil
+			command := thermostatfanmodev3.ThermostatFanModeSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Thermostat Fan Mode")
 		}
 
-	case ThermostatFanModeV4:
+	case payload[0] == byte(ThermostatFanModeV4) && ccVersion == 4:
 		switch payload[1] {
 		case 0x02:
-			return thermostatfanmodev4.ParseThermostatFanModeGet(payload), nil
+			command := thermostatfanmodev4.ThermostatFanModeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return thermostatfanmodev4.ParseThermostatFanModeReport(payload), nil
+			command := thermostatfanmodev4.ThermostatFanModeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return thermostatfanmodev4.ParseThermostatFanModeSet(payload), nil
+			command := thermostatfanmodev4.ThermostatFanModeSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return thermostatfanmodev4.ParseThermostatFanModeSupportedGet(payload), nil
+			command := thermostatfanmodev4.ThermostatFanModeSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return thermostatfanmodev4.ParseThermostatFanModeSupportedReport(payload), nil
+			command := thermostatfanmodev4.ThermostatFanModeSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Thermostat Fan Mode")
 		}
 
-	case ThermostatFanState:
+	case payload[0] == byte(ThermostatFanState) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return thermostatfanstate.ParseThermostatFanStateGet(payload), nil
+			command := thermostatfanstate.ThermostatFanStateGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return thermostatfanstate.ParseThermostatFanStateReport(payload), nil
+			command := thermostatfanstate.ThermostatFanStateReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Thermostat Fan State")
 		}
 
-	case ThermostatHeating:
+	case payload[0] == byte(ThermostatHeating) && ccVersion == 1:
 		switch payload[1] {
 		case 0x0D:
-			return thermostatheating.ParseThermostatHeatingStatusReport(payload), nil
+			command := thermostatheating.ThermostatHeatingStatusReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return thermostatheating.ParseThermostatHeatingModeGet(payload), nil
+			command := thermostatheating.ThermostatHeatingModeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return thermostatheating.ParseThermostatHeatingModeReport(payload), nil
+			command := thermostatheating.ThermostatHeatingModeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return thermostatheating.ParseThermostatHeatingModeSet(payload), nil
+			command := thermostatheating.ThermostatHeatingModeSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x09:
-			return thermostatheating.ParseThermostatHeatingRelayStatusGet(payload), nil
+			command := thermostatheating.ThermostatHeatingRelayStatusGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0A:
-			return thermostatheating.ParseThermostatHeatingRelayStatusReport(payload), nil
+			command := thermostatheating.ThermostatHeatingRelayStatusReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return thermostatheating.ParseThermostatHeatingSetpointGet(payload), nil
+			command := thermostatheating.ThermostatHeatingSetpointGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return thermostatheating.ParseThermostatHeatingSetpointReport(payload), nil
+			command := thermostatheating.ThermostatHeatingSetpointReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return thermostatheating.ParseThermostatHeatingSetpointSet(payload), nil
+			command := thermostatheating.ThermostatHeatingSetpointSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0C:
-			return thermostatheating.ParseThermostatHeatingStatusGet(payload), nil
+			command := thermostatheating.ThermostatHeatingStatusGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0B:
-			return thermostatheating.ParseThermostatHeatingStatusSet(payload), nil
+			command := thermostatheating.ThermostatHeatingStatusSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x11:
-			return thermostatheating.ParseThermostatHeatingTimedOffSet(payload), nil
+			command := thermostatheating.ThermostatHeatingTimedOffSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Thermostat Heating")
 		}
 
-	case ThermostatMode:
+	case payload[0] == byte(ThermostatMode) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return thermostatmode.ParseThermostatModeGet(payload), nil
+			command := thermostatmode.ThermostatModeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return thermostatmode.ParseThermostatModeReport(payload), nil
+			command := thermostatmode.ThermostatModeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return thermostatmode.ParseThermostatModeSet(payload), nil
+			command := thermostatmode.ThermostatModeSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return thermostatmode.ParseThermostatModeSupportedGet(payload), nil
+			command := thermostatmode.ThermostatModeSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return thermostatmode.ParseThermostatModeSupportedReport(payload), nil
+			command := thermostatmode.ThermostatModeSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Thermostat Mode")
 		}
 
-	case ThermostatModeV2:
+	case payload[0] == byte(ThermostatModeV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x02:
-			return thermostatmodev2.ParseThermostatModeGet(payload), nil
+			command := thermostatmodev2.ThermostatModeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return thermostatmodev2.ParseThermostatModeReport(payload), nil
+			command := thermostatmodev2.ThermostatModeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return thermostatmodev2.ParseThermostatModeSet(payload), nil
+			command := thermostatmodev2.ThermostatModeSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return thermostatmodev2.ParseThermostatModeSupportedGet(payload), nil
+			command := thermostatmodev2.ThermostatModeSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return thermostatmodev2.ParseThermostatModeSupportedReport(payload), nil
+			command := thermostatmodev2.ThermostatModeSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Thermostat Mode")
 		}
 
-	case ThermostatModeV3:
+	case payload[0] == byte(ThermostatModeV3) && ccVersion == 3:
 		switch payload[1] {
 		case 0x02:
-			return thermostatmodev3.ParseThermostatModeGet(payload), nil
+			command := thermostatmodev3.ThermostatModeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return thermostatmodev3.ParseThermostatModeReport(payload), nil
+			command := thermostatmodev3.ThermostatModeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return thermostatmodev3.ParseThermostatModeSet(payload), nil
+			command := thermostatmodev3.ThermostatModeSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return thermostatmodev3.ParseThermostatModeSupportedGet(payload), nil
+			command := thermostatmodev3.ThermostatModeSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return thermostatmodev3.ParseThermostatModeSupportedReport(payload), nil
+			command := thermostatmodev3.ThermostatModeSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Thermostat Mode")
 		}
 
-	case ThermostatOperatingState:
+	case payload[0] == byte(ThermostatOperatingState) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return thermostatoperatingstate.ParseThermostatOperatingStateGet(payload), nil
+			command := thermostatoperatingstate.ThermostatOperatingStateGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return thermostatoperatingstate.ParseThermostatOperatingStateReport(payload), nil
+			command := thermostatoperatingstate.ThermostatOperatingStateReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Thermostat Operating State")
 		}
 
-	case ThermostatOperatingStateV2:
+	case payload[0] == byte(ThermostatOperatingStateV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x02:
-			return thermostatoperatingstatev2.ParseThermostatOperatingStateGet(payload), nil
+			command := thermostatoperatingstatev2.ThermostatOperatingStateGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return thermostatoperatingstatev2.ParseThermostatOperatingStateReport(payload), nil
+			command := thermostatoperatingstatev2.ThermostatOperatingStateReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return thermostatoperatingstatev2.ParseThermostatOperatingStateLoggingSupportedGet(payload), nil
+			command := thermostatoperatingstatev2.ThermostatOperatingStateLoggingSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return thermostatoperatingstatev2.ParseThermostatOperatingLoggingSupportedReport(payload), nil
+			command := thermostatoperatingstatev2.ThermostatOperatingLoggingSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return thermostatoperatingstatev2.ParseThermostatOperatingStateLoggingGet(payload), nil
+			command := thermostatoperatingstatev2.ThermostatOperatingStateLoggingGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return thermostatoperatingstatev2.ParseThermostatOperatingStateLoggingReport(payload), nil
+			command := thermostatoperatingstatev2.ThermostatOperatingStateLoggingReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Thermostat Operating State")
 		}
 
-	case ThermostatSetback:
+	case payload[0] == byte(ThermostatSetback) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return thermostatsetback.ParseThermostatSetbackGet(payload), nil
+			command := thermostatsetback.ThermostatSetbackGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return thermostatsetback.ParseThermostatSetbackReport(payload), nil
+			command := thermostatsetback.ThermostatSetbackReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return thermostatsetback.ParseThermostatSetbackSet(payload), nil
+			command := thermostatsetback.ThermostatSetbackSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Thermostat Setback")
 		}
 
-	case ThermostatSetpoint:
+	case payload[0] == byte(ThermostatSetpoint) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return thermostatsetpoint.ParseThermostatSetpointGet(payload), nil
+			command := thermostatsetpoint.ThermostatSetpointGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return thermostatsetpoint.ParseThermostatSetpointReport(payload), nil
+			command := thermostatsetpoint.ThermostatSetpointReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return thermostatsetpoint.ParseThermostatSetpointSet(payload), nil
+			command := thermostatsetpoint.ThermostatSetpointSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return thermostatsetpoint.ParseThermostatSetpointSupportedGet(payload), nil
+			command := thermostatsetpoint.ThermostatSetpointSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return thermostatsetpoint.ParseThermostatSetpointSupportedReport(payload), nil
+			command := thermostatsetpoint.ThermostatSetpointSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Thermostat Setpoint")
 		}
 
-	case ThermostatSetpointV2:
+	case payload[0] == byte(ThermostatSetpointV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x02:
-			return thermostatsetpointv2.ParseThermostatSetpointGet(payload), nil
+			command := thermostatsetpointv2.ThermostatSetpointGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return thermostatsetpointv2.ParseThermostatSetpointReport(payload), nil
+			command := thermostatsetpointv2.ThermostatSetpointReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return thermostatsetpointv2.ParseThermostatSetpointSet(payload), nil
+			command := thermostatsetpointv2.ThermostatSetpointSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return thermostatsetpointv2.ParseThermostatSetpointSupportedGet(payload), nil
+			command := thermostatsetpointv2.ThermostatSetpointSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return thermostatsetpointv2.ParseThermostatSetpointSupportedReport(payload), nil
+			command := thermostatsetpointv2.ThermostatSetpointSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Thermostat Setpoint")
 		}
 
-	case ThermostatSetpointV3:
+	case payload[0] == byte(ThermostatSetpointV3) && ccVersion == 3:
 		switch payload[1] {
 		case 0x02:
-			return thermostatsetpointv3.ParseThermostatSetpointGet(payload), nil
+			command := thermostatsetpointv3.ThermostatSetpointGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return thermostatsetpointv3.ParseThermostatSetpointReport(payload), nil
+			command := thermostatsetpointv3.ThermostatSetpointReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return thermostatsetpointv3.ParseThermostatSetpointSet(payload), nil
+			command := thermostatsetpointv3.ThermostatSetpointSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return thermostatsetpointv3.ParseThermostatSetpointSupportedGet(payload), nil
+			command := thermostatsetpointv3.ThermostatSetpointSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return thermostatsetpointv3.ParseThermostatSetpointSupportedReport(payload), nil
+			command := thermostatsetpointv3.ThermostatSetpointSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x09:
-			return thermostatsetpointv3.ParseThermostatSetpointCapabilitiesGet(payload), nil
+			command := thermostatsetpointv3.ThermostatSetpointCapabilitiesGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0A:
-			return thermostatsetpointv3.ParseThermostatSetpointCapabilitiesReport(payload), nil
+			command := thermostatsetpointv3.ThermostatSetpointCapabilitiesReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Thermostat Setpoint")
 		}
 
-	case TimeParameters:
+	case payload[0] == byte(TimeParameters) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return timeparameters.ParseTimeParametersGet(payload), nil
+			command := timeparameters.TimeParametersGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return timeparameters.ParseTimeParametersReport(payload), nil
+			command := timeparameters.TimeParametersReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return timeparameters.ParseTimeParametersSet(payload), nil
+			command := timeparameters.TimeParametersSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Time Parameters")
 		}
 
-	case Time:
+	case payload[0] == byte(Time) && ccVersion == 1:
 		switch payload[1] {
 		case 0x03:
-			return time.ParseDateGet(payload), nil
+			command := time.DateGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return time.ParseDateReport(payload), nil
+			command := time.DateReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return time.ParseTimeGet(payload), nil
+			command := time.TimeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return time.ParseTimeReport(payload), nil
+			command := time.TimeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Time")
 		}
 
-	case TimeV2:
+	case payload[0] == byte(TimeV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x03:
-			return timev2.ParseDateGet(payload), nil
+			command := timev2.DateGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return timev2.ParseDateReport(payload), nil
+			command := timev2.DateReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return timev2.ParseTimeGet(payload), nil
+			command := timev2.TimeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return timev2.ParseTimeOffsetGet(payload), nil
+			command := timev2.TimeOffsetGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return timev2.ParseTimeOffsetReport(payload), nil
+			command := timev2.TimeOffsetReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return timev2.ParseTimeOffsetSet(payload), nil
+			command := timev2.TimeOffsetSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return timev2.ParseTimeReport(payload), nil
+			command := timev2.TimeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Time")
 		}
 
-	case UserCode:
+	case payload[0] == byte(UserCode) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return usercode.ParseUserCodeGet(payload), nil
+			command := usercode.UserCodeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return usercode.ParseUserCodeReport(payload), nil
+			command := usercode.UserCodeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return usercode.ParseUserCodeSet(payload), nil
+			command := usercode.UserCodeSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return usercode.ParseUsersNumberGet(payload), nil
+			command := usercode.UsersNumberGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return usercode.ParseUsersNumberReport(payload), nil
+			command := usercode.UsersNumberReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class User Code")
 		}
 
-	case Version:
+	case payload[0] == byte(Version) && ccVersion == 1:
 		switch payload[1] {
 		case 0x13:
-			return version.ParseVersionCommandClassGet(payload), nil
+			command := version.VersionCommandClassGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x14:
-			return version.ParseVersionCommandClassReport(payload), nil
+			command := version.VersionCommandClassReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x11:
-			return version.ParseVersionGet(payload), nil
+			command := version.VersionGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x12:
-			return version.ParseVersionReport(payload), nil
+			command := version.VersionReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Version")
 		}
 
-	case VersionV2:
+	case payload[0] == byte(VersionV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x13:
-			return versionv2.ParseVersionCommandClassGet(payload), nil
+			command := versionv2.VersionCommandClassGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x14:
-			return versionv2.ParseVersionCommandClassReport(payload), nil
+			command := versionv2.VersionCommandClassReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x11:
-			return versionv2.ParseVersionGet(payload), nil
+			command := versionv2.VersionGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x12:
-			return versionv2.ParseVersionReport(payload), nil
+			command := versionv2.VersionReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Version")
 		}
 
-	case WakeUp:
+	case payload[0] == byte(WakeUp) && ccVersion == 1:
 		switch payload[1] {
 		case 0x05:
-			return wakeup.ParseWakeUpIntervalGet(payload), nil
+			command := wakeup.WakeUpIntervalGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return wakeup.ParseWakeUpIntervalReport(payload), nil
+			command := wakeup.WakeUpIntervalReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return wakeup.ParseWakeUpIntervalSet(payload), nil
+			command := wakeup.WakeUpIntervalSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return wakeup.ParseWakeUpNoMoreInformation(payload), nil
+			command := wakeup.WakeUpNoMoreInformation{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return wakeup.ParseWakeUpNotification(payload), nil
+			command := wakeup.WakeUpNotification{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Wake Up")
 		}
 
-	case WakeUpV2:
+	case payload[0] == byte(WakeUpV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x09:
-			return wakeupv2.ParseWakeUpIntervalCapabilitiesGet(payload), nil
+			command := wakeupv2.WakeUpIntervalCapabilitiesGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x0A:
-			return wakeupv2.ParseWakeUpIntervalCapabilitiesReport(payload), nil
+			command := wakeupv2.WakeUpIntervalCapabilitiesReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return wakeupv2.ParseWakeUpIntervalGet(payload), nil
+			command := wakeupv2.WakeUpIntervalGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return wakeupv2.ParseWakeUpIntervalReport(payload), nil
+			command := wakeupv2.WakeUpIntervalReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return wakeupv2.ParseWakeUpIntervalSet(payload), nil
+			command := wakeupv2.WakeUpIntervalSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return wakeupv2.ParseWakeUpNoMoreInformation(payload), nil
+			command := wakeupv2.WakeUpNoMoreInformation{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return wakeupv2.ParseWakeUpNotification(payload), nil
+			command := wakeupv2.WakeUpNotification{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Wake Up")
 		}
 
-	case ZensorNet:
+	case payload[0] == byte(ZensorNet) && ccVersion == 1:
 		switch payload[1] {
 		case 0x02:
-			return zensornet.ParseBindAccept(payload), nil
+			command := zensornet.BindAccept{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return zensornet.ParseBindComplete(payload), nil
+			command := zensornet.BindComplete{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x01:
-			return zensornet.ParseBindRequest(payload), nil
+			command := zensornet.BindRequest{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Zensor Net")
 		}
 
-	case ApplicationCapability:
+	case payload[0] == byte(ApplicationCapability) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return applicationcapability.ParseCommandCommandClassNotSupported(payload), nil
+			command := applicationcapability.CommandCommandClassNotSupported{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Application Capability")
 		}
 
-	case ColorControl:
+	case payload[0] == byte(ColorControl) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return colorcontrol.ParseCapabilityGet(payload), nil
+			command := colorcontrol.CapabilityGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return colorcontrol.ParseCapabilityReport(payload), nil
+			command := colorcontrol.CapabilityReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return colorcontrol.ParseStateGet(payload), nil
+			command := colorcontrol.StateGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return colorcontrol.ParseStateReport(payload), nil
+			command := colorcontrol.StateReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return colorcontrol.ParseStateSet(payload), nil
+			command := colorcontrol.StateSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return colorcontrol.ParseStartCapabilityLevelChange(payload), nil
+			command := colorcontrol.StartCapabilityLevelChange{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return colorcontrol.ParseStopStateChange(payload), nil
+			command := colorcontrol.StopStateChange{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Color Control")
 		}
 
-	case ColorControlV2:
+	case payload[0] == byte(ColorControlV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x01:
-			return colorcontrolv2.ParseCapabilityGet(payload), nil
+			command := colorcontrolv2.CapabilityGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return colorcontrolv2.ParseCapabilityReport(payload), nil
+			command := colorcontrolv2.CapabilityReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return colorcontrolv2.ParseStateGet(payload), nil
+			command := colorcontrolv2.StateGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return colorcontrolv2.ParseStateReport(payload), nil
+			command := colorcontrolv2.StateReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return colorcontrolv2.ParseStateSet(payload), nil
+			command := colorcontrolv2.StateSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return colorcontrolv2.ParseStartCapabilityLevelChange(payload), nil
+			command := colorcontrolv2.StartCapabilityLevelChange{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return colorcontrolv2.ParseStopStateChange(payload), nil
+			command := colorcontrolv2.StopStateChange{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Color Control")
 		}
 
-	case Schedule:
+	case payload[0] == byte(Schedule) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return schedule.ParseScheduleSupportedGet(payload), nil
+			command := schedule.ScheduleSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return schedule.ParseScheduleSupportedReport(payload), nil
+			command := schedule.ScheduleSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return schedule.ParseCommandScheduleSet(payload), nil
+			command := schedule.CommandScheduleSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return schedule.ParseCommandScheduleGet(payload), nil
+			command := schedule.CommandScheduleGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return schedule.ParseCommandScheduleReport(payload), nil
+			command := schedule.CommandScheduleReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return schedule.ParseScheduleRemove(payload), nil
+			command := schedule.ScheduleRemove{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return schedule.ParseScheduleStateSet(payload), nil
+			command := schedule.ScheduleStateSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return schedule.ParseScheduleStateGet(payload), nil
+			command := schedule.ScheduleStateGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x09:
-			return schedule.ParseScheduleStateReport(payload), nil
+			command := schedule.ScheduleStateReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Schedule")
 		}
 
-	case NetworkManagementPrimary:
+	case payload[0] == byte(NetworkManagementPrimary) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return networkmanagementprimary.ParseControllerChange(payload), nil
+			command := networkmanagementprimary.ControllerChange{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return networkmanagementprimary.ParseControllerChangeStatus(payload), nil
+			command := networkmanagementprimary.ControllerChangeStatus{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Network Management Primary")
 		}
 
-	case AssociationGrpInfo:
+	case payload[0] == byte(AssociationGrpInfo) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return associationgrpinfo.ParseAssociationGroupNameGet(payload), nil
+			command := associationgrpinfo.AssociationGroupNameGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return associationgrpinfo.ParseAssociationGroupNameReport(payload), nil
+			command := associationgrpinfo.AssociationGroupNameReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return associationgrpinfo.ParseAssociationGroupInfoGet(payload), nil
+			command := associationgrpinfo.AssociationGroupInfoGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return associationgrpinfo.ParseAssociationGroupInfoReport(payload), nil
+			command := associationgrpinfo.AssociationGroupInfoReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return associationgrpinfo.ParseAssociationGroupCommandListGet(payload), nil
+			command := associationgrpinfo.AssociationGroupCommandListGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return associationgrpinfo.ParseAssociationGroupCommandListReport(payload), nil
+			command := associationgrpinfo.AssociationGroupCommandListReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Association Group Info")
 		}
 
-	case DeviceResetLocally:
+	case payload[0] == byte(DeviceResetLocally) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return deviceresetlocally.ParseDeviceResetLocallyNotification(payload), nil
+			command := deviceresetlocally.DeviceResetLocallyNotification{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Device Reset Locally")
 		}
 
-	case CentralScene:
+	case payload[0] == byte(CentralScene) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return centralscene.ParseCentralSceneSupportedGet(payload), nil
+			command := centralscene.CentralSceneSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return centralscene.ParseCentralSceneSupportedReport(payload), nil
+			command := centralscene.CentralSceneSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return centralscene.ParseCentralSceneNotification(payload), nil
+			command := centralscene.CentralSceneNotification{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Central Scene")
 		}
 
-	case Antitheft:
+	case payload[0] == byte(Antitheft) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return antitheft.ParseAntitheftSet(payload), nil
+			command := antitheft.AntitheftSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return antitheft.ParseAntitheftGet(payload), nil
+			command := antitheft.AntitheftGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return antitheft.ParseAntitheftReport(payload), nil
+			command := antitheft.AntitheftReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Anti-theft")
 		}
 
-	case AntitheftV2:
+	case payload[0] == byte(AntitheftV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x01:
-			return antitheftv2.ParseAntitheftSet(payload), nil
+			command := antitheftv2.AntitheftSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return antitheftv2.ParseAntitheftGet(payload), nil
+			command := antitheftv2.AntitheftGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return antitheftv2.ParseAntitheftReport(payload), nil
+			command := antitheftv2.AntitheftReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Anti-theft")
 		}
 
-	case ZwaveplusInfo:
+	case payload[0] == byte(ZwaveplusInfo) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return zwaveplusinfo.ParseZwaveplusInfoGet(payload), nil
+			command := zwaveplusinfo.ZwaveplusInfoGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return zwaveplusinfo.ParseZwaveplusInfoReport(payload), nil
+			command := zwaveplusinfo.ZwaveplusInfoReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Z-Wave+ Info")
 		}
 
-	case ZwaveplusInfoV2:
+	case payload[0] == byte(ZwaveplusInfoV2) && ccVersion == 2:
 		switch payload[1] {
 		case 0x01:
-			return zwaveplusinfov2.ParseZwaveplusInfoGet(payload), nil
+			command := zwaveplusinfov2.ZwaveplusInfoGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return zwaveplusinfov2.ParseZwaveplusInfoReport(payload), nil
+			command := zwaveplusinfov2.ZwaveplusInfoReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Z-Wave+ Info")
 		}
 
-	case Appliance:
+	case payload[0] == byte(Appliance) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return appliance.ParseApplianceTypeGet(payload), nil
+			command := appliance.ApplianceTypeGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return appliance.ParseApplianceTypeReport(payload), nil
+			command := appliance.ApplianceTypeReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return appliance.ParseApplianceProgramSupportedGet(payload), nil
+			command := appliance.ApplianceProgramSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return appliance.ParseApplianceProgramSupportedReport(payload), nil
+			command := appliance.ApplianceProgramSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return appliance.ParseApplianceSet(payload), nil
+			command := appliance.ApplianceSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return appliance.ParseApplianceGet(payload), nil
+			command := appliance.ApplianceGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return appliance.ParseApplianceReport(payload), nil
+			command := appliance.ApplianceReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Appliance")
 		}
 
-	case Dmx:
+	case payload[0] == byte(Dmx) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return dmx.ParseDmxAddressSet(payload), nil
+			command := dmx.DmxAddressSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return dmx.ParseDmxAddressGet(payload), nil
+			command := dmx.DmxAddressGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return dmx.ParseDmxAddressReport(payload), nil
+			command := dmx.DmxAddressReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return dmx.ParseDmxCapabilityGet(payload), nil
+			command := dmx.DmxCapabilityGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return dmx.ParseDmxCapabilityReport(payload), nil
+			command := dmx.DmxCapabilityReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return dmx.ParseDmxData40(payload), nil
+			command := dmx.DmxData40{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class DMX")
 		}
 
-	case BarrierOperator:
+	case payload[0] == byte(BarrierOperator) && ccVersion == 1:
 		switch payload[1] {
 		case 0x01:
-			return barrieroperator.ParseBarrierOperatorSet(payload), nil
+			command := barrieroperator.BarrierOperatorSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x02:
-			return barrieroperator.ParseBarrierOperatorGet(payload), nil
+			command := barrieroperator.BarrierOperatorGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x03:
-			return barrieroperator.ParseBarrierOperatorReport(payload), nil
+			command := barrieroperator.BarrierOperatorReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x04:
-			return barrieroperator.ParseBarrierOperatorSignalSupportedGet(payload), nil
+			command := barrieroperator.BarrierOperatorSignalSupportedGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x05:
-			return barrieroperator.ParseBarrierOperatorSignalSupportedReport(payload), nil
+			command := barrieroperator.BarrierOperatorSignalSupportedReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x06:
-			return barrieroperator.ParseBarrierOperatorSignalSet(payload), nil
+			command := barrieroperator.BarrierOperatorSignalSet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x07:
-			return barrieroperator.ParseBarrierOperatorSignalGet(payload), nil
+			command := barrieroperator.BarrierOperatorSignalGet{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		case 0x08:
-			return barrieroperator.ParseBarrierOperatorSignalReport(payload), nil
+			command := barrieroperator.BarrierOperatorSignalReport{}
+			if err := command.UnmarshalBinary(payload[2:]); err != nil {
+				return nil, err
+			}
+			return command, nil
 		default:
 			return nil, errors.New("Unknown command in command class Command Class Barrier Operator")
 		}

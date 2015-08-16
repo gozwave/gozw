@@ -3,10 +3,16 @@
 
 package versionv2
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(VersionReport{})
+}
 
 // <no value>
-
 type VersionReport struct {
 	ZWaveLibraryType byte
 
@@ -23,7 +29,10 @@ type VersionReport struct {
 	NumberOfFirmwareTargets byte
 }
 
-func (cmd *VersionReport) UnmarshalBinary(payload []byte) error {
+func (cmd *VersionReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

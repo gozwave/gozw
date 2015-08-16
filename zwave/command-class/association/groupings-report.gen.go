@@ -3,15 +3,24 @@
 
 package association
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(AssociationGroupingsReport{})
+}
 
 // <no value>
-
 type AssociationGroupingsReport struct {
 	SupportedGroupings byte
 }
 
-func (cmd *AssociationGroupingsReport) UnmarshalBinary(payload []byte) error {
+func (cmd *AssociationGroupingsReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

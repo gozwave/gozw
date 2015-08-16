@@ -3,10 +3,16 @@
 
 package security
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(SecurityMessageEncapsulationNonceGet{})
+}
 
 // <no value>
-
 type SecurityMessageEncapsulationNonceGet struct {
 	InitializationVectorByte []byte
 
@@ -29,7 +35,10 @@ type SecurityMessageEncapsulationNonceGet struct {
 	MessageAuthenticationCodeByte []byte
 }
 
-func (cmd *SecurityMessageEncapsulationNonceGet) UnmarshalBinary(payload []byte) error {
+func (cmd *SecurityMessageEncapsulationNonceGet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

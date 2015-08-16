@@ -5,16 +5,23 @@ package colorcontrol
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(CapabilityReport{})
+}
 
+// <no value>
 type CapabilityReport struct {
 	CapabilityMask uint16
 }
 
-func (cmd *CapabilityReport) UnmarshalBinary(payload []byte) error {
+func (cmd *CapabilityReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

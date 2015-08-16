@@ -5,11 +5,15 @@ package protectionv2
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(ProtectionSupportedReport{})
+}
 
+// <no value>
 type ProtectionSupportedReport struct {
 	Level struct {
 		Timeout bool
@@ -22,7 +26,10 @@ type ProtectionSupportedReport struct {
 	RfProtectionState uint16
 }
 
-func (cmd *ProtectionSupportedReport) UnmarshalBinary(payload []byte) error {
+func (cmd *ProtectionSupportedReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

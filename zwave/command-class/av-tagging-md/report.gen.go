@@ -3,12 +3,20 @@
 
 package avtaggingmd
 
-// <no value>
+import "encoding/gob"
 
+func init() {
+	gob.Register(AvTaggingMdReport{})
+}
+
+// <no value>
 type AvTaggingMdReport struct {
 }
 
-func (cmd *AvTaggingMdReport) UnmarshalBinary(payload []byte) error {
+func (cmd *AvTaggingMdReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 
 	return nil
 }

@@ -3,15 +3,24 @@
 
 package scheduleentrylockv2
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ScheduleEntryLockEnableAllSet{})
+}
 
 // <no value>
-
 type ScheduleEntryLockEnableAllSet struct {
 	Enabled byte
 }
 
-func (cmd *ScheduleEntryLockEnableAllSet) UnmarshalBinary(payload []byte) error {
+func (cmd *ScheduleEntryLockEnableAllSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

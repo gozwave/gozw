@@ -3,10 +3,16 @@
 
 package nodenaming
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(NodeNamingNodeLocationSet{})
+}
 
 // <no value>
-
 type NodeNamingNodeLocationSet struct {
 	Level struct {
 		CharPresentation byte
@@ -15,7 +21,10 @@ type NodeNamingNodeLocationSet struct {
 	NodeLocationChar string
 }
 
-func (cmd *NodeNamingNodeLocationSet) UnmarshalBinary(payload []byte) error {
+func (cmd *NodeNamingNodeLocationSet) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

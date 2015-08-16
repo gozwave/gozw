@@ -3,10 +3,16 @@
 
 package securitypanelzonesensor
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(SecurityPanelZoneSensorStateReport{})
+}
 
 // <no value>
-
 type SecurityPanelZoneSensorStateReport struct {
 	ZoneNumber byte
 
@@ -19,7 +25,10 @@ type SecurityPanelZoneSensorStateReport struct {
 	EventParameters byte
 }
 
-func (cmd *SecurityPanelZoneSensorStateReport) UnmarshalBinary(payload []byte) error {
+func (cmd *SecurityPanelZoneSensorStateReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

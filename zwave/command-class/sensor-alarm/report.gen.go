@@ -5,11 +5,15 @@ package sensoralarm
 
 import (
 	"encoding/binary"
+	"encoding/gob"
 	"errors"
 )
 
-// <no value>
+func init() {
+	gob.Register(SensorAlarmReport{})
+}
 
+// <no value>
 type SensorAlarmReport struct {
 	SourceNodeId byte
 
@@ -20,7 +24,10 @@ type SensorAlarmReport struct {
 	Seconds uint16
 }
 
-func (cmd *SensorAlarmReport) UnmarshalBinary(payload []byte) error {
+func (cmd *SensorAlarmReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {

@@ -3,10 +3,16 @@
 
 package clock
 
-import "errors"
+import (
+	"encoding/gob"
+	"errors"
+)
+
+func init() {
+	gob.Register(ClockReport{})
+}
 
 // <no value>
-
 type ClockReport struct {
 	Level struct {
 		Hour byte
@@ -17,7 +23,10 @@ type ClockReport struct {
 	Minute byte
 }
 
-func (cmd *ClockReport) UnmarshalBinary(payload []byte) error {
+func (cmd *ClockReport) UnmarshalBinary(data []byte) error {
+	// According to the docs, we must copy data if we wish to retain it after returning
+	payload := make([]byte, len(data))
+	copy(payload, data)
 	i := 0
 
 	if len(payload) <= i {
