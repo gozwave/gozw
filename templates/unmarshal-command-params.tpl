@@ -1,4 +1,4 @@
-{{with .}}i := 2{{end}}
+{{with .}}i := 0{{end}}
 {{range $_, $param := .}}
   if len(payload) <= i {
     return errors.New("slice index out of bounds")
