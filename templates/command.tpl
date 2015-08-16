@@ -12,10 +12,8 @@ type {{$typeName}} struct {
   {{end}}
 }
 
-func Parse{{$typeName}}(payload []byte) {{$typeName}} {
-  val := {{$typeName}}{}
-
+func (cmd *{{$typeName}}) UnmarshalBinary(payload []byte) error {
   {{template "commandParseParams.tpl" .Command.Params}}
 
-  return val
+  return nil
 }
