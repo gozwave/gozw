@@ -13,26 +13,26 @@ const (
 func (c CommandClassID) String() string {
   switch c {
     {{range .CommandClasses}}
+    {{if eq .Version 1}}
     case {{.GetConstName}}:
       return "{{.Help}}"
+    {{end}}
     {{end}}
     default:
       return fmt.Sprintf("Unknown (0x%X)", byte(c))
   }
 }
 
-func Parse(payload []byte) (interface{}, error) {
-  switch CommandClassID(payload[0]) {
+func Parse(ccVersion uint8, payload []byte) (interface{}, error) {
+  switch {
     {{range $_, $cc := .CommandClasses}}{{if .CanGen}}{{$version := .Version}}
-    case {{.GetConstName}}:
+    case payload[0] == byte({{.GetConstName}}) && ccVersion == {{$version}}:
       switch payload[1] {
         {{range .Commands}}case {{.Key}}:
           command := {{$cc.GetPackageName}}.{{(ToGoName .Name)}}{}
-          err := command.UnmarshalBinary(payload[2:])
-          if err != nil {
+          if err := command.UnmarshalBinary(payload[2:]); err != nil {
             return nil, err
           }
-
           return command, nil
         {{end}}default:
           return nil, errors.New("Unknown command in command class {{.Help}}")
