@@ -3,14 +3,14 @@
 
 package commandclass
 
-type CommandClassID byte
+type ID byte
 
 const (
   {{range .CommandClasses}}
-  {{.GetConstName}} CommandClassID = {{.Key}}{{end}}
+  {{.GetConstName}} ID = {{.Key}}{{end}}
 )
 
-func (c CommandClassID) String() string {
+func (c ID) String() string {
   switch c {
     {{range .CommandClasses}}
     {{if eq .Version 1}}
