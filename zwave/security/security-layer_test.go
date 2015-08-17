@@ -50,7 +50,7 @@ func TestSecurityLayerGetExternalNonce(t *testing.T) {
 	receivedNonce := []byte{0x98, 0xe4, 0x1b, 0x30, 0x84, 0x33, 0xf4, 0x3f}
 
 	securityLayer.ReceiveNonce(1, &commandclass.SecurityNonceReport{
-		CommandClass: commandclass.CommandClassSecurity,
+		CommandClass: byte(commandclass.Security),
 		Command:      commandclass.CommandSecurityNonceReport,
 		Nonce:        receivedNonce,
 	})
@@ -78,7 +78,7 @@ func TestSecurityLayerWaitForExternalNonce(t *testing.T) {
 	time.Sleep(time.Millisecond * 50)
 
 	securityLayer.ReceiveNonce(1, &commandclass.SecurityNonceReport{
-		CommandClass: commandclass.CommandClassSecurity,
+		CommandClass: byte(commandclass.Security),
 		Command:      commandclass.CommandSecurityNonceReport,
 		Nonce:        receivedNonce,
 	})
