@@ -1,27 +1,64 @@
 package main
 
-import "github.com/helioslabs/ccgen/ccgen"
+import (
+	"errors"
+	"fmt"
+	"os"
+
+	"github.com/codegangsta/cli"
+	"github.com/helioslabs/zwgen/zwgen"
+)
 
 func main() {
 
-	gen, err := ccgen.NewGenerator()
-	if err != nil {
-		panic(err)
+	app := cli.NewApp()
+	app.Name = "zwgen"
+	app.Usage = "Generate code for the Z-Wave protocol"
+
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:  "output, o",
+			Usage: "Output directory",
+		},
 	}
 
-	err = gen.GenDevices()
-	if err != nil {
-		panic(err)
+	app.Before = func(c *cli.Context) error {
+		outDir := c.GlobalString("output")
+		if outDir == "" {
+			return errors.New("Must specify output directory")
+		}
+
+		return nil
 	}
 
-	err = gen.GenCommandClasses()
-	if err != nil {
-		panic(err)
+	app.Action = func(ctx *cli.Context) {
+		gen, err := zwgen.NewGenerator(ctx.GlobalString("output"))
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		err = gen.GenDevices()
+		if err != nil {
+			panic(err)
+		}
+
+		err = gen.GenCommandClasses()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		err = gen.GenParser()
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	err = gen.GenParser()
+	err := app.Run(os.Args)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 }

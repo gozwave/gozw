@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go/format"
 	"os"
+	"path"
 	"strings"
 	"text/template"
 
@@ -58,7 +59,7 @@ func (g *Generator) GenDevices() error {
 		return err
 	}
 
-	filename := "zwave/command-class/devices.gen.go"
+	filename := path.Join(g.outputDir, "devices.gen.go")
 	fp, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -89,7 +90,7 @@ func (g *Generator) GenParser() error {
 		return err
 	}
 
-	filename := "zwave/command-class/command-classes.gen.go"
+	filename := path.Join(g.outputDir, "command-classes.gen.go")
 	fp, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -121,7 +122,7 @@ func (g *Generator) GenCommandClasses() error {
 			continue
 		}
 
-		dirName := "zwave/command-class/" + cc.GetDirName()
+		dirName := path.Join(g.outputDir, cc.GetDirName())
 		err := os.Mkdir(dirName, 0775)
 		if err != nil && !strings.HasSuffix(err.Error(), "file exists") {
 			return err
@@ -158,7 +159,7 @@ func (g *Generator) generateCommand(dirName string, cc CommandClass, cmd Command
 		return err
 	}
 
-	filename := dirName + "/" + cmd.GetFileName(cc) + ".gen.go"
+	filename := path.Join(dirName, cmd.GetFileName(cc)+".gen.go")
 	fp, err := os.Create(filename)
 	if err != nil {
 		return err
