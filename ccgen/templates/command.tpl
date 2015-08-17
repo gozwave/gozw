@@ -13,7 +13,7 @@ func init() {
 // {{.Help}}
 type {{$typeName}} struct {
   {{range $_, $param := .Command.Params}}
-    {{template "command-struct-fields.tpl" $param}}
+    {{template "command-struct-fields" $param}}
   {{end}}
 }
 
@@ -21,12 +21,12 @@ func (cmd *{{$typeName}}) UnmarshalBinary(data []byte) error {
   // According to the docs, we must copy data if we wish to retain it after returning
   payload := make([]byte, len(data))
   copy(payload, data)
-  {{template "unmarshal-command-params.tpl" .Command.Params}}
+  {{template "unmarshal-command-params" .Command.Params}}
 
   return nil
 }
 
 func (cmd *{{$typeName}}) MarshalBinary() (payload []byte, err error) {
-  {{template "marshal-command-params.tpl" .Command.Params}}
+  {{template "marshal-command-params" .Command.Params}}
   return
 }

@@ -12,6 +12,8 @@ import (
 	"golang.org/x/tools/imports"
 )
 
+//go:generate go-bindata -pkg=ccgen templates/... data/...
+
 type Generator struct {
 	zwClasses *ZwClasses
 	tpl       *template.Template
@@ -20,16 +22,14 @@ type Generator struct {
 func NewGenerator() (*Generator, error) {
 	gen := &Generator{}
 
-	if err := gen.initTemplates(); err != nil {
-		return nil, err
-	}
+	gen.initTemplates()
 
-	fp, err := os.Open("ccgen/zwave-defs.xml")
+	zwData, err := Asset("data/zwave-defs.xml")
 	if err != nil {
 		return nil, err
 	}
 
-	decoder := xml.NewDecoder(fp)
+	decoder := xml.NewDecoder(bytes.NewBuffer(zwData))
 
 	zw := ZwClasses{}
 	err = decoder.Decode(&zw)
@@ -49,7 +49,8 @@ func NewGenerator() (*Generator, error) {
 
 func (g *Generator) GenDevices() error {
 	buf := bytes.NewBuffer([]byte{})
-	err := g.tpl.ExecuteTemplate(buf, "devices.tpl", g.zwClasses)
+
+	err := g.tpl.ExecuteTemplate(buf, "devices", g.zwClasses)
 	if err != nil {
 		return err
 	}
@@ -79,7 +80,8 @@ func (g *Generator) GenDevices() error {
 
 func (g *Generator) GenParser() error {
 	buf := bytes.NewBuffer([]byte{})
-	err := g.tpl.ExecuteTemplate(buf, "command-classes.tpl", g.zwClasses)
+
+	err := g.tpl.ExecuteTemplate(buf, "command-classes", g.zwClasses)
 	if err != nil {
 		return err
 	}
@@ -145,7 +147,7 @@ func (g *Generator) GenCommandClasses() error {
 func (g *Generator) generateCommand(dirName string, cc CommandClass, cmd Command) error {
 	buf := bytes.NewBuffer([]byte{})
 
-	err := g.tpl.ExecuteTemplate(buf, "command.tpl", map[string]interface{}{
+	err := g.tpl.ExecuteTemplate(buf, "command", map[string]interface{}{
 		"CommandClass": cc,
 		"Command":      cmd,
 	})
@@ -179,21 +181,23 @@ func (g *Generator) generateCommand(dirName string, cc CommandClass, cmd Command
 	return nil
 }
 
-func (g *Generator) initTemplates() error {
-	funcs := template.FuncMap{
+func (g *Generator) initTemplates() {
+	tpl := template.New("").Funcs(template.FuncMap{
 		"ToGoName":    toGoName,
 		"NotZeroByte": notZeroByte,
 		"Trim":        strings.TrimSpace,
-	}
+	})
 
-	tpl, err := template.New("").Funcs(funcs).ParseGlob("ccgen/templates/*.tpl")
-	if err != nil {
-		return err
-	}
+	tpl = template.Must(tpl.New("command-classes").Parse(mustAsset("templates/command-classes.tpl")))
+	tpl = template.Must(tpl.New("command-struct-fields").Parse(mustAsset("templates/command-struct-fields.tpl")))
+	tpl = template.Must(tpl.New("command").Parse(mustAsset("templates/command.tpl")))
+	tpl = template.Must(tpl.New("devices").Parse(mustAsset("templates/devices.tpl")))
+	tpl = template.Must(tpl.New("marshal-command-params").Parse(mustAsset("templates/marshal-command-params.tpl")))
+	tpl = template.Must(tpl.New("marshal-variant").Parse(mustAsset("templates/marshal-variant.tpl")))
+	tpl = template.Must(tpl.New("unmarshal-command-params").Parse(mustAsset("templates/unmarshal-command-params.tpl")))
+	tpl = template.Must(tpl.New("unmarshal-variant").Parse(mustAsset("templates/unmarshal-variant.tpl")))
 
 	g.tpl = tpl
-
-	return nil
 }
 
 func (g *Generator) fixVariants() error {
@@ -240,4 +244,13 @@ func (g *Generator) fixVariants() error {
 	}
 
 	return nil
+}
+
+func mustAsset(name string) string {
+	str, err := Asset(name)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(str)
 }

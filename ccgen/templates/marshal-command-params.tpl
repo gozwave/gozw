@@ -1,7 +1,7 @@
 {{range .}}
   {{if eq .Type "VARIANT"}}
     {{if eq (index .Variant 0).ParamOffset 255}}
-      {{template "marshal-variant.tpl" .}}
+      {{template "marshal-variant" .}}
     {{else}}
       if cmd.{{ToGoName .Name}} != nil && len(cmd.{{ToGoName .Name}}) > 0 {
         payload = append(payload, cmd.{{ToGoName .Name}}...)
