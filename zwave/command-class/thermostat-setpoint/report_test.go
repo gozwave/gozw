@@ -7,7 +7,7 @@ import (
 )
 
 func TestUnmarshalReport(t *testing.T) {
-	report := ThermostatSetpointReport{}
+	report := Report{}
 
 	err := report.UnmarshalBinary([]byte{
 		0xFF,
@@ -24,7 +24,7 @@ func TestUnmarshalReport(t *testing.T) {
 }
 
 func TestUnmarshalReportHandlesBadPayloads(t *testing.T) {
-	report := ThermostatSetpointReport{}
+	report := Report{}
 
 	assert.Error(t, report.UnmarshalBinary([]byte{}))
 	assert.Error(t, report.UnmarshalBinary([]byte{0x00}))
@@ -33,7 +33,7 @@ func TestUnmarshalReportHandlesBadPayloads(t *testing.T) {
 }
 
 func TestMarshalReport(t *testing.T) {
-	report := ThermostatSetpointReport{
+	report := Report{
 		Level:  struct{ SetpointType byte }{SetpointType: 0x01},
 		Level2: struct{ Size, Scale, Precision byte }{0x01, 0x02, 0x03},
 		Value:  []byte{0xAA},

@@ -7,14 +7,14 @@ import (
 )
 
 func TestUnmarshalSupportedGet(t *testing.T) {
-	supportedGet := ThermostatSetpointSupportedGet{}
+	supportedGet := SupportedGet{}
 
 	assert.NoError(t, supportedGet.UnmarshalBinary(nil))
 	assert.NoError(t, supportedGet.UnmarshalBinary([]byte{}))
 }
 
 func TestMarshalSupportedGet(t *testing.T) {
-	set := ThermostatSetpointSupportedGet{}
+	set := SupportedGet{}
 
 	data, err := set.MarshalBinary()
 

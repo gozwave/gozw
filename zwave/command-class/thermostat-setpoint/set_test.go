@@ -7,7 +7,7 @@ import (
 )
 
 func TestUnmarshalSet(t *testing.T) {
-	set := ThermostatSetpointSet{}
+	set := Set{}
 
 	err := set.UnmarshalBinary([]byte{
 		0xFF,
@@ -24,7 +24,7 @@ func TestUnmarshalSet(t *testing.T) {
 }
 
 func TestUnmarshalSetHandlesBadPayloads(t *testing.T) {
-	set := ThermostatSetpointSet{}
+	set := Set{}
 
 	assert.Error(t, set.UnmarshalBinary([]byte{}))
 	assert.Error(t, set.UnmarshalBinary([]byte{0x00}))
@@ -33,7 +33,7 @@ func TestUnmarshalSetHandlesBadPayloads(t *testing.T) {
 }
 
 func TestMarshalSet(t *testing.T) {
-	set := ThermostatSetpointSet{
+	set := Set{
 		Level:  struct{ SetpointType byte }{SetpointType: 0x01},
 		Level2: struct{ Size, Scale, Precision byte }{0x01, 0x02, 0x03},
 		Value:  []byte{0xAA},

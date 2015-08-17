@@ -7,7 +7,7 @@ import (
 )
 
 func TestUnmarshalGet(t *testing.T) {
-	get := ThermostatSetpointGet{}
+	get := Get{}
 
 	err := get.UnmarshalBinary([]byte{0xFF})
 
@@ -21,14 +21,14 @@ func TestUnmarshalGet(t *testing.T) {
 }
 
 func TestUnmarshalGetHandlesBadPayloads(t *testing.T) {
-	get := ThermostatSetpointGet{}
+	get := Get{}
 
 	assert.Error(t, get.UnmarshalBinary([]byte{}))
 	assert.Error(t, get.UnmarshalBinary(nil))
 }
 
 func TestMarshalGet(t *testing.T) {
-	get := ThermostatSetpointGet{
+	get := Get{
 		Level: struct{ SetpointType byte }{SetpointType: 0xFF},
 	}
 
