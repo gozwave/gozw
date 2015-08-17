@@ -30,6 +30,7 @@ func (cmd *{{$typeName}}) UnmarshalBinary(data []byte) error {
 }
 
 func (cmd *{{$typeName}}) MarshalBinary() (payload []byte, err error) {
+  payload = make([]byte, 0)
   {{template "marshal-command-params" .Command.Params}}
   return
 }
