@@ -132,8 +132,6 @@ func (g *Gateway) processIncoming() {
 
 func (g *Gateway) handleEvent(ev proto.Event) {
 	switch ev.Payload.(type) {
-	case proto.UserCodeEvent:
-		fmt.Println("Time to create a user code")
 	default:
 		spew.Dump(ev.Payload)
 	}
