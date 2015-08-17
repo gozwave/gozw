@@ -1,4 +1,4 @@
-package ccgen
+package zwgen
 
 import (
 	"errors"

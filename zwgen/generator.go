@@ -1,4 +1,4 @@
-package ccgen
+package zwgen
 
 import (
 	"bytes"
@@ -12,15 +12,18 @@ import (
 	"golang.org/x/tools/imports"
 )
 
-//go:generate go-bindata -pkg=ccgen templates/... data/...
+//go:generate go-bindata -pkg=zwgen templates/... data/...
 
 type Generator struct {
+	outputDir string
 	zwClasses *ZwClasses
 	tpl       *template.Template
 }
 
-func NewGenerator() (*Generator, error) {
-	gen := &Generator{}
+func NewGenerator(outputDir string) (*Generator, error) {
+	gen := &Generator{
+		outputDir: outputDir,
+	}
 
 	gen.initTemplates()
 
