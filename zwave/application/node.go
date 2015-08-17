@@ -10,6 +10,16 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/helioslabs/gozw/zwave/command-class"
+	"github.com/helioslabs/gozw/zwave/command-class/alarm"
+	"github.com/helioslabs/gozw/zwave/command-class/battery"
+	"github.com/helioslabs/gozw/zwave/command-class/door-lock"
+	"github.com/helioslabs/gozw/zwave/command-class/manufacturer-specific"
+	"github.com/helioslabs/gozw/zwave/command-class/security"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-mode"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-operating-state"
+	"github.com/helioslabs/gozw/zwave/command-class/thermostat-setpoint"
+	"github.com/helioslabs/gozw/zwave/command-class/user-code"
+	"github.com/helioslabs/gozw/zwave/command-class/version"
 	"github.com/helioslabs/gozw/zwave/protocol"
 	"github.com/helioslabs/gozw/zwave/serial-api"
 	"github.com/helioslabs/proto"
@@ -45,14 +55,11 @@ type Node struct {
 
 	Failing bool
 
-	SupportedCommandClasses        map[byte]bool
-	SecureSupportedCommandClasses  map[byte]bool
-	SecureControlledCommandClasses map[byte]bool
+	SupportedCommandClasses        map[commandclass.CommandClassID]bool
+	SecureSupportedCommandClasses  map[commandclass.CommandClassID]bool
+	SecureControlledCommandClasses map[commandclass.CommandClassID]bool
 
-	CommandClassVersions map[byte]byte
-
-	DoorLock   *DoorLock
-	Thermostat *Thermostat
+	CommandClassVersions map[commandclass.CommandClassID]byte
 
 	ManufacturerID uint16
 	ProductTypeID  uint16
@@ -67,11 +74,11 @@ func NewNode(application *Layer, nodeID byte) (*Node, error) {
 	node := &Node{
 		NodeID: nodeID,
 
-		SupportedCommandClasses:        map[byte]bool{},
-		SecureSupportedCommandClasses:  map[byte]bool{},
-		SecureControlledCommandClasses: map[byte]bool{},
+		SupportedCommandClasses:        map[commandclass.CommandClassID]bool{},
+		SecureSupportedCommandClasses:  map[commandclass.CommandClassID]bool{},
+		SecureControlledCommandClasses: map[commandclass.CommandClassID]bool{},
 
-		CommandClassVersions: map[byte]byte{},
+		CommandClassVersions: map[commandclass.CommandClassID]byte{},
 
 		application:          application,
 		receivedUpdate:       make(chan bool),
@@ -86,22 +93,6 @@ func NewNode(application *Layer, nodeID byte) (*Node, error) {
 		}
 
 		node.saveToDb()
-	}
-
-	if IsDoorLock(node) {
-		if node.DoorLock != nil {
-			node.DoorLock.initialize(node)
-		} else {
-			node.DoorLock = NewDoorLock(node)
-		}
-	}
-
-	if IsThermostat(node) {
-		if node.Thermostat != nil {
-			node.Thermostat.initialize(node)
-		} else {
-			node.Thermostat = NewThermostat(node)
-		}
 	}
 
 	return node, nil
@@ -153,10 +144,6 @@ func (n *Node) initialize() error {
 		n.Failing = failing
 	}
 
-	if IsDoorLock(n) {
-		n.DoorLock = NewDoorLock(n)
-	}
-
 	return n.saveToDb()
 }
 
@@ -173,7 +160,7 @@ func (n *Node) saveToDb() error {
 }
 
 func (n *Node) IsSecure() bool {
-	_, found := n.SupportedCommandClasses[commandclass.CommandClassSecurity]
+	_, found := n.SupportedCommandClasses[commandclass.Security]
 	return found
 }
 
@@ -193,38 +180,14 @@ func (n *Node) GetSpecificDeviceClassName() string {
 	return protocol.GetSpecificDeviceTypeName(n.GenericDeviceClass, n.SpecificDeviceClass)
 }
 
-func (n *Node) GetDoorLock() (*DoorLock, error) {
-	if !IsDoorLock(n) {
-		return nil, errors.New("Node is not designated as a door lock")
-	}
-
-	if n.DoorLock == nil {
-		n.DoorLock = NewDoorLock(n)
-	}
-
-	return n.DoorLock, nil
-}
-
-func (n *Node) GetThermostat() (*Thermostat, error) {
-	if !IsThermostat(n) {
-		return nil, errors.New("Node is not designated as a thermostat")
-	}
-
-	if n.Thermostat == nil {
-		n.Thermostat = NewThermostat(n)
-	}
-
-	return n.Thermostat, nil
-}
-
-func (n *Node) SendCommand(commandClass byte, command byte, commandPayload ...byte) error {
+func (n *Node) SendCommand(commandClass commandclass.CommandClassID, command byte, commandPayload ...byte) error {
 	supportType := n.SupportsCommandClass(commandClass)
 
 	switch supportType {
 	case CommandClassSupportedSecure:
-		return n.sendDataSecure(append([]byte{commandClass, command}, commandPayload...))
+		return n.sendDataSecure(append([]byte{byte(commandClass), command}, commandPayload...))
 	case CommandClassSupportedInsecure:
-		return n.sendData(append([]byte{commandClass, command}, commandPayload...))
+		return n.sendData(append([]byte{byte(commandClass), command}, commandPayload...))
 	case CommandClassNotSupported:
 		return errors.New("Command class not supported")
 	default:
@@ -232,7 +195,7 @@ func (n *Node) SendCommand(commandClass byte, command byte, commandPayload ...by
 	}
 }
 
-func (n *Node) SupportsCommandClass(commandClass byte) CommandClassSupport {
+func (n *Node) SupportsCommandClass(commandClass commandclass.CommandClassID) CommandClassSupport {
 	if supported, ok := n.SupportedCommandClasses[commandClass]; ok && supported {
 		return CommandClassSupportedInsecure
 	}
@@ -253,15 +216,15 @@ func (n *Node) AddAssociation(groupID byte, nodeIDs ...byte) error {
 	fmt.Println("Associating")
 
 	return n.SendCommand(
-		commandclass.CommandClassAssociation,
-		commandclass.AssociationSet,
+		commandclass.Association,
+		0x01,
 		append([]byte{groupID}, nodeIDs...)...,
 	)
 }
 
 func (n *Node) RequestSupportedSecurityCommands() error {
 	return n.sendDataSecure([]byte{
-		commandclass.CommandClassSecurity,
+		byte(commandclass.Security),
 		commandclass.CommandSecurityCommandsSupportedGet,
 	})
 }
@@ -274,9 +237,9 @@ func (n *Node) LoadCommandClassVersions() error {
 	for cc := range n.SupportedCommandClasses {
 		time.Sleep(1 * time.Second)
 		err := n.sendData([]byte{
-			commandclass.CommandClassVersion,
-			commandclass.CommandVersionCommandClassGet,
-			cc,
+			byte(commandclass.Version),
+			0x13,
+			byte(cc),
 		})
 
 		if err != nil {
@@ -286,9 +249,9 @@ func (n *Node) LoadCommandClassVersions() error {
 
 	for cc := range n.SecureSupportedCommandClasses {
 		err := n.sendDataSecure([]byte{
-			commandclass.CommandClassVersion,
-			commandclass.CommandVersionCommandClassGet,
-			cc,
+			byte(commandclass.Version),
+			0x13,
+			byte(cc),
 		})
 
 		if err != nil {
@@ -301,8 +264,8 @@ func (n *Node) LoadCommandClassVersions() error {
 
 func (n *Node) LoadManufacturerInfo() error {
 	return n.SendCommand(
-		commandclass.CommandClassManufacturerSpecific,
-		commandclass.CommandManufacturerSpecificGet,
+		commandclass.ManufacturerSpecific,
+		0x04,
 	)
 }
 
@@ -366,7 +329,7 @@ func (n *Node) setFromAddNodeCallback(nodeInfo *serialapi.AddRemoveNodeCallback)
 	n.SpecificDeviceClass = nodeInfo.Specific
 
 	for _, cc := range nodeInfo.CommandClasses {
-		n.SupportedCommandClasses[cc] = true
+		n.SupportedCommandClasses[commandclass.CommandClassID(cc)] = true
 	}
 
 	n.saveToDb()
@@ -378,7 +341,7 @@ func (n *Node) setFromApplicationControllerUpdate(nodeInfo serialapi.ControllerU
 	n.SpecificDeviceClass = nodeInfo.Specific
 
 	for _, cc := range nodeInfo.CommandClasses {
-		n.SupportedCommandClasses[cc] = true
+		n.SupportedCommandClasses[commandclass.CommandClassID(cc)] = true
 	}
 
 	n.saveToDb()
@@ -393,13 +356,13 @@ func (n *Node) setFromNodeProtocolInfo(nodeInfo *serialapi.NodeProtocolInfo) {
 	n.saveToDb()
 }
 
-func (n *Node) receiveSecurityCommandsSupportedReport(cc *commandclass.SecurityCommandsSupportedReport) {
-	for _, cc := range cc.SupportedCommandClasses {
-		n.SecureSupportedCommandClasses[cc] = true
+func (n *Node) receiveSecurityCommandsSupportedReport(cc security.SecurityCommandsSupportedReport) {
+	for _, cc := range cc.CommandClassSupport {
+		n.SecureSupportedCommandClasses[commandclass.CommandClassID(cc)] = true
 	}
 
-	for _, cc := range cc.ControlledCommandClasses {
-		n.SecureControlledCommandClasses[cc] = true
+	for _, cc := range cc.CommandClassControl {
+		n.SecureControlledCommandClasses[commandclass.CommandClassID(cc)] = true
 	}
 
 	select {
@@ -411,107 +374,59 @@ func (n *Node) receiveSecurityCommandsSupportedReport(cc *commandclass.SecurityC
 }
 
 func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
-	switch cmd.CommandData[0] {
-	case commandclass.CommandClassSecurity:
-		switch cmd.CommandData[1] {
-		case commandclass.CommandSecurityCommandsSupportedReport:
-			fmt.Println("security commands supported report")
+	ver := n.CommandClassVersions[commandclass.CommandClassID(cmd.CommandData[0])]
+	command, err := commandclass.Parse(ver, cmd.CommandData)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-			n.receiveSecurityCommandsSupportedReport(
-				commandclass.ParseSecurityCommandsSupportedReport(cmd.CommandData),
-			)
+	switch command.(type) {
 
-			fmt.Println(n.GetSupportedSecureCommandClassStrings())
-		}
-
-	case commandclass.CommandClassBattery:
+	case battery.BatteryReport:
 		if cmd.CommandData[2] == 0xFF {
 			fmt.Printf("Node %d: low battery alert\n", n.NodeID)
 		} else {
-			fmt.Printf("Node %d: battery level is %d\n", n.NodeID, cmd.CommandData[2])
+			fmt.Printf("Node %d: battery level is %d\n", n.NodeID, command.(battery.BatteryReport))
 		}
 
-	case commandclass.CommandClassAlarm:
-		if IsDoorLock(n) {
-			lock, err := n.GetDoorLock()
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
+	case security.SecurityCommandsSupportedReport:
+		fmt.Println("security commands supported report")
+		n.receiveSecurityCommandsSupportedReport(command.(security.SecurityCommandsSupportedReport))
+		fmt.Println(n.GetSupportedSecureCommandClassStrings())
 
-			lock.handleAlarmCommandClass(cmd)
-		} else {
-			fmt.Println("Alarm command for non-lock")
-			spew.Dump(cmd)
-		}
+	case alarm.AlarmReport:
+		spew.Dump(command.(alarm.AlarmReport))
 
-	case commandclass.CommandClassUserCode:
-		lock, err := n.GetDoorLock()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+	case usercode.UserCodeReport:
+		spew.Dump(command.(usercode.UserCodeReport))
 
-		lock.handleUserCodeCommandClass(cmd)
+	case doorlock.DoorLockOperationReport:
+		spew.Dump(command.(doorlock.DoorLockOperationReport))
 
-	case commandclass.CommandClassDoorLock:
-		lock, err := n.GetDoorLock()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+	case thermostatmode.ThermostatModeReport:
+		spew.Dump(command.(thermostatmode.ThermostatModeReport))
 
-		lock.handleDoorLockCommandClass(cmd)
+	case thermostatoperatingstate.ThermostatOperatingStateReport:
+		spew.Dump(command.(thermostatoperatingstate.ThermostatOperatingStateReport))
 
-	case commandclass.CommandClassThermostatMode:
-		thermostat, err := n.GetThermostat()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+	case thermostatsetpoint.ThermostatSetpointReport:
+		spew.Dump(command.(thermostatsetpoint.ThermostatSetpointReport))
 
-		thermostat.handleThermostatModeCommandClass(cmd)
+	case version.VersionReport:
+		spew.Dump(command.(version.VersionReport))
+		// version := commandclass.ParseVersionCommandClassReport(cmd.CommandData)
+		// n.CommandClassVersions[version.CommandClass] = version.Version
+		// n.saveToDb()
 
-	case commandclass.CommandClassThermostatOperatingState:
-		thermostat, err := n.GetThermostat()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		thermostat.handleThermostatOperatingStateCommandClass(cmd)
-
-	case commandclass.CommandClassThermostatSetpoint:
-		thermostat, err := n.GetThermostat()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		thermostat.handleThermostatSetpointCommandClass(cmd)
-
-	case commandclass.CommandClassVersion:
-
-		if cmd.CommandData[1] == commandclass.CommandVersionCommandClassReport {
-			version := commandclass.ParseVersionCommandClassReport(cmd.CommandData)
-			n.CommandClassVersions[version.CommandClass] = version.Version
-		}
-
-		n.saveToDb()
-
-	case commandclass.CommandClassManufacturerSpecific:
-
-		if cmd.CommandData[1] == commandclass.CommandManufacturerSpecificReport {
-			mfgInfo := commandclass.ParseManufacturerSpecificReport(cmd.CommandData)
-			n.ManufacturerID = mfgInfo.ManufacturerID
-			n.ProductTypeID = mfgInfo.ProductTypeID
-			n.ProductID = mfgInfo.ProductID
-		}
-
-		n.saveToDb()
-
+	case manufacturerspecific.ManufacturerSpecificReport:
+		spew.Dump(command.(manufacturerspecific.ManufacturerSpecificReport))
+		// mfgInfo := commandclass.ParseManufacturerSpecificReport(cmd.CommandData)
+		// n.ManufacturerID = mfgInfo.ManufacturerID
+		// n.ProductTypeID = mfgInfo.ProductTypeID
+		// n.ProductID = mfgInfo.ProductID
 	default:
-		fmt.Printf("unhandled application command (%d): %s\n", n.NodeID, spew.Sdump(cmd))
+		spew.Dump(command)
 	}
 }
 
@@ -566,7 +481,7 @@ func (n *Node) GetSupportedSecureCommandClassStrings() []string {
 	return strings
 }
 
-func commandClassSetToStrings(commandClasses map[byte]bool) []string {
+func commandClassSetToStrings(commandClasses map[commandclass.CommandClassID]bool) []string {
 	if len(commandClasses) == 0 {
 		return []string{}
 	}
@@ -574,7 +489,7 @@ func commandClassSetToStrings(commandClasses map[byte]bool) []string {
 	ccStrings := []string{}
 
 	for cc := range commandClasses {
-		ccStrings = append(ccStrings, commandclass.GetCommandClassString(cc))
+		ccStrings = append(ccStrings, cc.String())
 	}
 
 	return ccStrings

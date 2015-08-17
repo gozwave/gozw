@@ -326,9 +326,9 @@ func (a *Layer) RemoveFailedNode(nodeID byte) (ok bool, err error) {
 
 func (a *Layer) handleApplicationCommands() {
 	for cmd := range a.serialAPI.ControllerCommands() {
-		switch cmd.CommandData[0] {
+		switch commandclass.CommandClassID(cmd.CommandData[0]) {
 
-		case commandclass.CommandClassSecurity:
+		case commandclass.Security:
 			a.handleSecurityCommand(cmd)
 
 		default:
@@ -502,7 +502,7 @@ func (a *Layer) handleSecurityCommand(cmd serialapi.ApplicationCommand) {
 			return
 		}
 
-		if msg[0] == commandclass.CommandClassSecurity && msg[1] == commandclass.CommandNetworkKeyVerify {
+		if msg[0] == byte(commandclass.Security) && msg[1] == commandclass.CommandNetworkKeyVerify {
 			if ch, ok := a.secureInclusionStep[cmd.SrcNodeID]; ok {
 				ch <- nil
 			}
