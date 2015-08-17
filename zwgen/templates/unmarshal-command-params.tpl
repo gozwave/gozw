@@ -36,6 +36,8 @@
       cmd.{{ToGoName .Name}} = payload[i:i+{{(index .ArrayAttrib 0).Length}}]
     {{end}}
     i += {{(index .ArrayAttrib 0).Length}}
+  {{else if eq .Type "BITMASK"}}
+    cmd.{{ToGoName .Name}} = payload[i:]
   {{else if eq .Type "DWORD"}}
     cmd.{{ToGoName .Name}} = binary.BigEndian.Uint32(payload[i:i+4])
     i += 4

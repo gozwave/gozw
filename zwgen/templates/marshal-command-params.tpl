@@ -39,6 +39,8 @@
     {{else}}
       payload = append(payload, cmd.{{ToGoName .Name}}...)
     {{end}}
+  {{else if eq .Type "BITMASK"}}
+    payload = append(payload, cmd.{{ToGoName .Name}}...)
   {{else if eq .Type "DWORD"}}
     {
       buf := make([]byte, 4)

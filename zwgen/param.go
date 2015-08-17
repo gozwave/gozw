@@ -92,7 +92,10 @@ func (p Param) GetGoType() (string, error) {
 		return "uint32", nil
 
 	case "BITMASK":
-		return "byte", nil
+		// @todo there are some command classes (that we currently don't generate)
+		// that have a BITMASK in the middle of the payload. We don't currently
+		// support that.
+		return "[]byte", nil
 
 	case "BYTE":
 		return "byte", nil
