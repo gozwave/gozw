@@ -21,11 +21,7 @@
     {{end}}
     {{range .BitFlag}}
       {{if .IsNotReserved}}
-        if payload[i] & {{.FlagMask}} == {{.FlagMask}} {
-          cmd.{{$name}}.{{ToGoName .FlagName}} = true
-        } else {
-          cmd.{{$name}}.{{ToGoName .FlagName}} = false
-        }
+        cmd.{{$name}}.{{ToGoName .FlagName}} = payload[i] & {{.FlagMask}} == {{.FlagMask}}
       {{end}}
     {{end}}
     i += 1
