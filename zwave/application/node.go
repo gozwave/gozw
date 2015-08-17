@@ -55,11 +55,11 @@ type Node struct {
 
 	Failing bool
 
-	SupportedCommandClasses        map[commandclass.CommandClassID]bool
-	SecureSupportedCommandClasses  map[commandclass.CommandClassID]bool
-	SecureControlledCommandClasses map[commandclass.CommandClassID]bool
+	SupportedCommandClasses        map[commandclass.ID]bool
+	SecureSupportedCommandClasses  map[commandclass.ID]bool
+	SecureControlledCommandClasses map[commandclass.ID]bool
 
-	CommandClassVersions map[commandclass.CommandClassID]byte
+	CommandClassVersions map[commandclass.ID]byte
 
 	ManufacturerID uint16
 	ProductTypeID  uint16
@@ -74,11 +74,11 @@ func NewNode(application *Layer, nodeID byte) (*Node, error) {
 	node := &Node{
 		NodeID: nodeID,
 
-		SupportedCommandClasses:        map[commandclass.CommandClassID]bool{},
-		SecureSupportedCommandClasses:  map[commandclass.CommandClassID]bool{},
-		SecureControlledCommandClasses: map[commandclass.CommandClassID]bool{},
+		SupportedCommandClasses:        map[commandclass.ID]bool{},
+		SecureSupportedCommandClasses:  map[commandclass.ID]bool{},
+		SecureControlledCommandClasses: map[commandclass.ID]bool{},
 
-		CommandClassVersions: map[commandclass.CommandClassID]byte{},
+		CommandClassVersions: map[commandclass.ID]byte{},
 
 		application:          application,
 		receivedUpdate:       make(chan bool),
@@ -180,7 +180,7 @@ func (n *Node) GetSpecificDeviceClassName() string {
 	return protocol.GetSpecificDeviceTypeName(n.GenericDeviceClass, n.SpecificDeviceClass)
 }
 
-func (n *Node) SendCommand(commandClass commandclass.CommandClassID, command byte, commandPayload ...byte) error {
+func (n *Node) SendCommand(commandClass commandclass.ID, command byte, commandPayload ...byte) error {
 	supportType := n.SupportsCommandClass(commandClass)
 
 	switch supportType {
@@ -195,7 +195,7 @@ func (n *Node) SendCommand(commandClass commandclass.CommandClassID, command byt
 	}
 }
 
-func (n *Node) SupportsCommandClass(commandClass commandclass.CommandClassID) CommandClassSupport {
+func (n *Node) SupportsCommandClass(commandClass commandclass.ID) CommandClassSupport {
 	if supported, ok := n.SupportedCommandClasses[commandClass]; ok && supported {
 		return CommandClassSupportedInsecure
 	}
@@ -329,7 +329,7 @@ func (n *Node) setFromAddNodeCallback(nodeInfo *serialapi.AddRemoveNodeCallback)
 	n.SpecificDeviceClass = nodeInfo.Specific
 
 	for _, cc := range nodeInfo.CommandClasses {
-		n.SupportedCommandClasses[commandclass.CommandClassID(cc)] = true
+		n.SupportedCommandClasses[commandclass.ID(cc)] = true
 	}
 
 	n.saveToDb()
@@ -341,7 +341,7 @@ func (n *Node) setFromApplicationControllerUpdate(nodeInfo serialapi.ControllerU
 	n.SpecificDeviceClass = nodeInfo.Specific
 
 	for _, cc := range nodeInfo.CommandClasses {
-		n.SupportedCommandClasses[commandclass.CommandClassID(cc)] = true
+		n.SupportedCommandClasses[commandclass.ID(cc)] = true
 	}
 
 	n.saveToDb()
@@ -358,11 +358,11 @@ func (n *Node) setFromNodeProtocolInfo(nodeInfo *serialapi.NodeProtocolInfo) {
 
 func (n *Node) receiveSecurityCommandsSupportedReport(cc security.SecurityCommandsSupportedReport) {
 	for _, cc := range cc.CommandClassSupport {
-		n.SecureSupportedCommandClasses[commandclass.CommandClassID(cc)] = true
+		n.SecureSupportedCommandClasses[commandclass.ID(cc)] = true
 	}
 
 	for _, cc := range cc.CommandClassControl {
-		n.SecureControlledCommandClasses[commandclass.CommandClassID(cc)] = true
+		n.SecureControlledCommandClasses[commandclass.ID(cc)] = true
 	}
 
 	select {
@@ -374,7 +374,7 @@ func (n *Node) receiveSecurityCommandsSupportedReport(cc security.SecurityComman
 }
 
 func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
-	ver := n.CommandClassVersions[commandclass.CommandClassID(cmd.CommandData[0])]
+	ver := n.CommandClassVersions[commandclass.ID(cmd.CommandData[0])]
 	command, err := commandclass.Parse(ver, cmd.CommandData)
 	if err != nil {
 		fmt.Println(err)
@@ -413,11 +413,11 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 	case thermostatsetpoint.ThermostatSetpointReport:
 		spew.Dump(command.(thermostatsetpoint.ThermostatSetpointReport))
 
-	case version.VersionReport:
-		spew.Dump(command.(version.VersionReport))
-		// version := commandclass.ParseVersionCommandClassReport(cmd.CommandData)
-		// n.CommandClassVersions[version.CommandClass] = version.Version
-		// n.saveToDb()
+	case version.VersionCommandClassReport:
+		spew.Dump(command.(version.VersionCommandClassReport))
+		report := command.(version.VersionCommandClassReport)
+		n.CommandClassVersions[commandclass.ID(report.RequestedCommandClass)] = report.CommandClassVersion
+		n.saveToDb()
 
 	case manufacturerspecific.ManufacturerSpecificReport:
 		spew.Dump(command.(manufacturerspecific.ManufacturerSpecificReport))
@@ -481,7 +481,7 @@ func (n *Node) GetSupportedSecureCommandClassStrings() []string {
 	return strings
 }
 
-func commandClassSetToStrings(commandClasses map[commandclass.CommandClassID]bool) []string {
+func commandClassSetToStrings(commandClasses map[commandclass.ID]bool) []string {
 	if len(commandClasses) == 0 {
 		return []string{}
 	}
