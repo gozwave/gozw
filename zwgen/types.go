@@ -136,7 +136,7 @@ type Command struct {
 	Params []Param `xml:"param"`
 }
 
-func (c Command) GetFileName(cc CommandClass) string {
+func (c Command) GetBaseName(cc CommandClass) string {
 	commandName := c.Name
 
 	if strings.HasPrefix(strings.ToLower(commandName), "command_") &&
@@ -152,5 +152,13 @@ func (c Command) GetFileName(cc CommandClass) string {
 		}
 	}
 
-	return stringcase.ToPropertyCase(commandName)
+	return commandName
+}
+
+func (c Command) GetStructName(cc CommandClass) string {
+	return stringcase.ToPascalCase(c.GetBaseName(cc))
+}
+
+func (c Command) GetFileName(cc CommandClass) string {
+	return stringcase.ToPropertyCase(c.GetBaseName(cc))
 }

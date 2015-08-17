@@ -29,7 +29,7 @@ func Parse(ccVersion uint8, payload []byte) (interface{}, error) {
     case payload[0] == byte({{.GetConstName}}) && ccVersion == {{$version}}:
       switch payload[1] {
         {{range .Commands}}case {{.Key}}:
-          command := {{$cc.GetPackageName}}.{{(ToGoName .Name)}}{}
+          command := {{$cc.GetPackageName}}.{{(.GetStructName $cc)}}{}
           if err := command.UnmarshalBinary(payload[2:]); err != nil {
             return nil, err
           }
