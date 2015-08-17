@@ -7,7 +7,6 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/helioslabs/gozw/zwave/application"
-	"github.com/helioslabs/gozw/zwave/command-class"
 	"github.com/helioslabs/gozw/zwave/frame"
 	"github.com/helioslabs/gozw/zwave/serial-api"
 	"github.com/helioslabs/gozw/zwave/session"
@@ -94,7 +93,7 @@ func main() {
 			for cc, _ := range node.SupportedCommandClasses {
 				fmt.Printf(
 					"%s: %d\n",
-					commandclass.GetCommandClassString(cc),
+					cc,
 					node.CommandClassVersions[cc],
 				)
 			}
@@ -102,175 +101,175 @@ func main() {
 			for cc, _ := range node.SecureSupportedCommandClasses {
 				fmt.Printf(
 					"%s: %d\n",
-					commandclass.GetCommandClassString(cc),
+					cc,
 					node.CommandClassVersions[cc],
 				)
 			}
 
-		case "L":
-			input, _ := line.Prompt("node id: ")
-			nodeId, _ := strconv.Atoi(input)
-			node, err := appLayer.Node(byte(nodeId))
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			lock, err := node.GetDoorLock()
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			lock.LoadAllUserCodes()
-		case "UN":
-			input, _ := line.Prompt("node id: ")
-			nodeId, _ := strconv.Atoi(input)
-			node, err := appLayer.Node(byte(nodeId))
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			lock, err := node.GetDoorLock()
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			count, err := lock.GetSupportedUserCount()
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			fmt.Printf("Supported users: %d\n", count)
-		case "UC":
-			input, _ := line.Prompt("node id: ")
-			nodeId, _ := strconv.Atoi(input)
-			node, err := appLayer.Node(byte(nodeId))
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			lock, err := node.GetDoorLock()
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			input, _ = line.Prompt("user id: ")
-			userId, _ := strconv.Atoi(input)
-
-			lock.LoadUserCode(byte(userId))
-
-		case "UCS":
-			input, _ := line.Prompt("node id: ")
-			nodeId, _ := strconv.Atoi(input)
-			node, err := appLayer.Node(byte(nodeId))
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			lock, err := node.GetDoorLock()
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			input, _ = line.Prompt("user id: ")
-			userId, err := strconv.Atoi(input)
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			code, _ := line.Prompt("code: ")
-			if len(code) < 4 || len(code) > 8 {
-				fmt.Println("Invalid code length")
-				continue
-			}
-
-			lock.SetUserCode(byte(userId), []byte(code))
-
-		case "UCC":
-			input, _ := line.Prompt("node id: ")
-			nodeId, _ := strconv.Atoi(input)
-			node, err := appLayer.Node(byte(nodeId))
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			lock, err := node.GetDoorLock()
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			input, _ = line.Prompt("user id: ")
-			userId, err := strconv.Atoi(input)
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			lock.ClearUserCode(byte(userId))
-
-		case "LS":
-			input, _ := line.Prompt("node id: ")
-			nodeId, _ := strconv.Atoi(input)
-			node, err := appLayer.Node(byte(nodeId))
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			lock, err := node.GetDoorLock()
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			spew.Dump(lock.GetLockStatus())
-
-		case "ST":
-			input, _ := line.Prompt("node id: ")
-			nodeId, _ := strconv.Atoi(input)
-			node, err := appLayer.Node(byte(nodeId))
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			thermostat, err := node.GetThermostat()
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			var setpointType commandclass.ThermostatSetpointType
-			input, _ = line.Prompt("(c)ooling or (h)eating> ")
-			switch input {
-			case "c":
-				setpointType = commandclass.ThermostatSetpointTypeCooling
-			case "h":
-				setpointType = commandclass.ThermostatSetpointTypeHeating
-			default:
-				fmt.Println("gg man")
-				continue
-			}
-
-			input, _ = line.Prompt("temperature> ")
-			temperature, err := strconv.Atoi(input)
-			if err != nil {
-				spew.Dump(err)
-				continue
-			}
-
-			thermostat.SetpointSet(setpointType, float64(temperature))
+		// case "L":
+		// 	input, _ := line.Prompt("node id: ")
+		// 	nodeId, _ := strconv.Atoi(input)
+		// 	node, err := appLayer.Node(byte(nodeId))
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	lock, err := node.GetDoorLock()
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	lock.LoadAllUserCodes()
+		// case "UN":
+		// 	input, _ := line.Prompt("node id: ")
+		// 	nodeId, _ := strconv.Atoi(input)
+		// 	node, err := appLayer.Node(byte(nodeId))
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	lock, err := node.GetDoorLock()
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	count, err := lock.GetSupportedUserCount()
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	fmt.Printf("Supported users: %d\n", count)
+		// case "UC":
+		// 	input, _ := line.Prompt("node id: ")
+		// 	nodeId, _ := strconv.Atoi(input)
+		// 	node, err := appLayer.Node(byte(nodeId))
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	lock, err := node.GetDoorLock()
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	input, _ = line.Prompt("user id: ")
+		// 	userId, _ := strconv.Atoi(input)
+		//
+		// 	lock.LoadUserCode(byte(userId))
+		//
+		// case "UCS":
+		// 	input, _ := line.Prompt("node id: ")
+		// 	nodeId, _ := strconv.Atoi(input)
+		// 	node, err := appLayer.Node(byte(nodeId))
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	lock, err := node.GetDoorLock()
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	input, _ = line.Prompt("user id: ")
+		// 	userId, err := strconv.Atoi(input)
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	code, _ := line.Prompt("code: ")
+		// 	if len(code) < 4 || len(code) > 8 {
+		// 		fmt.Println("Invalid code length")
+		// 		continue
+		// 	}
+		//
+		// 	lock.SetUserCode(byte(userId), []byte(code))
+		//
+		// case "UCC":
+		// 	input, _ := line.Prompt("node id: ")
+		// 	nodeId, _ := strconv.Atoi(input)
+		// 	node, err := appLayer.Node(byte(nodeId))
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	lock, err := node.GetDoorLock()
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	input, _ = line.Prompt("user id: ")
+		// 	userId, err := strconv.Atoi(input)
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	lock.ClearUserCode(byte(userId))
+		//
+		// case "LS":
+		// 	input, _ := line.Prompt("node id: ")
+		// 	nodeId, _ := strconv.Atoi(input)
+		// 	node, err := appLayer.Node(byte(nodeId))
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	lock, err := node.GetDoorLock()
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	spew.Dump(lock.GetLockStatus())
+		//
+		// case "ST":
+		// 	input, _ := line.Prompt("node id: ")
+		// 	nodeId, _ := strconv.Atoi(input)
+		// 	node, err := appLayer.Node(byte(nodeId))
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	thermostat, err := node.GetThermostat()
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	var setpointType commandclass.ThermostatSetpointType
+		// 	input, _ = line.Prompt("(c)ooling or (h)eating> ")
+		// 	switch input {
+		// 	case "c":
+		// 		setpointType = commandclass.ThermostatSetpointTypeCooling
+		// 	case "h":
+		// 		setpointType = commandclass.ThermostatSetpointTypeHeating
+		// 	default:
+		// 		fmt.Println("gg man")
+		// 		continue
+		// 	}
+		//
+		// 	input, _ = line.Prompt("temperature> ")
+		// 	temperature, err := strconv.Atoi(input)
+		// 	if err != nil {
+		// 		spew.Dump(err)
+		// 		continue
+		// 	}
+		//
+		// 	thermostat.SetpointSet(setpointType, float64(temperature))
 
 		case "NIF":
 			input, _ := line.Prompt("node id: ")
