@@ -9,6 +9,8 @@ func init() {
   gob.Register({{.Command.GetStructName .CommandClass}}{})
 }
 
+const Command{{.Command.GetStructName .CommandClass}} byte = {{.Command.Key}}
+
 // {{.Help}}
 type {{.Command.GetStructName .CommandClass}} struct {
   {{range $_, $param := .Command.Params}}
