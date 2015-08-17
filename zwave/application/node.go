@@ -356,7 +356,7 @@ func (n *Node) setFromNodeProtocolInfo(nodeInfo *serialapi.NodeProtocolInfo) {
 	n.saveToDb()
 }
 
-func (n *Node) receiveSecurityCommandsSupportedReport(cc security.SecurityCommandsSupportedReport) {
+func (n *Node) receiveSecurityCommandsSupportedReport(cc security.CommandsSupportedReport) {
 	for _, cc := range cc.CommandClassSupport {
 		n.SecureSupportedCommandClasses[commandclass.ID(cc)] = true
 	}
@@ -383,44 +383,44 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 
 	switch command.(type) {
 
-	case battery.BatteryReport:
+	case battery.Report:
 		if cmd.CommandData[2] == 0xFF {
 			fmt.Printf("Node %d: low battery alert\n", n.NodeID)
 		} else {
-			fmt.Printf("Node %d: battery level is %d\n", n.NodeID, command.(battery.BatteryReport))
+			fmt.Printf("Node %d: battery level is %d\n", n.NodeID, command.(battery.Report))
 		}
 
-	case security.SecurityCommandsSupportedReport:
+	case security.CommandsSupportedReport:
 		fmt.Println("security commands supported report")
-		n.receiveSecurityCommandsSupportedReport(command.(security.SecurityCommandsSupportedReport))
+		n.receiveSecurityCommandsSupportedReport(command.(security.CommandsSupportedReport))
 		fmt.Println(n.GetSupportedSecureCommandClassStrings())
 
-	case alarm.AlarmReport:
-		spew.Dump(command.(alarm.AlarmReport))
+	case alarm.Report:
+		spew.Dump(command.(alarm.Report))
 
-	case usercode.UserCodeReport:
-		spew.Dump(command.(usercode.UserCodeReport))
+	case usercode.Report:
+		spew.Dump(command.(usercode.Report))
 
-	case doorlock.DoorLockOperationReport:
-		spew.Dump(command.(doorlock.DoorLockOperationReport))
+	case doorlock.OperationReport:
+		spew.Dump(command.(doorlock.OperationReport))
 
-	case thermostatmode.ThermostatModeReport:
-		spew.Dump(command.(thermostatmode.ThermostatModeReport))
+	case thermostatmode.Report:
+		spew.Dump(command.(thermostatmode.Report))
 
-	case thermostatoperatingstate.ThermostatOperatingStateReport:
-		spew.Dump(command.(thermostatoperatingstate.ThermostatOperatingStateReport))
+	case thermostatoperatingstate.Report:
+		spew.Dump(command.(thermostatoperatingstate.Report))
 
-	case thermostatsetpoint.ThermostatSetpointReport:
-		spew.Dump(command.(thermostatsetpoint.ThermostatSetpointReport))
+	case thermostatsetpoint.Report:
+		spew.Dump(command.(thermostatsetpoint.Report))
 
-	case version.VersionCommandClassReport:
-		spew.Dump(command.(version.VersionCommandClassReport))
-		report := command.(version.VersionCommandClassReport)
+	case version.CommandClassReport:
+		spew.Dump(command.(version.CommandClassReport))
+		report := command.(version.CommandClassReport)
 		n.CommandClassVersions[commandclass.ID(report.RequestedCommandClass)] = report.CommandClassVersion
 		n.saveToDb()
 
-	case manufacturerspecific.ManufacturerSpecificReport:
-		spew.Dump(command.(manufacturerspecific.ManufacturerSpecificReport))
+	case manufacturerspecific.Report:
+		spew.Dump(command.(manufacturerspecific.Report))
 		// mfgInfo := commandclass.ParseManufacturerSpecificReport(cmd.CommandData)
 		// n.ManufacturerID = mfgInfo.ManufacturerID
 		// n.ProductTypeID = mfgInfo.ProductTypeID
