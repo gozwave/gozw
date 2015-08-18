@@ -34,8 +34,8 @@ func (cmd *EncryptedMessage) UnmarshalBinary(data []byte) error {
 
 	cmd.SenderNonce = payload[0:8]
 	cmd.EncryptedPayload = payload[8 : len(payload)-9]
-	cmd.ReceiverNonceID = payload[len(payload)-8]
-	cmd.HMAC = payload[len(payload)-8:]
+	cmd.ReceiverNonceID = payload[8+len(cmd.EncryptedPayload)]
+	cmd.HMAC = payload[9+len(cmd.EncryptedPayload):]
 
 	return nil
 }

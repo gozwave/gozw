@@ -92,7 +92,7 @@ func (s *Layer) EncapsulateMessage(
 
 	return &EncryptedMessage{
 		SenderNonce:      senderNonce,
-		EncryptedPayload: encryptPassword,
+		EncryptedPayload: encryptedPayload,
 		ReceiverNonceID:  receiverNonce[0],
 		HMAC:             hmac,
 	}, nil

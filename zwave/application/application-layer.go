@@ -548,7 +548,7 @@ func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) 
 		a.SendData(cmd.SrcNodeID, reply)
 
 	case zwsec.NonceReport:
-		a.securityLayer.ReceiveNonce(cmd.SrcNodeID, *(command.(*zwsec.NonceReport)))
+		a.securityLayer.ReceiveNonce(cmd.SrcNodeID, (command.(zwsec.NonceReport)))
 
 	case zwsec.SchemeReport:
 		if ch, ok := a.secureInclusionStep[cmd.SrcNodeID]; ok {
