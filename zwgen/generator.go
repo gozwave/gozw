@@ -67,17 +67,12 @@ func (g *Generator) GenDevices() error {
 
 	defer fp.Close()
 
-	formatted, err := format.Source(buf.Bytes())
+	formatted, err := goFmtAndImports(filename, buf)
 	if err != nil {
 		return err
 	}
 
-	imported, err := imports.Process(filename, formatted, nil)
-	if err != nil {
-		return err
-	}
-
-	fp.Write(imported)
+	fp.Write(formatted)
 
 	return nil
 }
@@ -98,17 +93,12 @@ func (g *Generator) GenParser() error {
 
 	defer fp.Close()
 
-	formatted, err := format.Source(buf.Bytes())
+	formatted, err := goFmtAndImports(filename, buf)
 	if err != nil {
 		return err
 	}
 
-	imported, err := imports.Process(filename, formatted, nil)
-	if err != nil {
-		return err
-	}
-
-	fp.Write(imported)
+	fp.Write(formatted)
 
 	return nil
 }
@@ -167,24 +157,15 @@ func (g *Generator) generateCommand(dirName string, cc CommandClass, cmd Command
 
 	defer fp.Close()
 
-	formatted, err := format.Source(buf.Bytes())
+	formatted, err := goFmtAndImports(filename, buf)
 	if err != nil {
-		fmt.Println(string(buf.Bytes()))
-		fmt.Println(cc.Name)
 		return err
 	}
 
-	imported, err := imports.Process(filename, formatted, nil)
-	if err != nil {
-		fmt.Println(cc.Name)
-		return err
-	}
-
-	fp.Write(imported)
+	fp.Write(formatted)
 
 	return nil
 }
-
 func (g *Generator) initTemplates() {
 	tpl := template.New("").Funcs(template.FuncMap{
 		"ToGoName":    toGoName,
@@ -257,4 +238,18 @@ func mustAsset(name string) string {
 	}
 
 	return string(str)
+}
+
+func goFmtAndImports(filename string, buf *bytes.Buffer) ([]byte, error) {
+	formatted, err := format.Source(buf.Bytes())
+	if err != nil {
+		return nil, err
+	}
+
+	imported, err := imports.Process(filename, formatted, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return imported, nil
 }
