@@ -3,6 +3,9 @@
 generate:
 	go generate ./zwave/command-class
 
+interceptty:
+	interceptty -s 'ispeed 115200 ospeed 115200' /dev/cu.usbmodem1411 /tmp/usbmodem
+
 clean-gen:
 	-rm zwave/command-class/*.gen.go
 	-rm zwave/command-class/**/*.gen.go
