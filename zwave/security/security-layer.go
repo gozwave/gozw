@@ -101,7 +101,7 @@ func (s *Layer) EncapsulateMessage(
 // @todo verify message hmac
 func (s *Layer) DecryptMessage(cmd serialapi.ApplicationCommand) (*serialapi.ApplicationCommand, error) {
 	message := EncryptedMessage{}
-	err := message.UnmarshalBinary(cmd.CommandData[2:])
+	err := message.UnmarshalBinary(cmd.CommandData)
 	if err != nil {
 		return nil, err
 	}
