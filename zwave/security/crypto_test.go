@@ -3,7 +3,7 @@ package security
 import (
 	"testing"
 
-	"github.com/helioslabs/gozw/zwave/command-class"
+	"github.com/helioslabs/gozw/zwave/command-class/security"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -50,7 +50,7 @@ func TestCalculateHMAC(t *testing.T) {
 	t.Parallel()
 
 	authData := []byte{
-		commandclass.CommandSecurityMessageEncapsulation,
+		byte(security.CommandMessageEncapsulation),
 		1, // sender node id
 		3, // receiver node id
 		uint8(len(testMessageCiphertext)),

@@ -6,7 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/helioslabs/gozw/zwave/command-class"
+	"github.com/helioslabs/gozw/zwave/command-class/security"
+	"github.com/helioslabs/gozw/zwave/serial-api"
 )
 
 const (
@@ -16,11 +17,11 @@ const (
 )
 
 type ILayer interface {
-	DecryptMessage(data *commandclass.SecurityMessageEncapsulation) ([]byte, error)
-	EncapsulateMessage(payload []byte, senderNonce []byte, receiverNonce []byte, srcNode byte, dstNode byte, inclusionMode bool) []byte
+	DecryptMessage(cmd serialapi.ApplicationCommand) (*serialapi.ApplicationCommand, error)
+	EncapsulateMessage(srcNode byte, dstNode byte, commandID security.CommandID, senderNonce []byte, receiverNonce []byte, payload []byte, inclusionMode bool) (*EncryptedMessage, error)
 	GenerateInternalNonce() (Nonce, error)
 	GetExternalNonce(key byte) (Nonce, error)
-	ReceiveNonce(fromNode byte, data *commandclass.SecurityNonceReport)
+	ReceiveNonce(fromNode byte, report security.NonceReport)
 	WaitForExternalNonce(nodeID byte) (Nonce, error)
 }
 
@@ -59,13 +60,14 @@ func NewLayer(networkKey []byte) *Layer {
 }
 
 func (s *Layer) EncapsulateMessage(
-	payload []byte,
-	senderNonce []byte,
-	receiverNonce []byte,
 	srcNode byte,
 	dstNode byte,
+	commandID security.CommandID,
+	senderNonce []byte,
+	receiverNonce []byte,
+	payload []byte,
 	inclusionMode bool,
-) []byte {
+) (*EncryptedMessage, error) {
 
 	var encKey, authKey []byte
 	if inclusionMode {
@@ -80,38 +82,44 @@ func (s *Layer) EncapsulateMessage(
 
 	encryptedPayload := CryptMessage(payload, iv, encKey)
 
-	authDataBuf := append(iv, commandclass.CommandSecurityMessageEncapsulation) // @todo CC should be determined by sequencing
-	authDataBuf = append(authDataBuf, srcNode)                                  // sender node
-	authDataBuf = append(authDataBuf, dstNode)                                  // receiver node
+	authDataBuf := append(iv, byte(security.CommandMessageEncapsulation))
+	authDataBuf = append(authDataBuf, srcNode) // sender node
+	authDataBuf = append(authDataBuf, dstNode) // receiver node
 	authDataBuf = append(authDataBuf, byte(len(encryptedPayload)))
 	authDataBuf = append(authDataBuf, encryptedPayload...)
 
 	hmac := CalculateHMAC(authDataBuf, authKey)
 
-	return commandclass.NewSecurityMessageEncapsulation(
-		senderNonce,
-		encryptedPayload,
-		hmac,
-		receiverNonce[0],
-	)
+	return &EncryptedMessage{
+		SenderNonce:      senderNonce,
+		EncryptedPayload: encryptPassword,
+		ReceiverNonceID:  receiverNonce[0],
+		HMAC:             hmac,
+	}, nil
 }
 
 // @todo verify message hmac
-func (s *Layer) DecryptMessage(data *commandclass.SecurityMessageEncapsulation) ([]byte, error) {
-	receiverNonce, err := s.internalNonceTable.Get(data.ReceiverNonceID)
+func (s *Layer) DecryptMessage(cmd serialapi.ApplicationCommand) (*serialapi.ApplicationCommand, error) {
+	message := EncryptedMessage{}
+	err := message.UnmarshalBinary(cmd.CommandData[2:])
+	if err != nil {
+		return nil, err
+	}
+
+	receiverNonce, err := s.internalNonceTable.Get(message.ReceiverNonceID)
 	if err != nil {
 		return nil, err
 	}
 
 	senderNonce := make([]byte, 8)
-	copy(senderNonce, data.SenderNonce)
+	copy(senderNonce, message.SenderNonce)
 	iv := append(senderNonce, receiverNonce...)
 
-	pl := make([]byte, len(data.EncryptedPayload))
-	copy(pl, data.EncryptedPayload)
-	decryptedPayload := CryptMessage(pl, iv, s.networkEncKey)
+	pl := make([]byte, len(message.EncryptedPayload))
+	copy(pl, message.EncryptedPayload)
+	cmd.CommandData = CryptMessage(pl, iv, s.networkEncKey)
 
-	return decryptedPayload[1:], nil
+	return &cmd, nil
 }
 
 // GenerateInternalNonce returns a new internal nonce and stores it in the
@@ -132,8 +140,8 @@ func (s *Layer) GetExternalNonce(key byte) (Nonce, error) {
 // it sets a timeout on the nonce (after which the nonce will be deleted from the
 // nonce table) and notifies any goroutine that may be waiting for a nonce from
 // the given node
-func (s *Layer) ReceiveNonce(fromNode byte, data *commandclass.SecurityNonceReport) {
-	s.externalNonceTable.Set(fromNode, data.Nonce, externalNonceTTL)
+func (s *Layer) ReceiveNonce(fromNode byte, report security.NonceReport) {
+	s.externalNonceTable.Set(fromNode, report.NonceByte, externalNonceTTL)
 
 	// if there is no matching channel in the waitForNonce map, then apparently we
 	// either fetched the nonce for no reason, some node just randomly gave us one,
