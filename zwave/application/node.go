@@ -11,6 +11,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/helioslabs/gozw/zwave/command-class"
 	"github.com/helioslabs/gozw/zwave/command-class/alarm"
+	"github.com/helioslabs/gozw/zwave/command-class/association"
 	"github.com/helioslabs/gozw/zwave/command-class/battery"
 	"github.com/helioslabs/gozw/zwave/command-class/door-lock"
 	"github.com/helioslabs/gozw/zwave/command-class/manufacturer-specific"
@@ -180,14 +181,15 @@ func (n *Node) GetSpecificDeviceClassName() string {
 	return protocol.GetSpecificDeviceTypeName(n.GenericDeviceClass, n.SpecificDeviceClass)
 }
 
-func (n *Node) SendCommand(commandClass commandclass.ID, command byte, commandPayload ...byte) error {
+func (n *Node) SendCommand(command commandclass.Command) error {
+	commandClass := commandclass.ID(command.CommandClassID())
 	supportType := n.SupportsCommandClass(commandClass)
 
 	switch supportType {
 	case CommandClassSupportedSecure:
-		return n.sendDataSecure(append([]byte{byte(commandClass), command}, commandPayload...))
+		return n.application.SendDataSecure(n.NodeID, command)
 	case CommandClassSupportedInsecure:
-		return n.sendData(append([]byte{byte(commandClass), command}, commandPayload...))
+		return n.application.SendData(n.NodeID, command)
 	case CommandClassNotSupported:
 		return errors.New("Command class not supported")
 	default:
@@ -215,18 +217,14 @@ func (n *Node) AddAssociation(groupID byte, nodeIDs ...byte) error {
 
 	fmt.Println("Associating")
 
-	return n.SendCommand(
-		commandclass.Association,
-		0x01,
-		append([]byte{groupID}, nodeIDs...)...,
-	)
+	return n.SendCommand(&association.Set{
+		GroupingIdentifier: groupID,
+		NodeId:             nodeIDs,
+	})
 }
 
 func (n *Node) RequestSupportedSecurityCommands() error {
-	return n.sendDataSecure([]byte{
-		byte(commandclass.Security),
-		commandclass.CommandSecurityCommandsSupportedGet,
-	})
+	return n.application.SendDataSecure(n.NodeID, &security.CommandsSupportedGet{})
 }
 
 func (n *Node) RequestNodeInformationFrame() error {
@@ -236,25 +234,18 @@ func (n *Node) RequestNodeInformationFrame() error {
 func (n *Node) LoadCommandClassVersions() error {
 	for cc := range n.SupportedCommandClasses {
 		time.Sleep(1 * time.Second)
-		err := n.sendData([]byte{
-			byte(commandclass.Version),
-			0x13,
-			byte(cc),
-		})
 
-		if err != nil {
+		cmd := &version.CommandClassGet{RequestedCommandClass: byte(cc)}
+		if err := n.application.SendData(n.NodeID, cmd); err != nil {
 			return err
 		}
 	}
 
 	for cc := range n.SecureSupportedCommandClasses {
-		err := n.sendDataSecure([]byte{
-			byte(commandclass.Version),
-			0x13,
-			byte(cc),
-		})
+		time.Sleep(1 * time.Second)
 
-		if err != nil {
+		cmd := &version.CommandClassGet{RequestedCommandClass: byte(cc)}
+		if err := n.application.SendDataSecure(n.NodeID, cmd); err != nil {
 			return err
 		}
 	}
@@ -263,10 +254,7 @@ func (n *Node) LoadCommandClassVersions() error {
 }
 
 func (n *Node) LoadManufacturerInfo() error {
-	return n.SendCommand(
-		commandclass.ManufacturerSpecific,
-		0x04,
-	)
+	return n.SendCommand(&manufacturerspecific.Get{})
 }
 
 func (n *Node) emitNodeEvent(event interface{}) {
@@ -276,14 +264,6 @@ func (n *Node) emitNodeEvent(event interface{}) {
 			Event:  event,
 		},
 	})
-}
-
-func (n *Node) sendData(payload []byte) error {
-	return n.application.SendData(n.NodeID, payload)
-}
-
-func (n *Node) sendDataSecure(payload []byte) error {
-	return n.application.SendDataSecure(n.NodeID, payload)
 }
 
 func (n *Node) receiveControllerUpdate(update serialapi.ControllerUpdate) {
@@ -296,30 +276,10 @@ func (n *Node) receiveControllerUpdate(update serialapi.ControllerUpdate) {
 	n.saveToDb()
 }
 
-// func (n *Node) updateSupportedSecureCommands() {
-// if n.IsSecure() {
-// 	n.manager.SendDataSecure(n.NodeId, []byte{
-// 		commandclass.CommandClassSecurity,
-// 		commandclass.CommandSecurityCommandsSupportedGet,
-// 	})
-// } else {
-// 	n.receivedSecure <- true
-// }
-// }
-
 // func (n *Node) sendNoOp() {
 // 	n.manager.session.SendData(n.NodeId, []byte{
 // 		commandclass.CommandClassNoOperation,
 // 	})
-// }
-
-// func (n *Node) IsFailing() bool {
-// 	result, err := n.manager.session.isNodeFailing(n.NodeId)
-// 	if err != nil {
-// 		fmt.Println("node.isFailing error:", err)
-// 	}
-//
-// 	return result
 // }
 
 func (n *Node) setFromAddNodeCallback(nodeInfo *serialapi.AddRemoveNodeCallback) {

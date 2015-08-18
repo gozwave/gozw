@@ -9,6 +9,7 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/helioslabs/gozw/zwave/command-class"
+	zwsec "github.com/helioslabs/gozw/zwave/command-class/security"
 	"github.com/helioslabs/gozw/zwave/protocol"
 	"github.com/helioslabs/gozw/zwave/security"
 	"github.com/helioslabs/gozw/zwave/serial-api"
@@ -329,7 +330,7 @@ func (a *Layer) handleApplicationCommands() {
 		switch commandclass.ID(cmd.CommandData[0]) {
 
 		case commandclass.Security:
-			a.handleSecurityCommand(cmd)
+			a.interceptSecurityCommandClass(cmd)
 
 		default:
 			if node, err := a.Node(cmd.SrcNodeID); err == nil {
@@ -364,21 +365,26 @@ func (a *Layer) handleControllerUpdates() {
 	}
 }
 
-func (a *Layer) SendData(dstNode byte, payload []byte) error {
-	_, err := a.serialAPI.SendData(dstNode, payload)
+func (a *Layer) SendData(dstNode byte, payload commandclass.Command) error {
+	marshaled, err := payload.MarshalBinary()
+	if err != nil {
+		return err
+	}
+
+	_, err = a.serialAPI.SendData(dstNode, marshaled)
 	return err
 }
 
 // SendDataSecure encapsulates payload in a security encapsulation command and
 // sends it to the destination node.
-func (a *Layer) SendDataSecure(dstNode byte, payload []byte) error {
+func (a *Layer) SendDataSecure(dstNode byte, message commandclass.Command) error {
 	// This function wraps the private sendDataSecure because no external packages
 	// should ever call this while in inclusion mode (and doing so would be incorrect)
-	return a.sendDataSecure(dstNode, payload, false)
+	return a.sendDataSecure(dstNode, message, false)
 }
 
 func (a *Layer) requestNonceForNode(dstNode byte) (security.Nonce, error) {
-	err := a.SendData(dstNode, commandclass.NewSecurityNonceGet())
+	err := a.SendData(dstNode, &zwsec.NonceGet{})
 
 	if err != nil {
 		return nil, err
@@ -405,13 +411,18 @@ func (a *Layer) getOrRequestNonceForNode(dstNode byte) (nonce security.Nonce, er
 	return nonce, err
 }
 
-func (a *Layer) sendDataSecure(dstNode byte, payload []byte, inclusionMode bool) error {
+func (a *Layer) sendDataSecure(dstNode byte, message commandclass.Command, inclusionMode bool) error {
 	// Previously, this function would just split and prepare the payload based on
 	// whether it should be split after figuring out whether to segment. For now,
 	// we're just going to assume that we will never have to worry about segmenting.
 	// It wasn't too hard to implement before, but since I couldn't find a real payload
 	// big enough, it wasn't possible to verify the implementation, so I didn't port
 	// it while refactoring (for simplicity's sake).
+
+	payload, err := message.MarshalBinary()
+	if err != nil {
+		return err
+	}
 
 	// Get a nonce from the other node
 	receiverNonce, err := a.getOrRequestNonceForNode(dstNode)
@@ -436,21 +447,26 @@ func (a *Layer) sendDataSecure(dstNode byte, payload []byte, inclusionMode bool)
 
 	securePayload := append([]byte{securityByte}, payload...)
 
-	encapsulatedMessage := a.securityLayer.EncapsulateMessage(
-		securePayload,
-		senderNonce,
-		receiverNonce,
+	encapsulatedMessage, err := a.securityLayer.EncapsulateMessage(
 		1,
 		dstNode,
+		zwsec.CommandMessageEncapsulation, // @todo CC should be determined by sequencing
+		senderNonce,
+		receiverNonce,
+		securePayload,
 		inclusionMode,
 	)
+
+	if err != nil {
+		return err
+	}
 
 	return a.SendData(dstNode, encapsulatedMessage)
 }
 
 func (a *Layer) includeSecureNode(nodeID byte) error {
 	a.secureInclusionStep[nodeID] = make(chan error)
-	a.SendData(nodeID, commandclass.NewSecuritySchemeGet())
+	a.SendData(nodeID, &zwsec.SchemeGet{})
 
 	defer close(a.secureInclusionStep[nodeID])
 	defer delete(a.secureInclusionStep, nodeID)
@@ -466,7 +482,7 @@ func (a *Layer) includeSecureNode(nodeID byte) error {
 
 	a.sendDataSecure(
 		nodeID,
-		commandclass.NewSecurityNetworkKeySet(a.networkKey),
+		&zwsec.NetworkKeySet{NetworkKeyByte: a.networkKey},
 		true,
 	)
 
@@ -478,10 +494,16 @@ func (a *Layer) includeSecureNode(nodeID byte) error {
 	}
 }
 
-func (a *Layer) handleSecurityCommand(cmd serialapi.ApplicationCommand) {
-	switch cmd.CommandData[1] {
+func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) {
+	command, err := commandclass.Parse(1, cmd.CommandData)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-	case commandclass.CommandSecurityMessageEncapsulation, commandclass.CommandSecurityMessageEncapsulationNonceGet:
+	switch command.(type) {
+
+	case zwsec.MessageEncapsulation, zwsec.MessageEncapsulationNonceGet:
 		// @todo determine whether to bother with sequenced messages. According to
 		// openzwave, they didn't bother to implement it because they never ran across
 		// a situation where a frame was large enough that it needed to be sequenced.
@@ -494,15 +516,15 @@ func (a *Layer) handleSecurityCommand(cmd serialapi.ApplicationCommand) {
 		// 3. if it's the second half of a sequenced message, reassemble the payloads
 		// 4. emit the decrypted (possibly recombined) message back
 
-		data := commandclass.ParseSecurityMessageEncapsulation(cmd.CommandData)
-		msg, err := a.securityLayer.DecryptMessage(data)
+		decrypted, err := a.securityLayer.DecryptMessage(cmd)
 
 		if err != nil {
 			fmt.Println("error handling encrypted message", err)
 			return
 		}
 
-		if msg[0] == byte(commandclass.Security) && msg[1] == commandclass.CommandNetworkKeyVerify {
+		if decrypted.CommandData[0] == byte(commandclass.Security) &&
+			decrypted.CommandData[1] == byte(zwsec.CommandNetworkKeyVerify) {
 			if ch, ok := a.secureInclusionStep[cmd.SrcNodeID]; ok {
 				ch <- nil
 			}
@@ -510,26 +532,25 @@ func (a *Layer) handleSecurityCommand(cmd serialapi.ApplicationCommand) {
 		}
 
 		if node, ok := a.nodes[cmd.SrcNodeID]; ok {
-			cmd.CommandData = msg
+			cmd.CommandData = decrypted.CommandData
 			go node.receiveApplicationCommand(cmd)
 		} else {
 			fmt.Println("Received secure command for unknown node", cmd.SrcNodeID)
 		}
 
-	case commandclass.CommandSecurityNonceGet:
+	case zwsec.NonceGet:
 		nonce, err := a.securityLayer.GenerateInternalNonce()
 		if err != nil {
 			fmt.Println("error generating internal nonce", err)
 		}
 
-		reply := commandclass.NewSecurityNonceReport(nonce)
+		reply := &zwsec.NonceReport{NonceByte: nonce}
 		a.SendData(cmd.SrcNodeID, reply)
 
-	case commandclass.CommandSecurityNonceReport:
-		nonceReport := commandclass.ParseSecurityNonceReport(cmd.CommandData)
-		a.securityLayer.ReceiveNonce(cmd.SrcNodeID, nonceReport)
+	case zwsec.NonceReport:
+		a.securityLayer.ReceiveNonce(cmd.SrcNodeID, *(command.(*zwsec.NonceReport)))
 
-	case commandclass.CommandSecuritySchemeReport:
+	case zwsec.SchemeReport:
 		if ch, ok := a.secureInclusionStep[cmd.SrcNodeID]; ok {
 			ch <- nil
 		}
