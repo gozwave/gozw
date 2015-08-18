@@ -16,6 +16,14 @@ type {{.Command.GetStructName .CommandClass}} struct {
   {{end}}
 }
 
+func (cmd {{.Command.GetStructName .CommandClass}}) CommandClassID() byte {
+  return {{.CommandClass.Key}}
+}
+
+func (cmd {{.Command.GetStructName .CommandClass}}) CommandID() byte {
+  return byte(Command{{.Command.GetStructName .CommandClass}})
+}
+
 func (cmd *{{.Command.GetStructName .CommandClass}}) UnmarshalBinary(data []byte) error {
   // According to the docs, we must copy data if we wish to retain it after returning
   {{if .Command.Params}}
@@ -34,8 +42,8 @@ func (cmd *{{.Command.GetStructName .CommandClass}}) UnmarshalBinary(data []byte
 
 func (cmd *{{.Command.GetStructName .CommandClass}}) MarshalBinary() (payload []byte, err error) {
   payload = make([]byte, 2)
-  payload[0] = {{.CommandClass.Key}} // command class id
-  payload[1] = byte(Command{{.Command.GetStructName .CommandClass}})
+  payload[0] = cmd.CommandClassID()
+  payload[1] = cmd.CommandID()
   {{template "marshal-command-params" .Command.Params}}
   return
 }
