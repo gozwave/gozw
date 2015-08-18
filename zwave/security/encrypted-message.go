@@ -1,12 +1,25 @@
 package security
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/helioslabs/gozw/zwave/command-class"
+	"github.com/helioslabs/gozw/zwave/command-class/security"
+)
 
 type EncryptedMessage struct {
 	SenderNonce      []byte
 	EncryptedPayload []byte
 	ReceiverNonceID  byte
 	HMAC             []byte
+}
+
+func (cmd EncryptedMessage) CommandClassID() byte {
+	return byte(commandclass.Security)
+}
+
+func (cmd EncryptedMessage) CommandID() byte {
+	return byte(security.CommandMessageEncapsulation)
 }
 
 func (cmd *EncryptedMessage) UnmarshalBinary(data []byte) error {
