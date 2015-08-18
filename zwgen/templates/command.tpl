@@ -22,6 +22,10 @@ func (cmd *{{.Command.GetStructName .CommandClass}}) UnmarshalBinary(data []byte
   payload := make([]byte, len(data))
   copy(payload, data)
 
+  if len(payload) < 2 {
+    return errors.New("Payload length underflow")
+  }
+
   {{template "unmarshal-command-params" .Command.Params}}
 
   {{end}}
@@ -29,7 +33,9 @@ func (cmd *{{.Command.GetStructName .CommandClass}}) UnmarshalBinary(data []byte
 }
 
 func (cmd *{{.Command.GetStructName .CommandClass}}) MarshalBinary() (payload []byte, err error) {
-  payload = make([]byte, 0)
+  payload = make([]byte, 2)
+  payload[0] = {{.CommandClass.Key}} // command class id
+  payload[1] = byte(Command{{.Command.GetStructName .CommandClass}})
   {{template "marshal-command-params" .Command.Params}}
   return
 }

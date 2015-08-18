@@ -30,7 +30,7 @@ func Parse(ccVersion uint8, payload []byte) (interface{}, error) {
       switch payload[1] {
         {{range .Commands}}case {{.Key}}:
           command := {{$cc.GetPackageName}}.{{(.GetStructName $cc)}}{}
-          if err := command.UnmarshalBinary(payload[2:]); err != nil {
+          if err := command.UnmarshalBinary(payload); err != nil {
             return nil, err
           }
           return command, nil

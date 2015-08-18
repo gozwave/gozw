@@ -1,4 +1,4 @@
-{{with .}}i := 0{{end}}{{/* {{with}} here ensures we don't print this if there are no params */}}
+{{with .}}i := 2{{end}}{{/* {{with}} here ensures we don't print this if there are no params */}}
 {{range .}}
   if len(payload) <= i {
     return errors.New("slice index out of bounds")
