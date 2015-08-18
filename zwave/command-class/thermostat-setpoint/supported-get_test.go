@@ -19,5 +19,5 @@ func TestMarshalSupportedGet(t *testing.T) {
 	data, err := set.MarshalBinary()
 
 	assert.NoError(t, err)
-	assert.EqualValues(t, []byte{}, data)
+	assert.EqualValues(t, []byte{}, data[2:])
 }

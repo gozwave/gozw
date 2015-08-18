@@ -9,12 +9,12 @@ import (
 func TestUnmarshalGet(t *testing.T) {
 	get := Get{}
 
-	err := get.UnmarshalBinary([]byte{0xFF})
+	err := get.UnmarshalBinary([]byte{0x00, 0x00, 0xFF})
 
 	assert.NoError(t, err)
 	assert.EqualValues(t, 0x0F, get.Level.SetpointType)
 
-	err = get.UnmarshalBinary([]byte{0x01})
+	err = get.UnmarshalBinary([]byte{0x00, 0x00, 0x01})
 
 	assert.NoError(t, err)
 	assert.EqualValues(t, 0x01, get.Level.SetpointType)
@@ -35,5 +35,5 @@ func TestMarshalGet(t *testing.T) {
 	data, err := get.MarshalBinary()
 
 	assert.NoError(t, err)
-	assert.EqualValues(t, 0x0F, data[0])
+	assert.EqualValues(t, 0x0F, data[2])
 }

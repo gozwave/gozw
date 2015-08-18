@@ -10,6 +10,8 @@ func TestUnmarshalSet(t *testing.T) {
 	set := Set{}
 
 	err := set.UnmarshalBinary([]byte{
+		0x00,
+		0x00,
 		0xFF,
 		0x71, // size, scale, precision = 1
 		0xAA,
@@ -42,5 +44,5 @@ func TestMarshalSet(t *testing.T) {
 	data, err := set.MarshalBinary()
 
 	assert.NoError(t, err)
-	assert.EqualValues(t, []byte{0x01, 0x71, 0xAA}, data)
+	assert.EqualValues(t, []byte{0x01, 0x71, 0xAA}, data[2:])
 }
