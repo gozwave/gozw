@@ -47,6 +47,8 @@ type CommandClass struct {
 	Help     string    `xml:"help,attr"`
 	Comment  string    `xml:"comment,attr"`
 	Commands []Command `xml:"cmd"`
+
+	Enabled bool `xml:"-"`
 }
 
 func (c CommandClass) GetBaseName() string {

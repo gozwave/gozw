@@ -5,10 +5,13 @@ import (
 	"encoding/xml"
 	"fmt"
 	"go/format"
+	"io/ioutil"
 	"os"
 	"path"
 	"strings"
 	"text/template"
+
+	"gopkg.in/yaml.v2"
 
 	"golang.org/x/tools/imports"
 )
@@ -16,14 +19,31 @@ import (
 //go:generate go-bindata -pkg=zwgen templates/... data/...
 
 type Generator struct {
-	outputDir string
+	output    string
+	config    Config
 	zwClasses *ZwClasses
 	tpl       *template.Template
 }
 
-func NewGenerator(outputDir string) (*Generator, error) {
+type Config struct {
+	CommandClasses map[string]map[int]bool `yaml:"CommandClasses"`
+}
+
+func NewGenerator(output string, configFile string) (*Generator, error) {
+	config := Config{}
+
+	configStr, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := yaml.Unmarshal(configStr, &config); err != nil {
+		return nil, err
+	}
+
 	gen := &Generator{
-		outputDir: outputDir,
+		output: output,
+		config: config,
 	}
 
 	gen.initTemplates()
@@ -59,15 +79,14 @@ func (g *Generator) GenDevices() error {
 		return err
 	}
 
-	filename := path.Join(g.outputDir, "devices.gen.go")
-	fp, err := os.Create(filename)
+	fp, err := os.Create(g.output)
 	if err != nil {
 		return err
 	}
 
 	defer fp.Close()
 
-	formatted, err := goFmtAndImports(filename, buf)
+	formatted, err := goFmtAndImports(g.output, buf)
 	if err != nil {
 		return err
 	}
@@ -78,6 +97,26 @@ func (g *Generator) GenDevices() error {
 }
 
 func (g *Generator) GenParser() error {
+
+	if g.config.CommandClasses != nil && len(g.config.CommandClasses) > 0 {
+		for i, cc := range g.zwClasses.CommandClasses {
+			if _, ok := g.config.CommandClasses[cc.Name]; !ok {
+				g.zwClasses.CommandClasses[i].Enabled = false
+				continue
+			} else {
+				g.zwClasses.CommandClasses[i].Enabled = true
+			}
+
+			if g.config.CommandClasses[cc.Name] != nil && len(g.config.CommandClasses[cc.Name]) > 0 {
+				if should, ok := g.config.CommandClasses[cc.Name][cc.Version]; !ok || !should {
+					g.zwClasses.CommandClasses[i].Enabled = false
+				} else {
+					g.zwClasses.CommandClasses[i].Enabled = true
+				}
+			}
+		}
+	}
+
 	buf := bytes.NewBuffer([]byte{})
 
 	err := g.tpl.ExecuteTemplate(buf, "command-classes", g.zwClasses)
@@ -85,15 +124,14 @@ func (g *Generator) GenParser() error {
 		return err
 	}
 
-	filename := path.Join(g.outputDir, "command-classes.gen.go")
-	fp, err := os.Create(filename)
+	fp, err := os.Create(g.output)
 	if err != nil {
 		return err
 	}
 
 	defer fp.Close()
 
-	formatted, err := goFmtAndImports(filename, buf)
+	formatted, err := goFmtAndImports(g.output, buf)
 	if err != nil {
 		return err
 	}
@@ -107,12 +145,24 @@ func (g *Generator) GenCommandClasses() error {
 	skipped := []CommandClass{}
 	for _, cc := range g.zwClasses.CommandClasses {
 
+		if g.config.CommandClasses != nil && len(g.config.CommandClasses) > 0 {
+			if _, ok := g.config.CommandClasses[cc.Name]; !ok {
+				continue
+			}
+
+			if g.config.CommandClasses[cc.Name] != nil && len(g.config.CommandClasses[cc.Name]) > 0 {
+				if should, ok := g.config.CommandClasses[cc.Name][cc.Version]; !ok || !should {
+					continue
+				}
+			}
+		}
+
 		if can, _ := cc.CanGenerate(); !can {
 			skipped = append(skipped, cc)
 			continue
 		}
 
-		dirName := path.Join(g.outputDir, cc.GetDirName())
+		dirName := path.Join(g.output, cc.GetDirName())
 		err := os.Mkdir(dirName, 0775)
 		if err != nil && !strings.HasSuffix(err.Error(), "file exists") {
 			return err
