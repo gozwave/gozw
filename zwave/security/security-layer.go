@@ -20,7 +20,7 @@ const (
 )
 
 type ILayer interface {
-	DecryptMessage(cmd serialapi.ApplicationCommand) (*serialapi.ApplicationCommand, error)
+	DecryptMessage(cmd serialapi.ApplicationCommand, inclusionMode bool) ([]byte, error)
 	EncapsulateMessage(srcNode byte, dstNode byte, commandID security.CommandID, senderNonce []byte, receiverNonce []byte, payload []byte, inclusionMode bool) (*EncryptedMessage, error)
 	GenerateInternalNonce() (Nonce, error)
 	GetExternalNonce(key byte) (Nonce, error)
@@ -81,16 +81,16 @@ func (s *Layer) EncapsulateMessage(
 
 	var encKey, authKey []byte
 	if inclusionMode {
+		s.logger.Print("debug: encrypting message using inclusion encryption")
 		encKey = inclusionEncKey
 		authKey = inclusionAuthKey
 	} else {
+		s.logger.Print("debug: encrypting message using network encryption")
 		encKey = s.networkEncKey
 		authKey = s.networkAuthKey
 	}
 
 	iv := append(senderNonce, receiverNonce...)
-
-	s.logger.Print("debug: encrypting message")
 
 	encryptedPayload := CryptMessage(payload, iv, encKey)
 
@@ -111,8 +111,17 @@ func (s *Layer) EncapsulateMessage(
 }
 
 // @todo verify message hmac
-func (s *Layer) DecryptMessage(cmd serialapi.ApplicationCommand) (*serialapi.ApplicationCommand, error) {
-	s.logger.Print("debug: decrypting message")
+func (s *Layer) DecryptMessage(cmd serialapi.ApplicationCommand, inclusionMode bool) ([]byte, error) {
+	var encKey /*, authKey*/ []byte
+	if inclusionMode {
+		s.logger.Print("debug: decrypting message using inclusion encryption")
+		encKey = inclusionEncKey
+		// authKey = inclusionAuthKey
+	} else {
+		s.logger.Print("debug: decrypting message using network encryption")
+		encKey = s.networkEncKey
+		// authKey = s.networkAuthKey
+	}
 
 	message := EncryptedMessage{}
 	err := message.UnmarshalBinary(cmd.CommandData)
@@ -129,13 +138,7 @@ func (s *Layer) DecryptMessage(cmd serialapi.ApplicationCommand) (*serialapi.App
 	copy(senderNonce, message.SenderNonce)
 	iv := append(senderNonce, receiverNonce...)
 
-	pl := make([]byte, len(message.EncryptedPayload))
-	copy(pl, message.EncryptedPayload)
-	cmd.CommandData = CryptMessage(pl, iv, s.networkEncKey)
-
-	s.logger.Printf("debug: decrypted message command class: %X", cmd.CommandData[0])
-
-	return &cmd, nil
+	return CryptMessage(message.EncryptedPayload, iv, encKey), nil
 }
 
 // GenerateInternalNonce returns a new internal nonce and stores it in the
@@ -209,8 +212,6 @@ func (s *Layer) WaitForExternalNonce(nodeID byte) (Nonce, error) {
 	}
 	s.waitMapLock.Unlock()
 	runtime.Gosched()
-
-	s.logger.Printf("debug: waiting for external nonce node=%d", nodeID)
 
 	select {
 	case <-waitChan:

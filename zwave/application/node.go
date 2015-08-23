@@ -62,6 +62,8 @@ type Node struct {
 
 	CommandClassVersions map[commandclass.ID]byte
 
+	NetworkKeySent bool
+
 	ManufacturerID uint16
 	ProductTypeID  uint16
 	ProductID      uint16
@@ -184,6 +186,13 @@ func (n *Node) GetSpecificDeviceClassName() string {
 func (n *Node) SendCommand(command commandclass.Command) error {
 	commandClass := commandclass.ID(command.CommandClassID())
 	supportType := n.SupportsCommandClass(commandClass)
+
+	if commandClass == commandclass.Security {
+		switch command.(type) {
+		case *security.CommandsSupportedGet, *security.CommandsSupportedReport:
+			supportType = CommandClassSupportedSecure
+		}
+	}
 
 	switch supportType {
 	case CommandClassSupportedSecure:
@@ -334,10 +343,20 @@ func (n *Node) receiveSecurityCommandsSupportedReport(cc security.CommandsSuppor
 }
 
 func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
-	ver := n.CommandClassVersions[commandclass.ID(cmd.CommandData[0])]
+	cc := commandclass.ID(cmd.CommandData[0])
+	ver, ok := n.CommandClassVersions[cc]
+
+	if !ok {
+		if cc == commandclass.Version || cc == commandclass.Security {
+			ver = 1
+		} else {
+			fmt.Printf("error: no version loaded for %s\n", cc)
+		}
+	}
+
 	command, err := commandclass.Parse(ver, cmd.CommandData)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("error parsing command class", err)
 		return
 	}
 

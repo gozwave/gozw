@@ -274,12 +274,11 @@ func (a *Layer) AddNode() (*Node, error) {
 
 	if node.IsSecure() {
 		a.logger.Println("debug: starting secure inclusion")
-		err = a.includeSecureNode(node.NodeID)
+		err = a.includeSecureNode(node)
 		if err != nil {
 			return nil, err
 		}
 
-		time.Sleep(time.Millisecond * 50)
 		err := node.RequestSupportedSecurityCommands()
 		if err != nil {
 			a.logger.Printf("error: %v\n", err)
@@ -287,7 +286,7 @@ func (a *Layer) AddNode() (*Node, error) {
 
 		select {
 		case <-node.receivedSecurityInfo:
-		case <-time.After(time.Second * 5):
+		case <-time.After(time.Second * 10):
 			a.logger.Println("error: timed out after requesting security commands")
 		}
 	}
@@ -473,15 +472,17 @@ func (a *Layer) sendDataSecure(dstNode byte, message commandclass.Command, inclu
 	return a.SendData(dstNode, encapsulatedMessage)
 }
 
-func (a *Layer) includeSecureNode(nodeID byte) error {
-	a.secureInclusionStep[nodeID] = make(chan error)
-	a.SendData(nodeID, &zwsec.SchemeGet{})
+func (a *Layer) includeSecureNode(node *Node) error {
+	a.secureInclusionStep[node.NodeID] = make(chan error)
+	a.SendData(node.NodeID, &zwsec.SchemeGet{})
 
-	defer close(a.secureInclusionStep[nodeID])
-	defer delete(a.secureInclusionStep, nodeID)
+	defer close(a.secureInclusionStep[node.NodeID])
+	defer delete(a.secureInclusionStep, node.NodeID)
+
+	a.logger.Print("info: requesting security scheme")
 
 	select {
-	case err := <-a.secureInclusionStep[nodeID]:
+	case err := <-a.secureInclusionStep[node.NodeID]:
 		if err != nil {
 			return err
 		}
@@ -489,14 +490,17 @@ func (a *Layer) includeSecureNode(nodeID byte) error {
 		return errors.New("Secure inclusion timeout")
 	}
 
+	a.logger.Print("info: sending network key")
+	node.NetworkKeySent = true
+
 	a.sendDataSecure(
-		nodeID,
+		node.NodeID,
 		&zwsec.NetworkKeySet{NetworkKeyByte: a.networkKey},
 		true,
 	)
 
 	select {
-	case err := <-a.secureInclusionStep[nodeID]:
+	case err := <-a.secureInclusionStep[node.NodeID]:
 		return err
 	case <-time.After(time.Second * 20):
 		return errors.New("Secure inclusion timeout")
@@ -504,7 +508,6 @@ func (a *Layer) includeSecureNode(nodeID byte) error {
 }
 
 func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) {
-	a.logger.Printf("debug: intercepted security command node=%d", cmd.SrcNodeID)
 	command, err := commandclass.Parse(1, cmd.CommandData)
 	if err != nil {
 		a.logger.Printf("error: %v\n", err)
@@ -527,15 +530,29 @@ func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) 
 		// 3. if it's the second half of a sequenced message, reassemble the payloads
 		// 4. emit the decrypted (possibly recombined) message back
 
-		decrypted, err := a.securityLayer.DecryptMessage(cmd)
+		var decrypted []byte
+		var err error
+		node, err := a.Node(cmd.SrcNodeID)
+		if err != nil {
+			a.logger.Printf("error: unknown node node=%X", cmd.SrcNodeID)
+			return
+		}
+
+		if !node.NetworkKeySent {
+			decrypted, err = a.securityLayer.DecryptMessage(cmd, true)
+		} else {
+			decrypted, err = a.securityLayer.DecryptMessage(cmd, false)
+		}
 
 		if err != nil {
 			a.logger.Printf("error: error handling encrypted message %v\n", err)
 			return
 		}
 
-		if decrypted.CommandData[0] == byte(commandclass.Security) &&
-			decrypted.CommandData[1] == byte(zwsec.CommandNetworkKeyVerify) {
+		a.logger.Printf("info: received encapsulated message %s", spew.Sdump(decrypted))
+
+		if decrypted[1] == byte(commandclass.Security) &&
+			decrypted[2] == byte(zwsec.CommandNetworkKeyVerify) {
 			a.logger.Printf("network key verify node=%d", cmd.SrcNodeID)
 			if ch, ok := a.secureInclusionStep[cmd.SrcNodeID]; ok {
 				ch <- nil
@@ -544,13 +561,14 @@ func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) 
 		}
 
 		if node, ok := a.nodes[cmd.SrcNodeID]; ok {
-			cmd.CommandData = decrypted.CommandData
+			cmd.CommandData = decrypted[1:]
 			go node.receiveApplicationCommand(cmd)
 		} else {
 			a.logger.Println("warn: received secure command for unknown node", cmd.SrcNodeID)
 		}
 
 	case zwsec.NonceGet:
+		a.logger.Printf("info: nonce get node=%d", cmd.SrcNodeID)
 		nonce, err := a.securityLayer.GenerateInternalNonce()
 		if err != nil {
 			a.logger.Println("alert: error generating internal nonce", err)

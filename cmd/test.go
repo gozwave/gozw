@@ -5,14 +5,21 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/comail/colog"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/helioslabs/gozw/zwave/application"
+	"github.com/helioslabs/gozw/zwave/command-class/door-lock"
 	"github.com/helioslabs/gozw/zwave/frame"
 	"github.com/helioslabs/gozw/zwave/serial-api"
 	"github.com/helioslabs/gozw/zwave/session"
 	"github.com/helioslabs/gozw/zwave/transport"
 	"github.com/peterh/liner"
 )
+
+func init() {
+	colog.Register()
+	colog.ParseFields(true)
+}
 
 func main() {
 	transport, err := transport.NewSerialPortTransport("/tmp/usbmodem", 115200)
@@ -105,6 +112,32 @@ func main() {
 					node.CommandClassVersions[cc],
 				)
 			}
+
+		case "UNLOCK":
+			input, _ := line.Prompt("node id: ")
+			nodeId, _ := strconv.Atoi(input)
+			node, err := appLayer.Node(byte(nodeId))
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			spew.Dump(node.SendCommand(&doorlock.OperationSet{
+				DoorLockMode: 0x00,
+			}))
+
+		case "LOCK":
+			input, _ := line.Prompt("node id: ")
+			nodeId, _ := strconv.Atoi(input)
+			node, err := appLayer.Node(byte(nodeId))
+			if err != nil {
+				spew.Dump(err)
+				continue
+			}
+
+			spew.Dump(node.SendCommand(&doorlock.OperationSet{
+				DoorLockMode: 0xFF,
+			}))
 
 		// case "L":
 		// 	input, _ := line.Prompt("node id: ")
