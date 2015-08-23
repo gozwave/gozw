@@ -1,8 +1,10 @@
 package serialapi
 
 import (
-	"fmt"
+	"log"
+	"os"
 
+	"github.com/comail/colog"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/helioslabs/gozw/zwave/protocol"
 	"github.com/helioslabs/gozw/zwave/session"
@@ -29,18 +31,27 @@ type Layer struct {
 	sessionLayer        session.ILayer
 	controllerUpdates   chan ControllerUpdate
 	applicationCommands chan ApplicationCommand
+	logger              *log.Logger
 }
 
 func NewLayer(sessionLayer session.ILayer) *Layer {
+	serialApiLogger := colog.NewCoLog(os.Stdout, "serial-api ", log.Ltime|log.Lmicroseconds|log.Lshortfile)
+	serialApiLogger.ParseFields(true)
+
 	layer := &Layer{
 		sessionLayer:        sessionLayer,
 		controllerUpdates:   make(chan ControllerUpdate, 10),
 		applicationCommands: make(chan ApplicationCommand, 10),
+		logger:              serialApiLogger.NewLogger(),
 	}
 
 	go layer.handleUnsolicitedFrames()
 
 	return layer
+}
+
+func (s *Layer) SetLogger(logger *log.Logger) {
+	s.logger = logger
 }
 
 func (s *Layer) ControllerUpdates() chan ControllerUpdate {
@@ -59,8 +70,7 @@ func (s *Layer) handleUnsolicitedFrames() {
 		case protocol.FnApplicationControllerUpdate:
 			s.controllerUpdates <- parseControllerUpdate(fr.Payload)
 		default:
-			fmt.Println("Unknown unsolicited frame!")
-			spew.Dump(fr)
+			s.logger.Println("warn: Unknown unsolicited frame!", spew.Sdump(fr))
 		}
 	}
 }

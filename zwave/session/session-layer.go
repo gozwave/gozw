@@ -3,9 +3,11 @@ package session
 import (
 	"encoding/hex"
 	"errors"
-	"fmt"
+	"log"
+	"os"
 	"time"
 
+	"github.com/comail/colog"
 	"github.com/helioslabs/gozw/zwave/frame"
 	"github.com/helioslabs/gozw/zwave/protocol"
 )
@@ -33,10 +35,15 @@ type Layer struct {
 	sequenceNumber byte
 	callbacks      map[byte]CallbackFunc
 
+	logger *log.Logger
+
 	requestQueue chan *Request
 }
 
 func NewSessionLayer(frameLayer frame.ILayer) *Layer {
+	sessionLogger := colog.NewCoLog(os.Stdout, "session ", log.Ltime|log.Lmicroseconds|log.Lshortfile)
+	sessionLogger.ParseFields(true)
+
 	session := &Layer{
 		frameLayer: frameLayer,
 
@@ -47,6 +54,8 @@ func NewSessionLayer(frameLayer frame.ILayer) *Layer {
 
 		sequenceNumber: 0,
 		callbacks:      map[byte]CallbackFunc{},
+
+		logger: sessionLogger.NewLogger(),
 
 		requestQueue: make(chan *Request, 10),
 	}
@@ -82,13 +91,13 @@ func (s *Layer) receiveThread() {
 
 				s.lastRequestFuncID = 0
 			} else {
-				fmt.Println("Received an unexpected response frame: ", frameIn)
+				s.logger.Println("warn: received an unexpected response frame: ", frameIn)
 			}
 		} else {
 			var callbackID byte
 
 			if s.lastRequestFuncID != 0 {
-				fmt.Println("REQUEST/RESPONSE COLLISION; SENDING CAN FRAME AND RETRYING PREVIOUS SEND")
+				s.logger.Println("REQUEST/RESPONSE COLLISION; SENDING CAN FRAME AND RETRYING PREVIOUS SEND")
 				s.frameLayer.Write(frame.NewCanFrame())
 				select {
 				case s.responses <- *frame.NewCanFrame():
@@ -119,7 +128,7 @@ func (s *Layer) receiveThread() {
 
 				// Log in case we need to set up a callback for a function
 			default:
-				fmt.Println("session-layer: got unknown callback for func: ", hex.EncodeToString([]byte{frameIn.Payload[0]}))
+				s.logger.Println("warn: got unknown callback for func: ", hex.EncodeToString([]byte{frameIn.Payload[0]}))
 				callbackID = 0
 			}
 
@@ -166,7 +175,7 @@ func (s *Layer) sendThread() {
 					// Hopefully we won't collide again if we wait for 10ms :)
 					time.Sleep(100 * time.Millisecond)
 					if attempts > 3 {
-						fmt.Println("TOO MANY RETRIES")
+						s.logger.Println("alert: TOO MANY RETRIES")
 						request.ReturnCallback(errors.New("Too many retries sending command"), nil)
 						return
 					}
@@ -190,7 +199,7 @@ func (s *Layer) sendThread() {
 			select {
 			case <-request.Release:
 			case <-time.After(request.Timeout):
-				fmt.Println("session lock timeout")
+				s.logger.Println("warn: session lock timeout")
 			}
 		}
 

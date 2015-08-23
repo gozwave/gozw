@@ -2,10 +2,13 @@ package security
 
 import (
 	"errors"
+	"log"
+	"os"
 	"runtime"
 	"sync"
 	"time"
 
+	"github.com/comail/colog"
 	"github.com/helioslabs/gozw/zwave/command-class/security"
 	"github.com/helioslabs/gozw/zwave/serial-api"
 )
@@ -40,9 +43,14 @@ type Layer struct {
 	// maps node id to channel
 	waitForNonce map[byte]chan bool
 	waitMapLock  *sync.Mutex
+
+	logger *log.Logger
 }
 
 func NewLayer(networkKey []byte) *Layer {
+	securityLogger := colog.NewCoLog(os.Stdout, "security ", log.Ltime|log.Lmicroseconds|log.Lshortfile)
+	securityLogger.ParseFields(true)
+
 	securityLayer := &Layer{
 		networkKey: networkKey,
 
@@ -54,6 +62,8 @@ func NewLayer(networkKey []byte) *Layer {
 
 		waitForNonce: map[byte]chan bool{},
 		waitMapLock:  &sync.Mutex{},
+
+		logger: securityLogger.NewLogger(),
 	}
 
 	return securityLayer

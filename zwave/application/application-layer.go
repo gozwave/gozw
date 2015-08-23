@@ -2,11 +2,13 @@ package application
 
 import (
 	"errors"
-	"fmt"
+	"log"
+	"os"
 	"time"
 
 	"github.com/asaskevich/EventBus"
 	"github.com/boltdb/bolt"
+	"github.com/comail/colog"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/helioslabs/gozw/zwave/command-class"
 	zwsec "github.com/helioslabs/gozw/zwave/command-class/security"
@@ -90,7 +92,8 @@ type Layer struct {
 
 	EventBus *EventBus.EventBus
 
-	db *bolt.DB
+	logger *log.Logger
+	db     *bolt.DB
 
 	// maps node id to channel
 	secureInclusionStep map[byte]chan error
@@ -101,11 +104,16 @@ type Layer struct {
 // handle incming Z-Wave commands and updates, and loads basic controller data
 // from the Z-Wave controller.
 func NewLayer(serialAPI serialapi.ILayer) (app *Layer, err error) {
+	applicationLogger := colog.NewCoLog(os.Stdout, "application ", log.Ltime|log.Lmicroseconds|log.Lshortfile)
+	applicationLogger.ParseFields(true)
+
 	app = &Layer{
 		serialAPI: serialAPI,
 		nodes:     map[byte]*Node{},
 
 		EventBus: EventBus.New(),
+
+		logger: applicationLogger.NewLogger(),
 
 		secureInclusionStep: map[byte]chan error{},
 	}
@@ -265,7 +273,7 @@ func (a *Layer) AddNode() (*Node, error) {
 	a.nodes[node.NodeID] = node
 
 	if node.IsSecure() {
-		fmt.Println("Starting secure inclusion")
+		a.logger.Println("debug: starting secure inclusion")
 		err = a.includeSecureNode(node.NodeID)
 		if err != nil {
 			return nil, err
@@ -274,13 +282,13 @@ func (a *Layer) AddNode() (*Node, error) {
 		time.Sleep(time.Millisecond * 50)
 		err := node.RequestSupportedSecurityCommands()
 		if err != nil {
-			fmt.Println(err)
+			a.logger.Printf("error: %v\n", err)
 		}
 
 		select {
 		case <-node.receivedSecurityInfo:
 		case <-time.After(time.Second * 5):
-			fmt.Println("timed out after requesting security commands")
+			a.logger.Println("error: timed out after requesting security commands")
 		}
 	}
 
@@ -336,7 +344,7 @@ func (a *Layer) handleApplicationCommands() {
 			if node, err := a.Node(cmd.SrcNodeID); err == nil {
 				go node.receiveApplicationCommand(cmd)
 			} else {
-				fmt.Println("Received command for unknown node", cmd.SrcNodeID)
+				a.logger.Println("warn: Received command for unknown node", cmd.SrcNodeID)
 			}
 
 		}
@@ -354,11 +362,11 @@ func (a *Layer) handleControllerUpdates() {
 			if node, ok := a.nodes[update.NodeID]; ok {
 				node.receiveControllerUpdate(update)
 			} else {
-				fmt.Println("controller update:", spew.Sdump(update))
+				a.logger.Println("debug: controller update:", spew.Sdump(update))
 			}
 
 		default:
-			fmt.Println("controller update:", spew.Sdump(update))
+			a.logger.Println("debug: controller update:", spew.Sdump(update))
 
 		}
 
@@ -404,7 +412,7 @@ func (a *Layer) getOrRequestNonceForNode(dstNode byte) (nonce security.Nonce, er
 			break
 		}
 
-		fmt.Printf("get nonce attempt #%d failed\n", i)
+		a.logger.Printf("error: get nonce attempt #%d failed\n", i)
 		time.Sleep(50 * time.Millisecond)
 	}
 
@@ -497,7 +505,7 @@ func (a *Layer) includeSecureNode(nodeID byte) error {
 func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) {
 	command, err := commandclass.Parse(1, cmd.CommandData)
 	if err != nil {
-		fmt.Println(err)
+		a.logger.Printf("error: %v\n", err)
 		return
 	}
 
@@ -519,7 +527,7 @@ func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) 
 		decrypted, err := a.securityLayer.DecryptMessage(cmd)
 
 		if err != nil {
-			fmt.Println("error handling encrypted message", err)
+			a.logger.Printf("error: error handling encrypted message %v\n", err)
 			return
 		}
 
@@ -535,13 +543,13 @@ func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) 
 			cmd.CommandData = decrypted.CommandData
 			go node.receiveApplicationCommand(cmd)
 		} else {
-			fmt.Println("Received secure command for unknown node", cmd.SrcNodeID)
+			a.logger.Println("warn: received secure command for unknown node", cmd.SrcNodeID)
 		}
 
 	case zwsec.NonceGet:
 		nonce, err := a.securityLayer.GenerateInternalNonce()
 		if err != nil {
-			fmt.Println("error generating internal nonce", err)
+			a.logger.Println("alert: error generating internal nonce", err)
 		}
 
 		reply := &zwsec.NonceReport{NonceByte: nonce}
@@ -556,6 +564,6 @@ func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) 
 		}
 
 	default:
-		fmt.Println("Unexpected security command:", spew.Sdump(cmd))
+		a.logger.Println("warn: unexpected security command:", spew.Sdump(cmd))
 	}
 }

@@ -1,8 +1,10 @@
 package frame
 
 import (
-	"fmt"
+	"log"
+	"os"
 
+	"github.com/comail/colog"
 	"github.com/helioslabs/gozw/zwave/transport"
 )
 
@@ -19,11 +21,16 @@ type Layer struct {
 	parserOutput     <-chan *ParseEvent
 	acks, naks, cans <-chan bool
 
+	logger *log.Logger
+
 	pendingWrites chan *Frame
 	frameOutput   chan Frame
 }
 
 func NewFrameLayer(transportLayer transport.Transport) *Layer {
+	frameLogger := colog.NewCoLog(os.Stdout, "frame ", log.Ltime|log.Lmicroseconds|log.Lshortfile)
+	frameLogger.ParseFields(true)
+
 	parserInput := make(chan byte)
 	parserOutput := make(chan *ParseEvent, 1)
 	acks := make(chan bool, 1)
@@ -39,6 +46,8 @@ func NewFrameLayer(transportLayer transport.Transport) *Layer {
 		acks:         acks,
 		naks:         naks,
 		cans:         cans,
+
+		logger: frameLogger.NewLogger(),
 
 		pendingWrites: make(chan *Frame),
 		frameOutput:   make(chan Frame, 5),
@@ -65,11 +74,11 @@ func (l *Layer) bgWork() {
 			}
 
 		case <-l.acks:
-			fmt.Println("frame layer: rx ack")
+			l.logger.Print("warn: rx ack")
 		case <-l.naks:
-			fmt.Println("frame layer: rx nak")
+			l.logger.Print("warn: rx nak")
 		case <-l.cans:
-			fmt.Println("frame layer: rx can")
+			l.logger.Print("warn: rx can")
 
 		case frameToWrite := <-l.pendingWrites:
 			l.writeToTransport(frameToWrite.Marshal())

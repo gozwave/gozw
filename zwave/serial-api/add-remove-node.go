@@ -2,7 +2,6 @@ package serialapi
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/helioslabs/gozw/zwave/frame"
@@ -32,23 +31,23 @@ func (s *Layer) AddNode() (*AddRemoveNodeCallback, error) {
 
 			switch cbData.Status {
 			case protocol.AddNodeStatusLearnReady:
-				fmt.Println("ADD NODE: learn ready")
+				s.logger.Println("debug: ADD NODE: learn ready")
 
 			case protocol.AddNodeStatusNodeFound:
-				fmt.Println("ADD NODE: node found")
+				s.logger.Println("debug: ADD NODE: node found")
 
 			case protocol.AddNodeStatusAddingSlave:
-				fmt.Println("ADD NODE: adding slave node")
+				s.logger.Println("debug: ADD NODE: adding slave node")
 				newNode = cbData
 
 			case protocol.AddNodeStatusAddingController:
 				// hey, i just met you, and this is crazy
 				// but it could happen, so implement me maybe
-				fmt.Println("ADD NODE: adding controller node")
+				s.logger.Println("debug: ADD NODE: adding controller node")
 				newNode = cbData
 
 			case protocol.AddNodeStatusProtocolDone:
-				fmt.Println("ADD NODE: protocol done")
+				s.logger.Println("debug: ADD NODE: protocol done")
 				reply := addRemoveStatusFrame(
 					protocol.FnAddNodeToNetwork,
 					protocol.AddNodeStop,
@@ -57,7 +56,7 @@ func (s *Layer) AddNode() (*AddRemoveNodeCallback, error) {
 				s.sessionLayer.SendFrameDirect(reply)
 
 			case protocol.AddNodeStatusDone:
-				fmt.Println("ADD NODE: done")
+				s.logger.Println("debug: ADD NODE: done")
 				reply := addRemoveStatusFrame(
 					protocol.FnAddNodeToNetwork,
 					protocol.AddNodeStop,
@@ -70,7 +69,7 @@ func (s *Layer) AddNode() (*AddRemoveNodeCallback, error) {
 				done <- &cbFrame
 
 			case protocol.AddNodeStatusFailed:
-				fmt.Println("ADD NODE: failed")
+				s.logger.Println("error: ADD NODE: failed")
 				reply := addRemoveStatusFrame(
 					protocol.FnAddNodeToNetwork,
 					protocol.AddNodeStop,
@@ -79,7 +78,7 @@ func (s *Layer) AddNode() (*AddRemoveNodeCallback, error) {
 				s.sessionLayer.SendFrameDirect(reply)
 
 			default:
-				fmt.Println("ADD NODE: unknown status", cbData.Status)
+				s.logger.Println("alert: ADD NODE: unknown status", cbData.Status)
 			}
 		},
 	}
@@ -117,23 +116,23 @@ func (s *Layer) RemoveNode() (*AddRemoveNodeCallback, error) {
 
 			switch cbData.Status {
 			case protocol.RemoveNodeStatusLearnReady:
-				fmt.Println("REMOVE NODE: learn ready")
+				s.logger.Println("debug: REMOVE NODE: learn ready")
 
 			case protocol.RemoveNodeStatusNodeFound:
-				fmt.Println("REMOVE NODE: node found")
+				s.logger.Println("debug: REMOVE NODE: node found")
 
 			case protocol.RemoveNodeStatusRemovingSlave:
-				fmt.Println("REMOVE NODE: removing slave node")
+				s.logger.Println("debug: REMOVE NODE: removing slave node")
 				removedNode = cbData
 
 			case protocol.RemoveNodeStatusRemovingController:
 				// hey, i just met you, and this is crazy
 				// but it could happen, so implement me maybe
-				fmt.Println("REMOVE NODE: removing controller node")
+				s.logger.Println("debug: REMOVE NODE: removing controller node")
 				removedNode = cbData
 
 			case protocol.RemoveNodeStatusProtocolDone:
-				fmt.Println("REMOVE NODE: protocol done")
+				s.logger.Println("debug: REMOVE NODE: protocol done")
 				reply := addRemoveStatusFrame(
 					protocol.FnRemoveNodeFromNetwork,
 					protocol.RemoveNodeStop,
@@ -142,7 +141,7 @@ func (s *Layer) RemoveNode() (*AddRemoveNodeCallback, error) {
 				s.sessionLayer.SendFrameDirect(reply)
 
 			case protocol.RemoveNodeStatusDone:
-				fmt.Println("REMOVE NODE: done")
+				s.logger.Println("debug: REMOVE NODE: done")
 				reply := addRemoveStatusFrame(
 					protocol.FnRemoveNodeFromNetwork,
 					protocol.RemoveNodeStop,
@@ -155,7 +154,7 @@ func (s *Layer) RemoveNode() (*AddRemoveNodeCallback, error) {
 				done <- &cbFrame
 
 			case protocol.RemoveNodeStatusFailed:
-				fmt.Println("REMOVE NODE: failed")
+				s.logger.Println("error: REMOVE NODE: failed")
 				reply := addRemoveStatusFrame(
 					protocol.FnRemoveNodeFromNetwork,
 					protocol.RemoveNodeStop,
@@ -164,7 +163,7 @@ func (s *Layer) RemoveNode() (*AddRemoveNodeCallback, error) {
 				s.sessionLayer.SendFrameDirect(reply)
 
 			default:
-				fmt.Println("REMOVE NODE: unknown status", cbData.Status)
+				s.logger.Println("alert: REMOVE NODE: unknown status", cbData.Status)
 			}
 		},
 	}
