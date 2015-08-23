@@ -45,6 +45,9 @@
     i += 2
   {{else if eq .Type "MARKER"}}
     i += 1 // skipping MARKER
+    if len(payload) <= i {
+      return nil
+    }
   {{else}}
     {{if .IsNotReserved}}
       cmd.{{ToGoName .Name}} = payload[i]
