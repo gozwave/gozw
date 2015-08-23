@@ -293,6 +293,8 @@ func (a *Layer) AddNode() (*Node, error) {
 
 	spew.Dump(node)
 
+	node.LoadCommandClassVersions()
+
 	node.AddAssociation(1, 1)
 
 	return node, nil
