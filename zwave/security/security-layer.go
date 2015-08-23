@@ -90,6 +90,8 @@ func (s *Layer) EncapsulateMessage(
 
 	iv := append(senderNonce, receiverNonce...)
 
+	s.logger.Print("debug: encrypting message")
+
 	encryptedPayload := CryptMessage(payload, iv, encKey)
 
 	authDataBuf := append(iv, byte(security.CommandMessageEncapsulation))
@@ -110,6 +112,8 @@ func (s *Layer) EncapsulateMessage(
 
 // @todo verify message hmac
 func (s *Layer) DecryptMessage(cmd serialapi.ApplicationCommand) (*serialapi.ApplicationCommand, error) {
+	s.logger.Print("debug: decrypting message")
+
 	message := EncryptedMessage{}
 	err := message.UnmarshalBinary(cmd.CommandData)
 	if err != nil {
@@ -128,6 +132,8 @@ func (s *Layer) DecryptMessage(cmd serialapi.ApplicationCommand) (*serialapi.App
 	pl := make([]byte, len(message.EncryptedPayload))
 	copy(pl, message.EncryptedPayload)
 	cmd.CommandData = CryptMessage(pl, iv, s.networkEncKey)
+
+	s.logger.Printf("debug: decrypted message command class: %X", cmd.CommandData[0])
 
 	return &cmd, nil
 }
@@ -169,7 +175,9 @@ func (s *Layer) ReceiveNonce(fromNode byte, report security.NonceReport) {
 		// any case, we never want to block here
 		select {
 		case ch <- true:
+			s.logger.Print("debug: received nonce and notified waiting channel")
 		default:
+			s.logger.Print("debug: no channel was waiting for received nonce")
 		}
 
 		// closing the channel will unblock anything that is currently listening (in
@@ -202,9 +210,12 @@ func (s *Layer) WaitForExternalNonce(nodeID byte) (Nonce, error) {
 	s.waitMapLock.Unlock()
 	runtime.Gosched()
 
+	s.logger.Printf("debug: waiting for external nonce node=%d", nodeID)
+
 	select {
 	case <-waitChan:
 	case <-time.After(nonceRequestTimeout):
+		s.logger.Printf("warn: external nonce timeout node=%d", nodeID)
 		return nil, errors.New("nonce timeout")
 	}
 

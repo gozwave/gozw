@@ -466,6 +466,7 @@ func (a *Layer) sendDataSecure(dstNode byte, message commandclass.Command, inclu
 	)
 
 	if err != nil {
+		a.logger.Printf("error: failed to encrypt message: %v node=%d", err, dstNode)
 		return err
 	}
 
@@ -503,6 +504,7 @@ func (a *Layer) includeSecureNode(nodeID byte) error {
 }
 
 func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) {
+	a.logger.Printf("debug: intercepted security command node=%d", cmd.SrcNodeID)
 	command, err := commandclass.Parse(1, cmd.CommandData)
 	if err != nil {
 		a.logger.Printf("error: %v\n", err)
@@ -512,6 +514,7 @@ func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) 
 	switch command.(type) {
 
 	case zwsec.MessageEncapsulation, zwsec.MessageEncapsulationNonceGet:
+		a.logger.Printf("rx secure message node=%d", cmd.SrcNodeID)
 		// @todo determine whether to bother with sequenced messages. According to
 		// openzwave, they didn't bother to implement it because they never ran across
 		// a situation where a frame was large enough that it needed to be sequenced.
@@ -533,6 +536,7 @@ func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) 
 
 		if decrypted.CommandData[0] == byte(commandclass.Security) &&
 			decrypted.CommandData[1] == byte(zwsec.CommandNetworkKeyVerify) {
+			a.logger.Printf("network key verify node=%d", cmd.SrcNodeID)
 			if ch, ok := a.secureInclusionStep[cmd.SrcNodeID]; ok {
 				ch <- nil
 			}
@@ -556,11 +560,15 @@ func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) 
 		a.SendData(cmd.SrcNodeID, reply)
 
 	case zwsec.NonceReport:
+		a.logger.Printf("nonce report node=%d", cmd.SrcNodeID)
 		a.securityLayer.ReceiveNonce(cmd.SrcNodeID, (command.(zwsec.NonceReport)))
 
 	case zwsec.SchemeReport:
+		a.logger.Printf("security scheme report node=%d", cmd.SrcNodeID)
 		if ch, ok := a.secureInclusionStep[cmd.SrcNodeID]; ok {
 			ch <- nil
+		} else {
+			a.logger.Printf("warn: not in secure inclusion mode node=%d", cmd.SrcNodeID)
 		}
 
 	default:
