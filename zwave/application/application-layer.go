@@ -518,7 +518,7 @@ func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) 
 
 	switch command.(type) {
 
-	case zwsec.MessageEncapsulation, zwsec.MessageEncapsulationNonceGet:
+	case *zwsec.MessageEncapsulation, *zwsec.MessageEncapsulationNonceGet:
 		a.logger.Printf("rx secure message node=%d", cmd.SrcNodeID)
 		// @todo determine whether to bother with sequenced messages. According to
 		// openzwave, they didn't bother to implement it because they never ran across
@@ -569,7 +569,7 @@ func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) 
 			a.logger.Println("warn: received secure command for unknown node", cmd.SrcNodeID)
 		}
 
-	case zwsec.NonceGet:
+	case *zwsec.NonceGet:
 		a.logger.Printf("info: nonce get node=%d", cmd.SrcNodeID)
 		nonce, err := a.securityLayer.GenerateInternalNonce()
 		if err != nil {
@@ -579,11 +579,11 @@ func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) 
 		reply := &zwsec.NonceReport{NonceByte: nonce}
 		a.SendData(cmd.SrcNodeID, reply)
 
-	case zwsec.NonceReport:
+	case *zwsec.NonceReport:
 		a.logger.Printf("nonce report node=%d", cmd.SrcNodeID)
-		a.securityLayer.ReceiveNonce(cmd.SrcNodeID, (command.(zwsec.NonceReport)))
+		a.securityLayer.ReceiveNonce(cmd.SrcNodeID, *command.(*zwsec.NonceReport))
 
-	case zwsec.SchemeReport:
+	case *zwsec.SchemeReport:
 		a.logger.Printf("security scheme report node=%d", cmd.SrcNodeID)
 		if ch, ok := a.secureInclusionStep[cmd.SrcNodeID]; ok {
 			ch <- nil

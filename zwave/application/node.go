@@ -1,6 +1,7 @@
 package application
 
 import (
+	"encoding"
 	"errors"
 	"fmt"
 	"time"
@@ -10,17 +11,12 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/helioslabs/gozw/zwave/command-class"
-	"github.com/helioslabs/gozw/zwave/command-class/alarm"
 	"github.com/helioslabs/gozw/zwave/command-class/association"
 	"github.com/helioslabs/gozw/zwave/command-class/battery"
-	"github.com/helioslabs/gozw/zwave/command-class/door-lock"
 	"github.com/helioslabs/gozw/zwave/command-class/manufacturer-specific"
 	"github.com/helioslabs/gozw/zwave/command-class/security"
-	"github.com/helioslabs/gozw/zwave/command-class/thermostat-mode"
-	"github.com/helioslabs/gozw/zwave/command-class/thermostat-operating-state"
-	"github.com/helioslabs/gozw/zwave/command-class/thermostat-setpoint"
-	"github.com/helioslabs/gozw/zwave/command-class/user-code"
 	"github.com/helioslabs/gozw/zwave/command-class/version"
+	"github.com/helioslabs/gozw/zwave/command-class/version-v2"
 	"github.com/helioslabs/gozw/zwave/protocol"
 	"github.com/helioslabs/gozw/zwave/serial-api"
 	"github.com/helioslabs/proto"
@@ -266,7 +262,13 @@ func (n *Node) LoadManufacturerInfo() error {
 	return n.SendCommand(&manufacturerspecific.Get{})
 }
 
-func (n *Node) emitNodeEvent(event interface{}) {
+func (n *Node) emitNodeEvent(event encoding.BinaryMarshaler) {
+	// buf, err := event.MarshalBinary()
+	// if err != nil {
+	// 	fmt.Printf("error encoding: %v\n", err)
+	// 	return
+	// }
+
 	n.application.EventBus.Publish("event", proto.Event{
 		Payload: proto.NodeEvent{
 			NodeId: n.NodeID,
@@ -347,6 +349,7 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 	ver, ok := n.CommandClassVersions[cc]
 
 	if !ok {
+		spew.Dump(n.CommandClassVersions)
 		if cc == commandclass.Version || cc == commandclass.Security {
 			ver = 1
 		} else {
@@ -362,50 +365,59 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 
 	switch command.(type) {
 
-	case battery.Report:
+	case *battery.Report:
 		if cmd.CommandData[2] == 0xFF {
 			fmt.Printf("Node %d: low battery alert\n", n.NodeID)
 		} else {
-			fmt.Printf("Node %d: battery level is %d\n", n.NodeID, command.(battery.Report))
+			fmt.Printf("Node %d: battery level is %d\n", n.NodeID, command.(*battery.Report))
 		}
+		n.emitNodeEvent(command)
 
-	case security.CommandsSupportedReport:
+	case *security.CommandsSupportedReport:
 		fmt.Println("security commands supported report")
-		n.receiveSecurityCommandsSupportedReport(command.(security.CommandsSupportedReport))
+		n.receiveSecurityCommandsSupportedReport(*command.(*security.CommandsSupportedReport))
 		fmt.Println(n.GetSupportedSecureCommandClassStrings())
 
-	case alarm.Report:
-		spew.Dump(command.(alarm.Report))
+		// case alarm.Report:
+		// 	spew.Dump(command.(alarm.Report))
+		//
+		// case usercode.Report:
+		// 	spew.Dump(command.(usercode.Report))
+		//
+		// case doorlock.OperationReport:
+		// 	spew.Dump(command.(doorlock.OperationReport))
+		//
+		// case thermostatmode.Report:
+		// 	spew.Dump(command.(thermostatmode.Report))
+		//
+		// case thermostatoperatingstate.Report:
+		// 	spew.Dump(command.(thermostatoperatingstate.Report))
+		//
+		// case thermostatsetpoint.Report:
+		// 	spew.Dump(command.(thermostatsetpoint.Report))
 
-	case usercode.Report:
-		spew.Dump(command.(usercode.Report))
-
-	case doorlock.OperationReport:
-		spew.Dump(command.(doorlock.OperationReport))
-
-	case thermostatmode.Report:
-		spew.Dump(command.(thermostatmode.Report))
-
-	case thermostatoperatingstate.Report:
-		spew.Dump(command.(thermostatoperatingstate.Report))
-
-	case thermostatsetpoint.Report:
-		spew.Dump(command.(thermostatsetpoint.Report))
-
-	case version.CommandClassReport:
-		spew.Dump(command.(version.CommandClassReport))
-		report := command.(version.CommandClassReport)
+	case *version.CommandClassReport:
+		spew.Dump(command.(*version.CommandClassReport))
+		report := command.(*version.CommandClassReport)
 		n.CommandClassVersions[commandclass.ID(report.RequestedCommandClass)] = report.CommandClassVersion
 		n.saveToDb()
 
-	case manufacturerspecific.Report:
-		spew.Dump(command.(manufacturerspecific.Report))
-		// mfgInfo := commandclass.ParseManufacturerSpecificReport(cmd.CommandData)
-		// n.ManufacturerID = mfgInfo.ManufacturerID
-		// n.ProductTypeID = mfgInfo.ProductTypeID
-		// n.ProductID = mfgInfo.ProductID
+	case *versionv2.CommandClassReport:
+		spew.Dump(command.(*versionv2.CommandClassReport))
+		report := command.(*versionv2.CommandClassReport)
+		n.CommandClassVersions[commandclass.ID(report.RequestedCommandClass)] = report.CommandClassVersion
+		n.saveToDb()
+
+	case *manufacturerspecific.Report:
+		spew.Dump(command.(*manufacturerspecific.Report))
+		mfgInfo := command.(*manufacturerspecific.Report)
+		n.ManufacturerID = mfgInfo.ManufacturerId
+		n.ProductTypeID = mfgInfo.ProductTypeId
+		n.ProductID = mfgInfo.ProductId
+		n.emitNodeEvent(command)
 	default:
 		spew.Dump(command)
+		n.emitNodeEvent(command)
 	}
 }
 
