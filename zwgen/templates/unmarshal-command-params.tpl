@@ -4,12 +4,7 @@
     return errors.New("slice index out of bounds")
   }
   {{if eq .Type "VARIANT"}}
-    {{if eq (index .Variant 0).ParamOffset 255}}
-      {{template "unmarshal-variant" .}}
-    {{else}}
-      cmd.{{ToGoName .Name}} = payload[i:i+{{(index .Variant 0).ParamOffset}}]
-      i += {{(index .Variant 0).ParamOffset}}
-    {{end}}
+    {{template "unmarshal-variant" .}}
   {{else if eq .Type "STRUCT_BYTE"}}{{$name := ToGoName .Name}}
     {{range .BitField}}
       {{if .IsNotReserved}}

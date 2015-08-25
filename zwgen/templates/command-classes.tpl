@@ -23,7 +23,7 @@ func (c ID) String() string {
   }
 }
 
-func Parse(ccVersion uint8, payload []byte) (interface{}, error) {
+func Parse(ccVersion uint8, payload []byte) (Command, error) {
   switch {
     {{range $_, $cc := .CommandClasses}}{{if .CanGen}}{{if .Enabled}}{{$version := .Version}}
     case payload[0] == byte({{.GetConstName}}) && ccVersion == {{$version}}:
@@ -33,7 +33,7 @@ func Parse(ccVersion uint8, payload []byte) (interface{}, error) {
           if err := command.UnmarshalBinary(payload); err != nil {
             return nil, err
           }
-          return command, nil
+          return &command, nil
         {{end}}default:
           return nil, errors.New("Unknown command in command class {{.Help}}")
       }
