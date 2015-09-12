@@ -41,7 +41,6 @@ func TestParsingDataFrame(t *testing.T) {
 	assert.EqualValues(t, 0x13, frame.Payload[0])
 	assert.EqualValues(t, 0xe8, frame.CalcChecksum())
 	assert.Len(t, frame.Payload, 2)
-
 }
 
 func TestInvalidChecksum(t *testing.T) {
@@ -160,5 +159,44 @@ func TestRecoversAfterInvalidLength(t *testing.T) {
 	assert.Equal(t, ParseNotOk, parserEvent.status)
 	assert.True(t, frame.IsData())
 	assert.True(t, frame.IsResponse())
+}
 
+func BenchmarkParsingShortDataFrame(b *testing.B) {
+	parserInput := make(chan byte)
+	parserOutput := make(chan *ParseEvent, 1)
+	acks := make(chan bool, 1)
+	naks := make(chan bool, 1)
+	cans := make(chan bool, 1)
+
+	NewParser(parserInput, parserOutput, acks, naks, cans)
+
+	for n := 0; n < b.N; n++ {
+
+		parserInput <- 0x01
+		parserInput <- 0x04
+		parserInput <- 0x01
+		parserInput <- 0x13
+		parserInput <- 0x01
+		parserInput <- 0xe8
+
+		parserEvent := <-parserOutput
+		assert.Equal(b, ParseOk, parserEvent.status)
+	}
+}
+
+func BenchmarkParsingAckFrame(b *testing.B) {
+	parserInput := make(chan byte)
+	parserOutput := make(chan *ParseEvent, 1)
+	acks := make(chan bool, 1)
+	naks := make(chan bool, 1)
+	cans := make(chan bool, 1)
+
+	NewParser(parserInput, parserOutput, acks, naks, cans)
+
+	for n := 0; n < b.N; n++ {
+
+		parserInput <- 0x06
+
+		<-acks
+	}
 }
