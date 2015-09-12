@@ -8,7 +8,6 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/helioslabs/gozw/zwave/application"
-	"github.com/helioslabs/gozw/zwave/command-class"
 	"github.com/helioslabs/gozw/zwave/frame"
 	"github.com/helioslabs/gozw/zwave/serial-api"
 	"github.com/helioslabs/gozw/zwave/session"
@@ -152,35 +151,16 @@ func (g *Gateway) handleEvent(ev proto.Event) {
 		for _, node := range g.app.Nodes() {
 
 			payload := proto.NodeInfoEvent{
-				NodeID:                         node.NodeID,
-				Capability:                     node.Capability,
-				BasicDeviceClass:               node.BasicDeviceClass,
-				GenericDeviceClass:             node.GenericDeviceClass,
-				SpecificDeviceClass:            node.SpecificDeviceClass,
-				Failing:                        node.Failing,
-				SupportedCommandClasses:        make([]commandclass.ID, 0),
-				SecureSupportedCommandClasses:  make([]commandclass.ID, 0),
-				SecureControlledCommandClasses: make([]commandclass.ID, 0),
-				CommandClassVersions:           map[commandclass.ID]byte{},
-				ManufacturerID:                 node.ManufacturerID,
-				ProductTypeID:                  node.ProductTypeID,
-				ProductID:                      node.ProductID,
-			}
-
-			for cc := range node.SupportedCommandClasses {
-				payload.SupportedCommandClasses = append(payload.SupportedCommandClasses, cc)
-			}
-
-			for cc := range node.SecureSupportedCommandClasses {
-				payload.SecureSupportedCommandClasses = append(payload.SecureSupportedCommandClasses, cc)
-			}
-
-			for cc := range node.SecureControlledCommandClasses {
-				payload.SecureControlledCommandClasses = append(payload.SecureControlledCommandClasses, cc)
-			}
-
-			for cc, version := range node.CommandClassVersions {
-				payload.CommandClassVersions[cc] = version
+				NodeID:              node.NodeID,
+				Capability:          node.Capability,
+				BasicDeviceClass:    node.BasicDeviceClass,
+				GenericDeviceClass:  node.GenericDeviceClass,
+				SpecificDeviceClass: node.SpecificDeviceClass,
+				Failing:             node.Failing,
+				CommandClasses:      node.CommandClasses,
+				ManufacturerID:      node.ManufacturerID,
+				ProductTypeID:       node.ProductTypeID,
+				ProductID:           node.ProductID,
 			}
 
 			g.outgoingEvents <- proto.Event{

@@ -97,19 +97,11 @@ func main() {
 				continue
 			}
 
-			for cc, _ := range node.SupportedCommandClasses {
+			for id, cc := range node.CommandClasses {
 				fmt.Printf(
 					"%s: %d\n",
-					cc,
-					node.CommandClassVersions[cc],
-				)
-			}
-
-			for cc, _ := range node.SecureSupportedCommandClasses {
-				fmt.Printf(
-					"%s: %d\n",
-					cc,
-					node.CommandClassVersions[cc],
+					id,
+					cc.Version,
 				)
 			}
 
