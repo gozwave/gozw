@@ -293,7 +293,7 @@ func dataZwaveDefsXml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/zwave-defs.xml", size: 640768, mode: os.FileMode(420), modTime: time.Unix(1442095443, 0)}
+	info := bindataFileInfo{name: "data/zwave-defs.xml", size: 640768, mode: os.FileMode(420), modTime: time.Unix(1442095528, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }

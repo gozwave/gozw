@@ -96,27 +96,7 @@ func (c CommandClass) CanGenerate() (can bool, reason string) {
 		return false, "Not an actual command class"
 	}
 
-	if c.Name == "COMMAND_CLASS_ZIP_6LOWPAN" ||
-		c.Name == "COMMAND_CLASS_ZIP_ND" ||
-		c.Name == "COMMAND_CLASS_ZIP_GATEWAY" ||
-		c.Name == "COMMAND_CLASS_ZIP_PORTAL" ||
-		c.Name == "COMMAND_CLASS_ZIP" ||
-		c.Name == "COMMAND_CLASS_IP_ASSOCIATION" ||
-		c.Name == "COMMAND_CLASS_TRANSPORT_SERVICE" ||
-		c.Name == "COMMAND_CLASS_CONTROLLER_REPLICATION" ||
-		c.Name == "COMMAND_CLASS_CRC_16_ENCAP" ||
-		c.Name == "COMMAND_CLASS_IP_CONFIGURATION" ||
-		c.Name == "COMMAND_CLASS_NETWORK_MANAGEMENT_BASIC" ||
-		c.Name == "COMMAND_CLASS_NETWORK_MANAGEMENT_INCLUSION" ||
-		c.Name == "COMMAND_CLASS_NETWORK_MANAGEMENT_PRIMARY" ||
-		c.Name == "COMMAND_CLASS_NETWORK_MANAGEMENT_PROXY" ||
-		c.Name == "COMMAND_CLASS_FIRMWARE_UPDATE_MD" ||
-		c.Name == "COMMAND_CLASS_SECURITY_PANEL_MODE" ||
-		c.Name == "COMMAND_CLASS_SECURITY_PANEL_ZONE" ||
-		c.Name == "COMMAND_CLASS_SECURITY_PANEL_ZONE_SENSOR" ||
-		c.Name == "COMMAND_CLASS_SCREEN_ATTRIBUTES" ||
-		c.Name == "COMMAND_CLASS_SCREEN" ||
-		c.Name == "COMMAND_CLASS_ZENSOR_NET" {
+	if c.Name == "COMMAND_CLASS_ZIP" {
 		return false, "Not supported"
 	}
 
