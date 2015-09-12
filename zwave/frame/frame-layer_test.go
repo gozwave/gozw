@@ -1,40 +1,39 @@
 package frame
 
 import (
+	"bytes"
+	"io"
 	"testing"
 	"time"
 
-	"github.com/helioslabs/gozw/zwave/mocks"
+	"github.com/helioslabs/gozw/zwave/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGoodIncomingFrameResultsInAck(t *testing.T) {
 	t.Parallel()
 
-	bytes := make(chan byte, 100)
-	var bytesFromTransport <-chan byte = bytes
+	buf := &testutil.TestBuffer{
+		ReadableBytes: bytes.NewBuffer([]byte{
+			0x01,
+			0x04,
+			0x01,
+			0x13,
+			0x01,
+			0xe8,
+		}),
+		BytesWritten: bytes.NewBuffer([]byte{}),
+	}
 
-	transport := new(mocks.TransportLayer)
-	transport.On("Read").Return(bytesFromTransport).Once()
-	transport.On("Write", []byte{HeaderAck}).Return(1, nil)
-
-	frameLayer := NewFrameLayer(transport)
-
-	bytes <- 0x01
-	bytes <- 0x04
-	bytes <- 0x01
-	bytes <- 0x13
-	bytes <- 0x01
-	bytes <- 0xe8
+	frameLayer := NewFrameLayer(io.ReadWriter(buf))
 
 	frame := <-frameLayer.GetOutputChannel()
 
 	// Ensure the other goroutines have time to do their thing
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 
 	// Ensure ack was written back to the transport
-	transport.AssertCalled(t, "Write", []byte{HeaderAck})
-	transport.AssertExpectations(t)
+	assert.EqualValues(t, []byte{HeaderAck}, buf.BytesWritten.Bytes())
 
 	// Ensure the frame read from the transport is correct
 	assert.True(t, frame.IsResponse())
@@ -46,29 +45,26 @@ func TestGoodIncomingFrameResultsInAck(t *testing.T) {
 
 func TestBadIncomingFrameResultsInNak(t *testing.T) {
 	t.Parallel()
+	buf := &testutil.TestBuffer{
 
-	bytes := make(chan byte, 100)
-	var bytesFromTransport <-chan byte = bytes
+		ReadableBytes: bytes.NewBuffer([]byte{
+			0x01,
+			0x04,
+			0x01,
+			0x13,
+			0x01,
+			0x99,
+		}),
+		BytesWritten: bytes.NewBuffer([]byte{}),
+	}
 
-	transport := new(mocks.TransportLayer)
-	transport.On("Read").Return(bytesFromTransport)
-	transport.On("Write", []byte{HeaderNak}).Return(1, nil)
-
-	_ = NewFrameLayer(transport)
-
-	bytes <- 0x01
-	bytes <- 0x04
-	bytes <- 0x01
-	bytes <- 0x13
-	bytes <- 0x01
-	bytes <- 0x99
+	_ = NewFrameLayer(io.ReadWriter(buf))
 
 	// Ensure the other goroutines have time to do their thing
 	time.Sleep(200 * time.Millisecond)
 
 	// Ensure nak was written back to the transport
-	transport.AssertCalled(t, "Write", []byte{HeaderNak})
-	transport.AssertExpectations(t)
+	assert.EqualValues(t, []byte{HeaderNak}, buf.BytesWritten.Bytes())
 }
 
 func TestOutgoingFrameWrittenCorrectly(t *testing.T) {

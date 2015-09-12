@@ -1,11 +1,11 @@
 package frame
 
 import (
+	"io"
 	"log"
 	"os"
 
 	"github.com/comail/colog"
-	"github.com/helioslabs/gozw/zwave/transport"
 )
 
 type ILayer interface {
@@ -14,7 +14,7 @@ type ILayer interface {
 }
 
 type Layer struct {
-	transportLayer transport.Transport
+	transportLayer io.ReadWriter
 
 	frameParser      *Parser
 	parserInput      chan<- byte
@@ -27,7 +27,11 @@ type Layer struct {
 	frameOutput   chan Frame
 }
 
-func NewFrameLayer(transportLayer transport.Transport) *Layer {
+func NewFrameLayer(transportLayer io.ReadWriter) *Layer {
+	if _, ok := transportLayer.(io.ByteReader); !ok {
+		panic("transportLayer does not implement io.ByteReader")
+	}
+
 	frameLogger := colog.NewCoLog(os.Stdout, "frame ", log.Ltime|log.Lmicroseconds|log.Lshortfile)
 	frameLogger.ParseFields(true)
 
@@ -99,8 +103,17 @@ func (l *Layer) GetOutputChannel() <-chan Frame {
 }
 
 func (l *Layer) bgRead() {
-	for eachByte := range l.transportLayer.Read() {
-		l.parserInput <- eachByte
+	for {
+		byt, err := l.transportLayer.(io.ByteReader).ReadByte()
+		if err == io.EOF {
+			// TODO: handle EOF
+			return
+		} else if err != nil {
+			// TODO: handle more gracefully
+			panic(err)
+		}
+
+		l.parserInput <- byt
 	}
 }
 

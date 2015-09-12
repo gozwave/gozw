@@ -2,18 +2,13 @@ package transport
 
 import (
 	"bufio"
-	"io"
 
 	"github.com/tarm/serial"
 )
 
-type Transport interface {
-	Read() <-chan byte
-	Write(buf []byte) (int, error)
-}
-
 type SerialPortTransport struct {
-	port *serial.Port
+	port   *serial.Port
+	reader *bufio.Reader
 }
 
 func NewSerialPortTransport(device string, baud int) (*SerialPortTransport, error) {
@@ -29,37 +24,21 @@ func NewSerialPortTransport(device string, baud int) (*SerialPortTransport, erro
 	}
 
 	transport := &SerialPortTransport{
-		port: port,
+		port:   port,
+		reader: bufio.NewReader(port),
 	}
 
 	return transport, nil
 }
 
-func (t *SerialPortTransport) Read() <-chan byte {
-	readQueue := make(chan byte)
+func (t *SerialPortTransport) Read(p []byte) (n int, err error) {
+	return t.reader.Read(p)
+}
 
-	go t.readAsync(readQueue)
-
-	return readQueue
+func (t *SerialPortTransport) ReadByte() (byte, error) {
+	return t.reader.ReadByte()
 }
 
 func (t *SerialPortTransport) Write(buf []byte) (int, error) {
 	return t.port.Write(buf)
-}
-
-func (t *SerialPortTransport) readAsync(readQueue chan<- byte) {
-	reader := bufio.NewReader(t.port)
-
-	for {
-		byt, err := reader.ReadByte()
-
-		if err == io.EOF {
-			close(readQueue)
-			break
-		} else if err != nil {
-			panic(err)
-		}
-
-		readQueue <- byt
-	}
 }
