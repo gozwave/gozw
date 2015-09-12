@@ -1,7 +1,6 @@
 package application
 
 import (
-	"encoding"
 	"errors"
 	"fmt"
 	"time"
@@ -262,17 +261,19 @@ func (n *Node) LoadManufacturerInfo() error {
 	return n.SendCommand(&manufacturerspecific.Get{})
 }
 
-func (n *Node) emitNodeEvent(event encoding.BinaryMarshaler) {
-	// buf, err := event.MarshalBinary()
-	// if err != nil {
-	// 	fmt.Printf("error encoding: %v\n", err)
-	// 	return
-	// }
+func (n *Node) emitNodeEvent(event commandclass.Command) {
+	buf, err := event.MarshalBinary()
+	if err != nil {
+		fmt.Printf("error encoding: %v\n", err)
+		return
+	}
 
 	n.application.EventBus.Publish("event", proto.Event{
-		Payload: proto.NodeEvent{
-			NodeId: n.NodeID,
-			Event:  event,
+		Payload: proto.NodeCommandEvent{
+			NodeID:         n.NodeID,
+			CommandClassID: event.CommandClassID(),
+			CommandID:      event.CommandID(),
+			CommandData:    buf,
 		},
 	})
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/helioslabs/gozw/zwave/application"
+	"github.com/helioslabs/gozw/zwave/command-class"
 	"github.com/helioslabs/gozw/zwave/frame"
 	"github.com/helioslabs/gozw/zwave/serial-api"
 	"github.com/helioslabs/gozw/zwave/session"
@@ -85,7 +86,7 @@ func (g *Gateway) Run() {
 	go g.processIncoming()
 
 	g.outgoingEvents <- proto.Event{
-		Payload: proto.IdentEvent{HomeId: g.app.HomeID},
+		Payload: proto.IdentEvent{HomeID: g.app.Controller.HomeID},
 	}
 }
 
@@ -132,6 +133,61 @@ func (g *Gateway) processIncoming() {
 
 func (g *Gateway) handleEvent(ev proto.Event) {
 	switch ev.Payload.(type) {
+	case proto.RegisterEvent:
+		g.outgoingEvents <- proto.Event{
+			Payload: proto.ControllerInfoEvent{
+				APIVersion:          g.app.Controller.APIVersion,
+				APILibraryType:      g.app.Controller.APILibraryType,
+				HomeID:              g.app.Controller.HomeID,
+				NodeID:              g.app.Controller.NodeID,
+				Version:             g.app.Controller.Version,
+				APIType:             g.app.Controller.APIType,
+				IsPrimaryController: g.app.Controller.IsPrimaryController,
+				ApplicationVersion:  g.app.Controller.ApplicationVersion,
+				ApplicationRevision: g.app.Controller.ApplicationRevision,
+				SupportedFunctions:  g.app.Controller.SupportedFunctions,
+			},
+		}
+
+		for _, node := range g.app.Nodes() {
+
+			payload := proto.NodeInfoEvent{
+				NodeID:                         node.NodeID,
+				Capability:                     node.Capability,
+				BasicDeviceClass:               node.BasicDeviceClass,
+				GenericDeviceClass:             node.GenericDeviceClass,
+				SpecificDeviceClass:            node.SpecificDeviceClass,
+				Failing:                        node.Failing,
+				SupportedCommandClasses:        make([]commandclass.ID, 0),
+				SecureSupportedCommandClasses:  make([]commandclass.ID, 0),
+				SecureControlledCommandClasses: make([]commandclass.ID, 0),
+				// CommandClassVersions:           make([]commandclass.ID, 0),
+				ManufacturerID: node.ManufacturerID,
+				ProductTypeID:  node.ProductTypeID,
+				ProductID:      node.ProductID,
+			}
+
+			for cc := range node.SupportedCommandClasses {
+				payload.SupportedCommandClasses = append(payload.SupportedCommandClasses, cc)
+			}
+
+			for cc := range node.SecureSupportedCommandClasses {
+				payload.SecureSupportedCommandClasses = append(payload.SecureSupportedCommandClasses, cc)
+			}
+
+			for cc := range node.SecureControlledCommandClasses {
+				payload.SecureControlledCommandClasses = append(payload.SecureControlledCommandClasses, cc)
+			}
+
+			// for cc := range node.CommandClassVersions {
+			// 	payload.CommandClassVersions = append(payload.CommandClassVersions, cc)
+			// }
+
+			g.outgoingEvents <- proto.Event{
+				Payload: payload,
+			}
+
+		}
 	default:
 		spew.Dump(ev.Payload)
 	}
