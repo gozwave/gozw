@@ -161,10 +161,10 @@ func (g *Gateway) handleEvent(ev proto.Event) {
 				SupportedCommandClasses:        make([]commandclass.ID, 0),
 				SecureSupportedCommandClasses:  make([]commandclass.ID, 0),
 				SecureControlledCommandClasses: make([]commandclass.ID, 0),
-				// CommandClassVersions:           make([]commandclass.ID, 0),
-				ManufacturerID: node.ManufacturerID,
-				ProductTypeID:  node.ProductTypeID,
-				ProductID:      node.ProductID,
+				CommandClassVersions:           map[commandclass.ID]byte{},
+				ManufacturerID:                 node.ManufacturerID,
+				ProductTypeID:                  node.ProductTypeID,
+				ProductID:                      node.ProductID,
 			}
 
 			for cc := range node.SupportedCommandClasses {
@@ -179,9 +179,9 @@ func (g *Gateway) handleEvent(ev proto.Event) {
 				payload.SecureControlledCommandClasses = append(payload.SecureControlledCommandClasses, cc)
 			}
 
-			// for cc := range node.CommandClassVersions {
-			// 	payload.CommandClassVersions = append(payload.CommandClassVersions, cc)
-			// }
+			for cc, version := range node.CommandClassVersions {
+				payload.CommandClassVersions[cc] = version
+			}
 
 			g.outgoingEvents <- proto.Event{
 				Payload: payload,
