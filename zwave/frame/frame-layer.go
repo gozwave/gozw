@@ -85,7 +85,11 @@ func (l *Layer) bgWork() {
 			l.logger.Print("warn: rx can")
 
 		case frameToWrite := <-l.pendingWrites:
-			l.writeToTransport(frameToWrite.Marshal())
+			// this method never returns an error, so ignore it
+			buf, _ := frameToWrite.MarshalBinary()
+
+			l.writeToTransport(buf)
+			// TODO: this needs to time out
 			_ = <-l.acks
 
 		}

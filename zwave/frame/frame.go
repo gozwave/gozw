@@ -120,7 +120,7 @@ func (z *Frame) VerifyChecksum() error {
 }
 
 // Marshal this frame into a byte slice
-func (z *Frame) Marshal() []byte {
+func (z *Frame) MarshalBinary() ([]byte, error) {
 	buf := new(bytes.Buffer)
 
 	z.Length = byte(len(z.Payload) + 2)
@@ -139,7 +139,7 @@ func (z *Frame) Marshal() []byte {
 		binary.Write(buf, binary.BigEndian, byte(z.Header))
 	}
 
-	return buf.Bytes()
+	return buf.Bytes(), nil
 }
 
 // UnmarshalFrame turns a byte slice into a Frame
