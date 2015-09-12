@@ -8303,8 +8303,8 @@
         <const key="0x02" flagname="Reserved by administrator" flagmask="0x02" />
         <const key="0x03" flagname="Status not available" flagmask="0xFE" />
       </param>
-      <param key="0x02" name="USER_CODE" type="ARRAY" typehashcode="0x05" comment="">
-        <arrayattrib key="0x00" len="10" is_ascii="True" />
+      <param key="0x02" name="USER_CODE" type="VARIANT" typehashcode="0x05" comment="">
+        <variant paramoffs="255" showhex="True" signed="True" sizemask="0x00" sizeoffs="0" />
       </param>
     </cmd>
     <cmd key="0x01" name="USER_CODE_SET" help="User Code Set" comment="">
@@ -8317,8 +8317,8 @@
         <const key="0x02" flagname="Reserved by administrator" flagmask="0x02" />
         <const key="0x03" flagname="Status not available" flagmask="0xFE" />
       </param>
-      <param key="0x02" name="USER_CODE" type="ARRAY" typehashcode="0x05" comment="">
-        <arrayattrib key="0x00" len="10" is_ascii="True" />
+      <param key="0x02" name="USER_CODE" type="VARIANT" typehashcode="0x05" comment="">
+        <variant paramoffs="255" showhex="True" signed="True" sizemask="0x00" sizeoffs="0" />
       </param>
     </cmd>
     <cmd key="0x04" name="USERS_NUMBER_GET" help="Users Number Get" comment="" />
