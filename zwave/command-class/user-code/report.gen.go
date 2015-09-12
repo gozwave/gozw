@@ -18,7 +18,7 @@ type Report struct {
 
 	UserIdStatus byte
 
-	UserCode string
+	UserCode []byte
 }
 
 func (cmd Report) CommandClassID() byte {
@@ -59,9 +59,7 @@ func (cmd *Report) UnmarshalBinary(data []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	cmd.UserCode = string(payload[i : i+10])
-
-	i += 10
+	cmd.UserCode = payload[i:]
 
 	return nil
 }
@@ -75,11 +73,7 @@ func (cmd *Report) MarshalBinary() (payload []byte, err error) {
 
 	payload = append(payload, cmd.UserIdStatus)
 
-	if paramLen := len(cmd.UserCode); paramLen > 10 {
-		return nil, errors.New("Length overflow in array parameter UserCode")
-	}
-
-	payload = append(payload, []byte(cmd.UserCode)...)
+	payload = append(payload, cmd.UserCode...)
 
 	return
 }
