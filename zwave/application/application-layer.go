@@ -54,36 +54,7 @@ const (
 // security functions (encrypting/decrypting messages, fetching nonces, etc.)
 // and interaction with the Serial API layer.
 type Layer struct {
-
-	// APIVersion is the Z-Wave serial API Version
-	APIVersion string
-
-	// APILibraryType is the Z-Wave library type string (as returned from the
-	// controller)
-	APILibraryType string
-
-	// HomeID is the controller's home ID
-	HomeID uint32
-
-	// NodeID is the controller's node ID
-	NodeID byte
-
-	// Version is returned from the GetVersion serial API call
-	Version byte
-
-	// APIType
-	APIType string
-
-	// IsPrimaryController is true when this node is the network's primary
-	// controller (we don't currently support being a non-primary controller)
-	IsPrimaryController bool
-
-	// ApplicationVersion
-	ApplicationVersion  byte
-	ApplicationRevision byte
-	SupportedFunctions  []byte
-
-	NodeList []byte
+	Controller Controller
 
 	serialAPI     serialapi.ILayer
 	securityLayer security.ILayer
@@ -108,6 +79,8 @@ func NewLayer(serialAPI serialapi.ILayer) (app *Layer, err error) {
 	applicationLogger.ParseFields(true)
 
 	app = &Layer{
+		Controller: Controller{},
+
 		serialAPI: serialAPI,
 		nodes:     map[byte]*Node{},
 
@@ -209,10 +182,10 @@ func (a *Layer) initZWave() error {
 		return err
 	}
 
-	a.APIVersion = version.Version
-	a.APILibraryType = version.GetLibraryTypeString()
+	a.Controller.APIVersion = version.Version
+	a.Controller.APILibraryType = version.GetLibraryTypeString()
 
-	a.HomeID, a.NodeID, err = a.serialAPI.MemoryGetID()
+	a.Controller.HomeID, a.Controller.NodeID, err = a.serialAPI.MemoryGetID()
 	if err != nil {
 		return err
 	}
@@ -222,21 +195,21 @@ func (a *Layer) initZWave() error {
 		return err
 	}
 
-	a.ApplicationVersion = serialAPICapabilities.ApplicationVersion
-	a.ApplicationRevision = serialAPICapabilities.ApplicationRevision
-	a.SupportedFunctions = serialAPICapabilities.GetSupportedFunctions()
+	a.Controller.ApplicationVersion = serialAPICapabilities.ApplicationVersion
+	a.Controller.ApplicationRevision = serialAPICapabilities.ApplicationRevision
+	a.Controller.SupportedFunctions = serialAPICapabilities.GetSupportedFunctions()
 
 	initData, err := a.serialAPI.GetInitAppData()
 	if err != nil {
 		return err
 	}
 
-	a.Version = initData.Version
-	a.APIType = initData.GetAPIType()
-	a.IsPrimaryController = initData.IsPrimaryController()
-	a.NodeList = initData.GetNodeIDs()
+	a.Controller.Version = initData.Version
+	a.Controller.APIType = initData.GetAPIType()
+	a.Controller.IsPrimaryController = initData.IsPrimaryController()
+	a.Controller.NodeList = initData.GetNodeIDs()
 
-	for _, nodeID := range a.NodeList {
+	for _, nodeID := range a.Controller.NodeList {
 		node, err := NewNode(a, nodeID)
 
 		if err != nil {

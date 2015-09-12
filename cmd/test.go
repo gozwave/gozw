@@ -314,12 +314,12 @@ func main() {
 			nodeId, _ := strconv.Atoi(input)
 			spew.Dump(appLayer.RemoveFailedNode(byte(nodeId)))
 		case "p":
-			fmt.Printf("Home ID: 0x%x; Node ID: %d\n", appLayer.HomeID, appLayer.NodeID)
-			fmt.Println("API Version:", appLayer.APIVersion)
-			fmt.Println("Library:", appLayer.APILibraryType)
-			fmt.Println("Version:", appLayer.Version)
-			fmt.Println("API Type:", appLayer.APIType)
-			fmt.Println("Is Primary Controller:", appLayer.IsPrimaryController)
+			fmt.Printf("Home ID: 0x%x; Node ID: %d\n", appLayer.Controller.HomeID, appLayer.Controller.NodeID)
+			fmt.Println("API Version:", appLayer.Controller.APIVersion)
+			fmt.Println("Library:", appLayer.Controller.APILibraryType)
+			fmt.Println("Version:", appLayer.Controller.Version)
+			fmt.Println("API Type:", appLayer.Controller.APIType)
+			fmt.Println("Is Primary Controller:", appLayer.Controller.IsPrimaryController)
 			fmt.Println("Node count:", len(appLayer.Nodes()))
 
 			for _, node := range appLayer.Nodes() {
