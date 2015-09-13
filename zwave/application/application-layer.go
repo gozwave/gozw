@@ -163,7 +163,7 @@ func (a *Layer) initNetworkKey() ([]byte, error) {
 		return networkKey, nil
 	}
 
-	networkKey = security.GenerateNetworkKey()
+	networkKey = GenerateNetworkKey()
 
 	err = a.db.Update(func(tx *bolt.Tx) error {
 		return tx.Bucket([]byte("controller")).Put([]byte("networkKey"), networkKey)
