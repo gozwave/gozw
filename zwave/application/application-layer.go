@@ -1,6 +1,7 @@
 package application
 
 import (
+	"encoding"
 	"errors"
 	"log"
 	"os"
@@ -347,7 +348,7 @@ func (a *Layer) handleControllerUpdates() {
 	}
 }
 
-func (a *Layer) SendData(dstNode byte, payload commandclass.Command) error {
+func (a *Layer) SendData(dstNode byte, payload encoding.BinaryMarshaler) error {
 	marshaled, err := payload.MarshalBinary()
 	if err != nil {
 		return err
@@ -359,7 +360,7 @@ func (a *Layer) SendData(dstNode byte, payload commandclass.Command) error {
 
 // SendDataSecure encapsulates payload in a security encapsulation command and
 // sends it to the destination node.
-func (a *Layer) SendDataSecure(dstNode byte, message commandclass.Command) error {
+func (a *Layer) SendDataSecure(dstNode byte, message encoding.BinaryMarshaler) error {
 	// This function wraps the private sendDataSecure because no external packages
 	// should ever call this while in inclusion mode (and doing so would be incorrect)
 	return a.sendDataSecure(dstNode, message, false)
@@ -393,7 +394,7 @@ func (a *Layer) getOrRequestNonceForNode(dstNode byte) (nonce security.Nonce, er
 	return nonce, err
 }
 
-func (a *Layer) sendDataSecure(dstNode byte, message commandclass.Command, inclusionMode bool) error {
+func (a *Layer) sendDataSecure(dstNode byte, message encoding.BinaryMarshaler, inclusionMode bool) error {
 	// Previously, this function would just split and prepare the payload based on
 	// whether it should be split after figuring out whether to segment. For now,
 	// we're just going to assume that we will never have to worry about segmenting.

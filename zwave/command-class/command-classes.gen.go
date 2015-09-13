@@ -211,7 +211,7 @@ const (
 	Schedule                        ID = 0x53
 	NetworkManagementPrimary        ID = 0x54
 	ZipNd                           ID = 0x58
-	AssociationGrpInfo              ID = 0x59
+	AssociationGroupInfo            ID = 0x59
 	DeviceResetLocally              ID = 0x5A
 	CentralScene                    ID = 0x5B
 	IpAssociation                   ID = 0x5C
@@ -544,7 +544,7 @@ func (c ID) String() string {
 	case ZipNd:
 		return "Command Class Z/IP-ND"
 
-	case AssociationGrpInfo:
+	case AssociationGroupInfo:
 		return "Command Class Association Group Info"
 
 	case DeviceResetLocally:

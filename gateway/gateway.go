@@ -168,6 +168,11 @@ func (g *Gateway) handleEvent(ev proto.Event) {
 			}
 
 		}
+
+	case proto.NodeCommandEvent:
+		cmd := ev.Payload.(proto.NodeCommandEvent)
+		node, err := g.app.SendData(cmd.NodeID, cmd.CommandData)
+
 	default:
 		spew.Dump(ev.Payload)
 	}

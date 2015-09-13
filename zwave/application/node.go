@@ -13,11 +13,13 @@ import (
 	"github.com/helioslabs/gozw/zwave/command-class/association"
 	"github.com/helioslabs/gozw/zwave/command-class/battery"
 	"github.com/helioslabs/gozw/zwave/command-class/manufacturer-specific"
+	"github.com/helioslabs/gozw/zwave/command-class/manufacturer-specific-v2"
 	"github.com/helioslabs/gozw/zwave/command-class/security"
 	"github.com/helioslabs/gozw/zwave/command-class/version"
 	"github.com/helioslabs/gozw/zwave/command-class/version-v2"
 	"github.com/helioslabs/gozw/zwave/protocol"
 	"github.com/helioslabs/gozw/zwave/serial-api"
+	"github.com/helioslabs/gozw/zwave/util"
 	"github.com/helioslabs/proto"
 )
 
@@ -183,6 +185,18 @@ func (n *Node) SendCommand(command commandclass.Command) error {
 	return n.application.SendData(n.NodeID, command)
 }
 
+func (n *Node) SendRawCommand(commandClass commandclass.ID, payload []byte) error {
+	if !n.CommandClasses.Supports(commandClass) {
+		return errors.New("Command class not supported")
+	}
+
+	if n.CommandClasses.IsSecure(commandClass) {
+		return n.application.SendDataSecure(n.NodeID, util.ByteMarshaler(payload))
+	}
+
+	return n.application.SendData(n.NodeID, util.ByteMarshaler(payload))
+}
+
 func (n *Node) AddAssociation(groupID byte, nodeIDs ...byte) error {
 	// sort of an arbitrary limit for now, but I'm not sure what it should be
 	if len(nodeIDs) > 20 {
@@ -230,18 +244,18 @@ func (n *Node) LoadManufacturerInfo() error {
 }
 
 func (n *Node) nextQueryStage() {
-	if !n.QueryStageSecurity {
+	if !n.QueryStageSecurity && n.IsSecure() {
 		n.LoadSupportedSecurityCommands()
-		return
-	}
-
-	if !n.QueryStageManufacturer {
-		n.LoadManufacturerInfo()
 		return
 	}
 
 	if !n.QueryStageVersions {
 		n.LoadCommandClassVersions()
+		return
+	}
+
+	if !n.QueryStageManufacturer {
+		n.LoadManufacturerInfo()
 		return
 	}
 }
@@ -322,10 +336,10 @@ func (n *Node) receiveSecurityCommandsSupportedReport(cc security.CommandsSuppor
 	n.nextQueryStage()
 }
 
-func (n *Node) receiveManufacturerInfo(mfgInfo manufacturerspecific.Report) {
-	n.ManufacturerID = mfgInfo.ManufacturerId
-	n.ProductTypeID = mfgInfo.ProductTypeId
-	n.ProductID = mfgInfo.ProductId
+func (n *Node) receiveManufacturerInfo(mfgId, productTypeId, productId uint16) {
+	n.ManufacturerID = mfgId
+	n.ProductTypeID = productTypeId
+	n.ProductID = productId
 
 	select {
 	case n.queryStageManufacturerComplete <- true:
@@ -387,7 +401,14 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 
 	case *manufacturerspecific.Report:
 		spew.Dump(command.(*manufacturerspecific.Report))
-		n.receiveManufacturerInfo(*command.(*manufacturerspecific.Report))
+		report := *command.(*manufacturerspecific.Report)
+		n.receiveManufacturerInfo(report.ManufacturerId, report.ProductTypeId, report.ProductId)
+		n.emitNodeEvent(command)
+
+	case *manufacturerspecificv2.Report:
+		spew.Dump(command.(*manufacturerspecificv2.Report))
+		report := *command.(*manufacturerspecificv2.Report)
+		n.receiveManufacturerInfo(report.ManufacturerId, report.ProductTypeId, report.ProductId)
 		n.emitNodeEvent(command)
 
 	case *version.CommandClassReport:
