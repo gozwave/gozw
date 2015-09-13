@@ -9368,7 +9368,7 @@
       </param>
     </cmd>
   </cmd_class>
-  <cmd_class key="0x59" version="1" name="COMMAND_CLASS_ASSOCIATION_GRP_INFO" help="Command Class Association Group Info" read_only="False">
+  <cmd_class key="0x59" version="1" name="COMMAND_CLASS_ASSOCIATION_GROUP_INFO" help="Command Class Association Group Info" read_only="False">
     <cmd key="0x01" name="ASSOCIATION_GROUP_NAME_GET" help="Association Group Name Get">
       <param key="0x00" name="Grouping Identifier" type="BYTE" typehashcode="0x01">
         <valueattrib key="0x00" hasdefines="False" showhex="True" />
