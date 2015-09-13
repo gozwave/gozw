@@ -66,7 +66,7 @@ func (cmd *DeviceSpecificReport) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return nil
 	}
 
 	cmd.DeviceIdData = payload[i:]

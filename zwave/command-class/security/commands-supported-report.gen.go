@@ -69,7 +69,7 @@ func (cmd *CommandsSupportedReport) UnmarshalBinary(data []byte) error {
 	}
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return nil
 	}
 
 	cmd.CommandClassControl = payload[i:]

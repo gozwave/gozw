@@ -47,7 +47,7 @@ func (cmd *Remove) UnmarshalBinary(data []byte) error {
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return nil
 	}
 
 	cmd.NodeId = payload[i:]

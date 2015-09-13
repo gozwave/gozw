@@ -56,7 +56,7 @@ func (cmd *Set) UnmarshalBinary(data []byte) error {
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return nil
 	}
 
 	cmd.UserCode = payload[i:]

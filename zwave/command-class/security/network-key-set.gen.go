@@ -38,7 +38,7 @@ func (cmd *NetworkKeySet) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return nil
 	}
 
 	cmd.NetworkKeyByte = payload[i:]
