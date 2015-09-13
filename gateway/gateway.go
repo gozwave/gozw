@@ -171,7 +171,15 @@ func (g *Gateway) handleEvent(ev proto.Event) {
 
 	case proto.NodeCommandEvent:
 		cmd := ev.Payload.(proto.NodeCommandEvent)
-		node, err := g.app.SendData(cmd.NodeID, cmd.CommandData)
+		node, err := g.app.Node(cmd.NodeID)
+		if err != nil {
+			fmt.Println("Command received for unknown node")
+		}
+
+		err = node.SendRawCommand(cmd.CommandData)
+		if err != nil {
+			fmt.Println("Error sending command")
+		}
 
 	default:
 		spew.Dump(ev.Payload)

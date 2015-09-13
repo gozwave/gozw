@@ -271,10 +271,8 @@ func (n *Node) emitNodeEvent(event commandclass.Command) {
 
 	n.application.EventBus.Publish("event", proto.Event{
 		Payload: proto.NodeCommandEvent{
-			NodeID:         n.NodeID,
-			CommandClassID: event.CommandClassID(),
-			CommandID:      event.CommandID(),
-			CommandData:    buf,
+			NodeID:      n.NodeID,
+			CommandData: buf,
 		},
 	})
 }
