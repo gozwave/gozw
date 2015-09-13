@@ -194,20 +194,18 @@ func (n *Node) RequestNodeInformationFrame() error {
 }
 
 func (n *Node) LoadCommandClassVersions() error {
-	for cc := range n.CommandClasses.ListBySecureStatus(false) {
+	for _, cc := range n.CommandClasses {
 		time.Sleep(1 * time.Second)
+		cmd := &version.CommandClassGet{RequestedCommandClass: byte(cc.CommandClass)}
+		var err error
 
-		cmd := &version.CommandClassGet{RequestedCommandClass: byte(cc)}
-		if err := n.application.SendData(n.NodeID, cmd); err != nil {
-			return err
+		if !cc.Secure {
+			err = n.application.SendData(n.NodeID, cmd)
+		} else {
+			err = n.application.SendDataSecure(n.NodeID, cmd)
 		}
-	}
 
-	for cc := range n.CommandClasses.ListBySecureStatus(true) {
-		time.Sleep(1 * time.Second)
-
-		cmd := &version.CommandClassGet{RequestedCommandClass: byte(cc)}
-		if err := n.application.SendDataSecure(n.NodeID, cmd); err != nil {
+		if err != nil {
 			return err
 		}
 	}
