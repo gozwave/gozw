@@ -8,24 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var testNetworkKey = []byte{
-	0x01,
-	0x02,
-	0x03,
-	0x04,
-	0x05,
-	0x06,
-	0x07,
-	0x08,
-	0x09,
-	0x0A,
-	0x0B,
-	0x0C,
-	0x0D,
-	0x0E,
-	0x0F,
-	0x10,
-}
+var testNetworkKey = []byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10}
 
 func TestSecurityLayerNonceGeneration(t *testing.T) {
 	securityLayer := NewLayer(testNetworkKey)
@@ -80,4 +63,50 @@ func TestSecurityLayerWaitForExternalNonce(t *testing.T) {
 	})
 
 	<-done
+}
+
+func TestSecurityLayerEncapsulateMessage(t *testing.T) {
+	securityLayer := NewLayer(testNetworkKey)
+
+	senderNonce := []byte{0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11}
+	receiverNonce := []byte{0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22}
+	payload := []byte{0x01, 0x02, 0xfe, 0xff}
+
+	enc, err := securityLayer.EncapsulateMessage(
+		1,
+		2,
+		security.CommandMessageEncapsulation,
+		senderNonce,
+		receiverNonce,
+		payload,
+		false,
+	)
+
+	expectedPayloadNormalMode := []byte{0x21, 0x3e, 0x38, 0x5d}
+	expectedHMACNormalMode := []byte{0xea, 0xb9, 0xac, 0x2b, 0xcc, 0x93, 0x2b, 0x4a}
+
+	assert.NoError(t, err)
+	assert.EqualValues(t, senderNonce, enc.SenderNonce)
+	assert.EqualValues(t, 0x22, enc.ReceiverNonceID)
+	assert.EqualValues(t, expectedPayloadNormalMode, enc.EncryptedPayload)
+	assert.EqualValues(t, expectedHMACNormalMode, enc.HMAC)
+
+	enc, err = securityLayer.EncapsulateMessage(
+		1,
+		2,
+		security.CommandMessageEncapsulation,
+		senderNonce,
+		receiverNonce,
+		payload,
+		true,
+	)
+
+	expectedPayloadInclusionMode := []byte{0x54, 0x59, 0xd9, 0xcc}
+	expectedHMACInclusionMode := []byte{0x4b, 0x0b, 0xe5, 0xc2, 0xde, 0x4e, 0x11, 0xc5}
+
+	assert.NoError(t, err)
+	assert.EqualValues(t, senderNonce, enc.SenderNonce)
+	assert.EqualValues(t, 0x22, enc.ReceiverNonceID)
+	assert.EqualValues(t, expectedPayloadInclusionMode, enc.EncryptedPayload)
+	assert.EqualValues(t, expectedHMACInclusionMode, enc.HMAC)
 }
