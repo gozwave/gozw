@@ -18,7 +18,6 @@ Golang Z/IP Portal
 1. `make install-deps` in the zwgen folder root
 1. `make install` in the zwgen folder root
 1. `make build` in the zwgen folder
-1. `go get -u github.com/helioslabs/proto`
 1. `go get ./...` in the gozw folder root
 1. `go generate ./...` in the gozw folder root
 1. `go run cmd/portald/main.go`

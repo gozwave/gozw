@@ -8,6 +8,7 @@ import (
 	"github.com/comail/colog"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/helioslabs/gozw/zwave/application"
+	"github.com/helioslabs/gozw/zwave/command-class/association"
 	"github.com/helioslabs/gozw/zwave/command-class/door-lock"
 	"github.com/helioslabs/gozw/zwave/frame"
 	"github.com/helioslabs/gozw/zwave/serial-api"
@@ -34,6 +35,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	n, _ := appLayer.Node(97)
+	// n.SendCommand(&association.Set{
+	// 	GroupingIdentifier: 1,
+	// 	NodeId:             []byte{1},
+	// })
+	n.SendCommand(&association.Get{1})
 
 	defer appLayer.Shutdown()
 

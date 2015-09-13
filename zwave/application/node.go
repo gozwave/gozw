@@ -20,7 +20,7 @@ import (
 	"github.com/helioslabs/gozw/zwave/protocol"
 	"github.com/helioslabs/gozw/zwave/serial-api"
 	"github.com/helioslabs/gozw/zwave/util"
-	"github.com/helioslabs/proto"
+	"github.com/helioslabs/moonshot/cannon"
 )
 
 // Node is an in-memory representation of a Z-Wave node
@@ -34,7 +34,7 @@ type Node struct {
 
 	Failing bool
 
-	CommandClasses proto.CommandClassSet
+	CommandClasses util.CommandClassSet
 
 	NetworkKeySent bool
 
@@ -57,7 +57,7 @@ func NewNode(application *Layer, nodeID byte) (*Node, error) {
 	node := &Node{
 		NodeID: nodeID,
 
-		CommandClasses: proto.CommandClassSet{},
+		CommandClasses: util.CommandClassSet{},
 
 		QueryStageSecurity:     false,
 		QueryStageManufacturer: false,
@@ -269,8 +269,8 @@ func (n *Node) emitNodeEvent(event commandclass.Command) {
 		return
 	}
 
-	n.application.EventBus.Publish("event", proto.Event{
-		Payload: proto.NodeCommandEvent{
+	n.application.EventBus.Publish("event", cannon.Event{
+		Payload: cannon.NodeCommandEvent{
 			NodeID:      n.NodeID,
 			CommandData: buf,
 		},

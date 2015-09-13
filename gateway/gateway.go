@@ -12,7 +12,7 @@ import (
 	"github.com/helioslabs/gozw/zwave/serial-api"
 	"github.com/helioslabs/gozw/zwave/session"
 	"github.com/helioslabs/gozw/zwave/transport"
-	"github.com/helioslabs/proto"
+	"github.com/helioslabs/moonshot/cannon"
 )
 
 type GatewayOptions struct {
@@ -28,13 +28,13 @@ type Gateway struct {
 	app  *application.Layer
 	conn net.Conn
 
-	outgoingEvents chan proto.Event
+	outgoingEvents chan cannon.Event
 }
 
 func NewGateway(opts GatewayOptions) (*Gateway, error) {
 	gateway := &Gateway{
 		opts:           opts,
-		outgoingEvents: make(chan proto.Event, 1),
+		outgoingEvents: make(chan cannon.Event, 1),
 	}
 
 	if err := gateway.openCommPort(); err != nil {
@@ -84,8 +84,8 @@ func (g *Gateway) Run() {
 	go g.processOutgoing()
 	go g.processIncoming()
 
-	g.outgoingEvents <- proto.Event{
-		Payload: proto.IdentEvent{HomeID: g.app.Controller.HomeID},
+	g.outgoingEvents <- cannon.Event{
+		Payload: cannon.IdentEvent{HomeID: g.app.Controller.HomeID},
 	}
 }
 
@@ -95,7 +95,7 @@ func (g *Gateway) Shutdown() {
 }
 
 func (g *Gateway) subscribeToAppEvents() {
-	g.app.EventBus.SubscribeAsync("event", func(ev proto.Event) {
+	g.app.EventBus.SubscribeAsync("event", func(ev cannon.Event) {
 		g.outgoingEvents <- ev
 	}, true)
 }
@@ -115,7 +115,7 @@ func (g *Gateway) processIncoming() {
 	decoder := gob.NewDecoder(g.conn)
 
 	for {
-		event := proto.Event{}
+		event := cannon.Event{}
 		err := decoder.Decode(&event)
 		if err == io.EOF {
 			// @todo initiate reconnect sequence
@@ -130,11 +130,11 @@ func (g *Gateway) processIncoming() {
 	}
 }
 
-func (g *Gateway) handleEvent(ev proto.Event) {
+func (g *Gateway) handleEvent(ev cannon.Event) {
 	switch ev.Payload.(type) {
-	case proto.RegisterEvent:
-		g.outgoingEvents <- proto.Event{
-			Payload: proto.ControllerInfoEvent{
+	case cannon.RegisterEvent:
+		g.outgoingEvents <- cannon.Event{
+			Payload: cannon.ControllerInfoEvent{
 				APIVersion:          g.app.Controller.APIVersion,
 				APILibraryType:      g.app.Controller.APILibraryType,
 				HomeID:              g.app.Controller.HomeID,
@@ -150,7 +150,7 @@ func (g *Gateway) handleEvent(ev proto.Event) {
 
 		for _, node := range g.app.Nodes() {
 
-			payload := proto.NodeInfoEvent{
+			payload := cannon.NodeInfoEvent{
 				NodeID:              node.NodeID,
 				Capability:          node.Capability,
 				BasicDeviceClass:    node.BasicDeviceClass,
@@ -163,14 +163,14 @@ func (g *Gateway) handleEvent(ev proto.Event) {
 				ProductID:           node.ProductID,
 			}
 
-			g.outgoingEvents <- proto.Event{
+			g.outgoingEvents <- cannon.Event{
 				Payload: payload,
 			}
 
 		}
 
-	case proto.NodeCommandEvent:
-		cmd := ev.Payload.(proto.NodeCommandEvent)
+	case cannon.NodeCommandEvent:
+		cmd := ev.Payload.(cannon.NodeCommandEvent)
 		node, err := g.app.Node(cmd.NodeID)
 		if err != nil {
 			fmt.Println("Command received for unknown node")
