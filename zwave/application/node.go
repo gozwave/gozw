@@ -185,7 +185,9 @@ func (n *Node) SendCommand(command commandclass.Command) error {
 	return n.application.SendData(n.NodeID, command)
 }
 
-func (n *Node) SendRawCommand(commandClass commandclass.ID, payload []byte) error {
+func (n *Node) SendRawCommand(payload []byte) error {
+	commandClass := commandclass.ID(payload[0])
+
 	if !n.CommandClasses.Supports(commandClass) {
 		return errors.New("Command class not supported")
 	}

@@ -252,22 +252,18 @@ func (a *Layer) AddNode() (*Node, error) {
 		if err != nil {
 			return nil, err
 		}
-
-		err := node.LoadSupportedSecurityCommands()
-		if err != nil {
-			a.logger.Printf("error: %v\n", err)
-		}
-
-		select {
-		case <-node.queryStageSecurityComplete:
-		case <-time.After(time.Second * 10):
-			a.logger.Println("error: timed out after requesting security commands")
-		}
 	}
 
 	spew.Dump(node)
 
-	node.LoadCommandClassVersions()
+	node.nextQueryStage()
+
+	select {
+	case <-node.queryStageVersionsComplete:
+		a.logger.Printf("info: node queries complete")
+	case <-time.After(time.Second * 30):
+		a.logger.Printf("warn: node query timeout (%d)", node.NodeID)
+	}
 
 	node.AddAssociation(1, 1)
 
