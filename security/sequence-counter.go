@@ -1,9 +1,6 @@
 package security
 
-import (
-	"runtime"
-	"sync"
-)
+import "sync"
 
 const (
 	SecuritySequenceCounterMin byte = 1
@@ -28,7 +25,6 @@ func (s *SequenceCounter) Get(nodeID byte) (counter byte) {
 
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	defer runtime.Gosched()
 
 	if counter, ok = s.counters[nodeID]; !ok {
 		s.counters[nodeID] = SecuritySequenceCounterMin

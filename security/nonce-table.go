@@ -3,7 +3,6 @@ package security
 import (
 	"crypto/rand"
 	"errors"
-	"runtime"
 	"sync"
 	"time"
 )
@@ -27,7 +26,6 @@ func NewNonceTable() *NonceTable {
 func (t *NonceTable) Set(key byte, nonce Nonce, timeout time.Duration) {
 	t.lock.Lock()
 	defer t.lock.Unlock()
-	defer runtime.Gosched()
 
 	t.set(key, nonce, timeout)
 }
@@ -35,7 +33,6 @@ func (t *NonceTable) Set(key byte, nonce Nonce, timeout time.Duration) {
 func (t *NonceTable) Get(key byte) (Nonce, error) {
 	t.lock.Lock()
 	defer t.lock.Unlock()
-	defer runtime.Gosched()
 
 	return t.get(key)
 }
@@ -44,7 +41,6 @@ func (t *NonceTable) Get(key byte) (Nonce, error) {
 // func (t *NonceTable) Peek(key byte) (Nonce, error) {
 // 	t.lock.Lock()
 // 	defer t.lock.Unlock()
-// 	defer runtime.Gosched()
 //
 // 	return t.peek(key)
 // }
@@ -52,7 +48,6 @@ func (t *NonceTable) Get(key byte) (Nonce, error) {
 func (t *NonceTable) Delete(key byte) {
 	t.lock.Lock()
 	defer t.lock.Unlock()
-	defer runtime.Gosched()
 
 	t.delete(key)
 }
@@ -60,7 +55,6 @@ func (t *NonceTable) Delete(key byte) {
 func (t *NonceTable) Generate(timeout time.Duration) (Nonce, error) {
 	t.lock.Lock()
 	defer t.lock.Unlock()
-	defer runtime.Gosched()
 
 	for i := 0; ; i++ {
 		nonce := GenerateNonce()

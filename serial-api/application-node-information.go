@@ -9,7 +9,6 @@ package serialapi
 //
 // 	s.execLock.Lock()
 // 	defer s.execLock.Unlock()
-// 	defer runtime.Gosched()
 //
 // 	payload := []byte{
 // 		FnApplicationNodeInformation,

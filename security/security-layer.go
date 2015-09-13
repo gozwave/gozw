@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log"
 	"os"
-	"runtime"
 	"sync"
 	"time"
 
@@ -169,7 +168,6 @@ func (s *Layer) ReceiveNonce(fromNode byte, report security.NonceReport) {
 	s.waitMapLock.Lock()
 	ch, ok := s.waitForNonce[fromNode]
 	s.waitMapLock.Unlock()
-	runtime.Gosched()
 
 	if ok {
 
@@ -196,7 +194,6 @@ func (s *Layer) ReceiveNonce(fromNode byte, report security.NonceReport) {
 		s.waitMapLock.Lock()
 		delete(s.waitForNonce, fromNode)
 		s.waitMapLock.Unlock()
-		runtime.Gosched()
 	}
 }
 
@@ -211,7 +208,6 @@ func (s *Layer) WaitForExternalNonce(nodeID byte) (Nonce, error) {
 		s.waitForNonce[nodeID] = waitChan
 	}
 	s.waitMapLock.Unlock()
-	runtime.Gosched()
 
 	select {
 	case <-waitChan:
