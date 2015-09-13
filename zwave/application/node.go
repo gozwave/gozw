@@ -390,17 +390,11 @@ func (n *Node) String() string {
 	str += fmt.Sprintf("  Product ID: %#x\n", n.ProductID)
 	str += fmt.Sprintf("  Supported command classes:\n")
 
-	nonsecure := n.CommandClasses.ListBySecureStatus(false)
-	for _, cc := range nonsecure {
-		str += fmt.Sprintf("    - %s\n", cc)
-	}
-
-	secure := n.CommandClasses.ListBySecureStatus(true)
-	if len(secure) > 0 {
-		secureCommands := commandClassSetToStrings(secure)
-		str += fmt.Sprintf("  Supported command classes (secure):\n")
-		for _, cc := range secureCommands {
-			str += fmt.Sprintf("    - %s\n", cc)
+	for _, cc := range n.CommandClasses {
+		if cc.Secure {
+			str += fmt.Sprintf("    - %s (v%d) (secure)\n", cc.CommandClass.String(), cc.Version)
+		} else {
+			str += fmt.Sprintf("    - %s (v%d)\n", cc.CommandClass.String(), cc.Version)
 		}
 	}
 
