@@ -7,13 +7,13 @@ import (
 
 	"github.com/comail/colog"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/helioslabs/gozw/zwave/application"
-	"github.com/helioslabs/gozw/zwave/command-class/association"
-	"github.com/helioslabs/gozw/zwave/command-class/door-lock"
-	"github.com/helioslabs/gozw/zwave/frame"
-	"github.com/helioslabs/gozw/zwave/serial-api"
-	"github.com/helioslabs/gozw/zwave/session"
-	"github.com/helioslabs/gozw/zwave/transport"
+	"github.com/helioslabs/gozw/application"
+	"github.com/helioslabs/gozw/command-class/association"
+	"github.com/helioslabs/gozw/command-class/door-lock"
+	"github.com/helioslabs/gozw/frame"
+	"github.com/helioslabs/gozw/serial-api"
+	"github.com/helioslabs/gozw/session"
+	"github.com/helioslabs/gozw/transport"
 	"github.com/peterh/liner"
 )
 
