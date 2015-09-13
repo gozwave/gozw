@@ -20,7 +20,6 @@ import (
 	"github.com/helioslabs/gozw/protocol"
 	"github.com/helioslabs/gozw/serial-api"
 	"github.com/helioslabs/gozw/util"
-	"github.com/helioslabs/moonshot"
 )
 
 // Node is an in-memory representation of a Z-Wave node
@@ -269,12 +268,7 @@ func (n *Node) emitNodeEvent(event commandclass.Command) {
 		return
 	}
 
-	n.application.EventBus.Publish("event", moonshot.Event{
-		Payload: moonshot.NodeCommandEvent{
-			NodeID:      n.NodeID,
-			CommandData: buf,
-		},
-	})
+	n.application.EventBus.Publish("nodeCommand", n.NodeID, buf)
 }
 
 func (n *Node) receiveControllerUpdate(update serialapi.ControllerUpdate) {
