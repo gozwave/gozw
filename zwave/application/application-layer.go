@@ -252,13 +252,13 @@ func (a *Layer) AddNode() (*Node, error) {
 			return nil, err
 		}
 
-		err := node.RequestSupportedSecurityCommands()
+		err := node.LoadSupportedSecurityCommands()
 		if err != nil {
 			a.logger.Printf("error: %v\n", err)
 		}
 
 		select {
-		case <-node.receivedSecurityInfo:
+		case <-node.queryStageSecurityComplete:
 		case <-time.After(time.Second * 10):
 			a.logger.Println("error: timed out after requesting security commands")
 		}

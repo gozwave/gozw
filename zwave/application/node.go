@@ -40,9 +40,15 @@ type Node struct {
 	ProductTypeID  uint16
 	ProductID      uint16
 
-	application          *Layer
-	receivedUpdate       chan bool
-	receivedSecurityInfo chan bool
+	QueryStageSecurity     bool
+	QueryStageManufacturer bool
+	QueryStageVersions     bool
+
+	queryStageSecurityComplete     chan bool
+	queryStageManufacturerComplete chan bool
+	queryStageVersionsComplete     chan bool
+
+	application *Layer
 }
 
 func NewNode(application *Layer, nodeID byte) (*Node, error) {
@@ -51,9 +57,15 @@ func NewNode(application *Layer, nodeID byte) (*Node, error) {
 
 		CommandClasses: proto.CommandClassSet{},
 
-		application:          application,
-		receivedUpdate:       make(chan bool),
-		receivedSecurityInfo: make(chan bool),
+		QueryStageSecurity:     false,
+		QueryStageManufacturer: false,
+		QueryStageVersions:     false,
+
+		queryStageSecurityComplete:     make(chan bool),
+		queryStageManufacturerComplete: make(chan bool),
+		queryStageVersionsComplete:     make(chan bool),
+
+		application: application,
 	}
 
 	err := node.loadFromDb()
@@ -185,7 +197,7 @@ func (n *Node) AddAssociation(groupID byte, nodeIDs ...byte) error {
 	})
 }
 
-func (n *Node) RequestSupportedSecurityCommands() error {
+func (n *Node) LoadSupportedSecurityCommands() error {
 	return n.application.SendDataSecure(n.NodeID, &security.CommandsSupportedGet{})
 }
 
@@ -217,6 +229,23 @@ func (n *Node) LoadManufacturerInfo() error {
 	return n.SendCommand(&manufacturerspecific.Get{})
 }
 
+func (n *Node) nextQueryStage() {
+	if !n.QueryStageSecurity {
+		n.LoadSupportedSecurityCommands()
+		return
+	}
+
+	if !n.QueryStageManufacturer {
+		n.LoadManufacturerInfo()
+		return
+	}
+
+	if !n.QueryStageVersions {
+		n.LoadCommandClassVersions()
+		return
+	}
+}
+
 func (n *Node) emitNodeEvent(event commandclass.Command) {
 	buf, err := event.MarshalBinary()
 	if err != nil {
@@ -235,20 +264,9 @@ func (n *Node) emitNodeEvent(event commandclass.Command) {
 }
 
 func (n *Node) receiveControllerUpdate(update serialapi.ControllerUpdate) {
-	select {
-	case n.receivedUpdate <- true:
-	default:
-	}
-
 	n.setFromApplicationControllerUpdate(update)
 	n.saveToDb()
 }
-
-// func (n *Node) sendNoOp() {
-// 	n.manager.session.SendData(n.NodeId, []byte{
-// 		commandclass.CommandClassNoOperation,
-// 	})
-// }
 
 func (n *Node) setFromAddNodeCallback(nodeInfo *serialapi.AddRemoveNodeCallback) {
 	n.NodeID = nodeInfo.Source
@@ -295,8 +313,41 @@ func (n *Node) receiveSecurityCommandsSupportedReport(cc security.CommandsSuppor
 	// }
 
 	select {
-	case n.receivedSecurityInfo <- true:
+	case n.queryStageSecurityComplete <- true:
 	default:
+	}
+
+	n.QueryStageSecurity = true
+	n.saveToDb()
+	n.nextQueryStage()
+}
+
+func (n *Node) receiveManufacturerInfo(mfgInfo manufacturerspecific.Report) {
+	n.ManufacturerID = mfgInfo.ManufacturerId
+	n.ProductTypeID = mfgInfo.ProductTypeId
+	n.ProductID = mfgInfo.ProductId
+
+	select {
+	case n.queryStageManufacturerComplete <- true:
+	default:
+	}
+
+	n.QueryStageManufacturer = true
+	n.saveToDb()
+	n.nextQueryStage()
+}
+
+func (n *Node) receiveCommandClassVersion(id commandclass.ID, version uint8) {
+	n.CommandClasses.SetVersion(id, version)
+
+	if n.CommandClasses.AllVersionsReceived() {
+		select {
+		case n.queryStageVersionsComplete <- true:
+		default:
+		}
+
+		n.QueryStageVersions = true
+		defer n.nextQueryStage()
 	}
 
 	n.saveToDb()
@@ -334,6 +385,23 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 		n.receiveSecurityCommandsSupportedReport(*command.(*security.CommandsSupportedReport))
 		fmt.Println(n.GetSupportedSecureCommandClassStrings())
 
+	case *manufacturerspecific.Report:
+		spew.Dump(command.(*manufacturerspecific.Report))
+		n.receiveManufacturerInfo(*command.(*manufacturerspecific.Report))
+		n.emitNodeEvent(command)
+
+	case *version.CommandClassReport:
+		spew.Dump(command.(*version.CommandClassReport))
+		report := command.(*version.CommandClassReport)
+		n.receiveCommandClassVersion(commandclass.ID(report.RequestedCommandClass), report.CommandClassVersion)
+		n.saveToDb()
+
+	case *versionv2.CommandClassReport:
+		spew.Dump(command.(*versionv2.CommandClassReport))
+		report := command.(*versionv2.CommandClassReport)
+		n.receiveCommandClassVersion(commandclass.ID(report.RequestedCommandClass), report.CommandClassVersion)
+		n.saveToDb()
+
 		// case alarm.Report:
 		// 	spew.Dump(command.(alarm.Report))
 		//
@@ -352,25 +420,6 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 		// case thermostatsetpoint.Report:
 		// 	spew.Dump(command.(thermostatsetpoint.Report))
 
-	case *version.CommandClassReport:
-		spew.Dump(command.(*version.CommandClassReport))
-		report := command.(*version.CommandClassReport)
-		n.CommandClasses.SetVersion(commandclass.ID(report.RequestedCommandClass), report.CommandClassVersion)
-		n.saveToDb()
-
-	case *versionv2.CommandClassReport:
-		spew.Dump(command.(*versionv2.CommandClassReport))
-		report := command.(*versionv2.CommandClassReport)
-		n.CommandClasses.SetVersion(commandclass.ID(report.RequestedCommandClass), report.CommandClassVersion)
-		n.saveToDb()
-
-	case *manufacturerspecific.Report:
-		spew.Dump(command.(*manufacturerspecific.Report))
-		mfgInfo := command.(*manufacturerspecific.Report)
-		n.ManufacturerID = mfgInfo.ManufacturerId
-		n.ProductTypeID = mfgInfo.ProductTypeId
-		n.ProductID = mfgInfo.ProductId
-		n.emitNodeEvent(command)
 	default:
 		spew.Dump(command)
 		n.emitNodeEvent(command)
