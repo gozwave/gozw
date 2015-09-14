@@ -6,10 +6,23 @@ package colorcontrol
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandStartCapabilityLevelChange commandclass.CommandID = 0x06
 
 func init() {
 	gob.Register(StartCapabilityLevelChange{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x33),
+		Command:      commandclass.CommandID(0x06),
+		Version:      1,
+	}, NewStartCapabilityLevelChange)
+}
+
+func NewStartCapabilityLevelChange() commandclass.Command {
+	return &StartCapabilityLevelChange{}
 }
 
 // <no value>
@@ -29,12 +42,16 @@ type StartCapabilityLevelChange struct {
 	StartState byte
 }
 
-func (cmd StartCapabilityLevelChange) CommandClassID() byte {
+func (cmd StartCapabilityLevelChange) CommandClassID() commandclass.CommandClassID {
 	return 0x33
 }
 
-func (cmd StartCapabilityLevelChange) CommandID() byte {
-	return byte(CommandStartCapabilityLevelChange)
+func (cmd StartCapabilityLevelChange) CommandID() commandclass.CommandID {
+	return CommandStartCapabilityLevelChange
+}
+
+func (cmd StartCapabilityLevelChange) CommandIDString() string {
+	return "START_CAPABILITY_LEVEL_CHANGE"
 }
 
 func (cmd *StartCapabilityLevelChange) UnmarshalBinary(data []byte) error {
@@ -82,8 +99,8 @@ func (cmd *StartCapabilityLevelChange) UnmarshalBinary(data []byte) error {
 
 func (cmd *StartCapabilityLevelChange) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	{
 		var val byte

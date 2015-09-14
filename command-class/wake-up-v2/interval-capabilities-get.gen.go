@@ -3,22 +3,41 @@
 
 package wakeupv2
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+
+	"github.com/helioslabs/gozw/command-class"
+)
+
+const CommandIntervalCapabilitiesGet commandclass.CommandID = 0x09
 
 func init() {
 	gob.Register(IntervalCapabilitiesGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x84),
+		Command:      commandclass.CommandID(0x09),
+		Version:      2,
+	}, NewIntervalCapabilitiesGet)
+}
+
+func NewIntervalCapabilitiesGet() commandclass.Command {
+	return &IntervalCapabilitiesGet{}
 }
 
 // <no value>
 type IntervalCapabilitiesGet struct {
 }
 
-func (cmd IntervalCapabilitiesGet) CommandClassID() byte {
+func (cmd IntervalCapabilitiesGet) CommandClassID() commandclass.CommandClassID {
 	return 0x84
 }
 
-func (cmd IntervalCapabilitiesGet) CommandID() byte {
-	return byte(CommandIntervalCapabilitiesGet)
+func (cmd IntervalCapabilitiesGet) CommandID() commandclass.CommandID {
+	return CommandIntervalCapabilitiesGet
+}
+
+func (cmd IntervalCapabilitiesGet) CommandIDString() string {
+	return "WAKE_UP_INTERVAL_CAPABILITIES_GET"
 }
 
 func (cmd *IntervalCapabilitiesGet) UnmarshalBinary(data []byte) error {
@@ -29,8 +48,8 @@ func (cmd *IntervalCapabilitiesGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *IntervalCapabilitiesGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	return
 }

@@ -6,10 +6,23 @@ package notificationv3
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandEventSupportedReport commandclass.CommandID = 0x02
 
 func init() {
 	gob.Register(EventSupportedReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x71),
+		Command:      commandclass.CommandID(0x02),
+		Version:      3,
+	}, NewEventSupportedReport)
+}
+
+func NewEventSupportedReport() commandclass.Command {
+	return &EventSupportedReport{}
 }
 
 // <no value>
@@ -23,12 +36,16 @@ type EventSupportedReport struct {
 	BitMask []byte
 }
 
-func (cmd EventSupportedReport) CommandClassID() byte {
+func (cmd EventSupportedReport) CommandClassID() commandclass.CommandClassID {
 	return 0x71
 }
 
-func (cmd EventSupportedReport) CommandID() byte {
-	return byte(CommandEventSupportedReport)
+func (cmd EventSupportedReport) CommandID() commandclass.CommandID {
+	return CommandEventSupportedReport
+}
+
+func (cmd EventSupportedReport) CommandIDString() string {
+	return "EVENT_SUPPORTED_REPORT"
 }
 
 func (cmd *EventSupportedReport) UnmarshalBinary(data []byte) error {
@@ -69,8 +86,8 @@ func (cmd *EventSupportedReport) UnmarshalBinary(data []byte) error {
 
 func (cmd *EventSupportedReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.NotificationType)
 

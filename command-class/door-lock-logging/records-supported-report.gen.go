@@ -6,10 +6,23 @@ package doorlocklogging
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandRecordsSupportedReport commandclass.CommandID = 0x02
 
 func init() {
 	gob.Register(RecordsSupportedReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x4C),
+		Command:      commandclass.CommandID(0x02),
+		Version:      1,
+	}, NewRecordsSupportedReport)
+}
+
+func NewRecordsSupportedReport() commandclass.Command {
+	return &RecordsSupportedReport{}
 }
 
 // <no value>
@@ -17,12 +30,16 @@ type RecordsSupportedReport struct {
 	MaxRecordsStored byte
 }
 
-func (cmd RecordsSupportedReport) CommandClassID() byte {
+func (cmd RecordsSupportedReport) CommandClassID() commandclass.CommandClassID {
 	return 0x4C
 }
 
-func (cmd RecordsSupportedReport) CommandID() byte {
-	return byte(CommandRecordsSupportedReport)
+func (cmd RecordsSupportedReport) CommandID() commandclass.CommandID {
+	return CommandRecordsSupportedReport
+}
+
+func (cmd RecordsSupportedReport) CommandIDString() string {
+	return "DOOR_LOCK_LOGGING_RECORDS_SUPPORTED_REPORT"
 }
 
 func (cmd *RecordsSupportedReport) UnmarshalBinary(data []byte) error {
@@ -49,8 +66,8 @@ func (cmd *RecordsSupportedReport) UnmarshalBinary(data []byte) error {
 
 func (cmd *RecordsSupportedReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.MaxRecordsStored)
 

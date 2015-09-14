@@ -6,10 +6,23 @@ package alarmv2
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandSet commandclass.CommandID = 0x06
 
 func init() {
 	gob.Register(Set{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x71),
+		Command:      commandclass.CommandID(0x06),
+		Version:      2,
+	}, NewSet)
+}
+
+func NewSet() commandclass.Command {
+	return &Set{}
 }
 
 // <no value>
@@ -19,12 +32,16 @@ type Set struct {
 	ZwaveAlarmStatus byte
 }
 
-func (cmd Set) CommandClassID() byte {
+func (cmd Set) CommandClassID() commandclass.CommandClassID {
 	return 0x71
 }
 
-func (cmd Set) CommandID() byte {
-	return byte(CommandSet)
+func (cmd Set) CommandID() commandclass.CommandID {
+	return CommandSet
+}
+
+func (cmd Set) CommandIDString() string {
+	return "ALARM_SET"
 }
 
 func (cmd *Set) UnmarshalBinary(data []byte) error {
@@ -58,8 +75,8 @@ func (cmd *Set) UnmarshalBinary(data []byte) error {
 
 func (cmd *Set) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.ZwaveAlarmType)
 

@@ -7,10 +7,23 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandBulkSet commandclass.CommandID = 0x07
 
 func init() {
 	gob.Register(BulkSet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x70),
+		Command:      commandclass.CommandID(0x07),
+		Version:      2,
+	}, NewBulkSet)
+}
+
+func NewBulkSet() commandclass.Command {
+	return &BulkSet{}
 }
 
 // <no value>
@@ -28,12 +41,16 @@ type BulkSet struct {
 	}
 }
 
-func (cmd BulkSet) CommandClassID() byte {
+func (cmd BulkSet) CommandClassID() commandclass.CommandClassID {
 	return 0x70
 }
 
-func (cmd BulkSet) CommandID() byte {
-	return byte(CommandBulkSet)
+func (cmd BulkSet) CommandID() commandclass.CommandID {
+	return CommandBulkSet
+}
+
+func (cmd BulkSet) CommandIDString() string {
+	return "CONFIGURATION_BULK_SET"
 }
 
 func (cmd *BulkSet) UnmarshalBinary(data []byte) error {
@@ -79,8 +96,8 @@ func (cmd *BulkSet) UnmarshalBinary(data []byte) error {
 
 func (cmd *BulkSet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	{
 		buf := make([]byte, 2)

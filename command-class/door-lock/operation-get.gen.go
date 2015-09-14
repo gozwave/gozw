@@ -3,22 +3,41 @@
 
 package doorlock
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+
+	"github.com/helioslabs/gozw/command-class"
+)
+
+const CommandOperationGet commandclass.CommandID = 0x02
 
 func init() {
 	gob.Register(OperationGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x62),
+		Command:      commandclass.CommandID(0x02),
+		Version:      1,
+	}, NewOperationGet)
+}
+
+func NewOperationGet() commandclass.Command {
+	return &OperationGet{}
 }
 
 // <no value>
 type OperationGet struct {
 }
 
-func (cmd OperationGet) CommandClassID() byte {
+func (cmd OperationGet) CommandClassID() commandclass.CommandClassID {
 	return 0x62
 }
 
-func (cmd OperationGet) CommandID() byte {
-	return byte(CommandOperationGet)
+func (cmd OperationGet) CommandID() commandclass.CommandID {
+	return CommandOperationGet
+}
+
+func (cmd OperationGet) CommandIDString() string {
+	return "DOOR_LOCK_OPERATION_GET"
 }
 
 func (cmd *OperationGet) UnmarshalBinary(data []byte) error {
@@ -29,8 +48,8 @@ func (cmd *OperationGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *OperationGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	return
 }

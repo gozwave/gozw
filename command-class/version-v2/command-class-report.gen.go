@@ -6,10 +6,23 @@ package versionv2
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandCommandClassReport commandclass.CommandID = 0x14
 
 func init() {
 	gob.Register(CommandClassReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x86),
+		Command:      commandclass.CommandID(0x14),
+		Version:      2,
+	}, NewCommandClassReport)
+}
+
+func NewCommandClassReport() commandclass.Command {
+	return &CommandClassReport{}
 }
 
 // <no value>
@@ -19,12 +32,16 @@ type CommandClassReport struct {
 	CommandClassVersion byte
 }
 
-func (cmd CommandClassReport) CommandClassID() byte {
+func (cmd CommandClassReport) CommandClassID() commandclass.CommandClassID {
 	return 0x86
 }
 
-func (cmd CommandClassReport) CommandID() byte {
-	return byte(CommandCommandClassReport)
+func (cmd CommandClassReport) CommandID() commandclass.CommandID {
+	return CommandCommandClassReport
+}
+
+func (cmd CommandClassReport) CommandIDString() string {
+	return "VERSION_COMMAND_CLASS_REPORT"
 }
 
 func (cmd *CommandClassReport) UnmarshalBinary(data []byte) error {
@@ -58,8 +75,8 @@ func (cmd *CommandClassReport) UnmarshalBinary(data []byte) error {
 
 func (cmd *CommandClassReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.RequestedCommandClass)
 

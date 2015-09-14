@@ -7,10 +7,23 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandRecordReport commandclass.CommandID = 0x04
 
 func init() {
 	gob.Register(RecordReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x4C),
+		Command:      commandclass.CommandID(0x04),
+		Version:      1,
+	}, NewRecordReport)
+}
+
+func NewRecordReport() commandclass.Command {
+	return &RecordReport{}
 }
 
 // <no value>
@@ -42,12 +55,16 @@ type RecordReport struct {
 	UserCode []byte
 }
 
-func (cmd RecordReport) CommandClassID() byte {
+func (cmd RecordReport) CommandClassID() commandclass.CommandClassID {
 	return 0x4C
 }
 
-func (cmd RecordReport) CommandID() byte {
-	return byte(CommandRecordReport)
+func (cmd RecordReport) CommandID() commandclass.CommandID {
+	return CommandRecordReport
+}
+
+func (cmd RecordReport) CommandIDString() string {
+	return "RECORD_REPORT"
 }
 
 func (cmd *RecordReport) UnmarshalBinary(data []byte) error {
@@ -146,8 +163,8 @@ func (cmd *RecordReport) UnmarshalBinary(data []byte) error {
 
 func (cmd *RecordReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.RecordNumber)
 

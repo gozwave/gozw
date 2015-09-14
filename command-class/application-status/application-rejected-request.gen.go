@@ -6,10 +6,23 @@ package applicationstatus
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandApplicationRejectedRequest commandclass.CommandID = 0x02
 
 func init() {
 	gob.Register(ApplicationRejectedRequest{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x22),
+		Command:      commandclass.CommandID(0x02),
+		Version:      1,
+	}, NewApplicationRejectedRequest)
+}
+
+func NewApplicationRejectedRequest() commandclass.Command {
+	return &ApplicationRejectedRequest{}
 }
 
 // <no value>
@@ -17,12 +30,16 @@ type ApplicationRejectedRequest struct {
 	Status byte
 }
 
-func (cmd ApplicationRejectedRequest) CommandClassID() byte {
+func (cmd ApplicationRejectedRequest) CommandClassID() commandclass.CommandClassID {
 	return 0x22
 }
 
-func (cmd ApplicationRejectedRequest) CommandID() byte {
-	return byte(CommandApplicationRejectedRequest)
+func (cmd ApplicationRejectedRequest) CommandID() commandclass.CommandID {
+	return CommandApplicationRejectedRequest
+}
+
+func (cmd ApplicationRejectedRequest) CommandIDString() string {
+	return "APPLICATION_REJECTED_REQUEST"
 }
 
 func (cmd *ApplicationRejectedRequest) UnmarshalBinary(data []byte) error {
@@ -49,8 +66,8 @@ func (cmd *ApplicationRejectedRequest) UnmarshalBinary(data []byte) error {
 
 func (cmd *ApplicationRejectedRequest) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.Status)
 

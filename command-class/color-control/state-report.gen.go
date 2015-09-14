@@ -6,10 +6,23 @@ package colorcontrol
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandStateReport commandclass.CommandID = 0x04
 
 func init() {
 	gob.Register(StateReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x33),
+		Command:      commandclass.CommandID(0x04),
+		Version:      1,
+	}, NewStateReport)
+}
+
+func NewStateReport() commandclass.Command {
+	return &StateReport{}
 }
 
 // <no value>
@@ -19,12 +32,16 @@ type StateReport struct {
 	State byte
 }
 
-func (cmd StateReport) CommandClassID() byte {
+func (cmd StateReport) CommandClassID() commandclass.CommandClassID {
 	return 0x33
 }
 
-func (cmd StateReport) CommandID() byte {
-	return byte(CommandStateReport)
+func (cmd StateReport) CommandID() commandclass.CommandID {
+	return CommandStateReport
+}
+
+func (cmd StateReport) CommandIDString() string {
+	return "STATE_REPORT"
 }
 
 func (cmd *StateReport) UnmarshalBinary(data []byte) error {
@@ -58,8 +75,8 @@ func (cmd *StateReport) UnmarshalBinary(data []byte) error {
 
 func (cmd *StateReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.CapabilityId)
 

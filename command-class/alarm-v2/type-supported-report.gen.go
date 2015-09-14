@@ -6,10 +6,23 @@ package alarmv2
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandTypeSupportedReport commandclass.CommandID = 0x08
 
 func init() {
 	gob.Register(TypeSupportedReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x71),
+		Command:      commandclass.CommandID(0x08),
+		Version:      2,
+	}, NewTypeSupportedReport)
+}
+
+func NewTypeSupportedReport() commandclass.Command {
+	return &TypeSupportedReport{}
 }
 
 // <no value>
@@ -23,12 +36,16 @@ type TypeSupportedReport struct {
 	BitMask []byte
 }
 
-func (cmd TypeSupportedReport) CommandClassID() byte {
+func (cmd TypeSupportedReport) CommandClassID() commandclass.CommandClassID {
 	return 0x71
 }
 
-func (cmd TypeSupportedReport) CommandID() byte {
-	return byte(CommandTypeSupportedReport)
+func (cmd TypeSupportedReport) CommandID() commandclass.CommandID {
+	return CommandTypeSupportedReport
+}
+
+func (cmd TypeSupportedReport) CommandIDString() string {
+	return "ALARM_TYPE_SUPPORTED_REPORT"
 }
 
 func (cmd *TypeSupportedReport) UnmarshalBinary(data []byte) error {
@@ -64,8 +81,8 @@ func (cmd *TypeSupportedReport) UnmarshalBinary(data []byte) error {
 
 func (cmd *TypeSupportedReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	{
 		var val byte

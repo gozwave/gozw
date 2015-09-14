@@ -3,22 +3,41 @@
 
 package thermostatoperatingstatev2
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+
+	"github.com/helioslabs/gozw/command-class"
+)
+
+const CommandLoggingSupportedGet commandclass.CommandID = 0x01
 
 func init() {
 	gob.Register(LoggingSupportedGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x42),
+		Command:      commandclass.CommandID(0x01),
+		Version:      2,
+	}, NewLoggingSupportedGet)
+}
+
+func NewLoggingSupportedGet() commandclass.Command {
+	return &LoggingSupportedGet{}
 }
 
 // <no value>
 type LoggingSupportedGet struct {
 }
 
-func (cmd LoggingSupportedGet) CommandClassID() byte {
+func (cmd LoggingSupportedGet) CommandClassID() commandclass.CommandClassID {
 	return 0x42
 }
 
-func (cmd LoggingSupportedGet) CommandID() byte {
-	return byte(CommandLoggingSupportedGet)
+func (cmd LoggingSupportedGet) CommandID() commandclass.CommandID {
+	return CommandLoggingSupportedGet
+}
+
+func (cmd LoggingSupportedGet) CommandIDString() string {
+	return "THERMOSTAT_OPERATING_STATE_LOGGING_SUPPORTED_GET"
 }
 
 func (cmd *LoggingSupportedGet) UnmarshalBinary(data []byte) error {
@@ -29,8 +48,8 @@ func (cmd *LoggingSupportedGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *LoggingSupportedGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	return
 }

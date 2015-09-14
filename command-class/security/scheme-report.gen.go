@@ -6,10 +6,23 @@ package security
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandSchemeReport commandclass.CommandID = 0x05
 
 func init() {
 	gob.Register(SchemeReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x98),
+		Command:      commandclass.CommandID(0x05),
+		Version:      1,
+	}, NewSchemeReport)
+}
+
+func NewSchemeReport() commandclass.Command {
+	return &SchemeReport{}
 }
 
 // <no value>
@@ -17,12 +30,16 @@ type SchemeReport struct {
 	SupportedSecuritySchemes byte
 }
 
-func (cmd SchemeReport) CommandClassID() byte {
+func (cmd SchemeReport) CommandClassID() commandclass.CommandClassID {
 	return 0x98
 }
 
-func (cmd SchemeReport) CommandID() byte {
-	return byte(CommandSchemeReport)
+func (cmd SchemeReport) CommandID() commandclass.CommandID {
+	return CommandSchemeReport
+}
+
+func (cmd SchemeReport) CommandIDString() string {
+	return "SECURITY_SCHEME_REPORT"
 }
 
 func (cmd *SchemeReport) UnmarshalBinary(data []byte) error {
@@ -49,8 +66,8 @@ func (cmd *SchemeReport) UnmarshalBinary(data []byte) error {
 
 func (cmd *SchemeReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.SupportedSecuritySchemes)
 

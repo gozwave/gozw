@@ -3,22 +3,41 @@
 
 package wakeup
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+
+	"github.com/helioslabs/gozw/command-class"
+)
+
+const CommandNotification commandclass.CommandID = 0x07
 
 func init() {
 	gob.Register(Notification{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x84),
+		Command:      commandclass.CommandID(0x07),
+		Version:      1,
+	}, NewNotification)
+}
+
+func NewNotification() commandclass.Command {
+	return &Notification{}
 }
 
 // <no value>
 type Notification struct {
 }
 
-func (cmd Notification) CommandClassID() byte {
+func (cmd Notification) CommandClassID() commandclass.CommandClassID {
 	return 0x84
 }
 
-func (cmd Notification) CommandID() byte {
-	return byte(CommandNotification)
+func (cmd Notification) CommandID() commandclass.CommandID {
+	return CommandNotification
+}
+
+func (cmd Notification) CommandIDString() string {
+	return "WAKE_UP_NOTIFICATION"
 }
 
 func (cmd *Notification) UnmarshalBinary(data []byte) error {
@@ -29,8 +48,8 @@ func (cmd *Notification) UnmarshalBinary(data []byte) error {
 
 func (cmd *Notification) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	return
 }

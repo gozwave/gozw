@@ -6,10 +6,23 @@ package security
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandNonceReport commandclass.CommandID = 0x80
 
 func init() {
 	gob.Register(NonceReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x98),
+		Command:      commandclass.CommandID(0x80),
+		Version:      1,
+	}, NewNonceReport)
+}
+
+func NewNonceReport() commandclass.Command {
+	return &NonceReport{}
 }
 
 // <no value>
@@ -17,12 +30,16 @@ type NonceReport struct {
 	NonceByte []byte
 }
 
-func (cmd NonceReport) CommandClassID() byte {
+func (cmd NonceReport) CommandClassID() commandclass.CommandClassID {
 	return 0x98
 }
 
-func (cmd NonceReport) CommandID() byte {
-	return byte(CommandNonceReport)
+func (cmd NonceReport) CommandID() commandclass.CommandID {
+	return CommandNonceReport
+}
+
+func (cmd NonceReport) CommandIDString() string {
+	return "SECURITY_NONCE_REPORT"
 }
 
 func (cmd *NonceReport) UnmarshalBinary(data []byte) error {
@@ -50,8 +67,8 @@ func (cmd *NonceReport) UnmarshalBinary(data []byte) error {
 
 func (cmd *NonceReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	if paramLen := len(cmd.NonceByte); paramLen > 8 {
 		return nil, errors.New("Length overflow in array parameter NonceByte")

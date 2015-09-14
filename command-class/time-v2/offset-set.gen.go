@@ -6,10 +6,23 @@ package timev2
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandOffsetSet commandclass.CommandID = 0x05
 
 func init() {
 	gob.Register(OffsetSet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x8A),
+		Command:      commandclass.CommandID(0x05),
+		Version:      2,
+	}, NewOffsetSet)
+}
+
+func NewOffsetSet() commandclass.Command {
+	return &OffsetSet{}
 }
 
 // <no value>
@@ -41,12 +54,16 @@ type OffsetSet struct {
 	HourEndDst byte
 }
 
-func (cmd OffsetSet) CommandClassID() byte {
+func (cmd OffsetSet) CommandClassID() commandclass.CommandClassID {
 	return 0x8A
 }
 
-func (cmd OffsetSet) CommandID() byte {
-	return byte(CommandOffsetSet)
+func (cmd OffsetSet) CommandID() commandclass.CommandID {
+	return CommandOffsetSet
+}
+
+func (cmd OffsetSet) CommandIDString() string {
+	return "TIME_OFFSET_SET"
 }
 
 func (cmd *OffsetSet) UnmarshalBinary(data []byte) error {
@@ -135,8 +152,8 @@ func (cmd *OffsetSet) UnmarshalBinary(data []byte) error {
 
 func (cmd *OffsetSet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	{
 		var val byte

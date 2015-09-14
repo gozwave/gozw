@@ -6,10 +6,23 @@ package applicationstatus
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandApplicationBusy commandclass.CommandID = 0x01
 
 func init() {
 	gob.Register(ApplicationBusy{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x22),
+		Command:      commandclass.CommandID(0x01),
+		Version:      1,
+	}, NewApplicationBusy)
+}
+
+func NewApplicationBusy() commandclass.Command {
+	return &ApplicationBusy{}
 }
 
 // <no value>
@@ -19,12 +32,16 @@ type ApplicationBusy struct {
 	WaitTime byte
 }
 
-func (cmd ApplicationBusy) CommandClassID() byte {
+func (cmd ApplicationBusy) CommandClassID() commandclass.CommandClassID {
 	return 0x22
 }
 
-func (cmd ApplicationBusy) CommandID() byte {
-	return byte(CommandApplicationBusy)
+func (cmd ApplicationBusy) CommandID() commandclass.CommandID {
+	return CommandApplicationBusy
+}
+
+func (cmd ApplicationBusy) CommandIDString() string {
+	return "APPLICATION_BUSY"
 }
 
 func (cmd *ApplicationBusy) UnmarshalBinary(data []byte) error {
@@ -58,8 +75,8 @@ func (cmd *ApplicationBusy) UnmarshalBinary(data []byte) error {
 
 func (cmd *ApplicationBusy) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.Status)
 

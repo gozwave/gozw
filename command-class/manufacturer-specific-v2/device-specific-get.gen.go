@@ -6,10 +6,23 @@ package manufacturerspecificv2
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandDeviceSpecificGet commandclass.CommandID = 0x06
 
 func init() {
 	gob.Register(DeviceSpecificGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x72),
+		Command:      commandclass.CommandID(0x06),
+		Version:      2,
+	}, NewDeviceSpecificGet)
+}
+
+func NewDeviceSpecificGet() commandclass.Command {
+	return &DeviceSpecificGet{}
 }
 
 // <no value>
@@ -19,12 +32,16 @@ type DeviceSpecificGet struct {
 	}
 }
 
-func (cmd DeviceSpecificGet) CommandClassID() byte {
+func (cmd DeviceSpecificGet) CommandClassID() commandclass.CommandClassID {
 	return 0x72
 }
 
-func (cmd DeviceSpecificGet) CommandID() byte {
-	return byte(CommandDeviceSpecificGet)
+func (cmd DeviceSpecificGet) CommandID() commandclass.CommandID {
+	return CommandDeviceSpecificGet
+}
+
+func (cmd DeviceSpecificGet) CommandIDString() string {
+	return "DEVICE_SPECIFIC_GET"
 }
 
 func (cmd *DeviceSpecificGet) UnmarshalBinary(data []byte) error {
@@ -52,8 +69,8 @@ func (cmd *DeviceSpecificGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *DeviceSpecificGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	{
 		var val byte

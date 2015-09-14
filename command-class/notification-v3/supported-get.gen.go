@@ -3,22 +3,41 @@
 
 package notificationv3
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+
+	"github.com/helioslabs/gozw/command-class"
+)
+
+const CommandSupportedGet commandclass.CommandID = 0x07
 
 func init() {
 	gob.Register(SupportedGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x71),
+		Command:      commandclass.CommandID(0x07),
+		Version:      3,
+	}, NewSupportedGet)
+}
+
+func NewSupportedGet() commandclass.Command {
+	return &SupportedGet{}
 }
 
 // <no value>
 type SupportedGet struct {
 }
 
-func (cmd SupportedGet) CommandClassID() byte {
+func (cmd SupportedGet) CommandClassID() commandclass.CommandClassID {
 	return 0x71
 }
 
-func (cmd SupportedGet) CommandID() byte {
-	return byte(CommandSupportedGet)
+func (cmd SupportedGet) CommandID() commandclass.CommandID {
+	return CommandSupportedGet
+}
+
+func (cmd SupportedGet) CommandIDString() string {
+	return "NOTIFICATION_SUPPORTED_GET"
 }
 
 func (cmd *SupportedGet) UnmarshalBinary(data []byte) error {
@@ -29,8 +48,8 @@ func (cmd *SupportedGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *SupportedGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	return
 }

@@ -3,22 +3,41 @@
 
 package security
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+
+	"github.com/helioslabs/gozw/command-class"
+)
+
+const CommandNetworkKeyVerify commandclass.CommandID = 0x07
 
 func init() {
 	gob.Register(NetworkKeyVerify{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x98),
+		Command:      commandclass.CommandID(0x07),
+		Version:      1,
+	}, NewNetworkKeyVerify)
+}
+
+func NewNetworkKeyVerify() commandclass.Command {
+	return &NetworkKeyVerify{}
 }
 
 // <no value>
 type NetworkKeyVerify struct {
 }
 
-func (cmd NetworkKeyVerify) CommandClassID() byte {
+func (cmd NetworkKeyVerify) CommandClassID() commandclass.CommandClassID {
 	return 0x98
 }
 
-func (cmd NetworkKeyVerify) CommandID() byte {
-	return byte(CommandNetworkKeyVerify)
+func (cmd NetworkKeyVerify) CommandID() commandclass.CommandID {
+	return CommandNetworkKeyVerify
+}
+
+func (cmd NetworkKeyVerify) CommandIDString() string {
+	return "NETWORK_KEY_VERIFY"
 }
 
 func (cmd *NetworkKeyVerify) UnmarshalBinary(data []byte) error {
@@ -29,8 +48,8 @@ func (cmd *NetworkKeyVerify) UnmarshalBinary(data []byte) error {
 
 func (cmd *NetworkKeyVerify) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	return
 }

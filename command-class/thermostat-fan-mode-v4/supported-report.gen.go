@@ -6,10 +6,23 @@ package thermostatfanmodev4
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandSupportedReport commandclass.CommandID = 0x05
 
 func init() {
 	gob.Register(SupportedReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x44),
+		Command:      commandclass.CommandID(0x05),
+		Version:      4,
+	}, NewSupportedReport)
+}
+
+func NewSupportedReport() commandclass.Command {
+	return &SupportedReport{}
 }
 
 // <no value>
@@ -17,12 +30,16 @@ type SupportedReport struct {
 	BitMask []byte
 }
 
-func (cmd SupportedReport) CommandClassID() byte {
+func (cmd SupportedReport) CommandClassID() commandclass.CommandClassID {
 	return 0x44
 }
 
-func (cmd SupportedReport) CommandID() byte {
-	return byte(CommandSupportedReport)
+func (cmd SupportedReport) CommandID() commandclass.CommandID {
+	return CommandSupportedReport
+}
+
+func (cmd SupportedReport) CommandIDString() string {
+	return "THERMOSTAT_FAN_MODE_SUPPORTED_REPORT"
 }
 
 func (cmd *SupportedReport) UnmarshalBinary(data []byte) error {
@@ -48,8 +65,8 @@ func (cmd *SupportedReport) UnmarshalBinary(data []byte) error {
 
 func (cmd *SupportedReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.BitMask...)
 

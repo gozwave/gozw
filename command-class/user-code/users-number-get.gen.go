@@ -3,22 +3,41 @@
 
 package usercode
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+
+	"github.com/helioslabs/gozw/command-class"
+)
+
+const CommandUsersNumberGet commandclass.CommandID = 0x04
 
 func init() {
 	gob.Register(UsersNumberGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x63),
+		Command:      commandclass.CommandID(0x04),
+		Version:      1,
+	}, NewUsersNumberGet)
+}
+
+func NewUsersNumberGet() commandclass.Command {
+	return &UsersNumberGet{}
 }
 
 // <no value>
 type UsersNumberGet struct {
 }
 
-func (cmd UsersNumberGet) CommandClassID() byte {
+func (cmd UsersNumberGet) CommandClassID() commandclass.CommandClassID {
 	return 0x63
 }
 
-func (cmd UsersNumberGet) CommandID() byte {
-	return byte(CommandUsersNumberGet)
+func (cmd UsersNumberGet) CommandID() commandclass.CommandID {
+	return CommandUsersNumberGet
+}
+
+func (cmd UsersNumberGet) CommandIDString() string {
+	return "USERS_NUMBER_GET"
 }
 
 func (cmd *UsersNumberGet) UnmarshalBinary(data []byte) error {
@@ -29,8 +48,8 @@ func (cmd *UsersNumberGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *UsersNumberGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	return
 }

@@ -3,22 +3,41 @@
 
 package security
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+
+	"github.com/helioslabs/gozw/command-class"
+)
+
+const CommandNonceGet commandclass.CommandID = 0x40
 
 func init() {
 	gob.Register(NonceGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x98),
+		Command:      commandclass.CommandID(0x40),
+		Version:      1,
+	}, NewNonceGet)
+}
+
+func NewNonceGet() commandclass.Command {
+	return &NonceGet{}
 }
 
 // <no value>
 type NonceGet struct {
 }
 
-func (cmd NonceGet) CommandClassID() byte {
+func (cmd NonceGet) CommandClassID() commandclass.CommandClassID {
 	return 0x98
 }
 
-func (cmd NonceGet) CommandID() byte {
-	return byte(CommandNonceGet)
+func (cmd NonceGet) CommandID() commandclass.CommandID {
+	return CommandNonceGet
+}
+
+func (cmd NonceGet) CommandIDString() string {
+	return "SECURITY_NONCE_GET"
 }
 
 func (cmd *NonceGet) UnmarshalBinary(data []byte) error {
@@ -29,8 +48,8 @@ func (cmd *NonceGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *NonceGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	return
 }

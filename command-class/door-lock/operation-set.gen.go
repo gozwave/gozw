@@ -6,10 +6,23 @@ package doorlock
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandOperationSet commandclass.CommandID = 0x01
 
 func init() {
 	gob.Register(OperationSet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x62),
+		Command:      commandclass.CommandID(0x01),
+		Version:      1,
+	}, NewOperationSet)
+}
+
+func NewOperationSet() commandclass.Command {
+	return &OperationSet{}
 }
 
 // <no value>
@@ -17,12 +30,16 @@ type OperationSet struct {
 	DoorLockMode byte
 }
 
-func (cmd OperationSet) CommandClassID() byte {
+func (cmd OperationSet) CommandClassID() commandclass.CommandClassID {
 	return 0x62
 }
 
-func (cmd OperationSet) CommandID() byte {
-	return byte(CommandOperationSet)
+func (cmd OperationSet) CommandID() commandclass.CommandID {
+	return CommandOperationSet
+}
+
+func (cmd OperationSet) CommandIDString() string {
+	return "DOOR_LOCK_OPERATION_SET"
 }
 
 func (cmd *OperationSet) UnmarshalBinary(data []byte) error {
@@ -49,8 +66,8 @@ func (cmd *OperationSet) UnmarshalBinary(data []byte) error {
 
 func (cmd *OperationSet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.DoorLockMode)
 

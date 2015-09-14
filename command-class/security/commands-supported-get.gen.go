@@ -3,22 +3,41 @@
 
 package security
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+
+	"github.com/helioslabs/gozw/command-class"
+)
+
+const CommandCommandsSupportedGet commandclass.CommandID = 0x02
 
 func init() {
 	gob.Register(CommandsSupportedGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x98),
+		Command:      commandclass.CommandID(0x02),
+		Version:      1,
+	}, NewCommandsSupportedGet)
+}
+
+func NewCommandsSupportedGet() commandclass.Command {
+	return &CommandsSupportedGet{}
 }
 
 // <no value>
 type CommandsSupportedGet struct {
 }
 
-func (cmd CommandsSupportedGet) CommandClassID() byte {
+func (cmd CommandsSupportedGet) CommandClassID() commandclass.CommandClassID {
 	return 0x98
 }
 
-func (cmd CommandsSupportedGet) CommandID() byte {
-	return byte(CommandCommandsSupportedGet)
+func (cmd CommandsSupportedGet) CommandID() commandclass.CommandID {
+	return CommandCommandsSupportedGet
+}
+
+func (cmd CommandsSupportedGet) CommandIDString() string {
+	return "SECURITY_COMMANDS_SUPPORTED_GET"
 }
 
 func (cmd *CommandsSupportedGet) UnmarshalBinary(data []byte) error {
@@ -29,8 +48,8 @@ func (cmd *CommandsSupportedGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *CommandsSupportedGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	return
 }

@@ -6,10 +6,23 @@ package version
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandReport commandclass.CommandID = 0x12
 
 func init() {
 	gob.Register(Report{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x86),
+		Command:      commandclass.CommandID(0x12),
+		Version:      1,
+	}, NewReport)
+}
+
+func NewReport() commandclass.Command {
+	return &Report{}
 }
 
 // <no value>
@@ -25,12 +38,16 @@ type Report struct {
 	ApplicationSubVersion byte
 }
 
-func (cmd Report) CommandClassID() byte {
+func (cmd Report) CommandClassID() commandclass.CommandClassID {
 	return 0x86
 }
 
-func (cmd Report) CommandID() byte {
-	return byte(CommandReport)
+func (cmd Report) CommandID() commandclass.CommandID {
+	return CommandReport
+}
+
+func (cmd Report) CommandIDString() string {
+	return "VERSION_REPORT"
 }
 
 func (cmd *Report) UnmarshalBinary(data []byte) error {
@@ -85,8 +102,8 @@ func (cmd *Report) UnmarshalBinary(data []byte) error {
 
 func (cmd *Report) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.ZWaveLibraryType)
 

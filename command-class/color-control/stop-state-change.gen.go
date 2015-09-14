@@ -6,10 +6,23 @@ package colorcontrol
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandStopStateChange commandclass.CommandID = 0x07
 
 func init() {
 	gob.Register(StopStateChange{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x33),
+		Command:      commandclass.CommandID(0x07),
+		Version:      1,
+	}, NewStopStateChange)
+}
+
+func NewStopStateChange() commandclass.Command {
+	return &StopStateChange{}
 }
 
 // <no value>
@@ -17,12 +30,16 @@ type StopStateChange struct {
 	CapabilityId byte
 }
 
-func (cmd StopStateChange) CommandClassID() byte {
+func (cmd StopStateChange) CommandClassID() commandclass.CommandClassID {
 	return 0x33
 }
 
-func (cmd StopStateChange) CommandID() byte {
-	return byte(CommandStopStateChange)
+func (cmd StopStateChange) CommandID() commandclass.CommandID {
+	return CommandStopStateChange
+}
+
+func (cmd StopStateChange) CommandIDString() string {
+	return "STOP_STATE_CHANGE"
 }
 
 func (cmd *StopStateChange) UnmarshalBinary(data []byte) error {
@@ -49,8 +66,8 @@ func (cmd *StopStateChange) UnmarshalBinary(data []byte) error {
 
 func (cmd *StopStateChange) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.CapabilityId)
 

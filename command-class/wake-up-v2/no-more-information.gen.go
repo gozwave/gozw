@@ -3,22 +3,41 @@
 
 package wakeupv2
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+
+	"github.com/helioslabs/gozw/command-class"
+)
+
+const CommandNoMoreInformation commandclass.CommandID = 0x08
 
 func init() {
 	gob.Register(NoMoreInformation{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x84),
+		Command:      commandclass.CommandID(0x08),
+		Version:      2,
+	}, NewNoMoreInformation)
+}
+
+func NewNoMoreInformation() commandclass.Command {
+	return &NoMoreInformation{}
 }
 
 // <no value>
 type NoMoreInformation struct {
 }
 
-func (cmd NoMoreInformation) CommandClassID() byte {
+func (cmd NoMoreInformation) CommandClassID() commandclass.CommandClassID {
 	return 0x84
 }
 
-func (cmd NoMoreInformation) CommandID() byte {
-	return byte(CommandNoMoreInformation)
+func (cmd NoMoreInformation) CommandID() commandclass.CommandID {
+	return CommandNoMoreInformation
+}
+
+func (cmd NoMoreInformation) CommandIDString() string {
+	return "WAKE_UP_NO_MORE_INFORMATION"
 }
 
 func (cmd *NoMoreInformation) UnmarshalBinary(data []byte) error {
@@ -29,8 +48,8 @@ func (cmd *NoMoreInformation) UnmarshalBinary(data []byte) error {
 
 func (cmd *NoMoreInformation) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	return
 }

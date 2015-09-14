@@ -6,10 +6,23 @@ package colorcontrolv2
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandStateGet commandclass.CommandID = 0x03
 
 func init() {
 	gob.Register(StateGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x33),
+		Command:      commandclass.CommandID(0x03),
+		Version:      2,
+	}, NewStateGet)
+}
+
+func NewStateGet() commandclass.Command {
+	return &StateGet{}
 }
 
 // <no value>
@@ -17,12 +30,16 @@ type StateGet struct {
 	CapabilityId byte
 }
 
-func (cmd StateGet) CommandClassID() byte {
+func (cmd StateGet) CommandClassID() commandclass.CommandClassID {
 	return 0x33
 }
 
-func (cmd StateGet) CommandID() byte {
-	return byte(CommandStateGet)
+func (cmd StateGet) CommandID() commandclass.CommandID {
+	return CommandStateGet
+}
+
+func (cmd StateGet) CommandIDString() string {
+	return "STATE_GET"
 }
 
 func (cmd *StateGet) UnmarshalBinary(data []byte) error {
@@ -49,8 +66,8 @@ func (cmd *StateGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *StateGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.CapabilityId)
 

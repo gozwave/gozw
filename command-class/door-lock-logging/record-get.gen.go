@@ -6,10 +6,23 @@ package doorlocklogging
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandRecordGet commandclass.CommandID = 0x03
 
 func init() {
 	gob.Register(RecordGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x4C),
+		Command:      commandclass.CommandID(0x03),
+		Version:      1,
+	}, NewRecordGet)
+}
+
+func NewRecordGet() commandclass.Command {
+	return &RecordGet{}
 }
 
 // <no value>
@@ -17,12 +30,16 @@ type RecordGet struct {
 	RecordNumber byte
 }
 
-func (cmd RecordGet) CommandClassID() byte {
+func (cmd RecordGet) CommandClassID() commandclass.CommandClassID {
 	return 0x4C
 }
 
-func (cmd RecordGet) CommandID() byte {
-	return byte(CommandRecordGet)
+func (cmd RecordGet) CommandID() commandclass.CommandID {
+	return CommandRecordGet
+}
+
+func (cmd RecordGet) CommandIDString() string {
+	return "RECORD_GET"
 }
 
 func (cmd *RecordGet) UnmarshalBinary(data []byte) error {
@@ -49,8 +66,8 @@ func (cmd *RecordGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *RecordGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.RecordNumber)
 

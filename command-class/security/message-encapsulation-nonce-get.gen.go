@@ -6,10 +6,23 @@ package security
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandMessageEncapsulationNonceGet commandclass.CommandID = 0xC1
 
 func init() {
 	gob.Register(MessageEncapsulationNonceGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x98),
+		Command:      commandclass.CommandID(0xC1),
+		Version:      1,
+	}, NewMessageEncapsulationNonceGet)
+}
+
+func NewMessageEncapsulationNonceGet() commandclass.Command {
+	return &MessageEncapsulationNonceGet{}
 }
 
 // <no value>
@@ -35,12 +48,16 @@ type MessageEncapsulationNonceGet struct {
 	MessageAuthenticationCodeByte []byte
 }
 
-func (cmd MessageEncapsulationNonceGet) CommandClassID() byte {
+func (cmd MessageEncapsulationNonceGet) CommandClassID() commandclass.CommandClassID {
 	return 0x98
 }
 
-func (cmd MessageEncapsulationNonceGet) CommandID() byte {
-	return byte(CommandMessageEncapsulationNonceGet)
+func (cmd MessageEncapsulationNonceGet) CommandID() commandclass.CommandID {
+	return CommandMessageEncapsulationNonceGet
+}
+
+func (cmd MessageEncapsulationNonceGet) CommandIDString() string {
+	return "SECURITY_MESSAGE_ENCAPSULATION_NONCE_GET"
 }
 
 func (cmd *MessageEncapsulationNonceGet) UnmarshalBinary(data []byte) error {
@@ -116,8 +133,8 @@ func (cmd *MessageEncapsulationNonceGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *MessageEncapsulationNonceGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	if paramLen := len(cmd.InitializationVectorByte); paramLen > 8 {
 		return nil, errors.New("Length overflow in array parameter InitializationVectorByte")

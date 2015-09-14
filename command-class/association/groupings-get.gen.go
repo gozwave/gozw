@@ -3,22 +3,41 @@
 
 package association
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+
+	"github.com/helioslabs/gozw/command-class"
+)
+
+const CommandGroupingsGet commandclass.CommandID = 0x05
 
 func init() {
 	gob.Register(GroupingsGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x85),
+		Command:      commandclass.CommandID(0x05),
+		Version:      1,
+	}, NewGroupingsGet)
+}
+
+func NewGroupingsGet() commandclass.Command {
+	return &GroupingsGet{}
 }
 
 // <no value>
 type GroupingsGet struct {
 }
 
-func (cmd GroupingsGet) CommandClassID() byte {
+func (cmd GroupingsGet) CommandClassID() commandclass.CommandClassID {
 	return 0x85
 }
 
-func (cmd GroupingsGet) CommandID() byte {
-	return byte(CommandGroupingsGet)
+func (cmd GroupingsGet) CommandID() commandclass.CommandID {
+	return CommandGroupingsGet
+}
+
+func (cmd GroupingsGet) CommandIDString() string {
+	return "ASSOCIATION_GROUPINGS_GET"
 }
 
 func (cmd *GroupingsGet) UnmarshalBinary(data []byte) error {
@@ -29,8 +48,8 @@ func (cmd *GroupingsGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *GroupingsGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	return
 }

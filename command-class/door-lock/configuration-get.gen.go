@@ -3,22 +3,41 @@
 
 package doorlock
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+
+	"github.com/helioslabs/gozw/command-class"
+)
+
+const CommandConfigurationGet commandclass.CommandID = 0x05
 
 func init() {
 	gob.Register(ConfigurationGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x62),
+		Command:      commandclass.CommandID(0x05),
+		Version:      1,
+	}, NewConfigurationGet)
+}
+
+func NewConfigurationGet() commandclass.Command {
+	return &ConfigurationGet{}
 }
 
 // <no value>
 type ConfigurationGet struct {
 }
 
-func (cmd ConfigurationGet) CommandClassID() byte {
+func (cmd ConfigurationGet) CommandClassID() commandclass.CommandClassID {
 	return 0x62
 }
 
-func (cmd ConfigurationGet) CommandID() byte {
-	return byte(CommandConfigurationGet)
+func (cmd ConfigurationGet) CommandID() commandclass.CommandID {
+	return CommandConfigurationGet
+}
+
+func (cmd ConfigurationGet) CommandIDString() string {
+	return "DOOR_LOCK_CONFIGURATION_GET"
 }
 
 func (cmd *ConfigurationGet) UnmarshalBinary(data []byte) error {
@@ -29,8 +48,8 @@ func (cmd *ConfigurationGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *ConfigurationGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	return
 }

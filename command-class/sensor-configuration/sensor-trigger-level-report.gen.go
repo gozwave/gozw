@@ -6,10 +6,23 @@ package sensorconfiguration
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandSensorTriggerLevelReport commandclass.CommandID = 0x03
 
 func init() {
 	gob.Register(SensorTriggerLevelReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x9E),
+		Command:      commandclass.CommandID(0x03),
+		Version:      1,
+	}, NewSensorTriggerLevelReport)
+}
+
+func NewSensorTriggerLevelReport() commandclass.Command {
+	return &SensorTriggerLevelReport{}
 }
 
 // <no value>
@@ -27,12 +40,16 @@ type SensorTriggerLevelReport struct {
 	TriggerValue []byte
 }
 
-func (cmd SensorTriggerLevelReport) CommandClassID() byte {
+func (cmd SensorTriggerLevelReport) CommandClassID() commandclass.CommandClassID {
 	return 0x9E
 }
 
-func (cmd SensorTriggerLevelReport) CommandID() byte {
-	return byte(CommandSensorTriggerLevelReport)
+func (cmd SensorTriggerLevelReport) CommandID() commandclass.CommandID {
+	return CommandSensorTriggerLevelReport
+}
+
+func (cmd SensorTriggerLevelReport) CommandIDString() string {
+	return "SENSOR_TRIGGER_LEVEL_REPORT"
 }
 
 func (cmd *SensorTriggerLevelReport) UnmarshalBinary(data []byte) error {
@@ -81,8 +98,8 @@ func (cmd *SensorTriggerLevelReport) UnmarshalBinary(data []byte) error {
 
 func (cmd *SensorTriggerLevelReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.SensorType)
 

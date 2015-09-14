@@ -7,10 +7,23 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandDateReport commandclass.CommandID = 0x04
 
 func init() {
 	gob.Register(DateReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x8A),
+		Command:      commandclass.CommandID(0x04),
+		Version:      1,
+	}, NewDateReport)
+}
+
+func NewDateReport() commandclass.Command {
+	return &DateReport{}
 }
 
 // <no value>
@@ -22,12 +35,16 @@ type DateReport struct {
 	Day byte
 }
 
-func (cmd DateReport) CommandClassID() byte {
+func (cmd DateReport) CommandClassID() commandclass.CommandClassID {
 	return 0x8A
 }
 
-func (cmd DateReport) CommandID() byte {
-	return byte(CommandDateReport)
+func (cmd DateReport) CommandID() commandclass.CommandID {
+	return CommandDateReport
+}
+
+func (cmd DateReport) CommandIDString() string {
+	return "DATE_REPORT"
 }
 
 func (cmd *DateReport) UnmarshalBinary(data []byte) error {
@@ -68,8 +85,8 @@ func (cmd *DateReport) UnmarshalBinary(data []byte) error {
 
 func (cmd *DateReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	{
 		buf := make([]byte, 2)

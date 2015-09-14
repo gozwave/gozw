@@ -6,10 +6,23 @@ package thermostatsetpointv3
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandSet commandclass.CommandID = 0x01
 
 func init() {
 	gob.Register(Set{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x43),
+		Command:      commandclass.CommandID(0x01),
+		Version:      3,
+	}, NewSet)
+}
+
+func NewSet() commandclass.Command {
+	return &Set{}
 }
 
 // <no value>
@@ -29,12 +42,16 @@ type Set struct {
 	Value []byte
 }
 
-func (cmd Set) CommandClassID() byte {
+func (cmd Set) CommandClassID() commandclass.CommandClassID {
 	return 0x43
 }
 
-func (cmd Set) CommandID() byte {
-	return byte(CommandSet)
+func (cmd Set) CommandID() commandclass.CommandID {
+	return CommandSet
+}
+
+func (cmd Set) CommandIDString() string {
+	return "THERMOSTAT_SETPOINT_SET"
 }
 
 func (cmd *Set) UnmarshalBinary(data []byte) error {
@@ -84,8 +101,8 @@ func (cmd *Set) UnmarshalBinary(data []byte) error {
 
 func (cmd *Set) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	{
 		var val byte

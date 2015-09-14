@@ -6,10 +6,23 @@ package association
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandGroupingsReport commandclass.CommandID = 0x06
 
 func init() {
 	gob.Register(GroupingsReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x85),
+		Command:      commandclass.CommandID(0x06),
+		Version:      1,
+	}, NewGroupingsReport)
+}
+
+func NewGroupingsReport() commandclass.Command {
+	return &GroupingsReport{}
 }
 
 // <no value>
@@ -17,12 +30,16 @@ type GroupingsReport struct {
 	SupportedGroupings byte
 }
 
-func (cmd GroupingsReport) CommandClassID() byte {
+func (cmd GroupingsReport) CommandClassID() commandclass.CommandClassID {
 	return 0x85
 }
 
-func (cmd GroupingsReport) CommandID() byte {
-	return byte(CommandGroupingsReport)
+func (cmd GroupingsReport) CommandID() commandclass.CommandID {
+	return CommandGroupingsReport
+}
+
+func (cmd GroupingsReport) CommandIDString() string {
+	return "ASSOCIATION_GROUPINGS_REPORT"
 }
 
 func (cmd *GroupingsReport) UnmarshalBinary(data []byte) error {
@@ -49,8 +66,8 @@ func (cmd *GroupingsReport) UnmarshalBinary(data []byte) error {
 
 func (cmd *GroupingsReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.SupportedGroupings)
 

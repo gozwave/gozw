@@ -7,10 +7,23 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandBulkReport commandclass.CommandID = 0x09
 
 func init() {
 	gob.Register(BulkReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x70),
+		Command:      commandclass.CommandID(0x09),
+		Version:      2,
+	}, NewBulkReport)
+}
+
+func NewBulkReport() commandclass.Command {
+	return &BulkReport{}
 }
 
 // <no value>
@@ -30,12 +43,16 @@ type BulkReport struct {
 	}
 }
 
-func (cmd BulkReport) CommandClassID() byte {
+func (cmd BulkReport) CommandClassID() commandclass.CommandClassID {
 	return 0x70
 }
 
-func (cmd BulkReport) CommandID() byte {
-	return byte(CommandBulkReport)
+func (cmd BulkReport) CommandID() commandclass.CommandID {
+	return CommandBulkReport
+}
+
+func (cmd BulkReport) CommandIDString() string {
+	return "CONFIGURATION_BULK_REPORT"
 }
 
 func (cmd *BulkReport) UnmarshalBinary(data []byte) error {
@@ -88,8 +105,8 @@ func (cmd *BulkReport) UnmarshalBinary(data []byte) error {
 
 func (cmd *BulkReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	{
 		buf := make([]byte, 2)

@@ -6,10 +6,23 @@ package associationv2
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandRemove commandclass.CommandID = 0x04
 
 func init() {
 	gob.Register(Remove{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x85),
+		Command:      commandclass.CommandID(0x04),
+		Version:      2,
+	}, NewRemove)
+}
+
+func NewRemove() commandclass.Command {
+	return &Remove{}
 }
 
 // <no value>
@@ -19,12 +32,16 @@ type Remove struct {
 	NodeId []byte
 }
 
-func (cmd Remove) CommandClassID() byte {
+func (cmd Remove) CommandClassID() commandclass.CommandClassID {
 	return 0x85
 }
 
-func (cmd Remove) CommandID() byte {
-	return byte(CommandRemove)
+func (cmd Remove) CommandID() commandclass.CommandID {
+	return CommandRemove
+}
+
+func (cmd Remove) CommandIDString() string {
+	return "ASSOCIATION_REMOVE"
 }
 
 func (cmd *Remove) UnmarshalBinary(data []byte) error {
@@ -57,8 +74,8 @@ func (cmd *Remove) UnmarshalBinary(data []byte) error {
 
 func (cmd *Remove) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.GroupingIdentifier)
 

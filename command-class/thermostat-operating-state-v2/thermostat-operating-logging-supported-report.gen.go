@@ -6,10 +6,23 @@ package thermostatoperatingstatev2
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandThermostatOperatingLoggingSupportedReport commandclass.CommandID = 0x04
 
 func init() {
 	gob.Register(ThermostatOperatingLoggingSupportedReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x42),
+		Command:      commandclass.CommandID(0x04),
+		Version:      2,
+	}, NewThermostatOperatingLoggingSupportedReport)
+}
+
+func NewThermostatOperatingLoggingSupportedReport() commandclass.Command {
+	return &ThermostatOperatingLoggingSupportedReport{}
 }
 
 // <no value>
@@ -17,12 +30,16 @@ type ThermostatOperatingLoggingSupportedReport struct {
 	BitMask []byte
 }
 
-func (cmd ThermostatOperatingLoggingSupportedReport) CommandClassID() byte {
+func (cmd ThermostatOperatingLoggingSupportedReport) CommandClassID() commandclass.CommandClassID {
 	return 0x42
 }
 
-func (cmd ThermostatOperatingLoggingSupportedReport) CommandID() byte {
-	return byte(CommandThermostatOperatingLoggingSupportedReport)
+func (cmd ThermostatOperatingLoggingSupportedReport) CommandID() commandclass.CommandID {
+	return CommandThermostatOperatingLoggingSupportedReport
+}
+
+func (cmd ThermostatOperatingLoggingSupportedReport) CommandIDString() string {
+	return "THERMOSTAT_OPERATING_LOGGING_SUPPORTED_REPORT"
 }
 
 func (cmd *ThermostatOperatingLoggingSupportedReport) UnmarshalBinary(data []byte) error {
@@ -48,8 +65,8 @@ func (cmd *ThermostatOperatingLoggingSupportedReport) UnmarshalBinary(data []byt
 
 func (cmd *ThermostatOperatingLoggingSupportedReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.BitMask...)
 

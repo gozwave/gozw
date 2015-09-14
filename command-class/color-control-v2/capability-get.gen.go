@@ -3,22 +3,41 @@
 
 package colorcontrolv2
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+
+	"github.com/helioslabs/gozw/command-class"
+)
+
+const CommandCapabilityGet commandclass.CommandID = 0x01
 
 func init() {
 	gob.Register(CapabilityGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x33),
+		Command:      commandclass.CommandID(0x01),
+		Version:      2,
+	}, NewCapabilityGet)
+}
+
+func NewCapabilityGet() commandclass.Command {
+	return &CapabilityGet{}
 }
 
 // <no value>
 type CapabilityGet struct {
 }
 
-func (cmd CapabilityGet) CommandClassID() byte {
+func (cmd CapabilityGet) CommandClassID() commandclass.CommandClassID {
 	return 0x33
 }
 
-func (cmd CapabilityGet) CommandID() byte {
-	return byte(CommandCapabilityGet)
+func (cmd CapabilityGet) CommandID() commandclass.CommandID {
+	return CommandCapabilityGet
+}
+
+func (cmd CapabilityGet) CommandIDString() string {
+	return "CAPABILITY_GET"
 }
 
 func (cmd *CapabilityGet) UnmarshalBinary(data []byte) error {
@@ -29,8 +48,8 @@ func (cmd *CapabilityGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *CapabilityGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	return
 }

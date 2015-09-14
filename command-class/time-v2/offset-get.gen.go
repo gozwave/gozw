@@ -3,22 +3,41 @@
 
 package timev2
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+
+	"github.com/helioslabs/gozw/command-class"
+)
+
+const CommandOffsetGet commandclass.CommandID = 0x06
 
 func init() {
 	gob.Register(OffsetGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x8A),
+		Command:      commandclass.CommandID(0x06),
+		Version:      2,
+	}, NewOffsetGet)
+}
+
+func NewOffsetGet() commandclass.Command {
+	return &OffsetGet{}
 }
 
 // <no value>
 type OffsetGet struct {
 }
 
-func (cmd OffsetGet) CommandClassID() byte {
+func (cmd OffsetGet) CommandClassID() commandclass.CommandClassID {
 	return 0x8A
 }
 
-func (cmd OffsetGet) CommandID() byte {
-	return byte(CommandOffsetGet)
+func (cmd OffsetGet) CommandID() commandclass.CommandID {
+	return CommandOffsetGet
+}
+
+func (cmd OffsetGet) CommandIDString() string {
+	return "TIME_OFFSET_GET"
 }
 
 func (cmd *OffsetGet) UnmarshalBinary(data []byte) error {
@@ -29,8 +48,8 @@ func (cmd *OffsetGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *OffsetGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	return
 }

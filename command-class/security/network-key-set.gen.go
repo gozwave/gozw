@@ -6,10 +6,23 @@ package security
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandNetworkKeySet commandclass.CommandID = 0x06
 
 func init() {
 	gob.Register(NetworkKeySet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x98),
+		Command:      commandclass.CommandID(0x06),
+		Version:      1,
+	}, NewNetworkKeySet)
+}
+
+func NewNetworkKeySet() commandclass.Command {
+	return &NetworkKeySet{}
 }
 
 // <no value>
@@ -17,12 +30,16 @@ type NetworkKeySet struct {
 	NetworkKeyByte []byte
 }
 
-func (cmd NetworkKeySet) CommandClassID() byte {
+func (cmd NetworkKeySet) CommandClassID() commandclass.CommandClassID {
 	return 0x98
 }
 
-func (cmd NetworkKeySet) CommandID() byte {
-	return byte(CommandNetworkKeySet)
+func (cmd NetworkKeySet) CommandID() commandclass.CommandID {
+	return CommandNetworkKeySet
+}
+
+func (cmd NetworkKeySet) CommandIDString() string {
+	return "NETWORK_KEY_SET"
 }
 
 func (cmd *NetworkKeySet) UnmarshalBinary(data []byte) error {
@@ -48,8 +65,8 @@ func (cmd *NetworkKeySet) UnmarshalBinary(data []byte) error {
 
 func (cmd *NetworkKeySet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.NetworkKeyByte...)
 

@@ -6,10 +6,23 @@ package security
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandMessageEncapsulation commandclass.CommandID = 0x81
 
 func init() {
 	gob.Register(MessageEncapsulation{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x98),
+		Command:      commandclass.CommandID(0x81),
+		Version:      1,
+	}, NewMessageEncapsulation)
+}
+
+func NewMessageEncapsulation() commandclass.Command {
+	return &MessageEncapsulation{}
 }
 
 // <no value>
@@ -35,12 +48,16 @@ type MessageEncapsulation struct {
 	MessageAuthenticationCodeByte []byte
 }
 
-func (cmd MessageEncapsulation) CommandClassID() byte {
+func (cmd MessageEncapsulation) CommandClassID() commandclass.CommandClassID {
 	return 0x98
 }
 
-func (cmd MessageEncapsulation) CommandID() byte {
-	return byte(CommandMessageEncapsulation)
+func (cmd MessageEncapsulation) CommandID() commandclass.CommandID {
+	return CommandMessageEncapsulation
+}
+
+func (cmd MessageEncapsulation) CommandIDString() string {
+	return "SECURITY_MESSAGE_ENCAPSULATION"
 }
 
 func (cmd *MessageEncapsulation) UnmarshalBinary(data []byte) error {
@@ -116,8 +133,8 @@ func (cmd *MessageEncapsulation) UnmarshalBinary(data []byte) error {
 
 func (cmd *MessageEncapsulation) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	if paramLen := len(cmd.InitializationVectorByte); paramLen > 8 {
 		return nil, errors.New("Length overflow in array parameter InitializationVectorByte")

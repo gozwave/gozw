@@ -6,10 +6,23 @@ package nodenaming
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandNodeNameReport commandclass.CommandID = 0x03
 
 func init() {
 	gob.Register(NodeNameReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x77),
+		Command:      commandclass.CommandID(0x03),
+		Version:      1,
+	}, NewNodeNameReport)
+}
+
+func NewNodeNameReport() commandclass.Command {
+	return &NodeNameReport{}
 }
 
 // <no value>
@@ -21,12 +34,16 @@ type NodeNameReport struct {
 	NodeNameChar string
 }
 
-func (cmd NodeNameReport) CommandClassID() byte {
+func (cmd NodeNameReport) CommandClassID() commandclass.CommandClassID {
 	return 0x77
 }
 
-func (cmd NodeNameReport) CommandID() byte {
-	return byte(CommandNodeNameReport)
+func (cmd NodeNameReport) CommandID() commandclass.CommandID {
+	return CommandNodeNameReport
+}
+
+func (cmd NodeNameReport) CommandIDString() string {
+	return "NODE_NAMING_NODE_NAME_REPORT"
 }
 
 func (cmd *NodeNameReport) UnmarshalBinary(data []byte) error {
@@ -62,8 +79,8 @@ func (cmd *NodeNameReport) UnmarshalBinary(data []byte) error {
 
 func (cmd *NodeNameReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	{
 		var val byte

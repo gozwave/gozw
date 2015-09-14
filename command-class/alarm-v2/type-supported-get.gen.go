@@ -3,22 +3,41 @@
 
 package alarmv2
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+
+	"github.com/helioslabs/gozw/command-class"
+)
+
+const CommandTypeSupportedGet commandclass.CommandID = 0x07
 
 func init() {
 	gob.Register(TypeSupportedGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x71),
+		Command:      commandclass.CommandID(0x07),
+		Version:      2,
+	}, NewTypeSupportedGet)
+}
+
+func NewTypeSupportedGet() commandclass.Command {
+	return &TypeSupportedGet{}
 }
 
 // <no value>
 type TypeSupportedGet struct {
 }
 
-func (cmd TypeSupportedGet) CommandClassID() byte {
+func (cmd TypeSupportedGet) CommandClassID() commandclass.CommandClassID {
 	return 0x71
 }
 
-func (cmd TypeSupportedGet) CommandID() byte {
-	return byte(CommandTypeSupportedGet)
+func (cmd TypeSupportedGet) CommandID() commandclass.CommandID {
+	return CommandTypeSupportedGet
+}
+
+func (cmd TypeSupportedGet) CommandIDString() string {
+	return "ALARM_TYPE_SUPPORTED_GET"
 }
 
 func (cmd *TypeSupportedGet) UnmarshalBinary(data []byte) error {
@@ -29,8 +48,8 @@ func (cmd *TypeSupportedGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *TypeSupportedGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	return
 }

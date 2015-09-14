@@ -6,10 +6,23 @@ package sensormultilevelv5
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandSupportedScaleReport commandclass.CommandID = 0x06
 
 func init() {
 	gob.Register(SupportedScaleReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x31),
+		Command:      commandclass.CommandID(0x06),
+		Version:      5,
+	}, NewSupportedScaleReport)
+}
+
+func NewSupportedScaleReport() commandclass.Command {
+	return &SupportedScaleReport{}
 }
 
 // <no value>
@@ -21,12 +34,16 @@ type SupportedScaleReport struct {
 	}
 }
 
-func (cmd SupportedScaleReport) CommandClassID() byte {
+func (cmd SupportedScaleReport) CommandClassID() commandclass.CommandClassID {
 	return 0x31
 }
 
-func (cmd SupportedScaleReport) CommandID() byte {
-	return byte(CommandSupportedScaleReport)
+func (cmd SupportedScaleReport) CommandID() commandclass.CommandID {
+	return CommandSupportedScaleReport
+}
+
+func (cmd SupportedScaleReport) CommandIDString() string {
+	return "SENSOR_MULTILEVEL_SUPPORTED_SCALE_REPORT"
 }
 
 func (cmd *SupportedScaleReport) UnmarshalBinary(data []byte) error {
@@ -61,8 +78,8 @@ func (cmd *SupportedScaleReport) UnmarshalBinary(data []byte) error {
 
 func (cmd *SupportedScaleReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.SensorType)
 

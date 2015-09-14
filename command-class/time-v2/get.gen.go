@@ -3,22 +3,41 @@
 
 package timev2
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+
+	"github.com/helioslabs/gozw/command-class"
+)
+
+const CommandGet commandclass.CommandID = 0x01
 
 func init() {
 	gob.Register(Get{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x8A),
+		Command:      commandclass.CommandID(0x01),
+		Version:      2,
+	}, NewGet)
+}
+
+func NewGet() commandclass.Command {
+	return &Get{}
 }
 
 // <no value>
 type Get struct {
 }
 
-func (cmd Get) CommandClassID() byte {
+func (cmd Get) CommandClassID() commandclass.CommandClassID {
 	return 0x8A
 }
 
-func (cmd Get) CommandID() byte {
-	return byte(CommandGet)
+func (cmd Get) CommandID() commandclass.CommandID {
+	return CommandGet
+}
+
+func (cmd Get) CommandIDString() string {
+	return "TIME_GET"
 }
 
 func (cmd *Get) UnmarshalBinary(data []byte) error {
@@ -29,8 +48,8 @@ func (cmd *Get) UnmarshalBinary(data []byte) error {
 
 func (cmd *Get) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	return
 }

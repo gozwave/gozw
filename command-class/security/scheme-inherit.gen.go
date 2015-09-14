@@ -6,10 +6,23 @@ package security
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandSchemeInherit commandclass.CommandID = 0x08
 
 func init() {
 	gob.Register(SchemeInherit{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x98),
+		Command:      commandclass.CommandID(0x08),
+		Version:      1,
+	}, NewSchemeInherit)
+}
+
+func NewSchemeInherit() commandclass.Command {
+	return &SchemeInherit{}
 }
 
 // <no value>
@@ -17,12 +30,16 @@ type SchemeInherit struct {
 	SupportedSecuritySchemes byte
 }
 
-func (cmd SchemeInherit) CommandClassID() byte {
+func (cmd SchemeInherit) CommandClassID() commandclass.CommandClassID {
 	return 0x98
 }
 
-func (cmd SchemeInherit) CommandID() byte {
-	return byte(CommandSchemeInherit)
+func (cmd SchemeInherit) CommandID() commandclass.CommandID {
+	return CommandSchemeInherit
+}
+
+func (cmd SchemeInherit) CommandIDString() string {
+	return "SECURITY_SCHEME_INHERIT"
 }
 
 func (cmd *SchemeInherit) UnmarshalBinary(data []byte) error {
@@ -49,8 +66,8 @@ func (cmd *SchemeInherit) UnmarshalBinary(data []byte) error {
 
 func (cmd *SchemeInherit) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.SupportedSecuritySchemes)
 

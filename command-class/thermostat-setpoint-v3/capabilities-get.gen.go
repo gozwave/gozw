@@ -6,10 +6,23 @@ package thermostatsetpointv3
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandCapabilitiesGet commandclass.CommandID = 0x09
 
 func init() {
 	gob.Register(CapabilitiesGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x43),
+		Command:      commandclass.CommandID(0x09),
+		Version:      3,
+	}, NewCapabilitiesGet)
+}
+
+func NewCapabilitiesGet() commandclass.Command {
+	return &CapabilitiesGet{}
 }
 
 // <no value>
@@ -19,12 +32,16 @@ type CapabilitiesGet struct {
 	}
 }
 
-func (cmd CapabilitiesGet) CommandClassID() byte {
+func (cmd CapabilitiesGet) CommandClassID() commandclass.CommandClassID {
 	return 0x43
 }
 
-func (cmd CapabilitiesGet) CommandID() byte {
-	return byte(CommandCapabilitiesGet)
+func (cmd CapabilitiesGet) CommandID() commandclass.CommandID {
+	return CommandCapabilitiesGet
+}
+
+func (cmd CapabilitiesGet) CommandIDString() string {
+	return "THERMOSTAT_SETPOINT_CAPABILITIES_GET"
 }
 
 func (cmd *CapabilitiesGet) UnmarshalBinary(data []byte) error {
@@ -52,8 +69,8 @@ func (cmd *CapabilitiesGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *CapabilitiesGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	{
 		var val byte

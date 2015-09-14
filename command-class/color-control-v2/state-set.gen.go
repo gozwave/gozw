@@ -6,10 +6,23 @@ package colorcontrolv2
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandStateSet commandclass.CommandID = 0x05
 
 func init() {
 	gob.Register(StateSet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x33),
+		Command:      commandclass.CommandID(0x05),
+		Version:      2,
+	}, NewStateSet)
+}
+
+func NewStateSet() commandclass.Command {
+	return &StateSet{}
 }
 
 // <no value>
@@ -21,12 +34,16 @@ type StateSet struct {
 	DimmingDuration byte
 }
 
-func (cmd StateSet) CommandClassID() byte {
+func (cmd StateSet) CommandClassID() commandclass.CommandClassID {
 	return 0x33
 }
 
-func (cmd StateSet) CommandID() byte {
-	return byte(CommandStateSet)
+func (cmd StateSet) CommandID() commandclass.CommandID {
+	return CommandStateSet
+}
+
+func (cmd StateSet) CommandIDString() string {
+	return "STATE_SET"
 }
 
 func (cmd *StateSet) UnmarshalBinary(data []byte) error {
@@ -61,8 +78,8 @@ func (cmd *StateSet) UnmarshalBinary(data []byte) error {
 
 func (cmd *StateSet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	{
 		var val byte

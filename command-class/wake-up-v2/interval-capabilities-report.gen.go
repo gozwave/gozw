@@ -7,10 +7,23 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandIntervalCapabilitiesReport commandclass.CommandID = 0x0A
 
 func init() {
 	gob.Register(IntervalCapabilitiesReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x84),
+		Command:      commandclass.CommandID(0x0A),
+		Version:      2,
+	}, NewIntervalCapabilitiesReport)
+}
+
+func NewIntervalCapabilitiesReport() commandclass.Command {
+	return &IntervalCapabilitiesReport{}
 }
 
 // <no value>
@@ -24,12 +37,16 @@ type IntervalCapabilitiesReport struct {
 	WakeUpIntervalStepSeconds uint32
 }
 
-func (cmd IntervalCapabilitiesReport) CommandClassID() byte {
+func (cmd IntervalCapabilitiesReport) CommandClassID() commandclass.CommandClassID {
 	return 0x84
 }
 
-func (cmd IntervalCapabilitiesReport) CommandID() byte {
-	return byte(CommandIntervalCapabilitiesReport)
+func (cmd IntervalCapabilitiesReport) CommandID() commandclass.CommandID {
+	return CommandIntervalCapabilitiesReport
+}
+
+func (cmd IntervalCapabilitiesReport) CommandIDString() string {
+	return "WAKE_UP_INTERVAL_CAPABILITIES_REPORT"
 }
 
 func (cmd *IntervalCapabilitiesReport) UnmarshalBinary(data []byte) error {
@@ -77,8 +94,8 @@ func (cmd *IntervalCapabilitiesReport) UnmarshalBinary(data []byte) error {
 
 func (cmd *IntervalCapabilitiesReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	{
 		buf := make([]byte, 4)

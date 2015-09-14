@@ -6,10 +6,23 @@ package versionv2
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandCommandClassGet commandclass.CommandID = 0x13
 
 func init() {
 	gob.Register(CommandClassGet{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x86),
+		Command:      commandclass.CommandID(0x13),
+		Version:      2,
+	}, NewCommandClassGet)
+}
+
+func NewCommandClassGet() commandclass.Command {
+	return &CommandClassGet{}
 }
 
 // <no value>
@@ -17,12 +30,16 @@ type CommandClassGet struct {
 	RequestedCommandClass byte
 }
 
-func (cmd CommandClassGet) CommandClassID() byte {
+func (cmd CommandClassGet) CommandClassID() commandclass.CommandClassID {
 	return 0x86
 }
 
-func (cmd CommandClassGet) CommandID() byte {
-	return byte(CommandCommandClassGet)
+func (cmd CommandClassGet) CommandID() commandclass.CommandID {
+	return CommandCommandClassGet
+}
+
+func (cmd CommandClassGet) CommandIDString() string {
+	return "VERSION_COMMAND_CLASS_GET"
 }
 
 func (cmd *CommandClassGet) UnmarshalBinary(data []byte) error {
@@ -49,8 +66,8 @@ func (cmd *CommandClassGet) UnmarshalBinary(data []byte) error {
 
 func (cmd *CommandClassGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.RequestedCommandClass)
 

@@ -6,10 +6,23 @@ package thermostatoperatingstatev2
 import (
 	"encoding/gob"
 	"errors"
+
+	"github.com/helioslabs/gozw/command-class"
 )
+
+const CommandLoggingReport commandclass.CommandID = 0x06
 
 func init() {
 	gob.Register(LoggingReport{})
+	commandclass.Register(commandclass.CommandIdentifier{
+		CommandClass: commandclass.CommandClassID(0x42),
+		Command:      commandclass.CommandID(0x06),
+		Version:      2,
+	}, NewLoggingReport)
+}
+
+func NewLoggingReport() commandclass.Command {
+	return &LoggingReport{}
 }
 
 // <no value>
@@ -17,12 +30,16 @@ type LoggingReport struct {
 	ReportsToFollow byte
 }
 
-func (cmd LoggingReport) CommandClassID() byte {
+func (cmd LoggingReport) CommandClassID() commandclass.CommandClassID {
 	return 0x42
 }
 
-func (cmd LoggingReport) CommandID() byte {
-	return byte(CommandLoggingReport)
+func (cmd LoggingReport) CommandID() commandclass.CommandID {
+	return CommandLoggingReport
+}
+
+func (cmd LoggingReport) CommandIDString() string {
+	return "THERMOSTAT_OPERATING_STATE_LOGGING_REPORT"
 }
 
 func (cmd *LoggingReport) UnmarshalBinary(data []byte) error {
@@ -49,8 +66,8 @@ func (cmd *LoggingReport) UnmarshalBinary(data []byte) error {
 
 func (cmd *LoggingReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
-	payload[0] = cmd.CommandClassID()
-	payload[1] = cmd.CommandID()
+	payload[0] = byte(cmd.CommandClassID())
+	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.ReportsToFollow)
 
