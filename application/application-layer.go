@@ -306,7 +306,7 @@ func (a *Layer) RemoveFailedNode(nodeID byte) (ok bool, err error) {
 
 func (a *Layer) handleApplicationCommands() {
 	for cmd := range a.serialAPI.ControllerCommands() {
-		switch commandclass.ID(cmd.CommandData[0]) {
+		switch commandclass.CommandClassID(cmd.CommandData[0]) {
 
 		case commandclass.Security:
 			a.interceptSecurityCommandClass(cmd)

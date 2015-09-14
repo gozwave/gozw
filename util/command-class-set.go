@@ -12,19 +12,19 @@ func init() {
 }
 
 type CommandClassSupport struct {
-	CommandClass commandclass.ID
+	CommandClass commandclass.CommandClassID
 	Secure       bool
 	Version      uint8
 }
 
-type CommandClassSet map[commandclass.ID]*CommandClassSupport
+type CommandClassSet map[commandclass.CommandClassID]*CommandClassSupport
 
-func (s CommandClassSet) Supports(id commandclass.ID) bool {
+func (s CommandClassSet) Supports(id commandclass.CommandClassID) bool {
 	_, ok := s[id]
 	return ok
 }
 
-func (s CommandClassSet) IsSecure(id commandclass.ID) bool {
+func (s CommandClassSet) IsSecure(id commandclass.CommandClassID) bool {
 	if c, ok := s[id]; ok {
 		return c.Secure
 	} else {
@@ -32,16 +32,16 @@ func (s CommandClassSet) IsSecure(id commandclass.ID) bool {
 	}
 }
 
-func (s CommandClassSet) ListAll() []commandclass.ID {
-	list := make([]commandclass.ID, 0)
+func (s CommandClassSet) ListAll() []commandclass.CommandClassID {
+	list := make([]commandclass.CommandClassID, 0)
 	for id := range s {
 		list = append(list, id)
 	}
 	return list
 }
 
-func (s CommandClassSet) ListBySecureStatus(secure bool) []commandclass.ID {
-	list := make([]commandclass.ID, 0)
+func (s CommandClassSet) ListBySecureStatus(secure bool) []commandclass.CommandClassID {
+	list := make([]commandclass.CommandClassID, 0)
 	for id, c := range s {
 		if c.Secure == secure {
 			list = append(list, id)
@@ -50,7 +50,7 @@ func (s CommandClassSet) ListBySecureStatus(secure bool) []commandclass.ID {
 	return list
 }
 
-func (s CommandClassSet) GetVersion(id commandclass.ID) uint8 {
+func (s CommandClassSet) GetVersion(id commandclass.CommandClassID) uint8 {
 	if c, ok := s[id]; ok {
 		return c.Version
 	} else {
@@ -58,7 +58,7 @@ func (s CommandClassSet) GetVersion(id commandclass.ID) uint8 {
 	}
 }
 
-func (s CommandClassSet) Add(id commandclass.ID) {
+func (s CommandClassSet) Add(id commandclass.CommandClassID) {
 	_, ok := s[id]
 	if !ok {
 		s[id] = &CommandClassSupport{
@@ -67,7 +67,7 @@ func (s CommandClassSet) Add(id commandclass.ID) {
 	}
 }
 
-func (s CommandClassSet) SetSecure(id commandclass.ID, secure bool) {
+func (s CommandClassSet) SetSecure(id commandclass.CommandClassID, secure bool) {
 	if c, ok := s[id]; ok {
 		c.Secure = secure
 	} else {
@@ -78,7 +78,7 @@ func (s CommandClassSet) SetSecure(id commandclass.ID, secure bool) {
 	}
 }
 
-func (s CommandClassSet) SetVersion(id commandclass.ID, version uint8) {
+func (s CommandClassSet) SetVersion(id commandclass.CommandClassID, version uint8) {
 	if c, ok := s[id]; ok {
 		c.Version = version
 	} else {

@@ -10,11 +10,11 @@ import (
 func TestCommandClassSet(t *testing.T) {
 	s := CommandClassSet{}
 
-	assert.EqualValues(t, []commandclass.ID{}, s.ListAll())
+	assert.EqualValues(t, []commandclass.CommandClassID{}, s.ListAll())
 	assert.True(t, s.AllVersionsReceived())
 
 	s.Add(commandclass.Security)
-	assert.EqualValues(t, []commandclass.ID{commandclass.Security}, s.ListAll())
+	assert.EqualValues(t, []commandclass.CommandClassID{commandclass.Security}, s.ListAll())
 	assert.False(t, s.AllVersionsReceived())
 
 	assert.True(t, s.Supports(commandclass.Security))
@@ -34,15 +34,15 @@ func TestCommandClassSet(t *testing.T) {
 	assert.True(t, s.Supports(commandclass.Alarm))
 	assert.True(t, s.IsSecure(commandclass.Alarm))
 	assert.EqualValues(t, 0, s.GetVersion(commandclass.Alarm))
-	assert.EqualValues(t, []commandclass.ID{commandclass.Security, commandclass.Alarm}, s.ListAll())
+	assert.EqualValues(t, []commandclass.CommandClassID{commandclass.Security, commandclass.Alarm}, s.ListAll())
 
 	s.SetVersion(commandclass.Association, 3)
 	assert.True(t, s.Supports(commandclass.Association))
 	assert.False(t, s.IsSecure(commandclass.Association))
 	assert.EqualValues(t, 3, s.GetVersion(commandclass.Association))
 
-	assert.EqualValues(t, []commandclass.ID{commandclass.Security, commandclass.Alarm}, s.ListBySecureStatus(true))
-	assert.EqualValues(t, []commandclass.ID{commandclass.Association}, s.ListBySecureStatus(false))
+	assert.EqualValues(t, []commandclass.CommandClassID{commandclass.Security, commandclass.Alarm}, s.ListBySecureStatus(true))
+	assert.EqualValues(t, []commandclass.CommandClassID{commandclass.Association}, s.ListBySecureStatus(false))
 
 	s.SetVersion(commandclass.Alarm, 1)
 	assert.True(t, s.AllVersionsReceived())

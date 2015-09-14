@@ -164,7 +164,7 @@ func (n *Node) GetSpecificDeviceClassName() string {
 }
 
 func (n *Node) SendCommand(command commandclass.Command) error {
-	commandClass := commandclass.ID(command.CommandClassID())
+	commandClass := commandclass.CommandClassID(command.CommandClassID())
 
 	if commandClass == commandclass.Security {
 		switch command.(type) {
@@ -185,7 +185,7 @@ func (n *Node) SendCommand(command commandclass.Command) error {
 }
 
 func (n *Node) SendRawCommand(payload []byte) error {
-	commandClass := commandclass.ID(payload[0])
+	commandClass := commandclass.CommandClassID(payload[0])
 
 	if !n.CommandClasses.Supports(commandClass) {
 		return errors.New("Command class not supported")
@@ -283,7 +283,7 @@ func (n *Node) setFromAddNodeCallback(nodeInfo *serialapi.AddRemoveNodeCallback)
 	n.SpecificDeviceClass = nodeInfo.Specific
 
 	for _, cc := range nodeInfo.CommandClasses {
-		n.CommandClasses.Add(commandclass.ID(cc))
+		n.CommandClasses.Add(commandclass.CommandClassID(cc))
 	}
 
 	n.saveToDb()
@@ -295,7 +295,7 @@ func (n *Node) setFromApplicationControllerUpdate(nodeInfo serialapi.ControllerU
 	n.SpecificDeviceClass = nodeInfo.Specific
 
 	for _, cc := range nodeInfo.CommandClasses {
-		n.CommandClasses.Add(commandclass.ID(cc))
+		n.CommandClasses.Add(commandclass.CommandClassID(cc))
 	}
 
 	n.saveToDb()
@@ -312,7 +312,7 @@ func (n *Node) setFromNodeProtocolInfo(nodeInfo *serialapi.NodeProtocolInfo) {
 
 func (n *Node) receiveSecurityCommandsSupportedReport(cc security.CommandsSupportedReport) {
 	for _, cc := range cc.CommandClassSupport {
-		n.CommandClasses.SetSecure(commandclass.ID(cc), true)
+		n.CommandClasses.SetSecure(commandclass.CommandClassID(cc), true)
 	}
 
 	// TODO: do we really need to know about controlled command classes?
@@ -345,7 +345,7 @@ func (n *Node) receiveManufacturerInfo(mfgId, productTypeId, productId uint16) {
 	n.nextQueryStage()
 }
 
-func (n *Node) receiveCommandClassVersion(id commandclass.ID, version uint8) {
+func (n *Node) receiveCommandClassVersion(id commandclass.CommandClassID, version uint8) {
 	n.CommandClasses.SetVersion(id, version)
 
 	if n.CommandClasses.AllVersionsReceived() {
@@ -362,7 +362,7 @@ func (n *Node) receiveCommandClassVersion(id commandclass.ID, version uint8) {
 }
 
 func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
-	cc := commandclass.ID(cmd.CommandData[0])
+	cc := commandclass.CommandClassID(cmd.CommandData[0])
 	ver := n.CommandClasses.GetVersion(cc)
 	if ver == 0 {
 		ver = 1
@@ -408,13 +408,13 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 	case *version.CommandClassReport:
 		spew.Dump(command.(*version.CommandClassReport))
 		report := command.(*version.CommandClassReport)
-		n.receiveCommandClassVersion(commandclass.ID(report.RequestedCommandClass), report.CommandClassVersion)
+		n.receiveCommandClassVersion(commandclass.CommandClassID(report.RequestedCommandClass), report.CommandClassVersion)
 		n.saveToDb()
 
 	case *versionv2.CommandClassReport:
 		spew.Dump(command.(*versionv2.CommandClassReport))
 		report := command.(*versionv2.CommandClassReport)
-		n.receiveCommandClassVersion(commandclass.ID(report.RequestedCommandClass), report.CommandClassVersion)
+		n.receiveCommandClassVersion(commandclass.CommandClassID(report.RequestedCommandClass), report.CommandClassVersion)
 		n.saveToDb()
 
 		// case alarm.Report:
@@ -489,7 +489,7 @@ func (n *Node) GetSupportedSecureCommandClassStrings() []string {
 	return strings
 }
 
-func commandClassSetToStrings(commandClasses []commandclass.ID) []string {
+func commandClassSetToStrings(commandClasses []commandclass.CommandClassID) []string {
 	if len(commandClasses) == 0 {
 		return []string{}
 	}
