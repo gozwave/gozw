@@ -168,10 +168,6 @@ func (g *Generator) GenCommandClasses() error {
 			return err
 		}
 
-		if err := g.generateCommandIDs(dirName, cc); err != nil {
-			return err
-		}
-
 		for _, cmd := range cc.Commands {
 			err := g.generateCommand(dirName, cc, cmd)
 			if err != nil {
@@ -188,32 +184,6 @@ func (g *Generator) GenCommandClasses() error {
 			fmt.Printf("  - %s (%s)\n", cc.Name, reason)
 		}
 	}
-
-	return nil
-}
-
-func (g *Generator) generateCommandIDs(dirName string, cc CommandClass) error {
-	buf := bytes.NewBuffer([]byte{})
-
-	err := g.tpl.ExecuteTemplate(buf, "command-ids", cc)
-	if err != nil {
-		return err
-	}
-
-	filename := path.Join(dirName, "command-ids.gen.go")
-	fp, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-
-	defer fp.Close()
-
-	formatted, err := goFmtAndImports(filename, buf)
-	if err != nil {
-		return err
-	}
-
-	fp.Write(formatted)
 
 	return nil
 }
@@ -255,7 +225,6 @@ func (g *Generator) initTemplates() {
 	})
 
 	tpl = template.Must(tpl.New("command-classes").Parse(mustAsset("templates/command-classes.tpl")))
-	tpl = template.Must(tpl.New("command-ids").Parse(mustAsset("templates/command-ids.tpl")))
 	tpl = template.Must(tpl.New("command-struct-fields").Parse(mustAsset("templates/command-struct-fields.tpl")))
 	tpl = template.Must(tpl.New("command").Parse(mustAsset("templates/command.tpl")))
 	tpl = template.Must(tpl.New("devices").Parse(mustAsset("templates/devices.tpl")))

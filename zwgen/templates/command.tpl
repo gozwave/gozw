@@ -6,6 +6,8 @@ package {{.CommandClass.GetPackageName}}
 {{$version := .CommandClass.Version}}
 {{$structName := (.Command.GetStructName .CommandClass)}}
 
+const Command{{$structName}} commandclass.CommandID = {{.Command.Key}}
+
 func init() {
   gob.Register({{$structName}}{})
   commandclass.Register(commandclass.CommandIdentifier{
@@ -26,12 +28,16 @@ type {{$structName}} struct {
   {{end}}
 }
 
-func (cmd {{$structName}}) CommandClassID() byte {
+func (cmd {{$structName}}) CommandClassID() commandclass.CommandClassID {
   return {{.CommandClass.Key}}
 }
 
-func (cmd {{$structName}}) CommandID() byte {
-  return byte(Command{{$structName}})
+func (cmd {{$structName}}) CommandID() commandclass.CommandID {
+  return Command{{$structName}}
+}
+
+func (cmd {{$structName}}) CommandIDString() string {
+  return "{{.Command.Name}}"
 }
 
 func (cmd *{{$structName}}) UnmarshalBinary(data []byte) error {
@@ -52,8 +58,8 @@ func (cmd *{{$structName}}) UnmarshalBinary(data []byte) error {
 
 func (cmd *{{$structName}}) MarshalBinary() (payload []byte, err error) {
   payload = make([]byte, 2)
-  payload[0] = cmd.CommandClassID()
-  payload[1] = cmd.CommandID()
+  payload[0] = byte(cmd.CommandClassID())
+  payload[1] = byte(cmd.CommandID())
   {{template "marshal-command-params" .Command.Params}}
   return
 }
