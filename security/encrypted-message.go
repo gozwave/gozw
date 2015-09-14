@@ -14,12 +14,16 @@ type EncryptedMessage struct {
 	HMAC             []byte
 }
 
-func (cmd EncryptedMessage) CommandClassID() byte {
-	return byte(commandclass.Security)
+func (cmd EncryptedMessage) CommandClassID() commandclass.CommandClassID {
+	return commandclass.Security
 }
 
-func (cmd EncryptedMessage) CommandID() byte {
-	return byte(security.CommandMessageEncapsulation)
+func (cmd EncryptedMessage) CommandID() commandclass.CommandID {
+	return security.CommandMessageEncapsulation
+}
+
+func (cmd EncryptedMessage) CommandIDString() string {
+	return "SECURITY_MESSAGE_ENCAPSULATION"
 }
 
 func (cmd *EncryptedMessage) UnmarshalBinary(data []byte) error {
@@ -43,8 +47,8 @@ func (cmd *EncryptedMessage) UnmarshalBinary(data []byte) error {
 func (cmd *EncryptedMessage) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 0)
 
-	payload = append(payload, cmd.CommandClassID())
-	payload = append(payload, cmd.CommandID())
+	payload = append(payload, byte(cmd.CommandClassID()))
+	payload = append(payload, byte(cmd.CommandID()))
 	payload = append(payload, cmd.SenderNonce...)
 	payload = append(payload, cmd.EncryptedPayload...)
 	payload = append(payload, cmd.ReceiverNonceID)

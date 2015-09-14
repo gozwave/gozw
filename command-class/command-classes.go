@@ -11,24 +11,27 @@ import (
 //go:generate zwgen parser -c zwgen.config.yaml -o ./command-classes.gen.go
 //go:generate zwgen devices -c zwgen.config.yaml -o ./devices.gen.go
 
-type CommandFactory func() Command
+type (
+	CommandClassID byte
+	CommandID      byte
 
-type Command interface {
-	encoding.BinaryMarshaler
-	encoding.BinaryUnmarshaler
+	Command interface {
+		encoding.BinaryMarshaler
+		encoding.BinaryUnmarshaler
 
-	CommandClassID() byte
-	CommandID() byte
-}
+		CommandClassID() CommandClassID
+		CommandID() CommandID
+		CommandIDString() string
+	}
 
-type CommandClassID byte
-type CommandID byte
+	CommandFactory func() Command
 
-type CommandIdentifier struct {
-	CommandClass CommandClassID
-	Command      CommandID
-	Version      uint8
-}
+	CommandIdentifier struct {
+		CommandClass CommandClassID
+		Command      CommandID
+		Version      uint8
+	}
+)
 
 var (
 	ErrNotRegistered    = errors.New("No factory exists for the specified command class")

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/comail/colog"
+	"github.com/helioslabs/gozw/command-class"
 	"github.com/helioslabs/gozw/command-class/security"
 	"github.com/helioslabs/gozw/serial-api"
 )
@@ -20,7 +21,7 @@ const (
 
 type ILayer interface {
 	DecryptMessage(cmd serialapi.ApplicationCommand, inclusionMode bool) ([]byte, error)
-	EncapsulateMessage(srcNode byte, dstNode byte, commandID security.CommandID, senderNonce []byte, receiverNonce []byte, payload []byte, inclusionMode bool) (*EncryptedMessage, error)
+	EncapsulateMessage(srcNode byte, dstNode byte, commandID commandclass.CommandID, senderNonce []byte, receiverNonce []byte, payload []byte, inclusionMode bool) (*EncryptedMessage, error)
 	GenerateInternalNonce() (Nonce, error)
 	GetExternalNonce(key byte) (Nonce, error)
 	ReceiveNonce(fromNode byte, report security.NonceReport)
@@ -71,7 +72,7 @@ func NewLayer(networkKey []byte) *Layer {
 func (s *Layer) EncapsulateMessage(
 	srcNode byte,
 	dstNode byte,
-	commandID security.CommandID,
+	commandID commandclass.CommandID,
 	senderNonce []byte,
 	receiverNonce []byte,
 	payload []byte,

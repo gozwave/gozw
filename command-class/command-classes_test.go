@@ -9,8 +9,9 @@ import (
 
 type testCommand struct{}
 
-func (testCommand) CommandClassID() byte              { return 0x01 }
-func (testCommand) CommandID() byte                   { return 0x02 }
+func (testCommand) CommandClassID() CommandClassID    { return 0x01 }
+func (testCommand) CommandID() CommandID              { return 0x02 }
+func (testCommand) CommandIDString() string           { return "" }
 func (testCommand) MarshalBinary() ([]byte, error)    { return []byte{}, nil }
 func (testCommand) UnmarshalBinary(data []byte) error { return nil }
 func testCommandFactory() Command                     { return &testCommand{} }
@@ -19,8 +20,9 @@ var errTest = errors.New("")
 
 type errCommand struct{}
 
-func (errCommand) CommandClassID() byte              { return 0x02 }
-func (errCommand) CommandID() byte                   { return 0x02 }
+func (errCommand) CommandClassID() CommandClassID    { return 0x02 }
+func (errCommand) CommandID() CommandID              { return 0x02 }
+func (errCommand) CommandIDString() string           { return "" }
 func (errCommand) MarshalBinary() ([]byte, error)    { return nil, errTest }
 func (errCommand) UnmarshalBinary(data []byte) error { return errTest }
 func errCommandFactory() Command                     { return &errCommand{} }
