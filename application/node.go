@@ -33,7 +33,7 @@ type Node struct {
 
 	Failing bool
 
-	CommandClasses util.CommandClassSet
+	CommandClasses cc.CommandClassSet
 
 	NetworkKeySent bool
 
@@ -56,7 +56,7 @@ func NewNode(application *Layer, nodeID byte) (*Node, error) {
 	node := &Node{
 		NodeID: nodeID,
 
-		CommandClasses: util.CommandClassSet{},
+		CommandClasses: cc.CommandClassSet{},
 
 		QueryStageSecurity:     false,
 		QueryStageManufacturer: false,

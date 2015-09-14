@@ -1,10 +1,6 @@
-package util
+package cc
 
-import (
-	"encoding/gob"
-
-	"github.com/helioslabs/gozw/cc"
-)
+import "encoding/gob"
 
 func init() {
 	gob.Register(CommandClassSupport{})
@@ -12,19 +8,19 @@ func init() {
 }
 
 type CommandClassSupport struct {
-	CommandClass cc.CommandClassID
+	CommandClass CommandClassID
 	Secure       bool
 	Version      uint8
 }
 
-type CommandClassSet map[cc.CommandClassID]*CommandClassSupport
+type CommandClassSet map[CommandClassID]*CommandClassSupport
 
-func (s CommandClassSet) Supports(id cc.CommandClassID) bool {
+func (s CommandClassSet) Supports(id CommandClassID) bool {
 	_, ok := s[id]
 	return ok
 }
 
-func (s CommandClassSet) IsSecure(id cc.CommandClassID) bool {
+func (s CommandClassSet) IsSecure(id CommandClassID) bool {
 	if c, ok := s[id]; ok {
 		return c.Secure
 	} else {
@@ -32,16 +28,16 @@ func (s CommandClassSet) IsSecure(id cc.CommandClassID) bool {
 	}
 }
 
-func (s CommandClassSet) ListAll() []cc.CommandClassID {
-	list := make([]cc.CommandClassID, 0)
+func (s CommandClassSet) ListAll() []CommandClassID {
+	list := make([]CommandClassID, 0)
 	for id := range s {
 		list = append(list, id)
 	}
 	return list
 }
 
-func (s CommandClassSet) ListBySecureStatus(secure bool) []cc.CommandClassID {
-	list := make([]cc.CommandClassID, 0)
+func (s CommandClassSet) ListBySecureStatus(secure bool) []CommandClassID {
+	list := make([]CommandClassID, 0)
 	for id, c := range s {
 		if c.Secure == secure {
 			list = append(list, id)
@@ -50,7 +46,7 @@ func (s CommandClassSet) ListBySecureStatus(secure bool) []cc.CommandClassID {
 	return list
 }
 
-func (s CommandClassSet) GetVersion(id cc.CommandClassID) uint8 {
+func (s CommandClassSet) GetVersion(id CommandClassID) uint8 {
 	if c, ok := s[id]; ok {
 		return c.Version
 	} else {
@@ -58,7 +54,7 @@ func (s CommandClassSet) GetVersion(id cc.CommandClassID) uint8 {
 	}
 }
 
-func (s CommandClassSet) Add(id cc.CommandClassID) {
+func (s CommandClassSet) Add(id CommandClassID) {
 	_, ok := s[id]
 	if !ok {
 		s[id] = &CommandClassSupport{
@@ -67,7 +63,7 @@ func (s CommandClassSet) Add(id cc.CommandClassID) {
 	}
 }
 
-func (s CommandClassSet) SetSecure(id cc.CommandClassID, secure bool) {
+func (s CommandClassSet) SetSecure(id CommandClassID, secure bool) {
 	if c, ok := s[id]; ok {
 		c.Secure = secure
 	} else {
@@ -78,7 +74,7 @@ func (s CommandClassSet) SetSecure(id cc.CommandClassID, secure bool) {
 	}
 }
 
-func (s CommandClassSet) SetVersion(id cc.CommandClassID, version uint8) {
+func (s CommandClassSet) SetVersion(id CommandClassID, version uint8) {
 	if c, ok := s[id]; ok {
 		c.Version = version
 	} else {
