@@ -4,27 +4,37 @@
 package {{.CommandClass.GetPackageName}}
 
 {{$version := .CommandClass.Version}}
+{{$structName := (.Command.GetStructName .CommandClass)}}
 
 func init() {
-  gob.Register({{.Command.GetStructName .CommandClass}}{})
+  gob.Register({{$structName}}{})
+  commandclass.Register(commandclass.CommandIdentifier{
+    CommandClass: commandclass.CommandClassID({{.CommandClass.Key}}),
+    Command: commandclass.CommandID({{.Command.Key}}),
+    Version: {{$version}},
+  }, New{{$structName}})
+}
+
+func New{{$structName}}() commandclass.Command {
+  return &{{$structName}}{}
 }
 
 // {{.Help}}
-type {{.Command.GetStructName .CommandClass}} struct {
+type {{$structName}} struct {
   {{range $_, $param := .Command.Params}}
     {{template "command-struct-fields" $param}}
   {{end}}
 }
 
-func (cmd {{.Command.GetStructName .CommandClass}}) CommandClassID() byte {
+func (cmd {{$structName}}) CommandClassID() byte {
   return {{.CommandClass.Key}}
 }
 
-func (cmd {{.Command.GetStructName .CommandClass}}) CommandID() byte {
-  return byte(Command{{.Command.GetStructName .CommandClass}})
+func (cmd {{$structName}}) CommandID() byte {
+  return byte(Command{{$structName}})
 }
 
-func (cmd *{{.Command.GetStructName .CommandClass}}) UnmarshalBinary(data []byte) error {
+func (cmd *{{$structName}}) UnmarshalBinary(data []byte) error {
   // According to the docs, we must copy data if we wish to retain it after returning
   {{if .Command.Params}}
   payload := make([]byte, len(data))
@@ -40,7 +50,7 @@ func (cmd *{{.Command.GetStructName .CommandClass}}) UnmarshalBinary(data []byte
   return nil
 }
 
-func (cmd *{{.Command.GetStructName .CommandClass}}) MarshalBinary() (payload []byte, err error) {
+func (cmd *{{$structName}}) MarshalBinary() (payload []byte, err error) {
   payload = make([]byte, 2)
   payload[0] = cmd.CommandClassID()
   payload[1] = cmd.CommandID()
