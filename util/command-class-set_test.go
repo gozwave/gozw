@@ -41,8 +41,13 @@ func TestCommandClassSet(t *testing.T) {
 	assert.False(t, s.IsSecure(cc.Association))
 	assert.EqualValues(t, 3, s.GetVersion(cc.Association))
 
-	assert.EqualValues(t, []cc.CommandClassID{cc.Security, cc.Alarm}, s.ListBySecureStatus(true))
-	assert.EqualValues(t, []cc.CommandClassID{cc.Association}, s.ListBySecureStatus(false))
+	assert.Contains(t, s.ListBySecureStatus(true), cc.Security)
+	assert.Contains(t, s.ListBySecureStatus(true), cc.Alarm)
+	assert.NotContains(t, s.ListBySecureStatus(true), cc.Association)
+
+	assert.NotContains(t, s.ListBySecureStatus(false), cc.Security)
+	assert.NotContains(t, s.ListBySecureStatus(false), cc.Alarm)
+	assert.Contains(t, s.ListBySecureStatus(false), cc.Association)
 
 	s.SetVersion(cc.Alarm, 1)
 	assert.True(t, s.AllVersionsReceived())
