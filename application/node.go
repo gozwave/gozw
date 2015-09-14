@@ -9,14 +9,14 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/helioslabs/gozw/command-class"
-	"github.com/helioslabs/gozw/command-class/association"
-	"github.com/helioslabs/gozw/command-class/battery"
-	"github.com/helioslabs/gozw/command-class/manufacturer-specific"
-	"github.com/helioslabs/gozw/command-class/manufacturer-specific-v2"
-	"github.com/helioslabs/gozw/command-class/security"
-	"github.com/helioslabs/gozw/command-class/version"
-	"github.com/helioslabs/gozw/command-class/version-v2"
+	"github.com/helioslabs/gozw/cc"
+	"github.com/helioslabs/gozw/cc/association"
+	"github.com/helioslabs/gozw/cc/battery"
+	"github.com/helioslabs/gozw/cc/manufacturer-specific"
+	"github.com/helioslabs/gozw/cc/manufacturer-specific-v2"
+	"github.com/helioslabs/gozw/cc/security"
+	"github.com/helioslabs/gozw/cc/version"
+	"github.com/helioslabs/gozw/cc/version-v2"
 	"github.com/helioslabs/gozw/protocol"
 	"github.com/helioslabs/gozw/serial-api"
 	"github.com/helioslabs/gozw/util"
@@ -144,7 +144,7 @@ func (n *Node) saveToDb() error {
 }
 
 func (n *Node) IsSecure() bool {
-	return n.CommandClasses.Supports(commandclass.Security)
+	return n.CommandClasses.Supports(cc.Security)
 }
 
 func (n *Node) IsListening() bool {
@@ -163,10 +163,10 @@ func (n *Node) GetSpecificDeviceClassName() string {
 	return protocol.GetSpecificDeviceTypeName(n.GenericDeviceClass, n.SpecificDeviceClass)
 }
 
-func (n *Node) SendCommand(command commandclass.Command) error {
-	commandClass := commandclass.CommandClassID(command.CommandClassID())
+func (n *Node) SendCommand(command cc.Command) error {
+	commandClass := cc.CommandClassID(command.CommandClassID())
 
-	if commandClass == commandclass.Security {
+	if commandClass == cc.Security {
 		switch command.(type) {
 		case *security.CommandsSupportedGet, *security.CommandsSupportedReport:
 			return n.application.SendDataSecure(n.NodeID, command)
@@ -185,7 +185,7 @@ func (n *Node) SendCommand(command commandclass.Command) error {
 }
 
 func (n *Node) SendRawCommand(payload []byte) error {
-	commandClass := commandclass.CommandClassID(payload[0])
+	commandClass := cc.CommandClassID(payload[0])
 
 	if !n.CommandClasses.Supports(commandClass) {
 		return errors.New("Command class not supported")
@@ -221,12 +221,12 @@ func (n *Node) RequestNodeInformationFrame() error {
 }
 
 func (n *Node) LoadCommandClassVersions() error {
-	for _, cc := range n.CommandClasses {
+	for _, commandClass := range n.CommandClasses {
 		time.Sleep(1 * time.Second)
-		cmd := &version.CommandClassGet{RequestedCommandClass: byte(cc.CommandClass)}
+		cmd := &version.CommandClassGet{RequestedCommandClass: byte(commandClass.CommandClass)}
 		var err error
 
-		if !cc.Secure {
+		if !commandClass.Secure {
 			err = n.application.SendData(n.NodeID, cmd)
 		} else {
 			err = n.application.SendDataSecure(n.NodeID, cmd)
@@ -261,7 +261,7 @@ func (n *Node) nextQueryStage() {
 	}
 }
 
-func (n *Node) emitNodeEvent(event commandclass.Command) {
+func (n *Node) emitNodeEvent(event cc.Command) {
 	buf, err := event.MarshalBinary()
 	if err != nil {
 		fmt.Printf("error encoding: %v\n", err)
@@ -282,8 +282,8 @@ func (n *Node) setFromAddNodeCallback(nodeInfo *serialapi.AddRemoveNodeCallback)
 	n.GenericDeviceClass = nodeInfo.Generic
 	n.SpecificDeviceClass = nodeInfo.Specific
 
-	for _, cc := range nodeInfo.CommandClasses {
-		n.CommandClasses.Add(commandclass.CommandClassID(cc))
+	for _, cmd := range nodeInfo.CommandClasses {
+		n.CommandClasses.Add(cc.CommandClassID(cmd))
 	}
 
 	n.saveToDb()
@@ -294,8 +294,8 @@ func (n *Node) setFromApplicationControllerUpdate(nodeInfo serialapi.ControllerU
 	n.GenericDeviceClass = nodeInfo.Generic
 	n.SpecificDeviceClass = nodeInfo.Specific
 
-	for _, cc := range nodeInfo.CommandClasses {
-		n.CommandClasses.Add(commandclass.CommandClassID(cc))
+	for _, cmd := range nodeInfo.CommandClasses {
+		n.CommandClasses.Add(cc.CommandClassID(cmd))
 	}
 
 	n.saveToDb()
@@ -310,15 +310,10 @@ func (n *Node) setFromNodeProtocolInfo(nodeInfo *serialapi.NodeProtocolInfo) {
 	n.saveToDb()
 }
 
-func (n *Node) receiveSecurityCommandsSupportedReport(cc security.CommandsSupportedReport) {
-	for _, cc := range cc.CommandClassSupport {
-		n.CommandClasses.SetSecure(commandclass.CommandClassID(cc), true)
+func (n *Node) receiveSecurityCommandsSupportedReport(cmd security.CommandsSupportedReport) {
+	for _, supported := range cmd.CommandClassSupport {
+		n.CommandClasses.SetSecure(cc.CommandClassID(supported), true)
 	}
-
-	// TODO: do we really need to know about controlled command classes?
-	// for _, cc := range cc.CommandClassControl {
-	// 	n.SecureControlledCommandClasses[commandclass.ID(cc)] = true
-	// }
 
 	select {
 	case n.queryStageSecurityComplete <- true:
@@ -345,7 +340,7 @@ func (n *Node) receiveManufacturerInfo(mfgId, productTypeId, productId uint16) {
 	n.nextQueryStage()
 }
 
-func (n *Node) receiveCommandClassVersion(id commandclass.CommandClassID, version uint8) {
+func (n *Node) receiveCommandClassVersion(id cc.CommandClassID, version uint8) {
 	n.CommandClasses.SetVersion(id, version)
 
 	if n.CommandClasses.AllVersionsReceived() {
@@ -362,17 +357,17 @@ func (n *Node) receiveCommandClassVersion(id commandclass.CommandClassID, versio
 }
 
 func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
-	cc := commandclass.CommandClassID(cmd.CommandData[0])
-	ver := n.CommandClasses.GetVersion(cc)
+	commandClassID := cc.CommandClassID(cmd.CommandData[0])
+	ver := n.CommandClasses.GetVersion(commandClassID)
 	if ver == 0 {
 		ver = 1
 
-		if !(cc == commandclass.Version || cc == commandclass.Security) {
-			fmt.Printf("error: no version loaded for %s\n", cc)
+		if !(commandClassID == cc.Version || commandClassID == cc.Security) {
+			fmt.Printf("error: no version loaded for %s\n", commandClassID)
 		}
 	}
 
-	command, err := commandclass.Parse(ver, cmd.CommandData)
+	command, err := cc.Parse(ver, cmd.CommandData)
 	if err != nil {
 		fmt.Println("error parsing command class", err)
 		return
@@ -408,13 +403,13 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 	case *version.CommandClassReport:
 		spew.Dump(command.(*version.CommandClassReport))
 		report := command.(*version.CommandClassReport)
-		n.receiveCommandClassVersion(commandclass.CommandClassID(report.RequestedCommandClass), report.CommandClassVersion)
+		n.receiveCommandClassVersion(cc.CommandClassID(report.RequestedCommandClass), report.CommandClassVersion)
 		n.saveToDb()
 
 	case *versionv2.CommandClassReport:
 		spew.Dump(command.(*versionv2.CommandClassReport))
 		report := command.(*versionv2.CommandClassReport)
-		n.receiveCommandClassVersion(commandclass.CommandClassID(report.RequestedCommandClass), report.CommandClassVersion)
+		n.receiveCommandClassVersion(cc.CommandClassID(report.RequestedCommandClass), report.CommandClassVersion)
 		n.saveToDb()
 
 		// case alarm.Report:
@@ -454,21 +449,13 @@ func (n *Node) String() string {
 	str += fmt.Sprintf("  Product ID: %#x\n", n.ProductID)
 	str += fmt.Sprintf("  Supported command classes:\n")
 
-	for _, cc := range n.CommandClasses {
-		if cc.Secure {
-			str += fmt.Sprintf("    - %s (v%d) (secure)\n", cc.CommandClass.String(), cc.Version)
+	for _, cmd := range n.CommandClasses {
+		if cmd.Secure {
+			str += fmt.Sprintf("    - %s (v%d) (secure)\n", cmd.CommandClass.String(), cmd.Version)
 		} else {
-			str += fmt.Sprintf("    - %s (v%d)\n", cc.CommandClass.String(), cc.Version)
+			str += fmt.Sprintf("    - %s (v%d)\n", cmd.CommandClass.String(), cmd.Version)
 		}
 	}
-
-	// if len(n.SecureControlledCommandClasses) > 0 {
-	// 	secureCommands := commandClassSetToStrings(n.SecureControlledCommandClasses)
-	// 	str += fmt.Sprintf("  Controlled command classes (secure):\n")
-	// 	for _, cc := range secureCommands {
-	// 		str += fmt.Sprintf("    - %s\n", cc)
-	// 	}
-	// }
 
 	return str
 }
@@ -489,15 +476,15 @@ func (n *Node) GetSupportedSecureCommandClassStrings() []string {
 	return strings
 }
 
-func commandClassSetToStrings(commandClasses []commandclass.CommandClassID) []string {
+func commandClassSetToStrings(commandClasses []cc.CommandClassID) []string {
 	if len(commandClasses) == 0 {
 		return []string{}
 	}
 
 	ccStrings := []string{}
 
-	for _, cc := range commandClasses {
-		ccStrings = append(ccStrings, cc.String())
+	for _, cmd := range commandClasses {
+		ccStrings = append(ccStrings, cmd.String())
 	}
 
 	return ccStrings

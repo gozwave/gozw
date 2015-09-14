@@ -3,8 +3,8 @@ package security
 import (
 	"errors"
 
-	"github.com/helioslabs/gozw/command-class"
-	"github.com/helioslabs/gozw/command-class/security"
+	"github.com/helioslabs/gozw/cc"
+	"github.com/helioslabs/gozw/cc/security"
 )
 
 type EncryptedMessage struct {
@@ -14,11 +14,11 @@ type EncryptedMessage struct {
 	HMAC             []byte
 }
 
-func (cmd EncryptedMessage) CommandClassID() commandclass.CommandClassID {
-	return commandclass.Security
+func (cmd EncryptedMessage) CommandClassID() cc.CommandClassID {
+	return cc.Security
 }
 
-func (cmd EncryptedMessage) CommandID() commandclass.CommandID {
+func (cmd EncryptedMessage) CommandID() cc.CommandID {
 	return security.CommandMessageEncapsulation
 }
 

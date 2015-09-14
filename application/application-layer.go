@@ -11,8 +11,8 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/comail/colog"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/helioslabs/gozw/command-class"
-	zwsec "github.com/helioslabs/gozw/command-class/security"
+	"github.com/helioslabs/gozw/cc"
+	zwsec "github.com/helioslabs/gozw/cc/security"
 	"github.com/helioslabs/gozw/protocol"
 	"github.com/helioslabs/gozw/security"
 	"github.com/helioslabs/gozw/serial-api"
@@ -306,9 +306,9 @@ func (a *Layer) RemoveFailedNode(nodeID byte) (ok bool, err error) {
 
 func (a *Layer) handleApplicationCommands() {
 	for cmd := range a.serialAPI.ControllerCommands() {
-		switch commandclass.CommandClassID(cmd.CommandData[0]) {
+		switch cc.CommandClassID(cmd.CommandData[0]) {
 
-		case commandclass.Security:
+		case cc.Security:
 			a.interceptSecurityCommandClass(cmd)
 
 		default:
@@ -480,7 +480,7 @@ func (a *Layer) includeSecureNode(node *Node) error {
 }
 
 func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) {
-	command, err := commandclass.Parse(1, cmd.CommandData)
+	command, err := cc.Parse(1, cmd.CommandData)
 	if err != nil {
 		a.logger.Printf("error: %v\n", err)
 		return
@@ -523,7 +523,7 @@ func (a *Layer) interceptSecurityCommandClass(cmd serialapi.ApplicationCommand) 
 
 		a.logger.Printf("info: received encapsulated message %s", spew.Sdump(decrypted))
 
-		if decrypted[1] == byte(commandclass.Security) &&
+		if decrypted[1] == byte(cc.Security) &&
 			decrypted[2] == byte(zwsec.CommandNetworkKeyVerify) {
 			a.logger.Printf("network key verify node=%d", cmd.SrcNodeID)
 			if ch, ok := a.secureInclusionStep[cmd.SrcNodeID]; ok {

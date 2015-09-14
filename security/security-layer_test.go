@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/helioslabs/gozw/command-class/security"
+	"github.com/helioslabs/gozw/cc/security"
 	"github.com/stretchr/testify/assert"
 )
 

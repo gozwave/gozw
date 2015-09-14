@@ -3,48 +3,48 @@ package util
 import (
 	"testing"
 
-	"github.com/helioslabs/gozw/command-class"
+	"github.com/helioslabs/gozw/cc"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCommandClassSet(t *testing.T) {
 	s := CommandClassSet{}
 
-	assert.EqualValues(t, []commandclass.CommandClassID{}, s.ListAll())
+	assert.EqualValues(t, []cc.CommandClassID{}, s.ListAll())
 	assert.True(t, s.AllVersionsReceived())
 
-	s.Add(commandclass.Security)
-	assert.EqualValues(t, []commandclass.CommandClassID{commandclass.Security}, s.ListAll())
+	s.Add(cc.Security)
+	assert.EqualValues(t, []cc.CommandClassID{cc.Security}, s.ListAll())
 	assert.False(t, s.AllVersionsReceived())
 
-	assert.True(t, s.Supports(commandclass.Security))
-	assert.False(t, s.Supports(commandclass.Alarm))
-	assert.False(t, s.IsSecure(commandclass.Security))
-	assert.False(t, s.IsSecure(commandclass.Alarm))
-	assert.EqualValues(t, 0, s.GetVersion(commandclass.Security))
-	assert.EqualValues(t, 0, s.GetVersion(commandclass.Alarm))
+	assert.True(t, s.Supports(cc.Security))
+	assert.False(t, s.Supports(cc.Alarm))
+	assert.False(t, s.IsSecure(cc.Security))
+	assert.False(t, s.IsSecure(cc.Alarm))
+	assert.EqualValues(t, 0, s.GetVersion(cc.Security))
+	assert.EqualValues(t, 0, s.GetVersion(cc.Alarm))
 
-	s.SetVersion(commandclass.Security, 1)
-	assert.EqualValues(t, 1, s.GetVersion(commandclass.Security))
+	s.SetVersion(cc.Security, 1)
+	assert.EqualValues(t, 1, s.GetVersion(cc.Security))
 
-	s.SetSecure(commandclass.Security, true)
-	assert.True(t, s.IsSecure(commandclass.Security))
+	s.SetSecure(cc.Security, true)
+	assert.True(t, s.IsSecure(cc.Security))
 
-	s.SetSecure(commandclass.Alarm, true)
-	assert.True(t, s.Supports(commandclass.Alarm))
-	assert.True(t, s.IsSecure(commandclass.Alarm))
-	assert.EqualValues(t, 0, s.GetVersion(commandclass.Alarm))
-	assert.EqualValues(t, []commandclass.CommandClassID{commandclass.Security, commandclass.Alarm}, s.ListAll())
+	s.SetSecure(cc.Alarm, true)
+	assert.True(t, s.Supports(cc.Alarm))
+	assert.True(t, s.IsSecure(cc.Alarm))
+	assert.EqualValues(t, 0, s.GetVersion(cc.Alarm))
+	assert.EqualValues(t, []cc.CommandClassID{cc.Security, cc.Alarm}, s.ListAll())
 
-	s.SetVersion(commandclass.Association, 3)
-	assert.True(t, s.Supports(commandclass.Association))
-	assert.False(t, s.IsSecure(commandclass.Association))
-	assert.EqualValues(t, 3, s.GetVersion(commandclass.Association))
+	s.SetVersion(cc.Association, 3)
+	assert.True(t, s.Supports(cc.Association))
+	assert.False(t, s.IsSecure(cc.Association))
+	assert.EqualValues(t, 3, s.GetVersion(cc.Association))
 
-	assert.EqualValues(t, []commandclass.CommandClassID{commandclass.Security, commandclass.Alarm}, s.ListBySecureStatus(true))
-	assert.EqualValues(t, []commandclass.CommandClassID{commandclass.Association}, s.ListBySecureStatus(false))
+	assert.EqualValues(t, []cc.CommandClassID{cc.Security, cc.Alarm}, s.ListBySecureStatus(true))
+	assert.EqualValues(t, []cc.CommandClassID{cc.Association}, s.ListBySecureStatus(false))
 
-	s.SetVersion(commandclass.Alarm, 1)
+	s.SetVersion(cc.Alarm, 1)
 	assert.True(t, s.AllVersionsReceived())
 
 }
