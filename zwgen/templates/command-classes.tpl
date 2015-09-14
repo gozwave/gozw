@@ -3,14 +3,12 @@
 
 package commandclass
 
-type ID byte
-
 const (
   {{range .CommandClasses}}
-  {{.GetConstName}} ID = {{.Key}}{{end}}
+  {{.GetConstName}} CommandClassID = {{.Key}}{{end}}
 )
 
-func (c ID) String() string {
+func (c CommandClassID) String() string {
   switch c {
     {{range .CommandClasses}}
     {{if eq .Version 1}}
@@ -20,26 +18,5 @@ func (c ID) String() string {
     {{end}}
     default:
       return fmt.Sprintf("Unknown (0x%X)", byte(c))
-  }
-}
-
-func Parse(ccVersion uint8, payload []byte) (Command, error) {
-  switch {
-    {{range $_, $cc := .CommandClasses}}{{if .CanGen}}{{if .Enabled}}{{$version := .Version}}
-    case payload[0] == byte({{.GetConstName}}) && ccVersion == {{$version}}:
-      switch payload[1] {
-        {{range .Commands}}case {{.Key}}:
-          command := {{$cc.GetPackageName}}.{{(.GetStructName $cc)}}{}
-          if err := command.UnmarshalBinary(payload); err != nil {
-            return nil, err
-          }
-          return &command, nil
-        {{end}}default:
-          return nil, errors.New("Unknown command in command class {{.Help}}")
-      }
-    {{end}}{{end}}{{end}}
-
-    default:
-      return nil, errors.New("Unknown command class")
   }
 }
