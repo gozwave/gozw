@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/codegangsta/cli"
-	"github.com/helioslabs/zwgen/zwgen"
+	"gitlab.com/helioslabs/zwgen/zwgen"
 )
 
 func main() {
