@@ -7,3 +7,4 @@ install: build
 
 install-deps:
 	go get -u github.com/jteeuwen/go-bindata/...
+	glide install

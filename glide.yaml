@@ -1,0 +1,9 @@
+package: gitlab.com/helioslabs/zwgen
+import:
+- package: github.com/codegangsta/cli
+  version: ^1.18.1
+- package: github.com/reiver/go-stringcase
+- package: golang.org/x/tools
+  subpackages:
+  - imports
+- package: gopkg.in/yaml.v2
