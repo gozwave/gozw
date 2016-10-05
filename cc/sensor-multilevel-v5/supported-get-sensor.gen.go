@@ -6,7 +6,7 @@ package sensormultilevelv5
 import (
 	"encoding/gob"
 
-	"github.com/helioslabs/gozw/cc"
+	"gitlab.com/helioslabs/gozw/cc"
 )
 
 const CommandSupportedGetSensor cc.CommandID = 0x01

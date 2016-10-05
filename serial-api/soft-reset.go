@@ -3,8 +3,8 @@ package serialapi
 import (
 	"time"
 
-	"github.com/helioslabs/gozw/protocol"
-	"github.com/helioslabs/gozw/session"
+	"gitlab.com/helioslabs/gozw/protocol"
+	"gitlab.com/helioslabs/gozw/session"
 )
 
 // WARNING: This can (and often will) cause the device to get a new USB address,

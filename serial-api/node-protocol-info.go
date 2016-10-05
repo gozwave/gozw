@@ -3,9 +3,9 @@ package serialapi
 import (
 	"errors"
 
-	"github.com/helioslabs/gozw/frame"
-	"github.com/helioslabs/gozw/protocol"
-	"github.com/helioslabs/gozw/session"
+	"gitlab.com/helioslabs/gozw/frame"
+	"gitlab.com/helioslabs/gozw/protocol"
+	"gitlab.com/helioslabs/gozw/session"
 )
 
 func (s *Layer) GetNodeProtocolInfo(nodeID byte) (nodeInfo *NodeProtocolInfo, err error) {

@@ -6,7 +6,7 @@ package switchall
 import (
 	"encoding/gob"
 
-	"github.com/helioslabs/gozw/cc"
+	"gitlab.com/helioslabs/gozw/cc"
 )
 
 const CommandOn cc.CommandID = 0x04

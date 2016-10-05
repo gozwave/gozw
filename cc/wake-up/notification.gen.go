@@ -6,7 +6,7 @@ package wakeup
 import (
 	"encoding/gob"
 
-	"github.com/helioslabs/gozw/cc"
+	"gitlab.com/helioslabs/gozw/cc"
 )
 
 const CommandNotification cc.CommandID = 0x07

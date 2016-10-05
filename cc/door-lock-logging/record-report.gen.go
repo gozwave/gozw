@@ -8,7 +8,7 @@ import (
 	"encoding/gob"
 	"errors"
 
-	"github.com/helioslabs/gozw/cc"
+	"gitlab.com/helioslabs/gozw/cc"
 )
 
 const CommandRecordReport cc.CommandID = 0x04

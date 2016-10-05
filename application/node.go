@@ -9,17 +9,17 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/helioslabs/gozw/cc"
-	"github.com/helioslabs/gozw/cc/association"
-	"github.com/helioslabs/gozw/cc/battery"
-	"github.com/helioslabs/gozw/cc/manufacturer-specific"
-	"github.com/helioslabs/gozw/cc/manufacturer-specific-v2"
-	"github.com/helioslabs/gozw/cc/security"
-	"github.com/helioslabs/gozw/cc/version"
-	"github.com/helioslabs/gozw/cc/version-v2"
-	"github.com/helioslabs/gozw/protocol"
-	"github.com/helioslabs/gozw/serial-api"
-	"github.com/helioslabs/gozw/util"
+	"gitlab.com/helioslabs/gozw/cc"
+	"gitlab.com/helioslabs/gozw/cc/association"
+	"gitlab.com/helioslabs/gozw/cc/battery"
+	"gitlab.com/helioslabs/gozw/cc/manufacturer-specific"
+	"gitlab.com/helioslabs/gozw/cc/manufacturer-specific-v2"
+	"gitlab.com/helioslabs/gozw/cc/security"
+	"gitlab.com/helioslabs/gozw/cc/version"
+	"gitlab.com/helioslabs/gozw/cc/version-v2"
+	"gitlab.com/helioslabs/gozw/protocol"
+	"gitlab.com/helioslabs/gozw/serial-api"
+	"gitlab.com/helioslabs/gozw/util"
 )
 
 // Node is an in-memory representation of a Z-Wave node

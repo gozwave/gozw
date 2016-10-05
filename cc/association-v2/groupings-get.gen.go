@@ -6,7 +6,7 @@ package associationv2
 import (
 	"encoding/gob"
 
-	"github.com/helioslabs/gozw/cc"
+	"gitlab.com/helioslabs/gozw/cc"
 )
 
 const CommandGroupingsGet cc.CommandID = 0x05

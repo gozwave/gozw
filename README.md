@@ -14,7 +14,7 @@ Golang Z/IP Portal
   - Installation is as simple as `./configure && make && sudo cp interceptty /usr/local/bin`
   - To run: `interceptty -s 'ispeed 115200 ospeed 115200' /dev/<serialdevice> /tmp/<serialdevice>`
   - Be sure to update your config.yaml to point to `/tmp/<serialdevice>`
-1. `go get -u github.com/helioslabs/zwgen`
+1. `go get -u gitlab.com/helioslabs/zwgen`
 1. `make install-deps` in the zwgen folder root
 1. `make install` in the zwgen folder root
 1. `make build` in the zwgen folder

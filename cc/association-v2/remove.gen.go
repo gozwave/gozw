@@ -7,7 +7,7 @@ import (
 	"encoding/gob"
 	"errors"
 
-	"github.com/helioslabs/gozw/cc"
+	"gitlab.com/helioslabs/gozw/cc"
 )
 
 const CommandRemove cc.CommandID = 0x04

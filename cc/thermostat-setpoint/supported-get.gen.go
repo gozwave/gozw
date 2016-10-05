@@ -6,7 +6,7 @@ package thermostatsetpoint
 import (
 	"encoding/gob"
 
-	"github.com/helioslabs/gozw/cc"
+	"gitlab.com/helioslabs/gozw/cc"
 )
 
 const CommandSupportedGet cc.CommandID = 0x04

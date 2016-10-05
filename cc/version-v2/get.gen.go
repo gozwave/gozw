@@ -6,7 +6,7 @@ package versionv2
 import (
 	"encoding/gob"
 
-	"github.com/helioslabs/gozw/cc"
+	"gitlab.com/helioslabs/gozw/cc"
 )
 
 const CommandGet cc.CommandID = 0x11

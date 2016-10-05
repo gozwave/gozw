@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <xs:schema
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	targetNamespace="https://github.com/helioslabs/gozw/"
-	xmlns:Manufacturers="https://github.com/helioslabs/gozw/"
+	targetNamespace="https://gitlab.com/helioslabs/gozw/"
+	xmlns:Manufacturers="https://gitlab.com/helioslabs/gozw/"
 	elementFormDefault="qualified"
 >
 

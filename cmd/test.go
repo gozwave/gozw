@@ -7,14 +7,14 @@ import (
 
 	"github.com/comail/colog"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/helioslabs/gozw/application"
-	"github.com/helioslabs/gozw/cc/association"
-	"github.com/helioslabs/gozw/cc/door-lock"
-	"github.com/helioslabs/gozw/frame"
-	"github.com/helioslabs/gozw/serial-api"
-	"github.com/helioslabs/gozw/session"
-	"github.com/helioslabs/gozw/transport"
 	"github.com/peterh/liner"
+	"gitlab.com/helioslabs/gozw/application"
+	"gitlab.com/helioslabs/gozw/cc/association"
+	"gitlab.com/helioslabs/gozw/cc/door-lock"
+	"gitlab.com/helioslabs/gozw/frame"
+	"gitlab.com/helioslabs/gozw/serial-api"
+	"gitlab.com/helioslabs/gozw/session"
+	"gitlab.com/helioslabs/gozw/transport"
 )
 
 func init() {

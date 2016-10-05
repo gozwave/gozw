@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/helioslabs/gozw/testutil"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/helioslabs/gozw/testutil"
 )
 
 func TestGoodIncomingFrameResultsInAck(t *testing.T) {

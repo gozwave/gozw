@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/comail/colog"
-	"github.com/helioslabs/gozw/frame"
-	"github.com/helioslabs/gozw/protocol"
+	"gitlab.com/helioslabs/gozw/frame"
+	"gitlab.com/helioslabs/gozw/protocol"
 )
 
 const (

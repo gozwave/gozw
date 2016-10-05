@@ -6,7 +6,7 @@ package doorlockv2
 import (
 	"encoding/gob"
 
-	"github.com/helioslabs/gozw/cc"
+	"gitlab.com/helioslabs/gozw/cc"
 )
 
 const CommandOperationGet cc.CommandID = 0x02

@@ -6,7 +6,7 @@ package nodenaming
 import (
 	"encoding/gob"
 
-	"github.com/helioslabs/gozw/cc"
+	"gitlab.com/helioslabs/gozw/cc"
 )
 
 const CommandNodeLocationGet cc.CommandID = 0x05
