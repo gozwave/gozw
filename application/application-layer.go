@@ -62,7 +62,7 @@ type Layer struct {
 	networkKey    []byte
 	nodes         map[byte]*Node
 
-	EventBus *EventBus.EventBus
+	EventBus EventBus.Bus
 
 	logger *log.Logger
 	db     *bolt.DB

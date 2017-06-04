@@ -2,7 +2,7 @@ hash: 83317c5591de89a621d011e50833bb887eb7fadbfd1bfa3122afb6c6265bd730
 updated: 2016-10-05T09:39:41.099209557-06:00
 imports:
 - name: github.com/asaskevich/EventBus
-  version: ab9e5ceb2cc1ca6f36a5813c928c534e837681c2
+  version: 9223ecd796146991d8ffc3b822d5aa02f15aee97
 - name: github.com/boltdb/bolt
   version: 583e8937c61f1af6513608ccc75c97b6abdf4ff9
 - name: github.com/comail/colog
