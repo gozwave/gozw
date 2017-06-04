@@ -3,7 +3,7 @@ package session
 import (
 	"time"
 
-	"gitlab.com/helioslabs/gozw/frame"
+	"github.com/gozwave/gozw/frame"
 )
 
 // type CallbackType int

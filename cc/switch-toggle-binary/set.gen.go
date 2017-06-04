@@ -6,7 +6,7 @@ package switchtogglebinary
 import (
 	"encoding/gob"
 
-	"gitlab.com/helioslabs/gozw/cc"
+	"github.com/gozwave/gozw/cc"
 )
 
 const CommandSet cc.CommandID = 0x01

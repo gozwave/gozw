@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/comail/colog"
-	"gitlab.com/helioslabs/gozw/cc"
-	"gitlab.com/helioslabs/gozw/cc/security"
-	"gitlab.com/helioslabs/gozw/serial-api"
+	"github.com/gozwave/gozw/cc"
+	"github.com/gozwave/gozw/cc/security"
+	"github.com/gozwave/gozw/serial-api"
 )
 
 const (

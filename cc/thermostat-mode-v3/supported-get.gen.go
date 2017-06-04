@@ -6,7 +6,7 @@ package thermostatmodev3
 import (
 	"encoding/gob"
 
-	"gitlab.com/helioslabs/gozw/cc"
+	"github.com/gozwave/gozw/cc"
 )
 
 const CommandSupportedGet cc.CommandID = 0x04

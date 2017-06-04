@@ -3,8 +3,8 @@ package security
 import (
 	"errors"
 
-	"gitlab.com/helioslabs/gozw/cc"
-	"gitlab.com/helioslabs/gozw/cc/security"
+	"github.com/gozwave/gozw/cc"
+	"github.com/gozwave/gozw/cc/security"
 )
 
 type EncryptedMessage struct {

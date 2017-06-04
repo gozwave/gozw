@@ -6,7 +6,7 @@ package doorlocklogging
 import (
 	"encoding/gob"
 
-	"gitlab.com/helioslabs/gozw/cc"
+	"github.com/gozwave/gozw/cc"
 )
 
 const CommandRecordsSupportedGet cc.CommandID = 0x01

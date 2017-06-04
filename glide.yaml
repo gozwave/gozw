@@ -1,4 +1,4 @@
-package: gitlab.com/helioslabs/gozw
+package: github.com/gozwave/gozw
 import:
 - package: github.com/asaskevich/EventBus
 - package: github.com/boltdb/bolt

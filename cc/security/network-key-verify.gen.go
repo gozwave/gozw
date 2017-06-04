@@ -6,7 +6,7 @@ package security
 import (
 	"encoding/gob"
 
-	"gitlab.com/helioslabs/gozw/cc"
+	"github.com/gozwave/gozw/cc"
 )
 
 const CommandNetworkKeyVerify cc.CommandID = 0x07

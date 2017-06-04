@@ -6,7 +6,7 @@ package colorcontrolv2
 import (
 	"encoding/gob"
 
-	"gitlab.com/helioslabs/gozw/cc"
+	"github.com/gozwave/gozw/cc"
 )
 
 const CommandCapabilityGet cc.CommandID = 0x01

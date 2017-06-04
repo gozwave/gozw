@@ -7,7 +7,7 @@ import (
 	"encoding/gob"
 	"errors"
 
-	"gitlab.com/helioslabs/gozw/cc"
+	"github.com/gozwave/gozw/cc"
 )
 
 const CommandSchemeGet cc.CommandID = 0x04

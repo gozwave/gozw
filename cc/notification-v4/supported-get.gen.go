@@ -6,7 +6,7 @@ package notificationv4
 import (
 	"encoding/gob"
 
-	"gitlab.com/helioslabs/gozw/cc"
+	"github.com/gozwave/gozw/cc"
 )
 
 const CommandSupportedGet cc.CommandID = 0x07

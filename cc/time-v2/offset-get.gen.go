@@ -6,7 +6,7 @@ package timev2
 import (
 	"encoding/gob"
 
-	"gitlab.com/helioslabs/gozw/cc"
+	"github.com/gozwave/gozw/cc"
 )
 
 const CommandOffsetGet cc.CommandID = 0x06

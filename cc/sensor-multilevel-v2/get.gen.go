@@ -6,7 +6,7 @@ package sensormultilevelv2
 import (
 	"encoding/gob"
 
-	"gitlab.com/helioslabs/gozw/cc"
+	"github.com/gozwave/gozw/cc"
 )
 
 const CommandGet cc.CommandID = 0x04

@@ -6,7 +6,7 @@ package doorlock
 import (
 	"encoding/gob"
 
-	"gitlab.com/helioslabs/gozw/cc"
+	"github.com/gozwave/gozw/cc"
 )
 
 const CommandOperationGet cc.CommandID = 0x02

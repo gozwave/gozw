@@ -1,4 +1,4 @@
-package: gitlab.com/helioslabs/zwgen
+package: github.com/gozwave/gozw/zwgen
 import:
 - package: github.com/codegangsta/cli
   version: ^1.18.1

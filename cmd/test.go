@@ -8,13 +8,13 @@ import (
 	"github.com/comail/colog"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/peterh/liner"
-	"gitlab.com/helioslabs/gozw/application"
-	"gitlab.com/helioslabs/gozw/cc/association"
-	"gitlab.com/helioslabs/gozw/cc/door-lock"
-	"gitlab.com/helioslabs/gozw/frame"
-	"gitlab.com/helioslabs/gozw/serial-api"
-	"gitlab.com/helioslabs/gozw/session"
-	"gitlab.com/helioslabs/gozw/transport"
+	"github.com/gozwave/gozw/application"
+	"github.com/gozwave/gozw/cc/association"
+	"github.com/gozwave/gozw/cc/door-lock"
+	"github.com/gozwave/gozw/frame"
+	"github.com/gozwave/gozw/serial-api"
+	"github.com/gozwave/gozw/session"
+	"github.com/gozwave/gozw/transport"
 )
 
 func init() {

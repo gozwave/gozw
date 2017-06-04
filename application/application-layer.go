@@ -11,11 +11,11 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/comail/colog"
 	"github.com/davecgh/go-spew/spew"
-	"gitlab.com/helioslabs/gozw/cc"
-	zwsec "gitlab.com/helioslabs/gozw/cc/security"
-	"gitlab.com/helioslabs/gozw/protocol"
-	"gitlab.com/helioslabs/gozw/security"
-	"gitlab.com/helioslabs/gozw/serial-api"
+	"github.com/gozwave/gozw/cc"
+	zwsec "github.com/gozwave/gozw/cc/security"
+	"github.com/gozwave/gozw/protocol"
+	"github.com/gozwave/gozw/security"
+	"github.com/gozwave/gozw/serial-api"
 )
 
 // MaxSecureInclusionDuration is the timeout for secure inclusion mode. If this

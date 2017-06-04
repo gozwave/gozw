@@ -1,6 +1,6 @@
 package serialapi
 
-import "gitlab.com/helioslabs/gozw/protocol"
+import "github.com/gozwave/gozw/protocol"
 
 type ApplicationCommand struct {
 	CommandID     byte

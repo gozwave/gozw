@@ -8,7 +8,7 @@ import (
 	"encoding/gob"
 	"errors"
 
-	"gitlab.com/helioslabs/gozw/cc"
+	"github.com/gozwave/gozw/cc"
 )
 
 const CommandBulkReport cc.CommandID = 0x09

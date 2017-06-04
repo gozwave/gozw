@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"gitlab.com/helioslabs/gozw/frame"
-	"gitlab.com/helioslabs/gozw/protocol"
-	"gitlab.com/helioslabs/gozw/session"
+	"github.com/gozwave/gozw/frame"
+	"github.com/gozwave/gozw/protocol"
+	"github.com/gozwave/gozw/session"
 )
 
 type transmitStatus struct {
