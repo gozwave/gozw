@@ -37,10 +37,6 @@ type MessageEncapsulationNonceGet struct {
 		SecondFrame bool
 	}
 
-	CommandClassIdentifier byte
-
-	CommandIdentifier byte
-
 	CommandByte []byte
 
 	ReceiversNonceIdentifier byte
@@ -91,20 +87,6 @@ func (cmd *MessageEncapsulationNonceGet) UnmarshalBinary(data []byte) error {
 	cmd.Properties1.SecondFrame = payload[i]&0x20 == 0x20
 
 	i += 1
-
-	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
-	}
-
-	cmd.CommandClassIdentifier = payload[i]
-	i++
-
-	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
-	}
-
-	cmd.CommandIdentifier = payload[i]
-	i++
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -161,10 +143,6 @@ func (cmd *MessageEncapsulationNonceGet) MarshalBinary() (payload []byte, err er
 
 		payload = append(payload, val)
 	}
-
-	payload = append(payload, cmd.CommandClassIdentifier)
-
-	payload = append(payload, cmd.CommandIdentifier)
 
 	payload = append(payload, cmd.CommandByte...)
 

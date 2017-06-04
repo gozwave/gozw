@@ -1,10 +1,8 @@
-build:
-	go generate ./...
-	go build ./...
+generate:
+	go generate ./zwgen
 
-install: build
+install: generate
 	go install .
 
 install-deps:
 	go get -u github.com/jteeuwen/go-bindata/...
-	glide install

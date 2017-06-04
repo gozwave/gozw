@@ -140,6 +140,7 @@ const (
 	SpecificTypeSecureBarrierOpenOnly        SpecificDeviceType = 0x08
 	SpecificTypeSecureBarrierCloseOnly       SpecificDeviceType = 0x09
 	SpecificTypeSecureLockbox                SpecificDeviceType = 0x0A
+	SpecificTypeSecureKeypad                 SpecificDeviceType = 0x0B
 	SpecificTypePortableRemoteController     SpecificDeviceType = 0x01
 	SpecificTypePortableSceneController      SpecificDeviceType = 0x02
 	SpecificTypePortableInstallerTool        SpecificDeviceType = 0x03
@@ -149,6 +150,7 @@ const (
 	SpecificTypeAdvEnergyControl             SpecificDeviceType = 0x02
 	SpecificTypeWholeHomeMeterSimple         SpecificDeviceType = 0x03
 	SpecificTypeRepeaterSlave                SpecificDeviceType = 0x01
+	SpecificTypeVirtualNode                  SpecificDeviceType = 0x02
 	SpecificTypeZonedSecurityPanel           SpecificDeviceType = 0x01
 	SpecificTypeEnergyProduction             SpecificDeviceType = 0x01
 	SpecificTypeAdvZensorNetAlarmSensor      SpecificDeviceType = 0x05
@@ -177,13 +179,16 @@ const (
 	SpecificTypePowerStrip                   SpecificDeviceType = 0x04
 	SpecificTypeSiren                        SpecificDeviceType = 0x05
 	SpecificTypeValveOpenClose               SpecificDeviceType = 0x06
-	SpecificDeviceBinaryTunableColorLight    SpecificDeviceType = 0x02
+	SpecificTypeColorTunableBinary           SpecificDeviceType = 0x02
+	SpecificTypeIrrigationController         SpecificDeviceType = 0x07
 	SpecificTypeClassAMotorControl           SpecificDeviceType = 0x05
 	SpecificTypeClassBMotorControl           SpecificDeviceType = 0x06
 	SpecificTypeClassCMotorControl           SpecificDeviceType = 0x07
 	SpecificTypeMotorMultiposition           SpecificDeviceType = 0x03
 	SpecificTypePowerSwitchMultilevel        SpecificDeviceType = 0x01
 	SpecificTypeSceneSwitchMultilevel        SpecificDeviceType = 0x04
+	SpecificTypeFanSwitch                    SpecificDeviceType = 0x08
+	SpecificTypeColorTunableMultilevel       SpecificDeviceType = 0x02
 	SpecificTypeSwitchRemoteBinary           SpecificDeviceType = 0x01
 	SpecificTypeSwitchRemoteMultilevel       SpecificDeviceType = 0x02
 	SpecificTypeSwitchRemoteToggleBinary     SpecificDeviceType = 0x03
@@ -231,6 +236,7 @@ var SpecificDeviceTypeNames map[GenericDeviceType]map[SpecificDeviceType]string 
 		SpecificTypeSecureBarrierOpenOnly:        "Secure Barrier Open Only",
 		SpecificTypeSecureBarrierCloseOnly:       "Secure Barrier Close Only",
 		SpecificTypeSecureLockbox:                "Secure Lockbox",
+		SpecificTypeSecureKeypad:                 "Secure Keypad",
 	},
 	GenericTypeGenericController: map[SpecificDeviceType]string{
 		SpecificTypeNotUsed:                  "Not Used",
@@ -255,6 +261,7 @@ var SpecificDeviceTypeNames map[GenericDeviceType]map[SpecificDeviceType]string 
 	GenericTypeRepeaterSlave: map[SpecificDeviceType]string{
 		SpecificTypeNotUsed:       "Not Used",
 		SpecificTypeRepeaterSlave: "Repeater Slave",
+		SpecificTypeVirtualNode:   "Virtual Node",
 	},
 	GenericTypeSecurityPanel: map[SpecificDeviceType]string{
 		SpecificTypeNotUsed:            "Not Used",
@@ -298,22 +305,25 @@ var SpecificDeviceTypeNames map[GenericDeviceType]map[SpecificDeviceType]string 
 		SpecificTypeGateway:             "Gateway",
 	},
 	GenericTypeSwitchBinary: map[SpecificDeviceType]string{
-		SpecificTypeNotUsed:                   "Not Used",
-		SpecificTypePowerSwitchBinary:         "Power Switch Binary",
-		SpecificTypeSceneSwitchBinary:         "Scene Switch Binary",
-		SpecificTypePowerStrip:                "Power Strip",
-		SpecificTypeSiren:                     "Siren",
-		SpecificTypeValveOpenClose:            "Valve Open/Close",
-		SpecificDeviceBinaryTunableColorLight: "Binary Tunable Color Light",
+		SpecificTypeNotUsed:              "Not Used",
+		SpecificTypePowerSwitchBinary:    "Power Switch Binary",
+		SpecificTypeSceneSwitchBinary:    "Scene Switch Binary",
+		SpecificTypePowerStrip:           "Power Strip",
+		SpecificTypeSiren:                "Siren",
+		SpecificTypeValveOpenClose:       "Valve Open/Close",
+		SpecificTypeColorTunableBinary:   "Binary Tunable Color Light",
+		SpecificTypeIrrigationController: "Irrigation Controller",
 	},
 	GenericTypeSwitchMultilevel: map[SpecificDeviceType]string{
-		SpecificTypeNotUsed:               "Not Used",
-		SpecificTypeClassAMotorControl:    "Class A Motor Control",
-		SpecificTypeClassBMotorControl:    "Class B Motor Control",
-		SpecificTypeClassCMotorControl:    "Class C Motor Control",
-		SpecificTypeMotorMultiposition:    "Motor Multiposition",
-		SpecificTypePowerSwitchMultilevel: "Power Switch Multilevel",
-		SpecificTypeSceneSwitchMultilevel: "Scene Switch Multilevel",
+		SpecificTypeNotUsed:                "Not Used",
+		SpecificTypeClassAMotorControl:     "Class A Motor Control",
+		SpecificTypeClassBMotorControl:     "Class B Motor Control",
+		SpecificTypeClassCMotorControl:     "Class C Motor Control",
+		SpecificTypeMotorMultiposition:     "Motor Multiposition",
+		SpecificTypePowerSwitchMultilevel:  "Power Switch Multilevel",
+		SpecificTypeSceneSwitchMultilevel:  "Scene Switch Multilevel",
+		SpecificTypeFanSwitch:              "Fan Switch",
+		SpecificTypeColorTunableMultilevel: "Multilevel Tunable Color Light",
 	},
 	GenericTypeSwitchRemote: map[SpecificDeviceType]string{
 		SpecificTypeNotUsed:                      "Not Used",

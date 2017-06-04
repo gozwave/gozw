@@ -1,7 +1,7 @@
 .PHONY: test
 
 generate:
-	go generate ./...
+	go generate ./cc
 
 interceptty:
 	interceptty -s 'ispeed 115200 ospeed 115200' /dev/cu.usbmodem1411 /tmp/usbmodem

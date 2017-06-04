@@ -31,7 +31,7 @@ type Set struct {
 
 	UserIdStatus byte
 
-	UserCode []byte
+	UserCode string
 }
 
 func (cmd Set) CommandClassID() cc.CommandClassID {
@@ -73,10 +73,12 @@ func (cmd *Set) UnmarshalBinary(data []byte) error {
 	i++
 
 	if len(payload) <= i {
-		return nil
+		return errors.New("slice index out of bounds")
 	}
 
-	cmd.UserCode = payload[i:]
+	cmd.UserCode = string(payload[i : i+10])
+
+	i += 10
 
 	return nil
 }
@@ -90,7 +92,11 @@ func (cmd *Set) MarshalBinary() (payload []byte, err error) {
 
 	payload = append(payload, cmd.UserIdStatus)
 
-	payload = append(payload, cmd.UserCode...)
+	if paramLen := len(cmd.UserCode); paramLen > 10 {
+		return nil, errors.New("Length overflow in array parameter UserCode")
+	}
+
+	payload = append(payload, []byte(cmd.UserCode)...)
 
 	return
 }

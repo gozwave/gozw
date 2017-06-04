@@ -32,21 +32,21 @@ type CapabilitiesReport struct {
 	}
 
 	Properties2 struct {
-		Size byte
+		Size1 byte
 
-		Scale byte
+		Scale1 byte
 
-		Precision byte
+		Precision1 byte
 	}
 
 	MinValue []byte
 
 	Properties3 struct {
-		Size byte
+		Size2 byte
 
-		Scale byte
+		Scale2 byte
 
-		Precision byte
+		Precision2 byte
 	}
 
 	Maxvalue []byte
@@ -88,11 +88,11 @@ func (cmd *CapabilitiesReport) UnmarshalBinary(data []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	cmd.Properties2.Size = (payload[i] & 0x07)
+	cmd.Properties2.Size1 = (payload[i] & 0x07)
 
-	cmd.Properties2.Scale = (payload[i] & 0x18) >> 3
+	cmd.Properties2.Scale1 = (payload[i] & 0x18) >> 3
 
-	cmd.Properties2.Precision = (payload[i] & 0xE0) >> 5
+	cmd.Properties2.Precision1 = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -110,11 +110,11 @@ func (cmd *CapabilitiesReport) UnmarshalBinary(data []byte) error {
 		return errors.New("slice index out of bounds")
 	}
 
-	cmd.Properties3.Size = (payload[i] & 0x07)
+	cmd.Properties3.Size2 = (payload[i] & 0x07)
 
-	cmd.Properties3.Scale = (payload[i] & 0x18) >> 3
+	cmd.Properties3.Scale2 = (payload[i] & 0x18) >> 3
 
-	cmd.Properties3.Precision = (payload[i] & 0xE0) >> 5
+	cmd.Properties3.Precision2 = (payload[i] & 0xE0) >> 5
 
 	i += 1
 
@@ -147,11 +147,11 @@ func (cmd *CapabilitiesReport) MarshalBinary() (payload []byte, err error) {
 	{
 		var val byte
 
-		val |= (cmd.Properties2.Size) & byte(0x07)
+		val |= (cmd.Properties2.Size1) & byte(0x07)
 
-		val |= (cmd.Properties2.Scale << byte(3)) & byte(0x18)
+		val |= (cmd.Properties2.Scale1 << byte(3)) & byte(0x18)
 
-		val |= (cmd.Properties2.Precision << byte(5)) & byte(0xE0)
+		val |= (cmd.Properties2.Precision1 << byte(5)) & byte(0xE0)
 
 		payload = append(payload, val)
 	}
@@ -163,11 +163,11 @@ func (cmd *CapabilitiesReport) MarshalBinary() (payload []byte, err error) {
 	{
 		var val byte
 
-		val |= (cmd.Properties3.Size) & byte(0x07)
+		val |= (cmd.Properties3.Size2) & byte(0x07)
 
-		val |= (cmd.Properties3.Scale << byte(3)) & byte(0x18)
+		val |= (cmd.Properties3.Scale2 << byte(3)) & byte(0x18)
 
-		val |= (cmd.Properties3.Precision << byte(5)) & byte(0xE0)
+		val |= (cmd.Properties3.Precision2 << byte(5)) & byte(0xE0)
 
 		payload = append(payload, val)
 	}

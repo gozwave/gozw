@@ -83,10 +83,14 @@ func (cmd *DeviceSpecificReport) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return nil
+		return errors.New("slice index out of bounds")
 	}
 
-	cmd.DeviceIdData = payload[i:]
+	{
+		length := (payload[1+2] >> 0) & 0x1F
+		cmd.DeviceIdData = payload[i : i+int(length)]
+		i += int(length)
+	}
 
 	return nil
 }
@@ -114,7 +118,9 @@ func (cmd *DeviceSpecificReport) MarshalBinary() (payload []byte, err error) {
 		payload = append(payload, val)
 	}
 
-	payload = append(payload, cmd.DeviceIdData...)
+	if cmd.DeviceIdData != nil && len(cmd.DeviceIdData) > 0 {
+		payload = append(payload, cmd.DeviceIdData...)
+	}
 
 	return
 }

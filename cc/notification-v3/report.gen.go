@@ -31,8 +31,6 @@ type Report struct {
 
 	V1AlarmLevel byte
 
-	ZensorNetSourceNodeId byte
-
 	NotificationStatus byte
 
 	NotificationType byte
@@ -91,9 +89,6 @@ func (cmd *Report) UnmarshalBinary(data []byte) error {
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
-	cmd.ZensorNetSourceNodeId = payload[i]
-	i++
 
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
@@ -154,8 +149,6 @@ func (cmd *Report) MarshalBinary() (payload []byte, err error) {
 	payload = append(payload, cmd.V1AlarmType)
 
 	payload = append(payload, cmd.V1AlarmLevel)
-
-	payload = append(payload, cmd.ZensorNetSourceNodeId)
 
 	payload = append(payload, cmd.NotificationStatus)
 
