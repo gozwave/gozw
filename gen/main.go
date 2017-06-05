@@ -1,3 +1,5 @@
+// +build ignore
+
 package main
 
 import (
@@ -6,13 +8,13 @@ import (
 	"os"
 
 	"github.com/codegangsta/cli"
-	"github.com/gozwave/gozw/zwgen/zwgen"
+	"github.com/gozwave/gozw/gen"
 )
 
 func main() {
 
 	app := cli.NewApp()
-	app.Name = "zwgen"
+	app.Name = ""
 	app.Usage = "Generate code for the Z-Wave protocol"
 
 	before := func(c *cli.Context) error {
@@ -45,7 +47,7 @@ func main() {
 			},
 			Before: before,
 			Action: func(ctx *cli.Context) {
-				gen, err := zwgen.NewGenerator(ctx.String("output"), ctx.String("config"))
+				gen, err := gen.NewGenerator(ctx.String("output"), ctx.String("config"))
 				if err != nil {
 					fmt.Println(err)
 					os.Exit(1)
@@ -73,7 +75,7 @@ func main() {
 			},
 			Before: before,
 			Action: func(ctx *cli.Context) {
-				gen, err := zwgen.NewGenerator(ctx.String("output"), ctx.String("config"))
+				gen, err := gen.NewGenerator(ctx.String("output"), ctx.String("config"))
 				if err != nil {
 					fmt.Println(err)
 					os.Exit(1)
@@ -102,7 +104,7 @@ func main() {
 			},
 			Before: before,
 			Action: func(ctx *cli.Context) {
-				gen, err := zwgen.NewGenerator(ctx.String("output"), ctx.String("config"))
+				gen, err := gen.NewGenerator(ctx.String("output"), ctx.String("config"))
 				if err != nil {
 					fmt.Println(err)
 					os.Exit(1)

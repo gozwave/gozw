@@ -7,9 +7,9 @@ import (
 	"sync"
 )
 
-//go:generate zwgen command-classes -c zwgen.config.yaml -o .
-//go:generate zwgen parser -c zwgen.config.yaml -o ./command-classes.gen.go
-//go:generate zwgen devices -c zwgen.config.yaml -o ./devices.gen.go
+//go:generate go run ../gen/main.go command-classes -c gen.config.yaml -o .
+//go:generate go run ../gen/main.go parser -c gen.config.yaml -o ./command-classes.gen.go
+//go:generate go run ../gen/main.go devices -c gen.config.yaml -o ./devices.gen.go
 
 type (
 	CommandClassID byte

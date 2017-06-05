@@ -1,6 +1,7 @@
 .PHONY: test
 
 generate:
+	go generate ./gen
 	go generate ./cc
 
 interceptty:

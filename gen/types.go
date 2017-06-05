@@ -1,4 +1,4 @@
-package zwgen
+package gen
 
 import (
 	"encoding/xml"

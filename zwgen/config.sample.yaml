@@ -1,9 +1,0 @@
-CommandClasses:
-  COMMAND_CLASS_ALARM:
-    1: true
-    2: true
-  COMMAND_CLASS_NOTIFICATION:
-    3: true
-    4: false
-    5: true
-  COMMAND_CLASS_THERMOSTAT_SETPOINT:

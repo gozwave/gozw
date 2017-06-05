@@ -1,4 +1,4 @@
-package zwgen
+package gen
 
 type ArrayAttrib struct {
 	Key     string `xml:"key,attr"`

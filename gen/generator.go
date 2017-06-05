@@ -1,4 +1,4 @@
-package zwgen
+package gen
 
 import (
 	"bytes"
@@ -16,7 +16,7 @@ import (
 	"golang.org/x/tools/imports"
 )
 
-//go:generate go-bindata -pkg=zwgen templates/... data/...
+//go:generate go-bindata -pkg=gen templates/... data/...
 
 type Generator struct {
 	output    string
