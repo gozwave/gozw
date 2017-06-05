@@ -1,3 +1,9 @@
+Fork of https://gitlab.com/helioslabs/gozw and https://gitlab.com/helioslabs/zwgen.
+
+Working with the authors of https://github.com/stampzilla/gozwave and https://gitlab.com/helioslabs/gozw to create a unified Z-Wave library for Go. Currently a work in progress.
+
+Join the #gozwave channel on the [Gophers slack](https://invite.slack.golangbridge.org/).
+
 # gozw
 
 Golang Z/IP Portal
