@@ -1,7 +1,6 @@
 package frame
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -65,8 +64,7 @@ func NewFrameLayer(transportLayer io.ReadWriter) *Layer {
 empty:
 	for {
 		select {
-		case msg := <-parserInput:
-			fmt.Println(msg)
+		case <-parserInput:
 		case <-time.After(time.Millisecond):
 			break empty
 		}

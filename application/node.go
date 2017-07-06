@@ -258,28 +258,23 @@ func (n *Node) LoadManufacturerInfo() error {
 }
 
 func (n *Node) nextQueryStage() {
-	fmt.Printf("Start interview process on node %d\n", n.NodeID)
 
 	if !n.QueryStageNIF {
-		fmt.Printf("n.QueryStageNIF %d\n", n.NodeID)
 		n.RequestNodeInformationFrame()
 		return
 	}
 
 	if !n.QueryStageSecurity && n.IsSecure() {
-		fmt.Printf("n.QueryStageSecurity %d\n", n.NodeID)
 		n.LoadSupportedSecurityCommands()
 		return
 	}
 
 	if !n.QueryStageVersions {
-		fmt.Printf("n.QueryStageVersions %d\n", n.NodeID)
 		n.LoadCommandClassVersions()
 		return
 	}
 
 	if !n.QueryStageManufacturer {
-		fmt.Printf("n.QueryStageManufacturer %d\n", n.NodeID)
 		n.LoadManufacturerInfo()
 		return
 	}
@@ -291,7 +286,6 @@ func (n *Node) nextQueryStage() {
 
 	n.QueryStageCompleted = true
 	n.saveToDb()
-	fmt.Printf("Done interview process on node %d\n", n.NodeID)
 }
 
 func (n *Node) emitNodeEvent(event cc.Command) {
