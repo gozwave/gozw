@@ -41,13 +41,17 @@ type Node struct {
 	ProductTypeID  uint16
 	ProductID      uint16
 
+	QueryStageNIF          bool
 	QueryStageSecurity     bool
 	QueryStageManufacturer bool
 	QueryStageVersions     bool
+	QueryStageCompleted    bool
 
+	queryStageNIFComplete          chan bool
 	queryStageSecurityComplete     chan bool
 	queryStageManufacturerComplete chan bool
 	queryStageVersionsComplete     chan bool
+	queryStageComplete             chan bool
 
 	application *Layer
 }
@@ -58,13 +62,17 @@ func NewNode(application *Layer, nodeID byte) (*Node, error) {
 
 		CommandClasses: cc.CommandClassSet{},
 
+		// Done flags for each step in the interview process
+		QueryStageNIF:          false,
 		QueryStageSecurity:     false,
 		QueryStageManufacturer: false,
 		QueryStageVersions:     false,
 
+		queryStageNIFComplete:          make(chan bool),
 		queryStageSecurityComplete:     make(chan bool),
 		queryStageManufacturerComplete: make(chan bool),
 		queryStageVersionsComplete:     make(chan bool),
+		queryStageComplete:             make(chan bool),
 
 		application: application,
 	}
@@ -77,6 +85,11 @@ func NewNode(application *Layer, nodeID byte) (*Node, error) {
 		}
 
 		node.saveToDb()
+	}
+
+	// Start interview process
+	if !node.QueryStageCompleted && node.NodeID != 1 {
+		node.nextQueryStage()
 	}
 
 	return node, nil
@@ -245,20 +258,40 @@ func (n *Node) LoadManufacturerInfo() error {
 }
 
 func (n *Node) nextQueryStage() {
+	fmt.Printf("Start interview process on node %d\n", n.NodeID)
+
+	if !n.QueryStageNIF {
+		fmt.Printf("n.QueryStageNIF %d\n", n.NodeID)
+		n.RequestNodeInformationFrame()
+		return
+	}
+
 	if !n.QueryStageSecurity && n.IsSecure() {
+		fmt.Printf("n.QueryStageSecurity %d\n", n.NodeID)
 		n.LoadSupportedSecurityCommands()
 		return
 	}
 
 	if !n.QueryStageVersions {
+		fmt.Printf("n.QueryStageVersions %d\n", n.NodeID)
 		n.LoadCommandClassVersions()
 		return
 	}
 
 	if !n.QueryStageManufacturer {
+		fmt.Printf("n.QueryStageManufacturer %d\n", n.NodeID)
 		n.LoadManufacturerInfo()
 		return
 	}
+
+	select {
+	case n.queryStageComplete <- true:
+	default:
+	}
+
+	n.QueryStageCompleted = true
+	n.saveToDb()
+	fmt.Printf("Done interview process on node %d\n", n.NodeID)
 }
 
 func (n *Node) emitNodeEvent(event cc.Command) {
@@ -273,7 +306,15 @@ func (n *Node) emitNodeEvent(event cc.Command) {
 
 func (n *Node) receiveControllerUpdate(update serialapi.ControllerUpdate) {
 	n.setFromApplicationControllerUpdate(update)
+
+	select {
+	case n.queryStageNIFComplete <- true:
+	default:
+	}
+
+	n.QueryStageNIF = true
 	n.saveToDb()
+	n.nextQueryStage()
 }
 
 func (n *Node) setFromAddNodeCallback(nodeInfo *serialapi.AddRemoveNodeCallback) {
