@@ -38,6 +38,10 @@ type MessageEncapsulation struct {
 		SecondFrame bool
 	}
 
+	CommandClassIdentifier byte
+
+	CommandIdentifier byte
+
 	CommandByte []byte
 
 	ReceiversNonceIdentifier byte
@@ -88,6 +92,20 @@ func (cmd *MessageEncapsulation) UnmarshalBinary(data []byte) error {
 	cmd.Properties1.SecondFrame = payload[i]&0x20 == 0x20
 
 	i += 1
+
+	if len(payload) <= i {
+		return fmt.Errorf("slice index out of bounds (.CommandClassIdentifier) %d<=%d", len(payload), i)
+	}
+
+	cmd.CommandClassIdentifier = payload[i]
+	i++
+
+	if len(payload) <= i {
+		return fmt.Errorf("slice index out of bounds (.CommandIdentifier) %d<=%d", len(payload), i)
+	}
+
+	cmd.CommandIdentifier = payload[i]
+	i++
 
 	if len(payload) <= i {
 		return fmt.Errorf("slice index out of bounds (.CommandByte) %d<=%d", len(payload), i)
@@ -144,6 +162,10 @@ func (cmd *MessageEncapsulation) MarshalBinary() (payload []byte, err error) {
 
 		payload = append(payload, val)
 	}
+
+	payload = append(payload, cmd.CommandClassIdentifier)
+
+	payload = append(payload, cmd.CommandIdentifier)
 
 	payload = append(payload, cmd.CommandByte...)
 

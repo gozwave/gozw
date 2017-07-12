@@ -311,10 +311,10 @@ func (n *Node) nextQueryStage() {
 		return
 	}
 
-	/*if !n.QueryStageSecurity && n.IsSecure() {
+	if !n.QueryStageSecurity && n.IsSecure() {
 		n.LoadSupportedSecurityCommands()
 		return
-	}*/
+	}
 
 	if !n.QueryStageVersions {
 		n.LoadCommandClassVersions()
