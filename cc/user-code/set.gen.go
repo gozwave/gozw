@@ -6,6 +6,7 @@ package usercode
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -59,21 +60,21 @@ func (cmd *Set) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.UserIdentifier) %d<=%d", len(payload), i)
 	}
 
 	cmd.UserIdentifier = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.UserIdStatus) %d<=%d", len(payload), i)
 	}
 
 	cmd.UserIdStatus = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.UserCode) %d<=%d", len(payload), i)
 	}
 
 	cmd.UserCode = string(payload[i : i+10])

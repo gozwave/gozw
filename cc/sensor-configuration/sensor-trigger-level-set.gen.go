@@ -6,6 +6,7 @@ package sensorconfiguration
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -71,7 +72,7 @@ func (cmd *SensorTriggerLevelSet) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Properties1) %d<=%d", len(payload), i)
 	}
 
 	cmd.Properties1.Current = payload[i]&0x40 == 0x40
@@ -81,14 +82,14 @@ func (cmd *SensorTriggerLevelSet) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.SensorType) %d<=%d", len(payload), i)
 	}
 
 	cmd.SensorType = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Properties2) %d<=%d", len(payload), i)
 	}
 
 	cmd.Properties2.Size = (payload[i] & 0x07)
@@ -100,7 +101,7 @@ func (cmd *SensorTriggerLevelSet) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.TriggerValue) %d<=%d", len(payload), i)
 	}
 
 	{

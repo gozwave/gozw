@@ -6,6 +6,7 @@ package manufacturerspecificv2
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -65,7 +66,7 @@ func (cmd *DeviceSpecificReport) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Properties1) %d<=%d", len(payload), i)
 	}
 
 	cmd.Properties1.DeviceIdType = (payload[i] & 0x07)
@@ -73,7 +74,7 @@ func (cmd *DeviceSpecificReport) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Properties2) %d<=%d", len(payload), i)
 	}
 
 	cmd.Properties2.DeviceIdDataLengthIndicator = (payload[i] & 0x1F)
@@ -83,7 +84,7 @@ func (cmd *DeviceSpecificReport) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.DeviceIdData) %d<=%d", len(payload), i)
 	}
 
 	{

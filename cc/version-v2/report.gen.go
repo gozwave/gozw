@@ -6,6 +6,7 @@ package versionv2
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -67,49 +68,49 @@ func (cmd *Report) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ZWaveLibraryType) %d<=%d", len(payload), i)
 	}
 
 	cmd.ZWaveLibraryType = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ZWaveProtocolVersion) %d<=%d", len(payload), i)
 	}
 
 	cmd.ZWaveProtocolVersion = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ZWaveProtocolSubVersion) %d<=%d", len(payload), i)
 	}
 
 	cmd.ZWaveProtocolSubVersion = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Firmware0Version) %d<=%d", len(payload), i)
 	}
 
 	cmd.Firmware0Version = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Firmware0SubVersion) %d<=%d", len(payload), i)
 	}
 
 	cmd.Firmware0SubVersion = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.HardwareVersion) %d<=%d", len(payload), i)
 	}
 
 	cmd.HardwareVersion = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.NumberOfFirmwareTargets) %d<=%d", len(payload), i)
 	}
 
 	cmd.NumberOfFirmwareTargets = payload[i]

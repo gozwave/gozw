@@ -3,6 +3,7 @@ package application
 import (
 	"encoding"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -271,6 +272,7 @@ func (a *Layer) AddNode() (*Node, error) {
 }
 
 func (a *Layer) RemoveNode() (byte, error) {
+	fmt.Println("Remove node started...")
 	result, err := a.serialAPI.RemoveNode()
 
 	if err != nil {

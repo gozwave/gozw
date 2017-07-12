@@ -4,6 +4,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"time"
 
 	"github.com/comail/colog"
 )
@@ -44,7 +45,6 @@ func NewFrameLayer(transportLayer io.ReadWriter) *Layer {
 	frameLayer := &Layer{
 		transportLayer: transportLayer,
 
-		frameParser:  NewParser(parserInput, parserOutput, acks, naks, cans),
 		parserInput:  parserInput,
 		parserOutput: parserOutput,
 		acks:         acks,
@@ -59,6 +59,19 @@ func NewFrameLayer(transportLayer io.ReadWriter) *Layer {
 
 	go frameLayer.bgWork()
 	go frameLayer.bgRead()
+
+	// Empty the buffer
+empty:
+	for {
+		select {
+		case <-parserInput:
+		case <-time.After(time.Millisecond):
+			break empty
+		}
+	}
+
+	// Start up the parser
+	frameLayer.frameParser = NewParser(parserInput, parserOutput, acks, naks, cans)
 
 	return frameLayer
 }

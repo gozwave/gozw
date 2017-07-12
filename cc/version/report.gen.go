@@ -6,6 +6,7 @@ package version
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -63,35 +64,35 @@ func (cmd *Report) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ZWaveLibraryType) %d<=%d", len(payload), i)
 	}
 
 	cmd.ZWaveLibraryType = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ZWaveProtocolVersion) %d<=%d", len(payload), i)
 	}
 
 	cmd.ZWaveProtocolVersion = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ZWaveProtocolSubVersion) %d<=%d", len(payload), i)
 	}
 
 	cmd.ZWaveProtocolSubVersion = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ApplicationVersion) %d<=%d", len(payload), i)
 	}
 
 	cmd.ApplicationVersion = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ApplicationSubVersion) %d<=%d", len(payload), i)
 	}
 
 	cmd.ApplicationSubVersion = payload[i]

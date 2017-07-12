@@ -6,6 +6,7 @@ package security
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -36,6 +37,10 @@ type MessageEncapsulation struct {
 
 		SecondFrame bool
 	}
+
+	CommandClassIdentifier byte
+
+	CommandIdentifier byte
 
 	CommandByte []byte
 
@@ -69,7 +74,7 @@ func (cmd *MessageEncapsulation) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.InitializationVectorByte) %d<=%d", len(payload), i)
 	}
 
 	cmd.InitializationVectorByte = payload[i : i+8]
@@ -77,7 +82,7 @@ func (cmd *MessageEncapsulation) UnmarshalBinary(data []byte) error {
 	i += 8
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Properties1) %d<=%d", len(payload), i)
 	}
 
 	cmd.Properties1.SequenceCounter = (payload[i] & 0x0F)
@@ -89,21 +94,35 @@ func (cmd *MessageEncapsulation) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.CommandClassIdentifier) %d<=%d", len(payload), i)
+	}
+
+	cmd.CommandClassIdentifier = payload[i]
+	i++
+
+	if len(payload) <= i {
+		return fmt.Errorf("slice index out of bounds (.CommandIdentifier) %d<=%d", len(payload), i)
+	}
+
+	cmd.CommandIdentifier = payload[i]
+	i++
+
+	if len(payload) <= i {
+		return fmt.Errorf("slice index out of bounds (.CommandByte) %d<=%d", len(payload), i)
 	}
 
 	cmd.CommandByte = payload[i : len(payload)-9]
 	i += len(cmd.CommandByte)
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ReceiversNonceIdentifier) %d<=%d", len(payload), i)
 	}
 
 	cmd.ReceiversNonceIdentifier = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.MessageAuthenticationCodeByte) %d<=%d", len(payload), i)
 	}
 
 	cmd.MessageAuthenticationCodeByte = payload[i : i+8]
@@ -143,6 +162,10 @@ func (cmd *MessageEncapsulation) MarshalBinary() (payload []byte, err error) {
 
 		payload = append(payload, val)
 	}
+
+	payload = append(payload, cmd.CommandClassIdentifier)
+
+	payload = append(payload, cmd.CommandIdentifier)
 
 	payload = append(payload, cmd.CommandByte...)
 

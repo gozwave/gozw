@@ -6,6 +6,7 @@ package notificationv5
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -59,21 +60,21 @@ func (cmd *Get) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.V1AlarmType) %d<=%d", len(payload), i)
 	}
 
 	cmd.V1AlarmType = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.NotificationType) %d<=%d", len(payload), i)
 	}
 
 	cmd.NotificationType = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Event) %d<=%d", len(payload), i)
 	}
 
 	cmd.Event = payload[i]

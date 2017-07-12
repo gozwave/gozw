@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -58,14 +59,14 @@ func (cmd *IntervalSet) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Seconds) %d<=%d", len(payload), i)
 	}
 
 	cmd.Seconds = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Nodeid) %d<=%d", len(payload), i)
 	}
 
 	cmd.Nodeid = payload[i]

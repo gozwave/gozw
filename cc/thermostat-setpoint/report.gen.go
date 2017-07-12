@@ -6,6 +6,7 @@ package thermostatsetpoint
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -67,7 +68,7 @@ func (cmd *Report) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Level) %d<=%d", len(payload), i)
 	}
 
 	cmd.Level.SetpointType = (payload[i] & 0x0F)
@@ -75,7 +76,7 @@ func (cmd *Report) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Level2) %d<=%d", len(payload), i)
 	}
 
 	cmd.Level2.Size = (payload[i] & 0x07)
@@ -87,7 +88,7 @@ func (cmd *Report) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Value) %d<=%d", len(payload), i)
 	}
 
 	{

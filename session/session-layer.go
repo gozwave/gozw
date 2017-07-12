@@ -3,6 +3,7 @@ package session
 import (
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -106,6 +107,8 @@ func (s *Layer) receiveThread() {
 				return
 			}
 
+			fmt.Printf("Received: 0x%X\n", frameIn.Payload)
+
 			switch frameIn.Payload[0] {
 
 			// These commands, when received as requests, are always callbacks and will
@@ -166,6 +169,7 @@ func (s *Layer) sendThread() {
 			s.lastRequestFuncID = request.FunctionID
 		}
 
+		fmt.Printf("Send: 0x%X\n", frame.Payload)
 		s.frameLayer.Write(frame)
 
 		if request.HasReturn {

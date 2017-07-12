@@ -26,9 +26,21 @@ Golang Z/IP Portal
 1. `make build` in the zwgen folder
 1. `go get ./...` in the gozw folder root
 1. `go generate ./...` in the gozw folder root
-1. `go run cmd/portald/main.go`
-1. `go run cmd/gatewayd/main.go`
+1. Spin up every layer and chain them together as this:
+	```golang
+	transport, err := transport.NewSerialPortTransport("/dev/ttyACM0", 115200)
+	if err != nil {
+		panic(err)
+	}
 
+	frameLayer := frame.NewFrameLayer(transport)
+	sessionLayer := session.NewSessionLayer(frameLayer)
+	apiLayer := serialapi.NewLayer(sessionLayer)
+	appLayer, err := application.NewLayer(apiLayer)
+	if err != nil {
+		panic(err)
+	}
+	```
 ## Summary
 1. **Transport layer** - handles raw communication with the Z-Wave controller via serial port
 1. **Frame layer** - handles frame encoding/decoding to/from binary
@@ -97,6 +109,21 @@ Whenever possible, methods exposed by this layer should block until their corres
 
 ### Application Layer
 The application layer abstracts the Z-Wave protocol so that user implementations do not need an in-depth understanding of Serial API functions or command classes. It manages the network at a high level by keeping track of nodes, acting as a proxy to the session layer, and receiving data frames (typically command classes whether GETs or REPORTs) from the session layer.
+
+#### Event bus
+The application layer also provides an eventbus (https://github.com/asaskevich/EventBus) where you can subscribe to events. Check out the list below on available events
+
+| Topic | Callback function | 
+|-------|-------------------|
+|node:updated|func (nodeID uint8, node application.Node) {}|
+|node:command|func (nodeID uint8, event cc.Command) {}|
+
+```golang
+appLayer.EventBus.Subscribe("node:command", func(nodeID uint8, event cc.Command) {
+	fmt.Printf("Node command event n=%d\n", nodeID)
+	spew.Dump(event)
+})
+```
 
 #### Responsibilities
  - Network management

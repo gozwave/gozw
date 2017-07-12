@@ -6,6 +6,7 @@ package doorlockv3
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -65,14 +66,14 @@ func (cmd *ConfigurationSet) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.OperationType) %d<=%d", len(payload), i)
 	}
 
 	cmd.OperationType = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Properties1) %d<=%d", len(payload), i)
 	}
 
 	cmd.Properties1.InsideDoorHandlesState = (payload[i] & 0x0F)
@@ -82,14 +83,14 @@ func (cmd *ConfigurationSet) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.LockTimeoutMinutes) %d<=%d", len(payload), i)
 	}
 
 	cmd.LockTimeoutMinutes = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.LockTimeoutSeconds) %d<=%d", len(payload), i)
 	}
 
 	cmd.LockTimeoutSeconds = payload[i]

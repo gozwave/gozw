@@ -349,24 +349,24 @@ var SpecificTypeNames = map[byte]map[byte]string{
 
 func GetBasicDeviceTypeName(basicType byte) string {
 	if val, ok := BasicTypeNames[basicType]; ok {
-		return val + fmt.Sprintf(" (0x%X)", basicType)
+		return val + fmt.Sprintf(" (0x%02X)", basicType)
 	}
 
-	return "Unknown" + fmt.Sprintf(" (0x%X)", basicType)
+	return "Unknown" + fmt.Sprintf(" (0x%02X)", basicType)
 }
 
 func GetGenericDeviceTypeName(genericType byte) string {
 	if val, ok := GenericTypeNames[genericType]; ok {
-		return val + fmt.Sprintf(" (0x%X)", genericType)
+		return val + fmt.Sprintf(" (0x%02X)", genericType)
 	}
 
-	return "Unknown" + fmt.Sprintf(" (0x%X)", genericType)
+	return "Unknown" + fmt.Sprintf(" (0x%02X)", genericType)
 }
 
 func GetSpecificDeviceTypeName(genericType byte, specificType byte) string {
 	if val, ok := SpecificTypeNames[genericType][specificType]; ok {
-		return val + fmt.Sprintf(" (0x%X)", specificType)
+		return val + fmt.Sprintf(" (0x%02X)", specificType)
 	}
 
-	return "Unknown" + fmt.Sprintf(" (0x%X)", specificType)
+	return "Unknown" + fmt.Sprintf(" (0x%02X)", specificType)
 }

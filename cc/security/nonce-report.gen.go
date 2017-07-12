@@ -6,6 +6,7 @@ package security
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -55,7 +56,7 @@ func (cmd *NonceReport) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.NonceByte) %d<=%d", len(payload), i)
 	}
 
 	cmd.NonceByte = payload[i : i+8]

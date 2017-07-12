@@ -5025,7 +5025,7 @@
       <param key="0x04" name="Previous Meter Value" type="VARIANT" typehashcode="0x0C" comment="" optionaloffs="0x03" optionalmask="0xFF">
         <variant paramoffs="1" showhex="true" signed="true" sizemask="0x07" sizeoffs="0" />
       </param>
-      <param key="0x05" name="Scale 2" type="BYTE" typehashcode="0x01">
+      <param key="0x05" name="Scale 2" type="BYTE" typehashcode="0x01" optional="true">
         <valueattrib key="0x00" hasdefines="false" showhex="true" />
       </param>
     </cmd>
@@ -8113,6 +8113,12 @@
         <bitflag key="0x01" flagname="Sequenced" flagmask="0x10" />
         <bitflag key="0x02" flagname="Second Frame" flagmask="0x20" />
         <bitfield key="0x03" fieldname="Reserved" fieldmask="0xC0" shifter="6" />
+	  </param>
+      <param key="0x02" name="Command Class Identifier" type="BYTE" typehashcode="0x01" comment="">
+        <valueattrib key="0x00" hasdefines="false" showhex="true" />
+	  </param>
+      <param key="0x03" name="Command Identifier" type="BYTE" typehashcode="0x01" comment="">
+        <valueattrib key="0x00" hasdefines="false" showhex="true" />
       </param>
       <param key="0x04" name="Command byte" type="VARIANT" typehashcode="0x0C" comment="">
         <variant paramoffs="255" showhex="true" signed="true" sizemask="0x00" sizeoffs="0" />

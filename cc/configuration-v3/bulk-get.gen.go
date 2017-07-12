@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -58,14 +59,14 @@ func (cmd *BulkGet) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ParameterOffset) %d<=%d", len(payload), i)
 	}
 
 	cmd.ParameterOffset = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.NumberOfParameters) %d<=%d", len(payload), i)
 	}
 
 	cmd.NumberOfParameters = payload[i]
