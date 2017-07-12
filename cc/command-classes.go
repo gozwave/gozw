@@ -79,6 +79,7 @@ func Parse(version uint8, payload []byte) (Command, error) {
 	factoriesMu.Unlock()
 
 	if !ok {
+		fmt.Printf("No factory exists for the specified command class cc=%x command=%x version=%x\n", payload[0], payload[1], version)
 		return nil, ErrNotRegistered
 	}
 

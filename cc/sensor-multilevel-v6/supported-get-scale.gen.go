@@ -6,6 +6,7 @@ package sensormultilevelv6
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -55,7 +56,7 @@ func (cmd *SupportedGetScale) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.SensorType) %d<=%d", len(payload), i)
 	}
 
 	cmd.SensorType = payload[i]

@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -62,28 +63,28 @@ func (cmd *IntervalCapabilitiesReport) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.MinimumWakeUpIntervalSeconds) %d<=%d", len(payload), i)
 	}
 
 	cmd.MinimumWakeUpIntervalSeconds = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.MaximumWakeUpIntervalSeconds) %d<=%d", len(payload), i)
 	}
 
 	cmd.MaximumWakeUpIntervalSeconds = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.DefaultWakeUpIntervalSeconds) %d<=%d", len(payload), i)
 	}
 
 	cmd.DefaultWakeUpIntervalSeconds = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.WakeUpIntervalStepSeconds) %d<=%d", len(payload), i)
 	}
 
 	cmd.WakeUpIntervalStepSeconds = binary.BigEndian.Uint32(payload[i : i+3])

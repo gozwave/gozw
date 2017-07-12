@@ -6,6 +6,7 @@ package timev2
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -79,7 +80,7 @@ func (cmd *OffsetSet) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Level) %d<=%d", len(payload), i)
 	}
 
 	cmd.Level.HourTzo = (payload[i] & 0x7F)
@@ -89,14 +90,14 @@ func (cmd *OffsetSet) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.MinuteTzo) %d<=%d", len(payload), i)
 	}
 
 	cmd.MinuteTzo = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Level2) %d<=%d", len(payload), i)
 	}
 
 	cmd.Level2.MinuteOffsetDst = (payload[i] & 0x7F)
@@ -106,42 +107,42 @@ func (cmd *OffsetSet) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.MonthStartDst) %d<=%d", len(payload), i)
 	}
 
 	cmd.MonthStartDst = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.DayStartDst) %d<=%d", len(payload), i)
 	}
 
 	cmd.DayStartDst = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.HourStartDst) %d<=%d", len(payload), i)
 	}
 
 	cmd.HourStartDst = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.MonthEndDst) %d<=%d", len(payload), i)
 	}
 
 	cmd.MonthEndDst = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.DayEndDst) %d<=%d", len(payload), i)
 	}
 
 	cmd.DayEndDst = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.HourEndDst) %d<=%d", len(payload), i)
 	}
 
 	cmd.HourEndDst = payload[i]

@@ -6,6 +6,7 @@ package thermostatsetpointv3
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -77,7 +78,7 @@ func (cmd *CapabilitiesReport) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Properties1) %d<=%d", len(payload), i)
 	}
 
 	cmd.Properties1.SetpointType = (payload[i] & 0x0F)
@@ -85,7 +86,7 @@ func (cmd *CapabilitiesReport) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Properties2) %d<=%d", len(payload), i)
 	}
 
 	cmd.Properties2.Size1 = (payload[i] & 0x07)
@@ -97,7 +98,7 @@ func (cmd *CapabilitiesReport) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.MinValue) %d<=%d", len(payload), i)
 	}
 
 	{
@@ -107,7 +108,7 @@ func (cmd *CapabilitiesReport) UnmarshalBinary(data []byte) error {
 	}
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Properties3) %d<=%d", len(payload), i)
 	}
 
 	cmd.Properties3.Size2 = (payload[i] & 0x07)
@@ -119,7 +120,7 @@ func (cmd *CapabilitiesReport) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Maxvalue) %d<=%d", len(payload), i)
 	}
 
 	{

@@ -6,6 +6,7 @@ package applicationstatus
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -57,14 +58,14 @@ func (cmd *ApplicationBusy) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Status) %d<=%d", len(payload), i)
 	}
 
 	cmd.Status = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.WaitTime) %d<=%d", len(payload), i)
 	}
 
 	cmd.WaitTime = payload[i]

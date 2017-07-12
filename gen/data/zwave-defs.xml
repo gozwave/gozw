@@ -5025,7 +5025,7 @@
       <param key="0x04" name="Previous Meter Value" type="VARIANT" typehashcode="0x0C" comment="" optionaloffs="0x03" optionalmask="0xFF">
         <variant paramoffs="1" showhex="true" signed="true" sizemask="0x07" sizeoffs="0" />
       </param>
-      <param key="0x05" name="Scale 2" type="BYTE" typehashcode="0x01">
+      <param key="0x05" name="Scale 2" type="BYTE" typehashcode="0x01" optional="true">
         <valueattrib key="0x00" hasdefines="false" showhex="true" />
       </param>
     </cmd>

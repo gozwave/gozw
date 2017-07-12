@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -60,14 +61,14 @@ func (cmd *NameReport) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ParameterNumber) %d<=%d", len(payload), i)
 	}
 
 	cmd.ParameterNumber = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ReportsToFollow) %d<=%d", len(payload), i)
 	}
 
 	cmd.ReportsToFollow = payload[i]

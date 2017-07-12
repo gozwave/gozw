@@ -6,6 +6,7 @@ package time
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -63,7 +64,7 @@ func (cmd *Report) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.HourLocalTime) %d<=%d", len(payload), i)
 	}
 
 	cmd.HourLocalTime.HourLocalTime = (payload[i] & 0x1F)
@@ -73,14 +74,14 @@ func (cmd *Report) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.MinuteLocalTime) %d<=%d", len(payload), i)
 	}
 
 	cmd.MinuteLocalTime = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.SecondLocalTime) %d<=%d", len(payload), i)
 	}
 
 	cmd.SecondLocalTime = payload[i]

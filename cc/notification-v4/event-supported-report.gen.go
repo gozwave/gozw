@@ -6,6 +6,7 @@ package notificationv4
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -61,14 +62,14 @@ func (cmd *EventSupportedReport) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.NotificationType) %d<=%d", len(payload), i)
 	}
 
 	cmd.NotificationType = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Properties1) %d<=%d", len(payload), i)
 	}
 
 	cmd.Properties1.NumberOfBitMasks = (payload[i] & 0x1F)
@@ -76,7 +77,7 @@ func (cmd *EventSupportedReport) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.BitMask) %d<=%d", len(payload), i)
 	}
 
 	cmd.BitMask = payload[i:]

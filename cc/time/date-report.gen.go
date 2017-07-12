@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -60,21 +61,21 @@ func (cmd *DateReport) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Year) %d<=%d", len(payload), i)
 	}
 
 	cmd.Year = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Month) %d<=%d", len(payload), i)
 	}
 
 	cmd.Month = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Day) %d<=%d", len(payload), i)
 	}
 
 	cmd.Day = payload[i]

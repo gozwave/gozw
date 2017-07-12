@@ -6,6 +6,7 @@ package alarmv2
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -69,56 +70,56 @@ func (cmd *Report) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.AlarmType) %d<=%d", len(payload), i)
 	}
 
 	cmd.AlarmType = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.AlarmLevel) %d<=%d", len(payload), i)
 	}
 
 	cmd.AlarmLevel = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ZensorNetSourceNodeId) %d<=%d", len(payload), i)
 	}
 
 	cmd.ZensorNetSourceNodeId = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ZwaveAlarmStatus) %d<=%d", len(payload), i)
 	}
 
 	cmd.ZwaveAlarmStatus = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ZwaveAlarmType) %d<=%d", len(payload), i)
 	}
 
 	cmd.ZwaveAlarmType = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ZwaveAlarmEvent) %d<=%d", len(payload), i)
 	}
 
 	cmd.ZwaveAlarmEvent = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.NumberOfEventParameters) %d<=%d", len(payload), i)
 	}
 
 	cmd.NumberOfEventParameters = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.EventParameter) %d<=%d", len(payload), i)
 	}
 
 	{

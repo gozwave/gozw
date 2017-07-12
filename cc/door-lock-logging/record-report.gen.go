@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -80,35 +81,35 @@ func (cmd *RecordReport) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.RecordNumber) %d<=%d", len(payload), i)
 	}
 
 	cmd.RecordNumber = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Year) %d<=%d", len(payload), i)
 	}
 
 	cmd.Year = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Month) %d<=%d", len(payload), i)
 	}
 
 	cmd.Month = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Day) %d<=%d", len(payload), i)
 	}
 
 	cmd.Day = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Properties1) %d<=%d", len(payload), i)
 	}
 
 	cmd.Properties1.HourLocalTime = (payload[i] & 0x1F)
@@ -118,35 +119,35 @@ func (cmd *RecordReport) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.MinuteLocalTime) %d<=%d", len(payload), i)
 	}
 
 	cmd.MinuteLocalTime = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.SecondLocalTime) %d<=%d", len(payload), i)
 	}
 
 	cmd.SecondLocalTime = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.EventType) %d<=%d", len(payload), i)
 	}
 
 	cmd.EventType = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.UserIdentifier) %d<=%d", len(payload), i)
 	}
 
 	cmd.UserIdentifier = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.UserCodeLength) %d<=%d", len(payload), i)
 	}
 
 	cmd.UserCodeLength = payload[i]

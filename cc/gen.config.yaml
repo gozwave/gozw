@@ -17,8 +17,23 @@ CommandClasses:
   COMMAND_CLASS_DOOR_LOCK:
   COMMAND_CLASS_DOOR_LOCK_LOGGING:
   COMMAND_CLASS_MANUFACTURER_SPECIFIC:
+  COMMAND_CLASS_METER:
+    1: true
+    2: true
+    3: true
+    4: true
   COMMAND_CLASS_MULTILEVEL_SWITCH:
   COMMAND_CLASS_MULTILEVEL_SENSOR:
+    1: true
+    2: true
+    3: true
+    4: true
+    5: true
+    6: true
+    7: true
+    8: true
+    9: true
+    10: true
   COMMAND_CLASS_NO_OPERATION:
   COMMAND_CLASS_NODE_NAMING:
   COMMAND_CLASS_NOTIFICATION:
@@ -40,3 +55,5 @@ CommandClasses:
   COMMAND_CLASS_USER_CODE:
   COMMAND_CLASS_VERSION:
   COMMAND_CLASS_WAKE_UP:
+    1: true
+    2: true

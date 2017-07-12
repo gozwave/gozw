@@ -6,6 +6,7 @@ package notificationv5
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -73,46 +74,46 @@ func (cmd *Report) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.V1AlarmType) %d<=%d", len(payload), i)
 	}
 
 	cmd.V1AlarmType = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.V1AlarmLevel) %d<=%d", len(payload), i)
 	}
 
 	cmd.V1AlarmLevel = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Reserved) %d<=%d", len(payload), i)
 	}
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.NotificationStatus) %d<=%d", len(payload), i)
 	}
 
 	cmd.NotificationStatus = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.NotificationType) %d<=%d", len(payload), i)
 	}
 
 	cmd.NotificationType = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Event) %d<=%d", len(payload), i)
 	}
 
 	cmd.Event = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Properties1) %d<=%d", len(payload), i)
 	}
 
 	cmd.Properties1.EventParametersLength = (payload[i] & 0x1F)
@@ -122,7 +123,7 @@ func (cmd *Report) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.EventParameter) %d<=%d", len(payload), i)
 	}
 
 	{
@@ -132,7 +133,7 @@ func (cmd *Report) UnmarshalBinary(data []byte) error {
 	}
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.SequenceNumber) %d<=%d", len(payload), i)
 	}
 
 	cmd.SequenceNumber = payload[i]

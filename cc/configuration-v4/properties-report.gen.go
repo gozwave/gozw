@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -80,14 +81,14 @@ func (cmd *PropertiesReport) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ParameterNumber) %d<=%d", len(payload), i)
 	}
 
 	cmd.ParameterNumber = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Properties1) %d<=%d", len(payload), i)
 	}
 
 	cmd.Properties1.Size = (payload[i] & 0x07)
@@ -101,7 +102,7 @@ func (cmd *PropertiesReport) UnmarshalBinary(data []byte) error {
 	i += 1
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.MinValue) %d<=%d", len(payload), i)
 	}
 
 	{
@@ -111,7 +112,7 @@ func (cmd *PropertiesReport) UnmarshalBinary(data []byte) error {
 	}
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.MaxValue) %d<=%d", len(payload), i)
 	}
 
 	{
@@ -121,7 +122,7 @@ func (cmd *PropertiesReport) UnmarshalBinary(data []byte) error {
 	}
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.DefaultValue) %d<=%d", len(payload), i)
 	}
 
 	{
@@ -131,14 +132,14 @@ func (cmd *PropertiesReport) UnmarshalBinary(data []byte) error {
 	}
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.NextParameterNumber) %d<=%d", len(payload), i)
 	}
 
 	cmd.NextParameterNumber = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Properties2) %d<=%d", len(payload), i)
 	}
 
 	cmd.Properties2.Advanced = payload[i]&0x01 == 0x01

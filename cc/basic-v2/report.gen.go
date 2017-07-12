@@ -6,6 +6,7 @@ package basicv2
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -59,21 +60,21 @@ func (cmd *Report) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.CurrentValue) %d<=%d", len(payload), i)
 	}
 
 	cmd.CurrentValue = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.TargetValue) %d<=%d", len(payload), i)
 	}
 
 	cmd.TargetValue = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.Duration) %d<=%d", len(payload), i)
 	}
 
 	cmd.Duration = payload[i]

@@ -14,6 +14,7 @@ type Param struct {
 	EncapType      string `xml:"encaptype,attr"`
 	OptionalOffset string `xml:"optionaloffs,attr"`
 	OptionalMask   string `xml:"optionalmask,attr"`
+	Optional       bool   `xml:"optional,attr"`
 	Encapsulated   bool   `xml:"encapsulated,attr"`
 	CommandMask    string `xml:"cmd_mask,attr"`
 	Affix          bool   `xml:"affix,attr"`
@@ -33,6 +34,10 @@ type Param struct {
 
 func (p Param) IsNotReserved() bool {
 	return !isReservedString(p.Name)
+}
+
+func (p Param) IsOptional() bool {
+	return p.Optional
 }
 
 func (p Param) GetEncodedByteLength() (uint8, error) {

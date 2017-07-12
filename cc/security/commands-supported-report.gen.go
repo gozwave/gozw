@@ -6,6 +6,7 @@ package security
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gozwave/gozw/cc"
 )
@@ -59,14 +60,14 @@ func (cmd *CommandsSupportedReport) UnmarshalBinary(data []byte) error {
 	i := 2
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.ReportsToFollow) %d<=%d", len(payload), i)
 	}
 
 	cmd.ReportsToFollow = payload[i]
 	i++
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.CommandClassSupport) %d<=%d", len(payload), i)
 	}
 
 	{
@@ -77,7 +78,7 @@ func (cmd *CommandsSupportedReport) UnmarshalBinary(data []byte) error {
 	}
 
 	if len(payload) <= i {
-		return errors.New("slice index out of bounds")
+		return fmt.Errorf("slice index out of bounds (.CommandClassMark) %d<=%d", len(payload), i)
 	}
 
 	i += 1 // skipping MARKER
