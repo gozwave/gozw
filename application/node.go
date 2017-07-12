@@ -14,9 +14,25 @@ import (
 	"github.com/gozwave/gozw/cc/battery"
 	"github.com/gozwave/gozw/cc/manufacturer-specific"
 	"github.com/gozwave/gozw/cc/manufacturer-specific-v2"
+	"github.com/gozwave/gozw/cc/meter"
+	meterv2 "github.com/gozwave/gozw/cc/meter-v2"
+	meterv3 "github.com/gozwave/gozw/cc/meter-v3"
+	meterv4 "github.com/gozwave/gozw/cc/meter-v4"
 	"github.com/gozwave/gozw/cc/security"
+	sensormultilevel "github.com/gozwave/gozw/cc/sensor-multilevel"
+	sensormultilevelv10 "github.com/gozwave/gozw/cc/sensor-multilevel-v10"
+	sensormultilevelv2 "github.com/gozwave/gozw/cc/sensor-multilevel-v2"
+	sensormultilevelv3 "github.com/gozwave/gozw/cc/sensor-multilevel-v3"
+	sensormultilevelv4 "github.com/gozwave/gozw/cc/sensor-multilevel-v4"
+	sensormultilevelv5 "github.com/gozwave/gozw/cc/sensor-multilevel-v5"
+	sensormultilevelv6 "github.com/gozwave/gozw/cc/sensor-multilevel-v6"
+	sensormultilevelv7 "github.com/gozwave/gozw/cc/sensor-multilevel-v7"
+	sensormultilevelv8 "github.com/gozwave/gozw/cc/sensor-multilevel-v8"
+	sensormultilevelv9 "github.com/gozwave/gozw/cc/sensor-multilevel-v9"
 	"github.com/gozwave/gozw/cc/version"
 	"github.com/gozwave/gozw/cc/version-v2"
+	wakeup "github.com/gozwave/gozw/cc/wake-up"
+	wakeupv2 "github.com/gozwave/gozw/cc/wake-up-v2"
 	"github.com/gozwave/gozw/protocol"
 	"github.com/gozwave/gozw/serial-api"
 	"github.com/gozwave/gozw/util"
@@ -87,9 +103,11 @@ func NewNode(application *Layer, nodeID byte) (*Node, error) {
 		node.saveToDb()
 	}
 
+	node.application.EventBus.Publish("node:updated", node.NodeID, *node)
+
 	// Start interview process
-	if !node.QueryStageCompleted && node.NodeID != 1 {
-		node.nextQueryStage()
+	if !node.QueryStageCompleted && node.NodeID != application.Controller.NodeID {
+		go node.nextQueryStage()
 	}
 
 	return node, nil
@@ -128,7 +146,7 @@ func (n *Node) initialize() error {
 		n.setFromNodeProtocolInfo(nodeInfo)
 	}
 
-	if n.NodeID == 1 {
+	if n.NodeID == n.application.Controller.NodeID {
 		// self is never failing
 		n.Failing = false
 	} else {
@@ -257,6 +275,35 @@ func (n *Node) LoadManufacturerInfo() error {
 	return n.SendCommand(&manufacturerspecific.Get{})
 }
 
+func (n *Node) GetInterviewProgress() float64 {
+	done := 0
+	if n.QueryStageNIF {
+		done = 1
+	}
+
+	if n.QueryStageSecurity {
+		done = 2
+	}
+
+	if n.QueryStageVersions {
+		done = 3
+	}
+
+	if n.QueryStageManufacturer {
+		done = 4
+	}
+
+	//TODO: Query CC capabilities
+	//TODO: Query configuration
+	//TODO: Query associations
+	//TODO: Query multichannels
+	//TODO: Query meters
+	//TODO: Query states (basic/multilevel)
+	//TODO: Query battery level
+
+	return float64(done) / 4
+}
+
 func (n *Node) nextQueryStage() {
 
 	if !n.QueryStageNIF {
@@ -264,10 +311,10 @@ func (n *Node) nextQueryStage() {
 		return
 	}
 
-	if !n.QueryStageSecurity && n.IsSecure() {
+	/*if !n.QueryStageSecurity && n.IsSecure() {
 		n.LoadSupportedSecurityCommands()
 		return
-	}
+	}*/
 
 	if !n.QueryStageVersions {
 		n.LoadCommandClassVersions()
@@ -289,13 +336,7 @@ func (n *Node) nextQueryStage() {
 }
 
 func (n *Node) emitNodeEvent(event cc.Command) {
-	buf, err := event.MarshalBinary()
-	if err != nil {
-		fmt.Printf("error encoding: %v\n", err)
-		return
-	}
-
-	n.application.EventBus.Publish("nodeCommand", n.NodeID, buf)
+	n.application.EventBus.Publish("node:command", n.NodeID, event)
 }
 
 func (n *Node) receiveControllerUpdate(update serialapi.ControllerUpdate) {
@@ -307,6 +348,8 @@ func (n *Node) receiveControllerUpdate(update serialapi.ControllerUpdate) {
 	}
 
 	n.QueryStageNIF = true
+
+	n.application.EventBus.Publish("node:updated", n.NodeID, *n)
 	n.saveToDb()
 	n.nextQueryStage()
 }
@@ -356,6 +399,7 @@ func (n *Node) receiveSecurityCommandsSupportedReport(cmd security.CommandsSuppo
 	}
 
 	n.QueryStageSecurity = true
+	n.application.EventBus.Publish("node:updated", n.NodeID, *n)
 	n.saveToDb()
 	n.nextQueryStage()
 }
@@ -371,6 +415,7 @@ func (n *Node) receiveManufacturerInfo(mfgId, productTypeId, productId uint16) {
 	}
 
 	n.QueryStageManufacturer = true
+	n.application.EventBus.Publish("node:updated", n.NodeID, *n)
 	n.saveToDb()
 	n.nextQueryStage()
 }
@@ -404,7 +449,8 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 
 	command, err := cc.Parse(ver, cmd.CommandData)
 	if err != nil {
-		fmt.Println("error parsing command class", err)
+		fmt.Printf("error parsing command class=%s version=%d: %s\n", commandClassID, ver, err.Error())
+		fmt.Printf("payload=0x%X", cmd.CommandData)
 		return
 	}
 
@@ -447,6 +493,39 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 		n.receiveCommandClassVersion(cc.CommandClassID(report.RequestedCommandClass), report.CommandClassVersion)
 		n.saveToDb()
 
+	case *meter.Report:
+		n.emitNodeEvent(command)
+	case *meterv2.Report:
+		n.emitNodeEvent(command)
+	case *meterv3.Report:
+		n.emitNodeEvent(command)
+	case *meterv4.Report:
+		n.emitNodeEvent(command)
+	case *wakeup.Notification:
+		n.emitNodeEvent(command)
+	case *wakeupv2.Notification:
+		n.emitNodeEvent(command)
+	case *sensormultilevel.Report:
+		n.emitNodeEvent(command)
+	case *sensormultilevelv2.Report:
+		n.emitNodeEvent(command)
+	case *sensormultilevelv3.Report:
+		n.emitNodeEvent(command)
+	case *sensormultilevelv4.Report:
+		n.emitNodeEvent(command)
+	case *sensormultilevelv5.Report:
+		n.emitNodeEvent(command)
+	case *sensormultilevelv6.Report:
+		n.emitNodeEvent(command)
+	case *sensormultilevelv7.Report:
+		n.emitNodeEvent(command)
+	case *sensormultilevelv8.Report:
+		n.emitNodeEvent(command)
+	case *sensormultilevelv9.Report:
+		n.emitNodeEvent(command)
+	case *sensormultilevelv10.Report:
+		n.emitNodeEvent(command)
+
 		// case alarm.Report:
 		// 	spew.Dump(command.(alarm.Report))
 		//
@@ -473,6 +552,7 @@ func (n *Node) receiveApplicationCommand(cmd serialapi.ApplicationCommand) {
 
 func (n *Node) String() string {
 	str := fmt.Sprintf("Node %d: \n", n.NodeID)
+	str += fmt.Sprintf("  Interview progress? %f\n", n.GetInterviewProgress())
 	str += fmt.Sprintf("  Failing? %t\n", n.Failing)
 	str += fmt.Sprintf("  Is listening? %t\n", n.IsListening())
 	str += fmt.Sprintf("  Is secure? %t\n", n.IsSecure())
