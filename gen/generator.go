@@ -246,7 +246,7 @@ func (g *Generator) fixVariants() error {
 			for i, param := range cmd.Params {
 
 				if param.Type == "VARIANT" {
-					if param.Variant[0].ParamOffset != byte(255) {
+					if param.Variant[0].ParamOffset != 255 {
 						continue
 					}
 

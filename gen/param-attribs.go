@@ -1,5 +1,13 @@
 package gen
 
+import (
+	"encoding/hex"
+	"encoding/xml"
+	"strconv"
+	"strings"
+)
+
+
 type ArrayAttrib struct {
 	Key     string `xml:"key,attr"`
 	Length  int    `xml:"len,attr"`
@@ -79,7 +87,7 @@ type ValueAttrib struct {
 
 type Variant struct {
 	Key         string `xml:"key,attr"`
-	ParamOffset byte   `xml:"paramoffs,attr"`
+	ParamOffset Byte   `xml:"paramoffs,attr"`
 	HasDefines  bool   `xml:"hasdefines,attr"`
 	ShowHex     bool   `xml:"showhex,attr"`
 	Signed      bool   `xml:"signed,attr"`
@@ -93,14 +101,33 @@ type Variant struct {
 
 type Bitmask struct {
 	Key          string `xml:"key,attr"`
-	ParamOffset  byte   `xml:"paramoffs,attr"`
-	LengthOffset byte   `xml:"lenoffs,attr"`
-	LengthMask   byte   `xml:"lenmask,attr"`
-	Length       byte   `xml:"len,attr"`
+	ParamOffset  Byte   `xml:"paramoffs,attr"`
+	LengthOffset Byte   `xml:"lenoffs,attr"`
+	LengthMask   Byte   `xml:"lenmask,attr"`
+	Length       Byte   `xml:"len,attr"`
 }
 
 type Word struct {
 	Key        string `xml:"key,attr"`
 	HasDefines bool   `xml:"hasdefines,attr"`
 	ShowHex    bool   `xml:"showhex,attr"`
+}
+
+type Byte byte
+
+func (b *Byte) UnmarshalXMLAttr(attr xml.Attr) error {
+	if strings.HasPrefix(attr.Value, "0x") {
+		bs, err := hex.DecodeString(attr.Value[2:])
+		if err != nil {
+			return err
+		}
+		*b = Byte(bs[0])
+	} else {
+		n, err := strconv.ParseUint(attr.Value, 10, 8)
+		if err != nil {
+			return err
+		}
+		*b = Byte(n)
+	}
+	return nil
 }

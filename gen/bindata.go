@@ -91,7 +91,7 @@ func templatesCommandClassesTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/command-classes.tpl", size: 420, mode: os.FileMode(420), modTime: time.Unix(1496630137, 0)}
+	info := bindataFileInfo{name: "templates/command-classes.tpl", size: 420, mode: os.FileMode(420), modTime: time.Unix(1530192315, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -111,7 +111,7 @@ func templatesCommandStructFieldsTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/command-struct-fields.tpl", size: 573, mode: os.FileMode(420), modTime: time.Unix(1496614561, 0)}
+	info := bindataFileInfo{name: "templates/command-struct-fields.tpl", size: 573, mode: os.FileMode(420), modTime: time.Unix(1530192315, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -131,7 +131,7 @@ func templatesCommandTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/command.tpl", size: 1640, mode: os.FileMode(420), modTime: time.Unix(1496630152, 0)}
+	info := bindataFileInfo{name: "templates/command.tpl", size: 1640, mode: os.FileMode(420), modTime: time.Unix(1530192315, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -151,7 +151,7 @@ func templatesDevicesTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/devices.tpl", size: 2295, mode: os.FileMode(420), modTime: time.Unix(1496630155, 0)}
+	info := bindataFileInfo{name: "templates/devices.tpl", size: 2295, mode: os.FileMode(420), modTime: time.Unix(1530192315, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -171,7 +171,7 @@ func templatesMarshalCommandParamsTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/marshal-command-params.tpl", size: 2445, mode: os.FileMode(420), modTime: time.Unix(1496614561, 0)}
+	info := bindataFileInfo{name: "templates/marshal-command-params.tpl", size: 2445, mode: os.FileMode(420), modTime: time.Unix(1530192315, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -191,7 +191,7 @@ func templatesMarshalVariantTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/marshal-variant.tpl", size: 327, mode: os.FileMode(420), modTime: time.Unix(1496614561, 0)}
+	info := bindataFileInfo{name: "templates/marshal-variant.tpl", size: 327, mode: os.FileMode(420), modTime: time.Unix(1530192315, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -211,7 +211,7 @@ func templatesUnmarshalCommandParamsTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/unmarshal-command-params.tpl", size: 2420, mode: os.FileMode(420), modTime: time.Unix(1496614561, 0)}
+	info := bindataFileInfo{name: "templates/unmarshal-command-params.tpl", size: 2420, mode: os.FileMode(420), modTime: time.Unix(1530192315, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -231,7 +231,7 @@ func templatesUnmarshalVariantTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/unmarshal-variant.tpl", size: 939, mode: os.FileMode(420), modTime: time.Unix(1496614561, 0)}
+	info := bindataFileInfo{name: "templates/unmarshal-variant.tpl", size: 939, mode: os.FileMode(420), modTime: time.Unix(1530192315, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -251,7 +251,7 @@ func dataZwaveDefsXml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/zwave-defs.xml", size: 1028187, mode: os.FileMode(420), modTime: time.Unix(1496615768, 0)}
+	info := bindataFileInfo{name: "data/zwave-defs.xml", size: 1028187, mode: os.FileMode(420), modTime: time.Unix(1530192315, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
