@@ -16,30 +16,32 @@ func (g *Generator) GenerateCommandClasses(w io.Writer) (err error) {
 		return
 	}
 	for _, cc := range g.zwClasses.CommandClasses {
-		io.WriteString(w, "\t")
-		io.WriteString(w, cc.GetConstName())
-		io.WriteString(w, " CommandClassID = ")
-		_, err = io.WriteString(w, "\n")
+		_, err = writeStrings(w,
+			"\t", cc.GetConstName(), " CommandClassID = ", cc.Key, "\n",
+		)
 		if err != nil {
 			return
 		}
 	}
-	_, err = io.WriteString(w, ")\nfunc (c CommandClassID) String() string {\n\tswitch c {\n")
+	_, err = writeStrings(w,
+		")\n",
+		"func (c CommandClassID) String() string {\n",
+		"\tswitch c {\n",
+	)
 	if err != nil {
 		return
 	}
 	for _, cc := range g.zwClasses.CommandClasses {
 		if cc.Version == 1 {
-			io.WriteString(w, "\tcase ")
-			io.WriteString(w, cc.GetConstName())
-			io.WriteString(w, "\t\treturn \"")
-			io.WriteString(w, cc.Help)
-			_, err = io.WriteString(w, "\"\n")
+			_, err = writeStrings(w,
+				"\tcase ", cc.GetConstName(), ":\n",
+				"\t\treturn \"", cc.Help, "\"\n",
+			)
 			if err != nil {
 				return
 			}
 		}
 	}
-	_, err = io.WriteString(w, "\t}\n}\n")
+	_, err = writeStrings(w, "\t}\n}\n")
 	return
 }

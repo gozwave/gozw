@@ -30,7 +30,6 @@ type NodeLocationSet struct {
 	Level struct {
 		CharPresentation byte
 	}
-
 	NodeLocationChar string
 }
 
@@ -48,32 +47,22 @@ func (cmd NodeLocationSet) CommandIDString() string {
 
 func (cmd *NodeLocationSet) UnmarshalBinary(data []byte) error {
 	// According to the docs, we must copy data if we wish to retain it after returning
-
 	payload := make([]byte, len(data))
 	copy(payload, data)
-
 	if len(payload) < 2 {
 		return errors.New("Payload length underflow")
 	}
-
 	i := 2
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.Level.CharPresentation = (payload[i] & 0x07)
-
 	i += 1
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.NodeLocationChar = string(payload[i : i+16])
-
 	i += 16
-
 	return nil
 }
 
@@ -81,20 +70,14 @@ func (cmd *NodeLocationSet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
 	payload[0] = byte(cmd.CommandClassID())
 	payload[1] = byte(cmd.CommandID())
-
 	{
 		var val byte
-
 		val |= (cmd.Level.CharPresentation) & byte(0x07)
-
 		payload = append(payload, val)
 	}
-
 	if paramLen := len(cmd.NodeLocationChar); paramLen > 16 {
 		return nil, errors.New("Length overflow in array parameter NodeLocationChar")
 	}
-
 	payload = append(payload, []byte(cmd.NodeLocationChar)...)
-
 	return
 }

@@ -27,8 +27,7 @@ func NewGet() cc.Command {
 
 // <no value>
 type Get struct {
-	AlarmType byte
-
+	AlarmType      byte
 	ZwaveAlarmType byte
 }
 
@@ -46,30 +45,22 @@ func (cmd Get) CommandIDString() string {
 
 func (cmd *Get) UnmarshalBinary(data []byte) error {
 	// According to the docs, we must copy data if we wish to retain it after returning
-
 	payload := make([]byte, len(data))
 	copy(payload, data)
-
 	if len(payload) < 2 {
 		return errors.New("Payload length underflow")
 	}
-
 	i := 2
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.AlarmType = payload[i]
 	i++
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.ZwaveAlarmType = payload[i]
 	i++
-
 	return nil
 }
 
@@ -77,10 +68,7 @@ func (cmd *Get) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
 	payload[0] = byte(cmd.CommandClassID())
 	payload[1] = byte(cmd.CommandID())
-
 	payload = append(payload, cmd.AlarmType)
-
 	payload = append(payload, cmd.ZwaveAlarmType)
-
 	return
 }

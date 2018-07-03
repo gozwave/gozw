@@ -27,8 +27,7 @@ func NewSupportedScaleReport() cc.Command {
 
 // <no value>
 type SupportedScaleReport struct {
-	SensorType byte
-
+	SensorType  byte
 	Properties1 struct {
 		ScaleBitMask byte
 	}
@@ -48,31 +47,22 @@ func (cmd SupportedScaleReport) CommandIDString() string {
 
 func (cmd *SupportedScaleReport) UnmarshalBinary(data []byte) error {
 	// According to the docs, we must copy data if we wish to retain it after returning
-
 	payload := make([]byte, len(data))
 	copy(payload, data)
-
 	if len(payload) < 2 {
 		return errors.New("Payload length underflow")
 	}
-
 	i := 2
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.SensorType = payload[i]
 	i++
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.Properties1.ScaleBitMask = (payload[i] & 0x0F)
-
 	i += 1
-
 	return nil
 }
 
@@ -80,16 +70,11 @@ func (cmd *SupportedScaleReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
 	payload[0] = byte(cmd.CommandClassID())
 	payload[1] = byte(cmd.CommandID())
-
 	payload = append(payload, cmd.SensorType)
-
 	{
 		var val byte
-
 		val |= (cmd.Properties1.ScaleBitMask) & byte(0x0F)
-
 		payload = append(payload, val)
 	}
-
 	return
 }

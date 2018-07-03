@@ -28,17 +28,12 @@ func NewOperationReport() cc.Command {
 // <no value>
 type OperationReport struct {
 	DoorLockMode byte
-
-	Properties1 struct {
-		InsideDoorHandlesMode byte
-
+	Properties1  struct {
+		InsideDoorHandlesMode  byte
 		OutsideDoorHandlesMode byte
 	}
-
-	DoorCondition byte
-
+	DoorCondition      byte
 	LockTimeoutMinutes byte
-
 	LockTimeoutSeconds byte
 }
 
@@ -56,54 +51,38 @@ func (cmd OperationReport) CommandIDString() string {
 
 func (cmd *OperationReport) UnmarshalBinary(data []byte) error {
 	// According to the docs, we must copy data if we wish to retain it after returning
-
 	payload := make([]byte, len(data))
 	copy(payload, data)
-
 	if len(payload) < 2 {
 		return errors.New("Payload length underflow")
 	}
-
 	i := 2
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.DoorLockMode = payload[i]
 	i++
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.Properties1.InsideDoorHandlesMode = (payload[i] & 0x0F)
-
 	cmd.Properties1.OutsideDoorHandlesMode = (payload[i] & 0xF0) >> 4
-
 	i += 1
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.DoorCondition = payload[i]
 	i++
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.LockTimeoutMinutes = payload[i]
 	i++
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.LockTimeoutSeconds = payload[i]
 	i++
-
 	return nil
 }
 
@@ -111,24 +90,15 @@ func (cmd *OperationReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
 	payload[0] = byte(cmd.CommandClassID())
 	payload[1] = byte(cmd.CommandID())
-
 	payload = append(payload, cmd.DoorLockMode)
-
 	{
 		var val byte
-
 		val |= (cmd.Properties1.InsideDoorHandlesMode) & byte(0x0F)
-
 		val |= (cmd.Properties1.OutsideDoorHandlesMode << byte(4)) & byte(0xF0)
-
 		payload = append(payload, val)
 	}
-
 	payload = append(payload, cmd.DoorCondition)
-
 	payload = append(payload, cmd.LockTimeoutMinutes)
-
 	payload = append(payload, cmd.LockTimeoutSeconds)
-
 	return
 }

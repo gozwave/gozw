@@ -28,18 +28,13 @@ func NewBulkReport() cc.Command {
 
 // <no value>
 type BulkReport struct {
-	ParameterOffset uint16
-
+	ParameterOffset    uint16
 	NumberOfParameters byte
-
-	ReportsToFollow byte
-
-	Properties1 struct {
-		Size byte
-
+	ReportsToFollow    byte
+	Properties1        struct {
+		Size      byte
 		Handshake bool
-
-		Default bool
+		Default   bool
 	}
 }
 
@@ -57,49 +52,34 @@ func (cmd BulkReport) CommandIDString() string {
 
 func (cmd *BulkReport) UnmarshalBinary(data []byte) error {
 	// According to the docs, we must copy data if we wish to retain it after returning
-
 	payload := make([]byte, len(data))
 	copy(payload, data)
-
 	if len(payload) < 2 {
 		return errors.New("Payload length underflow")
 	}
-
 	i := 2
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.ParameterOffset = binary.BigEndian.Uint16(payload[i : i+2])
 	i += 2
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.NumberOfParameters = payload[i]
 	i++
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.ReportsToFollow = payload[i]
 	i++
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.Properties1.Size = (payload[i] & 0x07)
-
 	cmd.Properties1.Handshake = payload[i]&0x40 == 0x40
-
 	cmd.Properties1.Default = payload[i]&0x80 == 0x80
-
 	i += 1
-
 	return nil
 }
 
@@ -107,36 +87,27 @@ func (cmd *BulkReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
 	payload[0] = byte(cmd.CommandClassID())
 	payload[1] = byte(cmd.CommandID())
-
 	{
 		buf := make([]byte, 2)
 		binary.BigEndian.PutUint16(buf, cmd.ParameterOffset)
 		payload = append(payload, buf...)
 	}
-
 	payload = append(payload, cmd.NumberOfParameters)
-
 	payload = append(payload, cmd.ReportsToFollow)
-
 	{
 		var val byte
-
 		val |= (cmd.Properties1.Size) & byte(0x07)
-
 		if cmd.Properties1.Handshake {
 			val |= byte(0x40) // flip bits on
 		} else {
 			val &= ^byte(0x40) // flip bits off
 		}
-
 		if cmd.Properties1.Default {
 			val |= byte(0x80) // flip bits on
 		} else {
 			val &= ^byte(0x80) // flip bits off
 		}
-
 		payload = append(payload, val)
 	}
-
 	return
 }

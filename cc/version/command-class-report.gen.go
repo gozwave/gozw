@@ -28,8 +28,7 @@ func NewCommandClassReport() cc.Command {
 // <no value>
 type CommandClassReport struct {
 	RequestedCommandClass byte
-
-	CommandClassVersion byte
+	CommandClassVersion   byte
 }
 
 func (cmd CommandClassReport) CommandClassID() cc.CommandClassID {
@@ -46,30 +45,22 @@ func (cmd CommandClassReport) CommandIDString() string {
 
 func (cmd *CommandClassReport) UnmarshalBinary(data []byte) error {
 	// According to the docs, we must copy data if we wish to retain it after returning
-
 	payload := make([]byte, len(data))
 	copy(payload, data)
-
 	if len(payload) < 2 {
 		return errors.New("Payload length underflow")
 	}
-
 	i := 2
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.RequestedCommandClass = payload[i]
 	i++
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.CommandClassVersion = payload[i]
 	i++
-
 	return nil
 }
 
@@ -77,10 +68,7 @@ func (cmd *CommandClassReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
 	payload[0] = byte(cmd.CommandClassID())
 	payload[1] = byte(cmd.CommandID())
-
 	payload = append(payload, cmd.RequestedCommandClass)
-
 	payload = append(payload, cmd.CommandClassVersion)
-
 	return
 }

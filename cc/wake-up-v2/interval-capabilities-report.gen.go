@@ -29,12 +29,9 @@ func NewIntervalCapabilitiesReport() cc.Command {
 // <no value>
 type IntervalCapabilitiesReport struct {
 	MinimumWakeUpIntervalSeconds uint32
-
 	MaximumWakeUpIntervalSeconds uint32
-
 	DefaultWakeUpIntervalSeconds uint32
-
-	WakeUpIntervalStepSeconds uint32
+	WakeUpIntervalStepSeconds    uint32
 }
 
 func (cmd IntervalCapabilitiesReport) CommandClassID() cc.CommandClassID {
@@ -51,44 +48,32 @@ func (cmd IntervalCapabilitiesReport) CommandIDString() string {
 
 func (cmd *IntervalCapabilitiesReport) UnmarshalBinary(data []byte) error {
 	// According to the docs, we must copy data if we wish to retain it after returning
-
 	payload := make([]byte, len(data))
 	copy(payload, data)
-
 	if len(payload) < 2 {
 		return errors.New("Payload length underflow")
 	}
-
 	i := 2
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.MinimumWakeUpIntervalSeconds = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.MaximumWakeUpIntervalSeconds = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.DefaultWakeUpIntervalSeconds = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.WakeUpIntervalStepSeconds = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
-
 	return nil
 }
 
@@ -96,7 +81,6 @@ func (cmd *IntervalCapabilitiesReport) MarshalBinary() (payload []byte, err erro
 	payload = make([]byte, 2)
 	payload[0] = byte(cmd.CommandClassID())
 	payload[1] = byte(cmd.CommandID())
-
 	{
 		buf := make([]byte, 4)
 		binary.BigEndian.PutUint32(buf, cmd.MinimumWakeUpIntervalSeconds)
@@ -105,7 +89,6 @@ func (cmd *IntervalCapabilitiesReport) MarshalBinary() (payload []byte, err erro
 		}
 		payload = append(payload, buf[1:4]...)
 	}
-
 	{
 		buf := make([]byte, 4)
 		binary.BigEndian.PutUint32(buf, cmd.MaximumWakeUpIntervalSeconds)
@@ -114,7 +97,6 @@ func (cmd *IntervalCapabilitiesReport) MarshalBinary() (payload []byte, err erro
 		}
 		payload = append(payload, buf[1:4]...)
 	}
-
 	{
 		buf := make([]byte, 4)
 		binary.BigEndian.PutUint32(buf, cmd.DefaultWakeUpIntervalSeconds)
@@ -123,7 +105,6 @@ func (cmd *IntervalCapabilitiesReport) MarshalBinary() (payload []byte, err erro
 		}
 		payload = append(payload, buf[1:4]...)
 	}
-
 	{
 		buf := make([]byte, 4)
 		binary.BigEndian.PutUint32(buf, cmd.WakeUpIntervalStepSeconds)
@@ -132,6 +113,5 @@ func (cmd *IntervalCapabilitiesReport) MarshalBinary() (payload []byte, err erro
 		}
 		payload = append(payload, buf[1:4]...)
 	}
-
 	return
 }

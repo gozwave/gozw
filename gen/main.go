@@ -44,10 +44,14 @@ func main() {
 					Name:  "config, c",
 					Usage: "Config file",
 				},
+				cli.StringFlag{
+					Name:  "def, d",
+					Usage: "ZWave Definitions FIle",
+				},
 			},
 			Before: before,
 			Action: func(ctx *cli.Context) {
-				gen, err := gen.NewGenerator(ctx.String("output"), ctx.String("config"))
+				gen, err := gen.NewGenerator(ctx.String("output"), ctx.String("config"), ctx.String("def"))
 				if err != nil {
 					fmt.Println(err)
 					os.Exit(1)
@@ -72,10 +76,14 @@ func main() {
 					Name:  "config, c",
 					Usage: "Config file",
 				},
+				cli.StringFlag{
+					Name:  "def, d",
+					Usage: "ZWave Definitions FIle",
+				},
 			},
 			Before: before,
 			Action: func(ctx *cli.Context) {
-				gen, err := gen.NewGenerator(ctx.String("output"), ctx.String("config"))
+				gen, err := gen.NewGenerator(ctx.String("output"), ctx.String("config"), ctx.String("def"))
 				if err != nil {
 					fmt.Println(err)
 					os.Exit(1)
@@ -101,10 +109,14 @@ func main() {
 					Name:  "config, c",
 					Usage: "Config file",
 				},
+				cli.StringFlag{
+					Name:  "def, d",
+					Usage: "ZWave Definitions FIle",
+				},
 			},
 			Before: before,
 			Action: func(ctx *cli.Context) {
-				gen, err := gen.NewGenerator(ctx.String("output"), ctx.String("config"))
+				gen, err := gen.NewGenerator(ctx.String("output"), ctx.String("config"), ctx.String("def"))
 				if err != nil {
 					fmt.Println(err)
 					os.Exit(1)

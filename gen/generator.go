@@ -12,11 +12,7 @@ import (
 	"text/template"
 
 	"gopkg.in/yaml.v2"
-
-	"golang.org/x/tools/imports"
 )
-
-//go:generate go-bindata -pkg=gen templates/... data/...
 
 type Generator struct {
 	output    string
@@ -29,7 +25,7 @@ type Config struct {
 	CommandClasses map[string]map[int]bool `yaml:"CommandClasses"`
 }
 
-func NewGenerator(output string, configFile string) (*Generator, error) {
+func NewGenerator(output string, configFile string, def string) (*Generator, error) {
 	config := Config{}
 
 	configStr, err := ioutil.ReadFile(configFile)
@@ -46,7 +42,7 @@ func NewGenerator(output string, configFile string) (*Generator, error) {
 		config: config,
 	}
 
-	zwData, err := Asset("data/zwave-defs.xml")
+	zwData, err := ioutil.ReadFile(def)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +80,7 @@ func (g *Generator) GenDevices() error {
 
 	defer fp.Close()
 
-	formatted, err := goFmtAndImports(g.output, buf)
+	formatted, err := format.Source(buf.Bytes())
 	if err != nil {
 		return err
 	}
@@ -129,7 +125,7 @@ func (g *Generator) GenParser() error {
 
 	defer fp.Close()
 
-	formatted, err := goFmtAndImports(g.output, buf)
+	formatted, err := format.Source(buf.Bytes())
 	if err != nil {
 		return err
 	}
@@ -202,12 +198,12 @@ func (g *Generator) generateCommand(dirName string, cc CommandClass, cmd Command
 
 	defer fp.Close()
 
-	// formatted, err := goFmtAndImports(filename, buf)
-	// if err != nil {
-	// 	return err
-	// }
+	formatted, err := format.Source(buf.Bytes())
+	if err != nil {
+		return err
+	}
 
-	fp.Write(buf.Bytes())
+	fp.Write(formatted)
 
 	return nil
 }
@@ -256,18 +252,4 @@ func (g *Generator) fixVariants() error {
 	}
 
 	return nil
-}
-
-func goFmtAndImports(filename string, buf *bytes.Buffer) ([]byte, error) {
-	formatted, err := format.Source(buf.Bytes())
-	if err != nil {
-		return nil, err
-	}
-
-	imported, err := imports.Process(filename, formatted, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return imported, nil
 }

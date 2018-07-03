@@ -29,8 +29,7 @@ func NewIntervalSet() cc.Command {
 // <no value>
 type IntervalSet struct {
 	Seconds uint32
-
-	Nodeid byte
+	Nodeid  byte
 }
 
 func (cmd IntervalSet) CommandClassID() cc.CommandClassID {
@@ -47,30 +46,22 @@ func (cmd IntervalSet) CommandIDString() string {
 
 func (cmd *IntervalSet) UnmarshalBinary(data []byte) error {
 	// According to the docs, we must copy data if we wish to retain it after returning
-
 	payload := make([]byte, len(data))
 	copy(payload, data)
-
 	if len(payload) < 2 {
 		return errors.New("Payload length underflow")
 	}
-
 	i := 2
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.Seconds = binary.BigEndian.Uint32(payload[i : i+3])
 	i += 3
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.Nodeid = payload[i]
 	i++
-
 	return nil
 }
 
@@ -78,7 +69,6 @@ func (cmd *IntervalSet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
 	payload[0] = byte(cmd.CommandClassID())
 	payload[1] = byte(cmd.CommandID())
-
 	{
 		buf := make([]byte, 4)
 		binary.BigEndian.PutUint32(buf, cmd.Seconds)
@@ -87,8 +77,6 @@ func (cmd *IntervalSet) MarshalBinary() (payload []byte, err error) {
 		}
 		payload = append(payload, buf[1:4]...)
 	}
-
 	payload = append(payload, cmd.Nodeid)
-
 	return
 }

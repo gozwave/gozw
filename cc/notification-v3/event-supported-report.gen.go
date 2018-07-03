@@ -28,11 +28,9 @@ func NewEventSupportedReport() cc.Command {
 // <no value>
 type EventSupportedReport struct {
 	NotificationType byte
-
-	Properties1 struct {
+	Properties1      struct {
 		NumberOfBitMasks byte
 	}
-
 	BitMask []byte
 }
 
@@ -50,37 +48,26 @@ func (cmd EventSupportedReport) CommandIDString() string {
 
 func (cmd *EventSupportedReport) UnmarshalBinary(data []byte) error {
 	// According to the docs, we must copy data if we wish to retain it after returning
-
 	payload := make([]byte, len(data))
 	copy(payload, data)
-
 	if len(payload) < 2 {
 		return errors.New("Payload length underflow")
 	}
-
 	i := 2
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.NotificationType = payload[i]
 	i++
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.Properties1.NumberOfBitMasks = (payload[i] & 0x1F)
-
 	i += 1
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.BitMask = payload[i:]
-
 	return nil
 }
 
@@ -88,18 +75,12 @@ func (cmd *EventSupportedReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
 	payload[0] = byte(cmd.CommandClassID())
 	payload[1] = byte(cmd.CommandID())
-
 	payload = append(payload, cmd.NotificationType)
-
 	{
 		var val byte
-
 		val |= (cmd.Properties1.NumberOfBitMasks) & byte(0x1F)
-
 		payload = append(payload, val)
 	}
-
 	payload = append(payload, cmd.BitMask...)
-
 	return
 }

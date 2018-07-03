@@ -65,8 +65,8 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 		"\tgob.Register(", structName, "{})\n",
 		"\tcc.Register(cc.CommandIdentifier{\n",
 		"\t\tCommandClass: cc.CommandClassID(", cc.Key, "),\n",
-		"\t\tCommand:      cc.CommandID(", cmd.Key, "),\n",
-		"\t\tVersion:      ", strconv.Itoa(cc.Version), ",\n",
+		"\t\tCommand: cc.CommandID(", cmd.Key, "),\n",
+		"\t\tVersion: ", strconv.Itoa(cc.Version), ",\n",
 		"\t}, New", structName, ")\n",
 		"}\n\n",
 		"func New", structName, "() cc.Command {\n",
@@ -78,36 +78,21 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 	if err != nil {
 		return
 	}
-	// var maxSize int
-	// for _, p := range cmd.Params {
-	// 	size := len(toGoName(p.Name))
-	// 	if size > maxSize {
-	// 		maxSize = size
-	// 	}
-	// }
-	for i, p := range cmd.Params {
+	for _, p := range cmd.Params {
 		if !p.IsNotReserved() {
 			continue
 		}
 		pname := toGoName(p.Name)
-		//sp := strings.Repeat(" ", 1+maxSize-len(pname))
-		if i > 0 {
-			io.WriteString(w, "\n") // hack to match output
-		}
 		switch p.Type {
 		case "STRUCT_BYTE":
 			_, err = writeStrings(w, "\t", pname, " struct {\n")
 			if err != nil {
 				return
 			}
-			n := 0
 			for _, v := range p.BitField {
 				if v.IsNotReserved() {
-					if n > 0 {
-						io.WriteString(w, "\n") // hack to match output
-					}
-					n++
-					_, err = writeStrings(w, "\t\t", toGoName(v.FieldName), " byte\n")
+					fname := toGoName(v.FieldName)
+					_, err = writeStrings(w, "\t\t", fname, " byte\n")
 					if err != nil {
 						return
 					}
@@ -115,11 +100,8 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 			}
 			for _, v := range p.BitFlag {
 				if v.IsNotReserved() {
-					if n > 0 {
-						io.WriteString(w, "\n") // hack to match output
-					}
-					n++
-					_, err = writeStrings(w, "\t\t", toGoName(v.FlagName), " bool\n")
+					fname := toGoName(v.FlagName)
+					_, err = writeStrings(w, "\t\t", fname, " bool\n")
 					if err != nil {
 						return
 					}
@@ -127,17 +109,17 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 			}
 			for _, v := range p.FieldEnum {
 				if v.IsNotReserved() {
-					if n > 0 {
-						io.WriteString(w, "\n") // hack to match output
-					}
-					n++
-					_, err = writeStrings(w, "\t\t", toGoName(v.FieldName), " byte\n")
+					fname := toGoName(v.FieldName)
+					_, err = writeStrings(w, "\t\t", fname, " byte\n")
 					if err != nil {
 						return
 					}
 				}
 			}
-			io.WriteString(w, "\t}\n")
+			_, err = io.WriteString(w, "\t}\n")
+			if err != nil {
+				return
+			}
 		case "MARKER":
 			break
 		default:
@@ -148,6 +130,7 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 			}
 		}
 	}
+
 	_, err = writeStrings(w,
 		"}\n\n",
 		"func (cmd ", structName, ") CommandClassID() cc.CommandClassID {\n",
@@ -160,7 +143,7 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 		"\treturn \"", cmd.Name, "\"\n",
 		"}\n\n",
 		"func (cmd *", structName, ") UnmarshalBinary(data []byte) error {\n",
-		"\t// According to the docs, we must copy data if we wish to retain it after returning\n\n",
+		"\t// According to the docs, we must copy data if we wish to retain it after returning\n",
 	)
 	if err != nil {
 		return
@@ -168,11 +151,11 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 	if len(cmd.Params) > 0 {
 		_, err = writeStrings(w,
 			"\tpayload := make([]byte, len(data))\n",
-			"\tcopy(payload, data)\n\n",
+			"\tcopy(payload, data)\n",
 			"\tif len(payload) < 2 {\n",
 			"\t\treturn errors.New(\"Payload length underflow\")\n",
-			"\t}\n\n",
-			"\ti := 2\n\n",
+			"\t}\n",
+			"\ti := 2\n",
 		)
 		if err != nil {
 			return
@@ -186,13 +169,13 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 					_, err = writeStrings(w,
 						"\tif len(payload) <= i {\n",
 						"\t\treturn errors.New(\"slice index out of bounds\")\n",
-						"\t}\n\n",
+						"\t}\n",
 						"\t{\n",
 						"\t\tfieldStart := i\n",
 						"\t\tfor ; i < len(payload) && payload[i] != ", variant.MarkerValue, "; i++ {\n",
 						"\t\t}\n",
 						"\t\tcmd.", pname, " = payload[fieldStart:i]\n",
-						"\t}\n\n",
+						"\t}\n",
 					)
 					if err != nil {
 						return
@@ -201,7 +184,7 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 					_, err = writeStrings(w,
 						"\tif len(payload) <= i {\n",
 						"\t\treturn errors.New(\"slice index out of bounds\")\n",
-						"\t}\n\n",
+						"\t}\n",
 						"\t{\n",
 						"\t\tlength := (payload[", strconv.Itoa(int(variant.ParamOffset)), "+2]",
 					)
@@ -234,7 +217,7 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 					_, err = writeStrings(w,
 						"\tif len(payload) <= i {\n",
 						"\t\treturn errors.New(\"slice index out of bounds\")\n",
-						"\t}\n\n",
+						"\t}\n",
 						"\tcmd.", pname, " = payload[i : len(payload)-", strconv.Itoa(int(variant.RemainingBytes)), "]\n",
 						"\ti += len(cmd.", pname, ")\n",
 					)
@@ -245,7 +228,7 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 					_, err = writeStrings(w,
 						"\tif len(payload) <= i {\n",
 						"\t\treturn nil\n",
-						"\t}\n\n",
+						"\t}\n",
 						"\tcmd.", pname, " = payload[i:]\n",
 					)
 					if err != nil {
@@ -256,7 +239,7 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 				_, err = writeStrings(w,
 					"\tif len(payload) <= i {\n",
 					"\t\treturn errors.New(\"slice index out of bounds\")\n",
-					"\t}\n\n",
+					"\t}\n",
 				)
 				if err != nil {
 					return
@@ -276,7 +259,6 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 						if _, err = writeStrings(w, str...); err != nil {
 							return
 						}
-						io.WriteString(w, "\n")
 					}
 				}
 				for _, v := range p.FieldEnum {
@@ -293,7 +275,6 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 					if _, err = writeStrings(w, str...); err != nil {
 						return
 					}
-					io.WriteString(w, "\n")
 				}
 				for _, v := range p.BitFlag {
 					if v.IsNotReserved() {
@@ -303,7 +284,6 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 						if err != nil {
 							return
 						}
-						io.WriteString(w, "\n")
 					}
 				}
 				_, err = io.WriteString(w, "\ti += 1\n")
@@ -314,7 +294,7 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 				_, err = writeStrings(w,
 					"\tif len(payload) <= i {\n",
 					"\t\treturn errors.New(\"slice index out of bounds\")\n",
-					"\t}\n\n",
+					"\t}\n",
 				)
 				if err != nil {
 					return
@@ -337,7 +317,7 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 				_, err = writeStrings(w,
 					"\tif len(payload) <= i {\n",
 					"\t\treturn errors.New(\"slice index out of bounds\")\n",
-					"\t}\n\n",
+					"\t}\n",
 					"\tcmd.", pname, " = payload[i:]\n",
 				)
 				if err != nil {
@@ -347,7 +327,7 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 				_, err = writeStrings(w,
 					"\tif len(payload) <= i {\n",
 					"\t\treturn errors.New(\"slice index out of bounds\")\n",
-					"\t}\n\n",
+					"\t}\n",
 					"\tcmd.", pname, " = binary.BigEndian.Uint32(payload[i : i+4])\n",
 					"\ti += 4\n",
 				)
@@ -358,7 +338,7 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 				_, err = writeStrings(w,
 					"\tif len(payload) <= i {\n",
 					"\t\treturn errors.New(\"slice index out of bounds\")\n",
-					"\t}\n\n",
+					"\t}\n",
 					"\tcmd.", pname, " = binary.BigEndian.Uint32(payload[i : i+3])\n",
 					"\ti += 3\n",
 				)
@@ -369,7 +349,7 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 				_, err = writeStrings(w,
 					"\tif len(payload) <= i {\n",
 					"\t\treturn errors.New(\"slice index out of bounds\")\n",
-					"\t}\n\n",
+					"\t}\n",
 					"\tcmd.", pname, " = binary.BigEndian.Uint16(payload[i : i+2])\n",
 					"\ti += 2\n",
 				)
@@ -380,7 +360,7 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 				_, err = writeStrings(w,
 					"\tif len(payload) <= i {\n",
 					"\t\treturn errors.New(\"slice index out of bounds\")\n",
-					"\t}\n\n",
+					"\t}\n",
 					"\ti += 1 // skipping MARKER\n",
 					"\tif len(payload) <= i {\n",
 					"\t\treturn nil\n",
@@ -393,7 +373,7 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 				_, err = writeStrings(w,
 					"\tif len(payload) <= i {\n",
 					"\t\treturn errors.New(\"slice index out of bounds\")\n",
-					"\t}\n\n",
+					"\t}\n",
 				)
 				if err != nil {
 					return
@@ -405,7 +385,6 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 					)
 				}
 			}
-			io.WriteString(w, "\n")
 		}
 	}
 	_, err = writeStrings(w,
@@ -414,7 +393,7 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 		"func (cmd *", structName, ") MarshalBinary() (payload []byte, err error) {\n",
 		"\tpayload = make([]byte, 2)\n",
 		"\tpayload[0] = byte(cmd.CommandClassID())\n",
-		"\tpayload[1] = byte(cmd.CommandID())\n\n",
+		"\tpayload[1] = byte(cmd.CommandID())\n",
 	)
 	if err != nil {
 		return
@@ -458,7 +437,7 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 		case "STRUCT_BYTE":
 			_, err = writeStrings(w,
 				"\t{\n",
-				"\t\tvar val byte\n\n",
+				"\t\tvar val byte\n",
 			)
 			if err != nil {
 				return
@@ -478,7 +457,6 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 					if _, err = writeStrings(w, str...); err != nil {
 						return
 					}
-					io.WriteString(w, "\n")
 				}
 			}
 			for _, v := range p.FieldEnum {
@@ -495,7 +473,6 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 				if _, err = writeStrings(w, str...); err != nil {
 					return
 				}
-				io.WriteString(w, "\n")
 			}
 			for _, v := range p.BitFlag {
 				if v.IsNotReserved() {
@@ -509,7 +486,6 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 					if err != nil {
 						return
 					}
-					io.WriteString(w, "\n")
 				}
 			}
 			_, err = writeStrings(w,
@@ -598,7 +574,6 @@ func (g *Generator) GenerateCommand(w io.Writer, cc CommandClass, cmd Command) (
 				}
 			}
 		}
-		io.WriteString(w, "\n")
 	}
 
 	io.WriteString(w, "\treturn\n")

@@ -42,7 +42,6 @@ func (cmd SupportedGet) CommandIDString() string {
 
 func (cmd *SupportedGet) UnmarshalBinary(data []byte) error {
 	// According to the docs, we must copy data if we wish to retain it after returning
-
 	return nil
 }
 
@@ -50,6 +49,5 @@ func (cmd *SupportedGet) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
 	payload[0] = byte(cmd.CommandClassID())
 	payload[1] = byte(cmd.CommandID())
-
 	return
 }

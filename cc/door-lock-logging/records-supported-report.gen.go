@@ -44,23 +44,17 @@ func (cmd RecordsSupportedReport) CommandIDString() string {
 
 func (cmd *RecordsSupportedReport) UnmarshalBinary(data []byte) error {
 	// According to the docs, we must copy data if we wish to retain it after returning
-
 	payload := make([]byte, len(data))
 	copy(payload, data)
-
 	if len(payload) < 2 {
 		return errors.New("Payload length underflow")
 	}
-
 	i := 2
-
 	if len(payload) <= i {
 		return errors.New("slice index out of bounds")
 	}
-
 	cmd.MaxRecordsStored = payload[i]
 	i++
-
 	return nil
 }
 
@@ -68,8 +62,6 @@ func (cmd *RecordsSupportedReport) MarshalBinary() (payload []byte, err error) {
 	payload = make([]byte, 2)
 	payload[0] = byte(cmd.CommandClassID())
 	payload[1] = byte(cmd.CommandID())
-
 	payload = append(payload, cmd.MaxRecordsStored)
-
 	return
 }
