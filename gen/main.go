@@ -1,14 +1,11 @@
-// +build ignore
-
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
 	"github.com/codegangsta/cli"
-	"github.com/gozwave/gozw/gen"
+	"github.com/pkg/errors"
 )
 
 func main() {
@@ -47,9 +44,10 @@ func main() {
 			},
 			Before: before,
 			Action: func(ctx *cli.Context) {
-				gen, err := gen.NewGenerator(ctx.String("output"), ctx.String("config"))
+				gen, err := NewGenerator(ctx.String("output"), ctx.String("config"))
 				if err != nil {
-					fmt.Println(err)
+
+					fmt.Println(errors.Wrap(err, "new generator"))
 					os.Exit(1)
 				}
 
@@ -75,7 +73,7 @@ func main() {
 			},
 			Before: before,
 			Action: func(ctx *cli.Context) {
-				gen, err := gen.NewGenerator(ctx.String("output"), ctx.String("config"))
+				gen, err := NewGenerator(ctx.String("output"), ctx.String("config"))
 				if err != nil {
 					fmt.Println(err)
 					os.Exit(1)
@@ -104,7 +102,7 @@ func main() {
 			},
 			Before: before,
 			Action: func(ctx *cli.Context) {
-				gen, err := gen.NewGenerator(ctx.String("output"), ctx.String("config"))
+				gen, err := NewGenerator(ctx.String("output"), ctx.String("config"))
 				if err != nil {
 					fmt.Println(err)
 					os.Exit(1)

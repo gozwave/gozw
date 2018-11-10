@@ -1,4 +1,4 @@
-package gen
+package main
 
 import (
 	"bytes"
@@ -11,12 +11,10 @@ import (
 	"strings"
 	"text/template"
 
-	"gopkg.in/yaml.v2"
-
+	"github.com/pkg/errors"
 	"golang.org/x/tools/imports"
+	yaml "gopkg.in/yaml.v2"
 )
-
-//go:generate go-bindata -pkg=gen templates/... data/...
 
 type Generator struct {
 	output    string
@@ -29,16 +27,16 @@ type Config struct {
 	CommandClasses map[string]map[int]bool `yaml:"CommandClasses"`
 }
 
-func NewGenerator(output string, configFile string) (*Generator, error) {
+func NewGenerator(output, configFile string) (*Generator, error) {
 	config := Config{}
 
 	configStr, err := ioutil.ReadFile(configFile)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "read config file")
 	}
 
 	if err := yaml.Unmarshal(configStr, &config); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "unmarshal config file")
 	}
 
 	gen := &Generator{
@@ -50,7 +48,7 @@ func NewGenerator(output string, configFile string) (*Generator, error) {
 
 	zwData, err := Asset("data/zwave-defs.xml")
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "asset data/zwave-defs.xml")
 	}
 
 	decoder := xml.NewDecoder(bytes.NewBuffer(zwData))
@@ -58,14 +56,22 @@ func NewGenerator(output string, configFile string) (*Generator, error) {
 	zw := ZwClasses{}
 	err = decoder.Decode(&zw)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "decode zwave-defs")
+	}
+
+	for i, cc := range zw.CommandClasses {
+		for j, c := range cc.Commands {
+			c.CC = cc
+			cc.Commands[j] = c
+		}
+		zw.CommandClasses[i] = cc
 	}
 
 	gen.zwClasses = &zw
 
 	err = gen.fixVariants()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "fix variants")
 	}
 
 	return gen, nil
@@ -219,13 +225,19 @@ func (g *Generator) generateCommand(dirName string, cc CommandClass, cmd Command
 
 func (g *Generator) initTemplates() {
 	tpl := template.New("").Funcs(template.FuncMap{
-		"ToGoName":    toGoName,
-		"NotZeroByte": notZeroByte,
-		"Trim":        strings.TrimSpace,
+		"ToGoName":      toGoName,
+		"NotZeroByte":   notZeroByte,
+		"Trim":          strings.TrimSpace,
+		"IsLastKey":     isLastKey,
+		"ToGoNameLower": toGoNameLower,
 	})
 
 	tpl = template.Must(tpl.New("command-classes").Parse(mustAsset("templates/command-classes.tpl")))
 	tpl = template.Must(tpl.New("command-struct-fields").Parse(mustAsset("templates/command-struct-fields.tpl")))
+	tpl = template.Must(tpl.New("marshal-command-param").Parse(mustAsset("templates/marshal-command-param.tpl")))
+	tpl = template.Must(tpl.New("marshal-command-vg-params").Parse(mustAsset("templates/marshal-command-vg-params.tpl")))
+	tpl = template.Must(tpl.New("unmarshal-command-param").Parse(mustAsset("templates/unmarshal-command-param.tpl")))
+	tpl = template.Must(tpl.New("unmarshal-command-vg-params").Parse(mustAsset("templates/unmarshal-command-vg-params.tpl")))
 	tpl = template.Must(tpl.New("command").Parse(mustAsset("templates/command.tpl")))
 	tpl = template.Must(tpl.New("devices").Parse(mustAsset("templates/devices.tpl")))
 	tpl = template.Must(tpl.New("marshal-command-params").Parse(mustAsset("templates/marshal-command-params.tpl")))
@@ -246,7 +258,7 @@ func (g *Generator) fixVariants() error {
 			for i, param := range cmd.Params {
 
 				if param.Type == "VARIANT" {
-					if param.Variant[0].ParamOffset != 255 {
+					if param.Variant[0].ParamOffset != byte(255) {
 						continue
 					}
 

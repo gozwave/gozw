@@ -40,6 +40,14 @@ type Report struct {
 	HardwareVersion byte
 
 	NumberOfFirmwareTargets byte
+
+	Vg []ReportVg
+}
+
+type ReportVg struct {
+	FirmwareVersion byte
+
+	FirmwareSubVersion byte
 }
 
 func (cmd Report) CommandClassID() cc.CommandClassID {
@@ -115,6 +123,31 @@ func (cmd *Report) UnmarshalBinary(data []byte) error {
 	cmd.NumberOfFirmwareTargets = payload[i]
 	i++
 
+	for i < len(payload) {
+
+		if len(payload) <= i {
+			return errors.New("slice index out of bounds")
+		}
+
+		firmwareVersion := payload[i]
+		i++
+
+		if len(payload) <= i {
+			return errors.New("slice index out of bounds")
+		}
+
+		firmwareSubVersion := payload[i]
+		i++
+
+		vg := ReportVg{
+
+			FirmwareVersion: firmwareVersion,
+
+			FirmwareSubVersion: firmwareSubVersion,
+		}
+		cmd.Vg = append(cmd.Vg, vg)
+	}
+
 	return nil
 }
 
@@ -136,6 +169,14 @@ func (cmd *Report) MarshalBinary() (payload []byte, err error) {
 	payload = append(payload, cmd.HardwareVersion)
 
 	payload = append(payload, cmd.NumberOfFirmwareTargets)
+
+	for _, vg := range cmd.Vg {
+
+		payload = append(payload, vg.FirmwareVersion)
+
+		payload = append(payload, vg.FirmwareSubVersion)
+
+	}
 
 	return
 }

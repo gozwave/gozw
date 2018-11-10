@@ -8,8 +8,10 @@ import (
 
 // type CallbackType int
 
+// CallbackFunc is a callback for a request
 type CallbackFunc func(frame.Frame)
 
+// Request contains a request.
 type Request struct {
 	FunctionID byte
 	Payload    []byte

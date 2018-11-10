@@ -28,6 +28,22 @@ func NewLoggingReport() cc.Command {
 // <no value>
 type LoggingReport struct {
 	ReportsToFollow byte
+
+	Vg1 []LoggingReportVg1
+}
+
+type LoggingReportVg1 struct {
+	Properties1 struct {
+		OperatingStateLogType byte
+	}
+
+	UsageTodayhours byte
+
+	UsageTodayminutes byte
+
+	UsageYesterdayhours byte
+
+	UsageYesterdayminutes byte
 }
 
 func (cmd LoggingReport) CommandClassID() cc.CommandClassID {
@@ -61,6 +77,61 @@ func (cmd *LoggingReport) UnmarshalBinary(data []byte) error {
 	cmd.ReportsToFollow = payload[i]
 	i++
 
+	for i < len(payload) {
+
+		if len(payload) <= i {
+			return errors.New("slice index out of bounds")
+		}
+
+		var properties1 Properties1
+
+		properties1.OperatingStateLogType = (payload[i] & 0x0F)
+
+		i += 1
+
+		if len(payload) <= i {
+			return errors.New("slice index out of bounds")
+		}
+
+		usageTodayhours := payload[i]
+		i++
+
+		if len(payload) <= i {
+			return errors.New("slice index out of bounds")
+		}
+
+		usageTodayminutes := payload[i]
+		i++
+
+		if len(payload) <= i {
+			return errors.New("slice index out of bounds")
+		}
+
+		usageYesterdayhours := payload[i]
+		i++
+
+		if len(payload) <= i {
+			return errors.New("slice index out of bounds")
+		}
+
+		usageYesterdayminutes := payload[i]
+		i++
+
+		vg1 := LoggingReportVg1{
+
+			Properties1: properties1,
+
+			UsageTodayhours: usageTodayhours,
+
+			UsageTodayminutes: usageTodayminutes,
+
+			UsageYesterdayhours: usageYesterdayhours,
+
+			UsageYesterdayminutes: usageYesterdayminutes,
+		}
+		cmd.Vg1 = append(cmd.Vg1, vg1)
+	}
+
 	return nil
 }
 
@@ -70,6 +141,26 @@ func (cmd *LoggingReport) MarshalBinary() (payload []byte, err error) {
 	payload[1] = byte(cmd.CommandID())
 
 	payload = append(payload, cmd.ReportsToFollow)
+
+	for _, vg := range cmd.Vg1 {
+
+		{
+			var val byte
+
+			val |= (vg.Properties1.OperatingStateLogType) & byte(0x0F)
+
+			payload = append(payload, val)
+		}
+
+		payload = append(payload, vg.UsageTodayhours)
+
+		payload = append(payload, vg.UsageTodayminutes)
+
+		payload = append(payload, vg.UsageYesterdayhours)
+
+		payload = append(payload, vg.UsageYesterdayminutes)
+
+	}
 
 	return
 }
