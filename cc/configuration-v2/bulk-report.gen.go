@@ -41,6 +41,12 @@ type BulkReport struct {
 
 		Default bool
 	}
+
+	Vg []BulkReportVg
+}
+
+type BulkReportVg struct {
+	Parameter []byte
 }
 
 func (cmd BulkReport) CommandClassID() cc.CommandClassID {
@@ -100,6 +106,25 @@ func (cmd *BulkReport) UnmarshalBinary(data []byte) error {
 
 	i += 1
 
+	for i < len(payload) {
+
+		if len(payload) <= i {
+			return errors.New("slice index out of bounds")
+		}
+
+		{
+			length := (payload[131+2] >> 0) & 0x07
+			cmd.Parameter = payload[i : i+int(length)]
+			i += int(length)
+		}
+
+		vg := BulkReportVg{
+
+			Parameter: parameter,
+		}
+		cmd.Vg = append(cmd.Vg, vg)
+	}
+
 	return nil
 }
 
@@ -136,6 +161,14 @@ func (cmd *BulkReport) MarshalBinary() (payload []byte, err error) {
 		}
 
 		payload = append(payload, val)
+	}
+
+	for _, vg := range cmd.Vg {
+
+		if vg.Parameter != nil && len(vg.Parameter) > 0 {
+			payload = append(payload, vg.Parameter...)
+		}
+
 	}
 
 	return

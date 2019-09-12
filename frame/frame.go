@@ -7,17 +7,22 @@ import (
 )
 
 const (
+	// HeaderData is a byte for a data frame.
 	HeaderData byte = 0x01
-	HeaderAck       = 0x06
-	HeaderNak       = 0x15
-	HeaderCan       = 0x18
+	// HeaderAck is a byte for a ack frame.
+	HeaderAck = 0x06
+	// HeaderNak is a byte for a nak frame.
+	HeaderNak = 0x15
+	// HeaderCan is a byte for a can frame.
+	HeaderCan = 0x18
+
+	// TypeRequest is for a request frame.
+	TypeRequest byte = 0x00
+	// TypeResponse is for a response frame.
+	TypeResponse = 0x01
 )
 
-const (
-	TypeRequest  byte = 0x00
-	TypeResponse      = 0x01
-)
-
+// Frame contains a frame.
 type Frame struct {
 
 	// Header is one of FrameHeader*
@@ -36,6 +41,7 @@ type Frame struct {
 	Checksum byte
 }
 
+// NewRequestFrame will build  a new request frame.
 func NewRequestFrame(payload []byte) *Frame {
 	return &Frame{
 		Header:  HeaderData,
@@ -44,50 +50,59 @@ func NewRequestFrame(payload []byte) *Frame {
 	}
 }
 
+// NewNakFrame returns a new  nak frame.
 func NewNakFrame() *Frame {
 	return &Frame{
 		Header: HeaderNak,
 	}
 }
 
+// NewAckFrame returns a new ack frame.
 func NewAckFrame() *Frame {
 	return &Frame{
 		Header: HeaderAck,
 	}
 }
 
+// NewCanFrame returns a new can frame.
 func NewCanFrame() *Frame {
 	return &Frame{
 		Header: HeaderCan,
 	}
 }
 
+// IsRequest checks if the frame is a request frame.
 func (z *Frame) IsRequest() bool {
 	return z.Type == TypeRequest
 }
 
+// IsResponse checks if the frame is a response frame.
 func (z *Frame) IsResponse() bool {
 	return z.Type == TypeResponse
 }
 
+// IsAck returns whether this is an ack frame.
 func (z *Frame) IsAck() bool {
 	return z.Header == HeaderAck
 }
 
+// IsNak returns whether this is an nak frame.
 func (z *Frame) IsNak() bool {
 	return z.Header == HeaderNak
 }
 
+// IsCan returns whether this is an can frame.
 func (z *Frame) IsCan() bool {
 	return z.Header == HeaderCan
 }
 
+// IsData returns whether this is a data frame.
 func (z *Frame) IsData() bool {
 	return z.Header == HeaderData
 }
 
 // CalcChecksum calculates the checksum for this frame, given the current data.
-// The Z-Wave checksum is calculated by taking 0xFF XOR Length XOR Type XOR Payload[0:n]
+// The Z-Wave checksum is calculated by taking 0xFF XOR Length XOR Type XOR Payload[0:n].
 func (z *Frame) CalcChecksum() byte {
 	var csum byte = 0xff
 	csum ^= z.Length
@@ -100,13 +115,13 @@ func (z *Frame) CalcChecksum() byte {
 	return csum
 }
 
-// SetChecksum calculates the frame checksum and saves it into the frame
+// SetChecksum calculates the frame checksum and saves it into the frame.
 func (z *Frame) SetChecksum() {
 	z.Checksum = z.CalcChecksum()
 }
 
 // VerifyChecksum calculates a checksum for the frame and compares it to the
-// frame's checksum, returning an error if they do not agree
+// frame's checksum, returning an error if they do not agree.
 func (z *Frame) VerifyChecksum() error {
 	if z.Header != HeaderData {
 		return nil
@@ -119,7 +134,7 @@ func (z *Frame) VerifyChecksum() error {
 	return nil
 }
 
-// Marshal this frame into a byte slice
+// MarshalBinary will marshal this frame into a byte slice.
 func (z *Frame) MarshalBinary() ([]byte, error) {
 	buf := new(bytes.Buffer)
 
@@ -142,7 +157,7 @@ func (z *Frame) MarshalBinary() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// UnmarshalFrame turns a byte slice into a Frame
+// UnmarshalFrame turns a byte slice into a Frame.
 func UnmarshalFrame(frame []byte) *Frame {
 	if frame[0] != HeaderData {
 		return &Frame{

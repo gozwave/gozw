@@ -26,7 +26,18 @@ type {{$structName}} struct {
   {{range $_, $param := .Command.Params}}
     {{template "command-struct-fields" $param}}
   {{end}}
+  {{range $_, $vg := .Command.VariantGroups}}
+    {{ToGoName $vg.Name}} []{{$structName}}{{ToGoName $vg.Name}}
+  {{end}}
 }
+
+{{range $_, $vg := .Command.VariantGroups}}
+  type {{$structName}}{{ToGoName .Name}} struct {
+    {{range $_, $param := .Params}}
+      {{template "command-struct-fields" $param}}
+    {{end}}
+  }
+{{end}}
 
 func (cmd {{$structName}}) CommandClassID() cc.CommandClassID {
   return {{.CommandClass.Key}}
@@ -50,7 +61,7 @@ func (cmd *{{$structName}}) UnmarshalBinary(data []byte) error {
     return errors.New("Payload length underflow")
   }
 
-  {{template "unmarshal-command-params" .Command.Params}}
+  {{template "unmarshal-command-params" .Command}}
 
   {{end}}
   return nil
@@ -60,6 +71,6 @@ func (cmd *{{$structName}}) MarshalBinary() (payload []byte, err error) {
   payload = make([]byte, 2)
   payload[0] = byte(cmd.CommandClassID())
   payload[1] = byte(cmd.CommandID())
-  {{template "marshal-command-params" .Command.Params}}
+  {{template "marshal-command-params" .Command}}
   return
 }
