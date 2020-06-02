@@ -210,7 +210,7 @@ func (p *Parser) processByte(currentByte byte) {
 		p.state.Event("RX_CHECKSUM", currentByte)
 		p.state.Transition()
 
-		payload := p.payloadReadBuffer.Bytes()
+		payload := append([]byte(nil), p.payloadReadBuffer.Bytes()...)
 		frame := Frame{
 			Header:   p.sof,
 			Length:   p.length,
